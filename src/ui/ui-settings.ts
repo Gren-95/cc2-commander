@@ -42,6 +42,8 @@ export interface UISettings {
    * this file must not become a second place that decides what a session is.
    */
   dryer: unknown;
+  /** Remembered sub-tab per group, e.g. `{ tools: 'dryer', help: 'debug' }`. */
+  subtabs: Record<string, string>;
 }
 
 const defaults: UISettings = {
@@ -65,6 +67,7 @@ const defaults: UISettings = {
   // a fresh phone focuses whatever is at the top of the user's own layout.
   mobileFocus: '',
   dryer: null,
+  subtabs: {},
 };
 
 let cached: UISettings | null = null;

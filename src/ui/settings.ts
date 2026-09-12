@@ -19,6 +19,7 @@ import { renderSpoolCalc } from './spool-calc';
 import { renderDryer } from './dryer-panel';
 import { renderHelp } from './help';
 import { renderAbout } from './about';
+import { bindSubtabs, switchSubtab } from './subtabs';
 import { isCardVisible, renderFocusRail, watchBreakpoint } from './mobile-focus';
 import type { BuildStampish } from '../types';
 import { getThemeChoice, setThemeChoice, isThemeChoice } from './theme';
@@ -145,36 +146,20 @@ export function openSettings(): void {
 
 /** Switch between main tabs (dashboard / settings / tools / help / debug) */
 /** Which section of the merged About page is showing. */
-export type HelpSubtab = 'help' | 'debug';
-
-let subtabsBound = false;
-
 /**
  * Show one section of the About page.
  *
  * Debug used to be a main tab of its own. It is a sub-tab here because it belongs with
  * Help — both answer "what is this thing doing?" — but it must not be *stacked under*
  * Help, whose API reference runs to several screens.
+ *
+ * A thin wrapper over the shared `switchSubtab` so `switchToTab('debug')` still has
+ * something to call.
  */
-export function switchHelpSubtab(sub: HelpSubtab): void {
-  for (const btn of document.querySelectorAll('.subtab')) {
-    const el = btn as HTMLElement;
-    const on = el.dataset.subtab === sub;
-    toggleState(el, 'active', on);
-    el.setAttribute('aria-selected', String(on));
-  }
-  document.getElementById('help-subtab-help')?.classList.toggle('hidden', sub !== 'help');
-  document.getElementById('help-subtab-debug')?.classList.toggle('hidden', sub !== 'debug');
-}
+export type HelpSubtab = 'help' | 'debug';
 
-function bindHelpSubtabs(): void {
-  if (subtabsBound) return;
-  subtabsBound = true;
-  for (const btn of document.querySelectorAll('.subtab')) {
-    btn.addEventListener('click', () => {
-      switchHelpSubtab(((btn as HTMLElement).dataset.subtab as HelpSubtab) ?? 'help');
-    });
-  }
+export function switchHelpSubtab(sub: HelpSubtab): void {
+  switchSubtab('help', sub);
 }
 
 /** Which main tab is showing. The focus rail belongs to the dashboard alone. */
@@ -224,14 +209,22 @@ export function switchToTab(tab: 'dashboard' | 'settings' | 'tools' | 'help' | '
     renderSettingsContent();
   } else if (tab === 'tools') {
     toolsPage?.classList.remove('hidden');
+    /*
+     * Both tools render regardless of which is showing: the spool calculator draws into
+     * a canvas that needs a laid-out element, and the dryer owns a one-second ticker
+     * that must keep running while the calculator is in front. Only the panels are
+     * swapped.
+     */
+    bindSubtabs('tools');
     renderSpoolCalc();
     renderDryer();
   } else if (tab === 'help' || tab === 'debug') {
     helpPage?.classList.remove('hidden');
-    bindHelpSubtabs();
     renderAbout(lastBuildStamp);
     renderHelp();
-    switchHelpSubtab(tab === 'debug' ? 'debug' : 'help');
+    bindSubtabs('help');
+    // An explicit `switchToTab('debug')` overrides whatever was last remembered.
+    if (tab === 'debug') switchSubtab('help', 'debug');
   }
 }
 

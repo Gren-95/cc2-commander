@@ -186,6 +186,13 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   `classList.contains` and the delegated click handlers still look for `main-tab`,
   `file-item`, `settings-card-visible` and ~107 others; those are hooks now, carrying
   no styling. Removing one breaks behaviour silently.
+- **Sub-tabs are one shared helper, and every group is scoped.** `ui/subtabs.ts`:
+  a strip is `<nav data-subtab-group="X">` with `.subtab` buttons, panels are
+  `id="X-subtab-<name>"`, and the choice is remembered per group. Tools and About each
+  have one. The first version queried `.subtab` across the document, which was fine
+  with one strip and wrong the moment there were two — picking a tool would have
+  deactivated Help and Debug.
+
 - **The filament dryer heats the bed on a timer, and that makes it the one tool in
   here with a physical failure mode.** `ui/dryer.ts` holds the presets, the schedule
   maths and the clamps; `ui/dryer-panel.ts` is the only place that sends `1028`

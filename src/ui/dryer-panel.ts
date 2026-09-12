@@ -334,6 +334,13 @@ export function renderDryer(): void {
     return;
   }
 
+  /*
+   * A dot on the Tools sub-tab while a session runs, so the timer is visible from the
+   * spool calculator — the whole point of sub-tabs is that only one is on screen, and a
+   * running heater should not be the thing you have to remember to go and check.
+   */
+  document.getElementById('dryer-running-dot')?.classList.toggle('hidden', !session);
+
   host.innerHTML = session ? runningView(session, Date.now()) : idleView();
   if (session) bindRunning(session);
   else bindIdle();
