@@ -9,7 +9,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="/icons/icon-192.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+  <!--
+    PNG, not the SVG the rest of the page uses: iOS ignores an SVG apple-touch-icon
+    outright and falls back to a screenshot of the page, which makes a home-screen
+    install look broken.
+  -->
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="Elegoo">
   <title>Elegoo Web</title>
   <link rel="stylesheet" href="/src/styles/main.css">
 <script>

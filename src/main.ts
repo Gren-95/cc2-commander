@@ -822,9 +822,35 @@ applyCardLayout();
   }
 }
 
-// Register PWA service worker
+// ---- PWA service worker ----
+//
+// Registration is deliberately late and failure is deliberately silent: the dashboard
+// works perfectly without a worker, and a browser that refuses one (private mode, an
+// insecure origin that is not localhost) must not lose the app over it.
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {
-    // SW registration failed — non-critical
-  });
+  navigator.serviceWorker
+    .register('/sw.js')
+    .then((registration) => {
+      /*
+       * Tell the user a new build is cached — do NOT reload for them.
+       *
+       * This page is usually left open watching a 14-hour print. Swapping it out from
+       * under someone mid-job to pick up a CSS change is the wrong trade, so the update
+       * is announced and applied on their next reload.
+       */
+      registration.addEventListener('updatefound', () => {
+        const installing = registration.installing;
+        if (!installing) return;
+        installing.addEventListener('statechange', () => {
+          // `controller` is null on the very first install; that is a fresh visit, not
+          // an update, and saying "updated" there would be nonsense.
+          if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+            toast('A new version is ready — reload to use it', 'info');
+          }
+        });
+      });
+    })
+    .catch(() => {
+      // Non-critical; see above.
+    });
 }
