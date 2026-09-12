@@ -1,5 +1,7 @@
 /** Simple toast notification system */
 
+import { icon, iconSolo } from './icons';
+
 const TOAST_DURATION = 4000;
 const MAX_TOASTS = 5;
 
@@ -34,7 +36,7 @@ function render(): void {
         `<div class="toast toast-${t.level}" data-id="${t.id}">` +
         `<span class="toast-icon">${iconFor(t.level)}</span>` +
         `<span class="toast-msg">${escapeHtml(t.message)}</span>` +
-        `<button class="toast-close">✕</button>` +
+        `<button class="toast-close" aria-label="Dismiss">${iconSolo('close')}</button>` +
         `</div>`,
     )
     .join('');
@@ -50,13 +52,13 @@ function render(): void {
 function iconFor(level: ToastLevel): string {
   switch (level) {
     case 'success':
-      return '✅';
+      return icon('ok');
     case 'warning':
-      return '⚠️';
+      return icon('warning');
     case 'error':
-      return '❌';
+      return icon('error');
     default:
-      return 'ℹ️';
+      return icon('info');
   }
 }
 

@@ -41,9 +41,9 @@ rather than silent drift, and the counts cannot rot.
 
 It lives under `src/server/` deliberately: `tsconfig.json` excludes that directory, so a
 test importing server code from `src/__tests__/` would drag Node-only modules into the
-browser typecheck. Being there means it is typechecked by `pnpm service:check` rather than
-by `pnpm build`, which never sees `src/server`. Both run in `pnpm gates`, and since ELEG-5
-`pnpm gates` is what CI runs — so the test executes on every PR.
+browser typecheck. Being there means it is typechecked by `bun run service:check` rather than
+by `bun run build`, which never sees `src/server`. Both run in `bun run gates`, and since ELEG-5
+`bun run gates` is what CI runs — so the test executes on every PR.
 
 **What the test still does not check: parameters, types and bounds.** It compares *names*.
 A changed clamp (`0-300°C`), a new optional parameter, a renamed argument or a wrong

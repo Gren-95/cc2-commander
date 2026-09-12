@@ -15,8 +15,7 @@
  *   { type: "command", method, params }     // forwarded to printer api_request
  */
 
-import { WebSocketServer, WebSocket } from 'ws';
-import type { Server } from 'http';
+import type { ServerWebSocket, WebSocketHandler } from 'bun';
 import type { StateStore, EventLogEntry } from './state-store.js';
 import { getCameraHealth } from './rest-api.js';
 import type { MqttBridge } from './mqtt-bridge.js';
@@ -32,34 +31,25 @@ export interface ServiceStatusProvider {
   aiMonitor: AIMonitor | null;
 }
 
+/** Per-connection state. Nothing to carry yet, but `upgrade()` requires the slot. */
+export interface BrowserSocketData {
+  readonly connectedAt: number;
+}
+
+export type BrowserSocket = ServerWebSocket<BrowserSocketData>;
+
+const WS_OPEN = 1;
+
 export class WebSocketTransport {
-  private wss: WebSocketServer;
+  private readonly clients = new Set<BrowserSocket>();
   private statusInterval: ReturnType<typeof setInterval> | null = null;
   private services: ServiceStatusProvider = { telegram: null, aiMonitor: null };
   private startTime = Date.now();
 
   constructor(
-    server: Server,
     private store: StateStore,
     private bridge: MqttBridge,
   ) {
-    this.wss = new WebSocketServer({ server, path: '/ws' });
-
-    this.wss.on('connection', (ws) => {
-      log.info(`Client connected (total: ${this.wss.clients.size})`);
-
-      // Send current state snapshot on connect
-      this.sendInit(ws);
-
-      ws.on('message', (raw) => {
-        this.handleClientMessage(ws, raw.toString());
-      });
-
-      ws.on('close', () => {
-        log.info(`Client disconnected (total: ${this.wss.clients.size})`);
-      });
-    });
-
     // Forward events from state store to all WS clients
     store.on('response', (method: number, data: Record<string, unknown>) => {
       this.broadcast({ type: 'response', method, data });
@@ -110,8 +100,8 @@ export class WebSocketTransport {
     bridge.on('connected', () => {
       this.broadcast({ type: 'connection', connected: true, sn: bridge.serialNumber });
       // Re-send full init to all clients after reconnect
-      for (const client of this.wss.clients) {
-        if (client.readyState === WebSocket.OPEN) {
+      for (const client of this.clients) {
+        if (client.readyState === WS_OPEN) {
           this.sendInit(client);
         }
       }
@@ -130,6 +120,38 @@ export class WebSocketTransport {
   /** Provide references to optional services for status reporting */
   setServices(services: ServiceStatusProvider): void {
     this.services = services;
+  }
+
+  /** The per-connection data `server.upgrade()` should attach. */
+  upgradeData(): BrowserSocketData {
+    return { connectedAt: Date.now() };
+  }
+
+  /**
+   * The `websocket` handler table for `Bun.serve`.
+   *
+   * Bun owns the socket itself — no `ws` package, no Node stream per connection, and
+   * the upgrade is decided in `fetch()` rather than by a second `upgrade` listener
+   * bolted onto an http.Server.
+   */
+  readonly handlers: WebSocketHandler<BrowserSocketData> = {
+    open: (ws) => {
+      this.clients.add(ws);
+      log.info(`Client connected (total: ${this.clients.size})`);
+      this.sendInit(ws);
+    },
+    message: (ws, message) => {
+      this.handleClientMessage(ws, typeof message === 'string' ? message : message.toString());
+    },
+    close: (ws) => {
+      this.clients.delete(ws);
+      log.info(`Client disconnected (total: ${this.clients.size})`);
+    },
+  };
+
+  /** Live browser connections, for /api/health and the status broadcast. */
+  get clientCount(): number {
+    return this.clients.size;
   }
 
   private getServiceStatus(): Record<string, unknown> {
@@ -155,7 +177,7 @@ export class WebSocketTransport {
       mqttRegisterAttempts: this.bridge.registerAttempts,
       printerSn: this.bridge.serialNumber || null,
       printerIp: this.bridge.ip,
-      wsClients: this.wss.clients.size,
+      wsClients: this.clients.size,
       telegram: this.services.telegram
         ? this.services.telegram.isRunning
           ? 'running'
@@ -173,7 +195,7 @@ export class WebSocketTransport {
     };
   }
 
-  private sendInit(ws: WebSocket): void {
+  private sendInit(ws: BrowserSocket): void {
     const msg = {
       type: 'init',
       connected: this.bridge.isConnected,
@@ -199,7 +221,7 @@ export class WebSocketTransport {
     ws.send(JSON.stringify(msg));
   }
 
-  private handleClientMessage(_ws: WebSocket, raw: string): void {
+  private handleClientMessage(_ws: BrowserSocket, raw: string): void {
     let msg: Record<string, unknown>;
     try {
       msg = JSON.parse(raw);
@@ -219,12 +241,19 @@ export class WebSocketTransport {
   /** Max queued bytes before dropping messages for a slow client */
   private static readonly MAX_BUFFERED = 1024 * 1024; // 1 MB
 
+  /**
+   * Deliberately NOT `server.publish()`, which would serialise once and let uWebSockets
+   * fan out. Publish has no per-client hook, and the slow-client drop below is load
+   * bearing: this service pushes a status frame every 5s plus every MQTT delta, and a
+   * browser on a stalled link would otherwise grow an unbounded send queue.
+   */
   broadcast(data: unknown): void {
     const json = JSON.stringify(data);
-    for (const client of this.wss.clients) {
-      if (client.readyState !== WebSocket.OPEN) continue;
-      if (client.bufferedAmount > WebSocketTransport.MAX_BUFFERED) {
-        log.warn(`Dropping message for slow client (buffered: ${client.bufferedAmount})`);
+    for (const client of this.clients) {
+      if (client.readyState !== WS_OPEN) continue;
+      const buffered = client.getBufferedAmount();
+      if (buffered > WebSocketTransport.MAX_BUFFERED) {
+        log.warn(`Dropping message for slow client (buffered: ${buffered})`);
         continue;
       }
       client.send(json);
@@ -233,6 +262,7 @@ export class WebSocketTransport {
 
   close(): void {
     if (this.statusInterval) clearInterval(this.statusInterval);
-    this.wss.close();
+    for (const client of this.clients) client.close(1001, 'Server shutting down');
+    this.clients.clear();
   }
 }

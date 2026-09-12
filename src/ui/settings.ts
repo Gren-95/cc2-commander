@@ -1,5 +1,6 @@
 /** Settings panel — persistent card layout + Telegram config */
 
+import { icon, iconSolo } from './icons';
 import { $, fetchTimeout } from './helpers';
 import { type CardLayout, CARD_NAMES, defaultCardLayout, normaliseCardLayout } from './card-layout';
 import { toast } from './toast';
@@ -172,7 +173,7 @@ function buildSettingsHTML(content: HTMLElement): void {
         const isHidden = currentLayout.hidden.includes(id);
         return `
         <div class="settings-card-row" data-card-id="${id}" data-panel="${panel}">
-          <span class="settings-drag-handle" title="Drag to reorder">⠿</span>
+          <span class="settings-drag-handle" title="Drag to reorder">${iconSolo('dragHandle')}</span>
           <label class="settings-card-label">
             <input type="checkbox" class="settings-card-visible" data-card-id="${id}" ${isHidden ? '' : 'checked'}>
             <span>${name}</span>
@@ -182,8 +183,8 @@ function buildSettingsHTML(content: HTMLElement): void {
             <option value="main" ${panel === 'main' ? 'selected' : ''}>Main</option>
           </select>
           <span class="settings-card-move">
-            <button class="btn btn-sm btn-ghost settings-move-up" data-card-id="${id}" data-panel="${panel}" title="Move up">▲</button>
-            <button class="btn btn-sm btn-ghost settings-move-down" data-card-id="${id}" data-panel="${panel}" title="Move down">▼</button>
+            <button class="btn btn-sm btn-ghost settings-move-up" data-card-id="${id}" data-panel="${panel}" title="Move up" aria-label="Move up">${iconSolo('moveUp')}</button>
+            <button class="btn btn-sm btn-ghost settings-move-down" data-card-id="${id}" data-panel="${panel}" title="Move down" aria-label="Move down">${iconSolo('moveDown')}</button>
           </span>
         </div>
       `;
@@ -573,7 +574,7 @@ function renderAILabelEditor(container: HTMLElement, labels: AILabelConfig[]): v
         </div>
         <div class="ai-label-config-field ai-label-config-delete">
           <label>&nbsp;</label>
-          <button class="btn btn-sm btn-ghost ai-lc-delete" data-idx="${idx}" title="Delete this label">✕</button>
+          <button class="btn btn-sm btn-ghost ai-lc-delete" data-idx="${idx}" title="Delete this label" aria-label="Delete this label">${iconSolo('close')}</button>
         </div>
       </div>
     `;
@@ -583,7 +584,7 @@ function renderAILabelEditor(container: HTMLElement, labels: AILabelConfig[]): v
   container.innerHTML = `
     <div class="ai-label-config-list">${rows}</div>
     <div class="settings-actions">
-      <button id="ai-labels-add" class="btn btn-sm btn-ghost">➕ Add Label</button>
+      <button id="ai-labels-add" class="btn btn-sm btn-ghost">${icon('add')} Add Label</button>
       <button id="ai-labels-save" class="btn btn-sm btn-primary">Save Labels</button>
       <button id="ai-labels-reset" class="btn btn-sm btn-ghost">Reset to Defaults</button>
     </div>

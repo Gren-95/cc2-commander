@@ -10,6 +10,7 @@
  * - Search/filter across all fields
  */
 
+import { icon, iconSolo, iconText } from './icons';
 import { fetchTimeout } from './helpers';
 import { PrinterState } from '../printer-state';
 import { STATUS_NAMES, SUB_STATUS_NAMES, EXCEPTION_NAMES, SPEED_MODE_NAMES } from '../types';
@@ -184,10 +185,10 @@ function buildTreeHtml(obj: unknown, path: string, filter: string, depth = 0): s
       return '';
     }
     return `<div class="debug-leaf${cls}" style="padding-left:${depth * 16}px">
-      ${watched ? '<span class="debug-watch-icon" title="Watched">👁</span>' : ''}
+      ${watched ? `<span class="debug-watch-icon" title="Watched">${iconSolo('watching')}</span>` : ''}
       <span class="debug-key">${escapeKey(path)}</span>
       <span class="debug-value debug-null">${String(obj)}</span>
-      <span class="debug-watch" data-path="${escapeHtmlStr(path)}" title="Toggle watch">${watched ? '👁' : '○'}</span>
+      <span class="debug-watch" data-path="${escapeHtmlStr(path)}" title="Toggle watch">${watched ? iconSolo('watching') : iconSolo('unwatched')}</span>
     </div>`;
   }
   if (typeof obj !== 'object') {
@@ -204,10 +205,10 @@ function buildTreeHtml(obj: unknown, path: string, filter: string, depth = 0): s
       return '';
     }
     return `<div class="debug-leaf${cls}" style="padding-left:${depth * 16}px">
-      ${watched ? '<span class="debug-watch-icon" title="Watched">👁</span>' : ''}
+      ${watched ? `<span class="debug-watch-icon" title="Watched">${iconSolo('watching')}</span>` : ''}
       <span class="debug-key">${escapeKey(lastSegment(path))}</span>
       <span class="debug-value ${typeClass(obj)}">${escapeHtmlStr(display)}</span>
-      <span class="debug-watch" data-path="${escapeHtmlStr(path)}" title="Toggle watch">${watched ? '👁' : '○'}</span>
+      <span class="debug-watch" data-path="${escapeHtmlStr(path)}" title="Toggle watch">${watched ? iconSolo('watching') : iconSolo('unwatched')}</span>
     </div>`;
   }
   if (Array.isArray(obj)) {
@@ -220,12 +221,12 @@ function buildTreeHtml(obj: unknown, path: string, filter: string, depth = 0): s
     if (filter && !hasVisibleChildren && !collapsed && !path.toLowerCase().includes(filter))
       return '';
     const watched = watchedPaths.has(path);
-    const arrow = collapsed ? '▶' : '▼';
+    const arrow = collapsed ? icon('collapsed') : icon('expanded');
     return `<div class="debug-node" style="padding-left:${depth * 16}px">
       <span class="debug-toggle" data-path="${escapeHtmlStr(path)}">${arrow}</span>
       <span class="debug-key">${escapeKey(lastSegment(path))}</span>
       <span class="debug-meta">[${obj.length}]</span>
-      <span class="debug-watch" data-path="${escapeHtmlStr(path)}" title="Watch all children">${watched ? '👁' : '○'}</span>
+      <span class="debug-watch" data-path="${escapeHtmlStr(path)}" title="Watch all children">${watched ? iconSolo('watching') : iconSolo('unwatched')}</span>
     </div>${childrenHtml}`;
   }
   const rec = obj as Record<string, unknown>;
@@ -238,13 +239,13 @@ function buildTreeHtml(obj: unknown, path: string, filter: string, depth = 0): s
   if (filter && !hasVisibleChildren && !collapsed && !path.toLowerCase().includes(filter))
     return '';
   const watched = watchedPaths.has(path);
-  const arrow = collapsed ? '▶' : '▼';
+  const arrow = collapsed ? icon('collapsed') : icon('expanded');
   const label = path ? lastSegment(path) : '{root}';
   return `<div class="debug-node" style="padding-left:${depth * 16}px">
     <span class="debug-toggle" data-path="${escapeHtmlStr(path)}">${arrow}</span>
     <span class="debug-key">${escapeKey(label)}</span>
     <span class="debug-meta">{${keys.length}}</span>
-    ${path ? `<span class="debug-watch" data-path="${escapeHtmlStr(path)}" title="Watch all children">${watched ? '👁' : '○'}</span>` : ''}
+    ${path ? `<span class="debug-watch" data-path="${escapeHtmlStr(path)}" title="Watch all children">${watched ? iconSolo('watching') : iconSolo('unwatched')}</span>` : ''}
   </div>${childrenHtml}`;
 }
 
@@ -343,10 +344,10 @@ function renderChangeLog(): void {
     const watched = isPathWatched(entry.path);
     html += `<div class="debug-log-entry${watched ? ' debug-log-watched' : ''}">
       <span class="debug-log-time">${time}</span>
-      ${watched ? '<span class="debug-log-badge">👁</span>' : ''}
+      ${watched ? `<span class="debug-log-badge">${iconSolo('watching')}</span>` : ''}
       <span class="debug-log-path">${escapeHtmlStr(entry.path)}</span>
       <span class="debug-log-old">${escapeHtmlStr(oldStr)}</span>
-      <span class="debug-log-arrow">→</span>
+      <span class="debug-log-arrow">${iconSolo('changeTo')}</span>
       <span class="debug-log-new">${escapeHtmlStr(newStr)}</span>
     </div>`;
   }
@@ -364,13 +365,12 @@ function renderWatchedPaths(): void {
   const container = document.getElementById('debug-watched-list');
   if (!container) return;
   if (watchedPaths.size === 0) {
-    container.innerHTML =
-      '<span class="debug-empty-inline">Click ○ on any value to watch it</span>';
+    container.innerHTML = `<span class="debug-empty-inline">Click ${icon('unwatched')} on any value to watch it</span>`;
     return;
   }
   let html = '';
   for (const path of watchedPaths) {
-    html += `<span class="debug-watched-tag" data-path="${escapeHtmlStr(path)}">${escapeHtmlStr(path)} ✕</span>`;
+    html += `<span class="debug-watched-tag" data-path="${escapeHtmlStr(path)}">${escapeHtmlStr(path)} ${icon('close')}</span>`;
   }
   container.innerHTML = html;
 }
@@ -398,7 +398,8 @@ function stopLogging(): void {
 function updateLoggingUI(): void {
   const btn = document.getElementById('debug-log-toggle') as HTMLButtonElement | null;
   if (btn) {
-    btn.textContent = changeLoggingEnabled ? '⏹ Stop Logging' : '▶ Start Logging';
+    if (changeLoggingEnabled) iconText(btn, 'stop', 'Stop Logging');
+    else iconText(btn, 'play', 'Start Logging');
     btn.classList.toggle('active', changeLoggingEnabled);
   }
   const badge = document.getElementById('debug-logging-badge');
@@ -568,12 +569,20 @@ export function bindDebugPanel(): void {
         const resp = await fetchTimeout('/api/debug/videostream/sdcp', { method: 'POST' }, 15_000);
         const data = await resp.json();
         if (resultSpan)
-          resultSpan.textContent = data.success
-            ? `SDCP: ✓ ${data.videoUrl ? `VideoUrl: ${data.videoUrl}` : 'OK'}`
-            : `SDCP: ✗ ${data.error || 'Failed'}`;
+          data.success
+            ? iconText(
+                resultSpan,
+                'check',
+                `SDCP: ${data.videoUrl ? `VideoUrl: ${data.videoUrl}` : 'OK'}`,
+              )
+            : iconText(resultSpan, 'cross', `SDCP: ${data.error || 'Failed'}`);
       } catch (err: unknown) {
         if (resultSpan)
-          resultSpan.textContent = `SDCP: ✗ ${err instanceof Error ? err.message : String(err)}`;
+          iconText(
+            resultSpan,
+            'cross',
+            `SDCP: ${err instanceof Error ? err.message : String(err)}`,
+          );
       } finally {
         sdcpBtn.disabled = false;
       }
@@ -589,12 +598,16 @@ export function bindDebugPanel(): void {
         const resp = await fetchTimeout('/api/debug/videostream/mqtt', { method: 'POST' }, 15_000);
         const data = await resp.json();
         if (resultSpan)
-          resultSpan.textContent = data.success
-            ? `MQTT 1054: ✓ sent — check log for response`
-            : `MQTT 1054: ✗ ${data.error || 'Failed'}`;
+          data.success
+            ? iconText(resultSpan, 'check', 'MQTT 1054: sent — check log for response')
+            : iconText(resultSpan, 'cross', `MQTT 1054: ${data.error || 'Failed'}`);
       } catch (err: unknown) {
         if (resultSpan)
-          resultSpan.textContent = `MQTT 1054: ✗ ${err instanceof Error ? err.message : String(err)}`;
+          iconText(
+            resultSpan,
+            'cross',
+            `MQTT 1054: ${err instanceof Error ? err.message : String(err)}`,
+          );
       } finally {
         mqttBtn.disabled = false;
       }

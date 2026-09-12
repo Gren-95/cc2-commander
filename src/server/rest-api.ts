@@ -17,8 +17,8 @@ import type { IncomingMessage, ServerResponse } from 'http';
 import { request as httpRequest } from 'http';
 import { createHash } from 'crypto';
 import { writeFile, readdir, readFile, mkdir, stat, unlink } from 'fs/promises';
-import { createReadStream, createWriteStream, existsSync } from 'fs';
-import { join, resolve, extname } from 'path';
+import { createReadStream, createWriteStream } from 'fs';
+import { join } from 'path';
 import { PassThrough } from 'stream';
 import sharp from 'sharp';
 import type { StateStore } from './state-store.js';
@@ -31,6 +31,7 @@ import { getBuildInfo } from './build-info.js';
 import { applyCors, corsHeaders } from './cors.js';
 import { captureLogDir, gcodeCacheDir } from './data-paths.js';
 import { getLogger } from './logger.js';
+import { writeSpaFallback } from './spa.js';
 import {
   STATUS_NAMES,
   SUB_STATUS_NAMES,
@@ -655,65 +656,12 @@ function addOverlayClient(res: ServerResponse, config: ServiceConfig): void {
 
 let _bridge: MqttBridge | null = null;
 
-/* ── Static file serving (production) ──────────────────────────── */
-
-const DIST_DIR = resolve(import.meta.dirname ?? '.', '..', '..', 'dist');
-
-const MIME_TYPES: Record<string, string> = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'application/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.gif': 'image/gif',
-  '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon',
-  '.webp': 'image/webp',
-  '.woff': 'font/woff',
-  '.woff2': 'font/woff2',
-  '.webmanifest': 'application/manifest+json',
-};
-
-function serveStatic(url: string, res: ServerResponse): void {
-  // Strip query string
-  const pathname = url.split('?')[0];
-  // Prevent directory traversal
-  const safePath = resolve(DIST_DIR, '.' + pathname);
-  if (!safePath.startsWith(DIST_DIR)) {
-    res.writeHead(403);
-    res.end('Forbidden');
-    return;
-  }
-
-  // Try exact file, then index.html (SPA fallback)
-  const candidates = [safePath, resolve(DIST_DIR, 'index.html')];
-  if (safePath === DIST_DIR || safePath === DIST_DIR + '/') {
-    candidates.unshift(resolve(DIST_DIR, 'index.html'));
-  }
-
-  for (const filePath of candidates) {
-    if (existsSync(filePath)) {
-      try {
-        const ext = extname(filePath);
-        const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-        // Cache hashed assets (Vite fingerprinted) aggressively
-        const cacheControl = filePath.includes('/assets/')
-          ? 'public, max-age=31536000, immutable'
-          : 'no-cache';
-        res.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': cacheControl });
-        createReadStream(filePath).pipe(res);
-        return;
-      } catch {
-        break;
-      }
-    }
-  }
-
-  res.writeHead(404);
-  res.end('Not found');
-}
+/* ── SPA fallback ────────────────────────────────────────────────
+ *
+ * dist/ is served by Bun's static route table (src/server/spa.ts), built once at
+ * startup. What reaches this module is only the terminal case: a path that matched no
+ * static file and no route above, which for a single-page app means "hand the browser
+ * index.html and let the client router decide". */
 
 export function createRestRouter(
   store: StateStore,
@@ -1524,8 +1472,8 @@ export function createRestRouter(
       return;
     }
 
-    // Not an API route — serve static files from dist/
-    serveStatic(url, res);
+    // Not an API route — hand the browser the SPA entry document.
+    writeSpaFallback(res);
 
     function handleClientError(req: IncomingMessage, res: ServerResponse): void {
       let body = '';

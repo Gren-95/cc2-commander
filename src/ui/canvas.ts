@@ -1,3 +1,4 @@
+import { icon, iconSolo } from './icons';
 import type { PrinterState } from '../printer-state';
 import type { CommandSender } from '../ws-client';
 import { $, escapeHtml, escapeAttr } from './helpers';
@@ -28,7 +29,7 @@ export function renderCanvas(state: PrinterState): void {
   for (const unit of canvas.canvas_list) {
     const connected = !!unit.connected;
     html += `<div class="canvas-unit ${connected ? '' : 'canvas-disconnected'}">`;
-    html += `<div class="canvas-unit-header">Canvas ${unit.canvas_id + 1} ${connected ? '🟢 Connected' : '🔴 Disconnected'}</div>`;
+    html += `<div class="canvas-unit-header">Canvas ${unit.canvas_id + 1} ${connected ? `${icon('connected', 'canvas-state-ok')} Connected` : `${icon('disconnected', 'canvas-state-off')} Disconnected`}</div>`;
 
     // Physical layout: 2×2 grid of spools inside a "device" frame
     html += `<div class="canvas-device">`;
@@ -87,7 +88,7 @@ export function renderCanvas(state: PrinterState): void {
 
     // Extruder icon
     html += `<div class="canvas-extruder" title="Extruder">`;
-    html += `<div class="extruder-icon">⬡</div>`;
+    html += `<div class="extruder-icon">${iconSolo('extruder')}</div>`;
     html += `</div>`;
 
     html += `</div>`; // canvas-device

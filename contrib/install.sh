@@ -27,25 +27,49 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-# Check for Node.js
-if ! command -v node &> /dev/null; then
-    log_error "Node.js is not installed. Please install Node.js 18+ first."
+# Check for Bun — the package manager, the TypeScript runtime and the HTTP server all
+# at once. Node and pnpm are no longer required by anything here.
+#
+# `bun` is resolved to an ABSOLUTE path because it has to go into the systemd unit, and
+# the unit's ExecStart is not resolved through $PATH.
+if ! command -v bun &> /dev/null; then
+    log_error "Bun is not installed. Install it with:"
+    log_error "  curl -fsSL https://bun.sh/install | bash"
+    log_error "…then move or symlink it somewhere system-wide, e.g. /usr/local/bin/bun."
     exit 1
 fi
+BUN_BIN="$(command -v bun)"
+BUN_VERSION="$(bun --version)"
 
-NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
-if [[ $NODE_VERSION -lt 18 ]]; then
-    log_error "Node.js version 18+ required. Found: $(node -v)"
+# 1.2.3 is the floor, not a preference: `Bun.serve({ routes })` — how src/server/spa.ts
+# serves the built frontend — does not exist before it, and neither does the bun.lock
+# text lockfile this install reads.
+BUN_MAJOR="${BUN_VERSION%%.*}"
+BUN_REST="${BUN_VERSION#*.}"
+BUN_MINOR="${BUN_REST%%.*}"
+BUN_PATCH="${BUN_REST#*.}"
+BUN_PATCH="${BUN_PATCH%%[!0-9]*}"
+if (( BUN_MAJOR < 1 )) \
+   || (( BUN_MAJOR == 1 && BUN_MINOR < 2 )) \
+   || (( BUN_MAJOR == 1 && BUN_MINOR == 2 && BUN_PATCH < 3 )); then
+    log_error "Bun 1.2.3+ required. Found: $BUN_VERSION"
+    log_error "  Upgrade with: bun upgrade"
     exit 1
 fi
-log_info "Node.js version: $(node -v)"
+log_info "Bun version: $BUN_VERSION ($BUN_BIN)"
 
-# Check for pnpm
-if ! command -v pnpm &> /dev/null; then
-    log_error "pnpm is not installed. Install with: npm install -g pnpm"
-    exit 1
-fi
-log_info "pnpm version: $(pnpm -v)"
+# The unit sets ProtectHome=true, so a bun living under /home or /root is invisible to
+# the service no matter what ExecStart says — it would install cleanly and then fail to
+# start, which is the worst of both.
+case "$BUN_BIN" in
+    /home/*|/root/*)
+        log_error "Bun is installed at $BUN_BIN, under a home directory."
+        log_error "  The service runs with ProtectHome=true and cannot see it there."
+        log_error "  Install it system-wide instead, e.g.:"
+        log_error "    install -m 0755 $BUN_BIN /usr/local/bin/bun"
+        exit 1
+        ;;
+esac
 
 # Check for rsync — the deploy is delete-consistent and there is no safe fallback.
 # Falling back to `cp -r` here would silently reintroduce the exact bug this guards
@@ -72,7 +96,7 @@ fi
 #
 # This builds in $SCRIPT_DIR — the checkout — and NOT in $INSTALL_DIR. Building in the
 # install directory is what used to drag the entire dev toolchain (vite, vitest,
-# typescript, release-it) into production, which every later `pnpm install --prod` then
+# typescript, release-it) into production, which every later production install then
 # had to prune back out, emitting the "Failed to create bin ... ENOENT" warnings that
 # made a healthy deploy look broken (ELEG-19). $INSTALL_DIR gets runtime dependencies
 # and nothing else.
@@ -82,10 +106,10 @@ fi
 if [[ ! -d "$SCRIPT_DIR/dist" ]]; then
     log_info "No dist/ in source — building the frontend..."
     if [[ -n "${SUDO_USER:-}" ]]; then
-        sudo -u "$SUDO_USER" bash -c "cd $(printf '%q' "$SCRIPT_DIR") && pnpm install && pnpm build"
+        sudo -u "$SUDO_USER" bash -c "cd $(printf '%q' "$SCRIPT_DIR") && bun install && bun run build"
     else
         log_warn "  No SUDO_USER — building as root, which will leave root-owned files in $SCRIPT_DIR"
-        (cd "$SCRIPT_DIR" && pnpm install && pnpm build)
+        (cd "$SCRIPT_DIR" && bun install && bun run build)
     fi
 fi
 
@@ -134,7 +158,7 @@ if [[ -d "$SCRIPT_DIR/public" ]]; then
 fi
 # Single files: no delete semantics to get right.
 cp "$SCRIPT_DIR/package.json" "$INSTALL_DIR/"
-cp "$SCRIPT_DIR/pnpm-lock.yaml" "$INSTALL_DIR/"
+cp "$SCRIPT_DIR/bun.lock" "$INSTALL_DIR/"
 cp "$SCRIPT_DIR/tsconfig.json" "$INSTALL_DIR/"
 cp "$SCRIPT_DIR/tsconfig.server.json" "$INSTALL_DIR/" 2>/dev/null || true
 
@@ -163,13 +187,13 @@ if command -v git &> /dev/null && "${GIT_CMD[@]}" rev-parse --git-dir &> /dev/nu
 else
     log_warn "  Source is not a git checkout — /api/health will report an unknown build"
 fi
-PKG_VERSION="$(node -p "require('$SCRIPT_DIR/package.json').version" 2>/dev/null || true)"
+PKG_VERSION="$(bun -e "console.log(require('$SCRIPT_DIR/package.json').version)" 2>/dev/null || true)"
 
-# Serialised by node rather than by hand: it is already a hard dependency (checked
+# Serialised by bun rather than by hand: it is already a hard dependency (checked
 # above) and it cannot mis-escape a value the way a printf template can.
 if BUILD_COMMIT="$GIT_COMMIT" BUILD_SHORT="$GIT_SHORT" BUILD_DESCRIBE="$GIT_DESCRIBE" \
    BUILD_VERSION="$PKG_VERSION" BUILD_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-   node -e 'const f = (v) => (v ? v : null);
+   bun -e 'const f = (v) => (v ? v : null);
 process.stdout.write(JSON.stringify({
   commit: f(process.env.BUILD_COMMIT),
   shortCommit: f(process.env.BUILD_SHORT),
@@ -231,20 +255,24 @@ else
     log_info "Keeping existing .env configuration"
 fi
 
-# Runtime dependencies only. Never a plain `pnpm install` here: devDependencies in
+# Runtime dependencies only. Never a plain `bun install` here: devDependencies in
 # $INSTALL_DIR are a larger production surface than the service needs, and the next
-# --prod run has to prune them again (ELEG-19). The frontend is built in the source
+# production run has to prune them again (ELEG-19). The frontend is built in the source
 # checkout above and arrives via rsync, so nothing in this directory needs a toolchain.
+#
+# --frozen-lockfile as well as --production: bun.lock was just copied in beside
+# package.json, and a deploy that silently re-resolves is a deploy that can install
+# something the checkout never tested.
 log_info "Installing production dependencies..."
 cd "$INSTALL_DIR"
-pnpm install --prod
+bun install --production --frozen-lockfile
 
 # Set ownership and modes.
 #
 # The modes are stated, not inherited. `cp` onto an existing file keeps that file's mode,
 # so an install directory that was once chmod'ed 777 by hand stayed 777 through every
 # later deploy and nothing here ever disagreed (ELEG-20). The service runs the TypeScript
-# directly under `node --import tsx`, so a world-writable tree is arbitrary code execution
+# directly under bun, so a world-writable tree is arbitrary code execution
 # as $SERVICE_USER, and a world-readable .env is every secret the service holds.
 #
 # chmod must come AFTER the chown -R: chown does not clear the bits, but doing it in this
@@ -254,15 +282,22 @@ chown -R "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR"
 chmod 750 "$INSTALL_DIR"
 chmod 750 "$INSTALL_DIR/data"
 chmod 600 "$INSTALL_DIR/.env"
-# The individually-copied files at the install root — package.json, pnpm-lock.yaml, the
+# The individually-copied files at the install root — package.json, bun.lock, the
 # tsconfigs, build-info.json. -maxdepth 1 on purpose: src/, dist/ and public/ carry their
 # modes from `rsync -a` and are already correct, and a recursive chmod over node_modules/
 # would strip the executable bit from package binaries.
 find "$INSTALL_DIR" -maxdepth 1 -type f ! -name .env -exec chmod 640 {} +
 
-# Install systemd service
-log_info "Installing systemd service..."
-cp "$SCRIPT_DIR/contrib/${SERVICE_NAME}.service" /etc/systemd/system/${SERVICE_NAME}.service
+# Install systemd service.
+#
+# ExecStart carries an absolute interpreter path — systemd does not search $PATH — and
+# bun's own installer puts it anywhere from /usr/local/bin to ~/.bun/bin. So the unit
+# ships with a @BUN@ placeholder and the path resolved above is substituted in here,
+# rather than the unit guessing and a mismatch surfacing as a start failure.
+log_info "Installing systemd service (bun: $BUN_BIN)..."
+sed "s|@BUN@|$BUN_BIN|g" "$SCRIPT_DIR/contrib/${SERVICE_NAME}.service" \
+    > /etc/systemd/system/${SERVICE_NAME}.service
+chmod 644 /etc/systemd/system/${SERVICE_NAME}.service
 systemctl daemon-reload
 
 # Enable and (re)start service

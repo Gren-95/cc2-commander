@@ -8,6 +8,7 @@
  * 4. On confirm: send method 1020 with slot_map
  */
 
+import { icon, iconSolo } from './icons';
 import type { PrinterState } from '../printer-state';
 import type { CommandSender } from '../ws-client';
 import type { CanvasInfo, CanvasTray } from '../types';
@@ -274,7 +275,7 @@ function showDialog(
       </div>
       <div class="print-dialog-footer">
         <button class="btn btn-ghost" id="print-dialog-cancel">Cancel</button>
-        <button class="btn btn-primary" id="print-dialog-confirm">▶ Print</button>
+        <button class="btn btn-primary" id="print-dialog-confirm">${icon('play')} Print</button>
       </div>
     </div>
   `;
@@ -481,7 +482,7 @@ function renderMappings(mappings: ColorMapping[], trays: FlatTray[]): string {
         <div class="print-mapping-gcode" style="background:${escapeAttr(gcColor)};color:${gcContrast}">
           ${escapeHtml(m.gcodeType)}
         </div>
-        <div class="print-mapping-arrow">→</div>
+        <div class="print-mapping-arrow">${iconSolo('changeTo')}</div>
         <div class="print-mapping-trays">
           ${gridsHtml}
         </div>

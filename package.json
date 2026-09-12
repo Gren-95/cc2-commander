@@ -3,17 +3,16 @@
   "version": "0.2.1",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.33.3",
   "simple-git-hooks": {
-    "pre-commit": "pnpm exec biome check --staged --write --no-errors-on-unmatched"
+    "pre-commit": "bunx biome check --staged --write --no-errors-on-unmatched"
   },
   "scripts": {
-    "dev": "concurrently -n svc,web -c magenta,cyan \"tsx watch src/server/index.ts\" \"vite\"",
+    "dev": "concurrently -n svc,web -c magenta,cyan \"bun --watch src/server/index.ts\" \"vite\"",
     "dev:web": "vite",
-    "dev:service": "tsx watch src/server/index.ts",
+    "dev:service": "bun --watch src/server/index.ts",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "service": "tsx src/server/index.ts",
+    "service": "bun src/server/index.ts",
     "service:check": "tsc --project tsconfig.server.json",
     "service:install": "sudo bash contrib/install.sh",
     "service:uninstall": "sudo bash contrib/uninstall.sh",
@@ -23,7 +22,7 @@
     "release": "release-it",
     "release:dry": "release-it --dry-run",
     "docker:build": "docker build -t ghcr.io/runnane/elegoo-web:local .",
-    "docker:verify": "docker run --rm -e PRINTER_IP=192.0.2.99 -e TELEGRAM_BOT_TOKEN= -e AI_ENABLED=false -e CAMERA_ENABLED=false ghcr.io/runnane/elegoo-web:local node --import tsx -e \"import('./src/server/config.js').then(()=>console.log('image OK'))\"",
+    "docker:verify": "docker run --rm -e PRINTER_IP=192.0.2.99 -e TELEGRAM_BOT_TOKEN= -e AI_ENABLED=false -e CAMERA_ENABLED=false ghcr.io/runnane/elegoo-web:local bun -e \"import('./src/server/config.js').then(()=>console.log('image OK'))\"",
     "gates": "bash scripts/gates.sh",
     "knip": "knip --no-config-hints",
     "lint": "biome lint",
@@ -39,10 +38,10 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.9",
     "@release-it/conventional-changelog": "^12.0.0",
+    "@types/bun": "^1.4.2",
     "@types/jsdom": "^30.0.0",
     "@types/pdfkit": "^0.17.6",
     "@types/three": "0.178.1",
-    "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "^4.1.10",
     "concurrently": "^10.0.5",
     "jsdom": "^30.0.1",
@@ -56,6 +55,7 @@
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
     "@modelcontextprotocol/sdk": "^1.30.0",
+    "bootstrap-icons": "^1.13.1",
     "dotenv": "^17.4.2",
     "gcode-preview": "3.0.0-alpha.4",
     "grammy": "^1.45.1",
@@ -63,9 +63,27 @@
     "pdfkit": "^0.19.1",
     "sharp": "^0.35.3",
     "three": "0.178.0",
-    "tsx": "^4.23.13",
     "winston": "^3.19.0",
-    "ws": "^8.21.3",
     "zod": "^4.4.3"
-  }
+  },
+  "overrides": {
+    "undici": ">=6.24.0",
+    "hono": ">=4.12.34",
+    "@hono/node-server": ">=2.0.5",
+    "qs": ">=6.15.2",
+    "body-parser": ">=2.3.0",
+    "fast-uri": ">=3.1.5",
+    "ip-address": ">=10.3.1",
+    "adm-zip": ">=0.6.0",
+    "protobufjs": ">=7.6.5",
+    "sharp": ">=0.35.0"
+  },
+  "trustedDependencies": [
+    "@biomejs/biome",
+    "esbuild",
+    "onnxruntime-node",
+    "protobufjs",
+    "sharp",
+    "simple-git-hooks"
+  ]
 }

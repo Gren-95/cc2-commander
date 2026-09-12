@@ -3,19 +3,27 @@ version: 2
 # Dependabot was already enabled here, and it is NOT sufficient on its own (ELEG-63).
 # All 38 advisories open at the time were TRANSITIVE — hono/express/ajv under
 # @modelcontextprotocol/sdk, onnxruntime under @huggingface/transformers, esbuild under
-# tsx — and it opened no PR for any of them, because under pnpm the fix is a floor in
-# `overrides:` in pnpm-workspace.yaml and Dependabot does not write that file. It only
-# bumps entries it can find in a manifest.
+# tsx — and it opened no PR for any of them, because the fix is a floor in `overrides`
+# and Dependabot does not write those. It only bumps entries it can find as a direct
+# manifest dependency.
+#
+# The move to Bun did not change this. `overrides` now lives in package.json rather than
+# in pnpm-workspace.yaml, which puts it in a file Dependabot *reads* — but it still only
+# proposes bumps for `dependencies` / `devDependencies` entries, not for override floors.
 #
 # So treat this as covering DIRECT dependencies and the actions below. The transitive
-# half is caught by .github/workflows/audit.yml and fixed by hand in pnpm-workspace.yaml.
+# half is caught by .github/workflows/audit.yml and fixed by hand in `overrides`; the
+# reason for each existing floor is in .agents/dependencies.md.
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
-    # Mirrors updateConfig.ignoreDependencies in pnpm-workspace.yaml — three and its
-    # types are pinned exactly there, so a PR bumping them is noise, not news.
+    # three and @types/three are pinned to exact versions in package.json (they must
+    # move together, and gcode-preview peers on three), so a PR bumping either is
+    # noise, not news. This list is the only home for that rule now — it used to be
+    # duplicated in pnpm-workspace.yaml's `updateConfig.ignoreDependencies`, which went
+    # with pnpm.
     ignore:
       - dependency-name: three
       - dependency-name: '@types/three'
@@ -24,16 +32,21 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    # Majors are a human decision here, and ELEG-69 is why. The unattended bump in #10
-    # took the base image from node:22-slim (LTS, supported to 2027-04-30) to
-    # node:25-slim — an odd release that was never going to be LTS and has been EOL
-    # since 2026-06-01 — and broke the Docker build outright, because 25 dropped the
-    # bundled corepack. Nobody noticed for months: no workflow built the image.
+    # The base image is `oven/bun` now, not `node`, and it is pinned to an exact patch
+    # in the Dockerfile.
     #
-    # Patches and minors still flow. A major means choosing the next even/LTS line
-    # deliberately and rebuilding, which is a review, not a merge.
+    # Majors stay a human decision, and ELEG-69 is why. The unattended bump in #10 took
+    # the base from node:22-slim (LTS, supported to 2027-04-30) to node:25-slim — an odd
+    # release that was never going to be LTS and has been EOL since 2026-06-01 — and
+    # broke the Docker build outright, because 25 dropped the bundled corepack. Nobody
+    # noticed for months: no workflow built the image.
+    #
+    # The stakes are higher with bun than they were with node: this base is also the
+    # TypeScript runtime and the HTTP server, so it has to move in step with
+    # .github/workflows/*.yml and the floor in contrib/install.sh. Patches and minors
+    # still flow; a major is a review, not a merge.
     ignore:
-      - dependency-name: node
+      - dependency-name: oven/bun
         update-types: ['version-update:semver-major']
 
   # Added by ELEG-63. Without this, an action major goes stale until a deprecation

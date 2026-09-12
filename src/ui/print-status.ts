@@ -1,3 +1,4 @@
+import { icon, iconOnly, iconSolo, iconText } from './icons';
 import type { PrinterState } from '../printer-state';
 import type { CommandSender } from '../ws-client';
 import {
@@ -117,7 +118,11 @@ export function toggleCameraOverlay(): void {
   }
   if (btn) {
     btn.classList.toggle('active', overlayEnabled);
-    btn.textContent = overlayEnabled ? '📊 Overlay ✓' : '📊 Overlay';
+    // Two glyphs when active (chart + tick), so `iconText` is not enough — but the
+    // label is a literal, so innerHTML is safe here.
+    btn.innerHTML = overlayEnabled
+      ? `${icon('overlay')} Overlay ${iconSolo('check')}`
+      : `${icon('overlay')} Overlay`;
   }
 }
 
@@ -176,7 +181,8 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   } else {
     thumbImg.classList.add('hidden');
     thumbPlaceholder.classList.remove('hidden');
-    thumbPlaceholder.textContent = state.thumbnailFailed ? 'No preview' : '🖨️';
+    if (state.thumbnailFailed) thumbPlaceholder.textContent = 'No preview';
+    else iconOnly(thumbPlaceholder, 'print', 'No thumbnail yet');
     $('print-thumbnail-wrap').classList.remove('thumbnail-dark');
   }
 
@@ -192,39 +198,42 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   const badge = $('print-status-badge');
   const subLabel = subStatusName ? ` · ${subStatusName}` : '';
   if (isPrinting && !isPaused) {
-    badge.textContent = `⟳ Printing${subLabel}`;
+    iconText(badge, 'printing', `Printing${subLabel}`);
     badge.className = 'print-status-badge badge-printing';
   } else if (isPaused) {
-    badge.textContent = `⏸ Paused${subLabel}`;
+    iconText(badge, 'pause', `Paused${subLabel}`);
     badge.className = 'print-status-badge badge-paused';
   } else if (machineStatus?.status === 5) {
-    badge.textContent = `📐 ${statusName}${subLabel}`;
+    iconText(badge, 'layer', `${statusName}${subLabel}`);
     badge.className = 'print-status-badge badge-busy';
   } else if (
     machineStatus?.status === 3 ||
     machineStatus?.status === 4 ||
     machineStatus?.status === 13
   ) {
-    badge.textContent = `🔄 ${statusName}${subLabel}`;
+    iconText(badge, 'refresh', `${statusName}${subLabel}`);
     badge.className = 'print-status-badge badge-busy';
   } else if (
     machineStatus?.status === 6 ||
     machineStatus?.status === 7 ||
     machineStatus?.status === 8
   ) {
-    badge.textContent = `⚙️ ${statusName}${subLabel}`;
+    iconText(badge, 'settings', `${statusName}${subLabel}`);
     badge.className = 'print-status-badge badge-busy';
   } else if (machineStatus?.status === 14) {
-    badge.textContent = `🛑 ${statusName}`;
+    iconText(badge, 'estop', statusName);
     badge.className = 'print-status-badge badge-error';
   } else if (powerLoss !== 'none') {
     // Status 15 used to fall through to the `else` below and render as `badge-idle` —
     // the printer sitting on a half-finished job awaiting a decision, styled as though
     // it had nothing to do (ELEG-29).
-    badge.textContent =
+    iconText(
+      badge,
+      'powerLoss',
       powerLoss === 'awaiting_decision'
-        ? '⚡ Power loss — resume or cancel'
-        : `⚡ ${statusName}${subLabel}`;
+        ? 'Power loss — resume or cancel'
+        : `${statusName}${subLabel}`,
+    );
     badge.className =
       'print-status-badge ' + (powerLoss === 'awaiting_decision' ? 'badge-error' : 'badge-busy');
   } else {
@@ -279,7 +288,11 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   const filamentUsed = state.fileFilamentUsed;
   if (filamentUsed != null && (isPrinting || isPaused)) {
     const lengthM = gramsToMeters(filamentUsed, getActiveFilamentType(state));
-    $('print-filament').textContent = `🧵 ${filamentUsed.toFixed(1)}g (${lengthM.toFixed(1)}m)`;
+    iconText(
+      $('print-filament'),
+      'filament',
+      `${filamentUsed.toFixed(1)}g (${lengthM.toFixed(1)}m)`,
+    );
   } else {
     $('print-filament').textContent = '--';
   }
@@ -292,12 +305,12 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     if (activeInfo) {
       activeFilamentEl.innerHTML = `<span class="filament-swatch" style="background:${escapeHtml(activeInfo.color)}"></span> ${escapeHtml(activeInfo.type)}`;
     } else {
-      activeFilamentEl.textContent = `🧵 ${getActiveFilamentType(state)}`;
+      iconText(activeFilamentEl, 'filament', getActiveFilamentType(state));
     }
     // Color changes from color_map
     const colorMap = state.colorMap;
     if (colorMap.length > 1) {
-      colorChangesEl.textContent = `🔄 ${colorMap.length} filaments`;
+      iconText(colorChangesEl, 'refresh', `${colorMap.length} filaments`);
     } else {
       colorChangesEl.textContent = '';
     }
@@ -374,7 +387,9 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     const maxT = chamber.measured_max_temperature;
     const rangeEl = $('temp-chamber-range');
     if (minT != null && maxT != null && (minT > 0 || maxT > 0)) {
-      rangeEl.textContent = `(↓${minT.toFixed(0)} ↑${maxT.toFixed(0)})`;
+      // Literal numbers only, so innerHTML is safe — and two arrows in one string
+      // is past what iconText() can express.
+      rangeEl.innerHTML = `(${icon('down')}${minT.toFixed(0)} ${icon('up')}${maxT.toFixed(0)})`;
     } else {
       rangeEl.textContent = '';
     }
@@ -481,8 +496,8 @@ function renderExceptions(codes: number[]): void {
     const name = EXCEPTION_NAMES[code] ?? `Unknown Error (${code})`;
     const isCritical = CRITICAL_EXCEPTIONS.has(code);
     const cls = isCritical ? 'exception-item critical' : 'exception-item warning';
-    const icon = isCritical ? '🔴' : '🟡';
-    return `<div class="${cls}">${icon} <strong>${escapeHtml(String(code))}</strong> — ${escapeHtml(name)}</div>`;
+    const severityIcon = isCritical ? icon('critical') : icon('warning');
+    return `<div class="${cls}">${severityIcon} <strong>${escapeHtml(String(code))}</strong> — ${escapeHtml(name)}</div>`;
   });
 
   banner.innerHTML = items.join('');

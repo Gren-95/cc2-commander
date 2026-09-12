@@ -1,5 +1,6 @@
 /** Structured MQTT log viewer with filters, search, pause, and highlighting */
 
+import { icon, iconOnly, iconSolo } from './icons';
 import type { LogStore, LogEntry } from '../log-store';
 import { $, escapeHtml } from './helpers';
 import { METHOD_NAMES } from './log-methods';
@@ -105,15 +106,15 @@ function typeIcon(entry: LogEntry): string {
   const cls = classifyEntry(entry);
   switch (cls) {
     case 'status':
-      return '📊';
+      return iconSolo('reports');
     case 'command':
-      return '📤';
+      return iconSolo('exportFile');
     case 'response':
-      return '📥';
+      return iconSolo('download');
     case 'heartbeat':
-      return '💓';
+      return iconSolo('heartbeat');
     default:
-      return '📋';
+      return iconSolo('mqttLog');
   }
 }
 
@@ -165,7 +166,7 @@ function compactPayload(entry: LogEntry): string {
     const result = raw.result as Record<string, unknown> | undefined;
     if (result?.error_code !== undefined) {
       const code = result.error_code as number;
-      return code === 0 ? '✅ OK' : `❌ Error ${code}`;
+      return code === 0 ? `${icon('ok')} OK` : `${icon('error')} Error ${code}`;
     }
   }
 
@@ -180,21 +181,21 @@ function renderSlogRow(e: LogEntry, prevStatusRaw: unknown): string {
   const typeClass = `slog-type-${classifyEntry(e)}`;
   const isExpanded = expandedEntries.has(e.timestamp);
   const isPinned = pinnedEntries.has(e.timestamp);
-  const icon = typeIcon(e);
+  const typeGlyph = typeIcon(e);
   const method = methodLabel(e);
   const summary = compactPayload(e);
 
   let row = '';
   row += `<div class="slog-row ${dirClass} ${typeClass} ${isPinned ? 'slog-pinned' : ''}" data-ts="${e.timestamp}">`;
   row += `<div class="slog-row-header">`;
-  row += `<span class="slog-icon">${icon}</span>`;
+  row += `<span class="slog-icon">${typeGlyph}</span>`;
   row += timestampSpan('slog-time', e.timestamp, formatTimestamp(e.timestamp));
-  row += `<span class="slog-dir">${e.direction === 'sent' ? '→' : '←'}</span>`;
+  row += `<span class="slog-dir">${e.direction === 'sent' ? icon('sent') : icon('received')}</span>`;
   row += `<span class="slog-method">${highlightMatch(method)}</span>`;
   row += `<span class="slog-topic">${highlightMatch(shortTopic(e.topic))}</span>`;
   row += `<span class="slog-summary">${highlightMatch(summary)}</span>`;
-  row += `<button class="slog-pin-btn ${isPinned ? 'pinned' : ''}" data-pin-ts="${e.timestamp}" title="${isPinned ? 'Unpin' : 'Pin'}">📌</button>`;
-  row += `<span class="slog-expand">${isExpanded ? '▾' : '▸'}</span>`;
+  row += `<button class="slog-pin-btn ${isPinned ? 'pinned' : ''}" data-pin-ts="${e.timestamp}" title="${isPinned ? 'Unpin' : 'Pin'}" aria-label="${isPinned ? 'Unpin' : 'Pin'}">${isPinned ? iconSolo('pinned') : iconSolo('pin')}</button>`;
+  row += `<span class="slog-expand">${isExpanded ? iconSolo('expanded') : iconSolo('collapsed')}</span>`;
   row += `</div>`;
 
   if (isExpanded) {
@@ -239,7 +240,7 @@ export function renderStructuredLog(store: LogStore): void {
 
   if (pinned.length) {
     html += `<div class="slog-pinned-section">`;
-    html += `<div class="slog-pinned-header">📌 Pinned (${pinned.length})</div>`;
+    html += `<div class="slog-pinned-header">${icon('pinned')} Pinned (${pinned.length})</div>`;
     for (const e of pinned) {
       html += renderSlogRow(e, null);
     }
@@ -373,7 +374,11 @@ export function bindStructuredLogControls(store: LogStore): void {
   // Pause
   $('slog-pause').addEventListener('click', () => {
     paused = !paused;
-    $('slog-pause').textContent = paused ? '▶' : '⏸';
+    iconOnly(
+      $('slog-pause'),
+      paused ? 'play' : 'pause',
+      paused ? 'Resume updates' : 'Pause updates',
+    );
     $('slog-paused-badge').classList.toggle('hidden', !paused);
     if (!paused) {
       pendingCount = 0;

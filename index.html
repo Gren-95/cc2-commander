@@ -43,15 +43,15 @@
     </div>
     <div class="header-center">
       <nav class="main-tabs" id="main-tabs">
-        <button class="main-tab active" data-tab="dashboard">🖨️ Dashboard</button>
-        <button class="main-tab" data-tab="tools">🧮 Tools</button>
-        <button class="main-tab" data-tab="settings">⚙️ Settings</button>
-        <button class="main-tab" data-tab="debug">🐛 Debug</button>
-        <button class="main-tab" data-tab="help">❓ Help</button>
+        <button class="main-tab active" data-tab="dashboard"><i class="bi bi-printer bi-lead" aria-hidden="true"></i> Dashboard</button>
+        <button class="main-tab" data-tab="tools"><i class="bi bi-calculator bi-lead" aria-hidden="true"></i> Tools</button>
+        <button class="main-tab" data-tab="settings"><i class="bi bi-gear bi-lead" aria-hidden="true"></i> Settings</button>
+        <button class="main-tab" data-tab="debug"><i class="bi bi-bug bi-lead" aria-hidden="true"></i> Debug</button>
+        <button class="main-tab" data-tab="help"><i class="bi bi-question-circle bi-lead" aria-hidden="true"></i> Help</button>
       </nav>
     </div>
     <div class="header-right">
-      <button id="sidebar-toggle" class="btn btn-sm btn-ghost" title="Toggle sidebar">◧</button>
+      <button id="sidebar-toggle" class="btn btn-sm btn-ghost" title="Toggle sidebar" aria-label="Toggle sidebar"><i class="bi bi-layout-sidebar" aria-hidden="true"></i></button>
       <div class="svc-header-wrap" id="svc-header-wrap">
         <button class="svc-header-badge" id="svc-header-badge" title="Service status">
           <span id="svc-header-dots"></span>
@@ -98,7 +98,7 @@
             <div class="print-status-top">
               <div id="print-thumbnail-wrap" class="print-thumbnail-wrap">
                 <img id="print-thumbnail" class="print-thumbnail thumb-img hidden" alt="">
-                <div id="print-thumbnail-placeholder" class="print-thumbnail-placeholder">🖨️</div>
+                <div id="print-thumbnail-placeholder" class="print-thumbnail-placeholder"><i class="bi bi-printer" aria-hidden="true"></i></div>
               </div>
               <div class="print-info">
                 <div class="print-file" id="print-filename">No active print</div>
@@ -130,10 +130,10 @@
               </div>
             </div>
             <div class="print-actions">
-              <button id="btn-pause" class="btn btn-warning btn-icon" title="Pause">⏸</button>
-              <button id="btn-resume" class="btn btn-success btn-icon hidden" title="Resume">▶</button>
-              <button id="btn-stop" class="btn btn-danger btn-icon" title="Stop">⏹</button>
-              <button id="btn-estop" class="btn btn-danger btn-icon" title="Emergency Stop">🛑</button>
+              <button id="btn-pause" class="btn btn-warning btn-icon" title="Pause" aria-label="Pause"><i class="bi bi-pause-fill" aria-hidden="true"></i></button>
+              <button id="btn-resume" class="btn btn-success btn-icon hidden" title="Resume" aria-label="Resume"><i class="bi bi-play-fill" aria-hidden="true"></i></button>
+              <button id="btn-stop" class="btn btn-danger btn-icon" title="Stop" aria-label="Stop"><i class="bi bi-stop-fill" aria-hidden="true"></i></button>
+              <button id="btn-estop" class="btn btn-danger btn-icon" title="Emergency Stop" aria-label="Emergency Stop"><i class="bi bi-exclamation-octagon-fill" aria-hidden="true"></i></button>
             </div>
           </div>
 
@@ -143,7 +143,7 @@
         <main class="dashboard-main" id="dashboard-main">
         <!-- Temperatures -->
         <div class="card" id="temps-card">
-          <h3>🌡️ Temperatures</h3>
+          <h3><i class="bi bi-thermometer-half bi-lead" aria-hidden="true"></i> Temperatures</h3>
           <div class="temp-grid">
             <div class="temp-item">
               <div class="temp-row">
@@ -197,7 +197,7 @@
             <button class="btn btn-sm btn-ghost temp-preset-btn" data-nozzle="240" data-bed="80">PETG</button>
             <button class="btn btn-sm btn-ghost temp-preset-btn" data-nozzle="250" data-bed="100">ABS</button>
             <button class="btn btn-sm btn-ghost temp-preset-btn" data-nozzle="230" data-bed="70">TPU</button>
-            <button class="btn btn-sm btn-ghost temp-preset-btn" data-nozzle="0" data-bed="0">Cool ❄️</button>
+            <button class="btn btn-sm btn-ghost temp-preset-btn" data-nozzle="0" data-bed="0">Cool<i class="bi bi-snow bi-trail" aria-hidden="true"></i></button>
           </div>
           <div class="chart-wrap">
             <div class="chart-time-selector">
@@ -212,7 +212,7 @@
 
         <!-- Canvas / AMS -->
         <div class="card" id="canvas-card">
-          <h3>🎨 Canvas / AMS</h3>
+          <h3><i class="bi bi-palette bi-lead" aria-hidden="true"></i> Canvas / AMS</h3>
           <div id="canvas-status" class="canvas-grid">
             <div class="canvas-empty">Not connected</div>
           </div>
@@ -221,11 +221,11 @@
         <!-- Camera -->
         <div class="card" id="camera-card">
           <div class="card-header">
-            <h3>📷 Camera</h3>
+            <h3><i class="bi bi-camera-video bi-lead" aria-hidden="true"></i> Camera</h3>
             <div class="camera-header-actions">
-              <button id="camera-snapshot-btn" class="btn btn-sm btn-ghost" title="Save snapshot">📸 Snapshot</button>
-              <button id="camera-overlay-btn" class="btn btn-sm btn-ghost" title="Toggle status overlay">📊 Overlay</button>
-              <button id="camera-expand-btn" class="btn btn-sm btn-ghost" title="Toggle large view">⤢ Expand</button>
+              <button id="camera-snapshot-btn" class="btn btn-sm btn-ghost" title="Save snapshot"><i class="bi bi-camera bi-lead" aria-hidden="true"></i> Snapshot</button>
+              <button id="camera-overlay-btn" class="btn btn-sm btn-ghost" title="Toggle status overlay"><i class="bi bi-bar-chart-line bi-lead" aria-hidden="true"></i> Overlay</button>
+              <button id="camera-expand-btn" class="btn btn-sm btn-ghost" title="Toggle large view"><i class="bi bi-arrows-angle-expand bi-lead" aria-hidden="true"></i> Expand</button>
             </div>
           </div>
           <div class="camera-wrap" id="camera-wrap" title="Click to enlarge">
@@ -236,7 +236,7 @@
 
         <!-- AI Monitor -->
         <div class="card" id="ai-card">
-          <h3>🤖 AI Monitor</h3>
+          <h3><i class="bi bi-robot bi-lead" aria-hidden="true"></i> AI Monitor</h3>
           <div id="ai-panel">
             <div class="ai-empty">AI monitoring disabled or not started</div>
           </div>
@@ -266,7 +266,7 @@
 
         <!-- Event Log -->
         <div class="card" id="event-log-card">
-          <h3>📜 Event Log</h3>
+          <h3><i class="bi bi-journal-text bi-lead" aria-hidden="true"></i> Event Log</h3>
           <div id="event-log-entries" class="event-log-entries">
             <div class="event-log-empty">No events yet</div>
           </div>
@@ -276,13 +276,13 @@
         <!-- Gcode Preview -->
         <div class="card" id="gcode-preview-card">
           <div class="card-header">
-            <h3>📐 Gcode Preview</h3>
+            <h3><i class="bi bi-bounding-box bi-lead" aria-hidden="true"></i> Gcode Preview</h3>
             <div class="gcode-preview-actions">
-              <button id="btn-gcode-follow" class="btn btn-sm btn-ghost active" title="Follow print progress">📍 Follow</button>
-              <button id="btn-gcode-single-layer" class="btn btn-sm btn-ghost active" title="Show only current layer">🔍 Single Layer</button>
-              <button id="btn-load-gcode" class="btn btn-sm btn-ghost" title="Load gcode file">📂 Load</button>
+              <button id="btn-gcode-follow" class="btn btn-sm btn-ghost active" title="Follow print progress"><i class="bi bi-geo-alt bi-lead" aria-hidden="true"></i> Follow</button>
+              <button id="btn-gcode-single-layer" class="btn btn-sm btn-ghost active" title="Show only current layer"><i class="bi bi-search bi-lead" aria-hidden="true"></i> Single Layer</button>
+              <button id="btn-load-gcode" class="btn btn-sm btn-ghost" title="Load gcode file"><i class="bi bi-folder2-open bi-lead" aria-hidden="true"></i> Load</button>
               <input type="file" id="gcode-file-input" accept=".gcode,.gco,.g" style="display:none">
-              <button id="btn-reset-layer-data" class="btn btn-sm btn-ghost" title="Reset layer duration data">🗑 Reset</button>
+              <button id="btn-reset-layer-data" class="btn btn-sm btn-ghost" title="Reset layer duration data"><i class="bi bi-arrow-counterclockwise bi-lead" aria-hidden="true"></i> Reset</button>
             </div>
           </div>
           <div class="gcode-preview-wrap">
@@ -308,16 +308,16 @@
                 <button class="btn btn-sm move-btn" data-axis="y" data-dir="1">Y+</button>
                 <div></div>
                 <button class="btn btn-sm move-btn" data-axis="x" data-dir="-1">X-</button>
-                <button class="btn btn-sm move-btn home-btn" id="btn-home-all" title="Home All Axes">⌂</button>
+                <button class="btn btn-sm move-btn home-btn" id="btn-home-all" title="Home All Axes" aria-label="Home all axes"><i class="bi bi-house" aria-hidden="true"></i></button>
                 <button class="btn btn-sm move-btn" data-axis="x" data-dir="1">X+</button>
                 <div></div>
                 <button class="btn btn-sm move-btn" data-axis="y" data-dir="-1">Y-</button>
                 <div></div>
               </div>
               <div class="move-z-col">
-                <button class="btn btn-sm move-btn" data-axis="z" data-dir="1">Z↑</button>
-                <button class="btn btn-sm move-btn home-btn" id="btn-home-all-z" title="Home All Axes">⌂</button>
-                <button class="btn btn-sm move-btn" data-axis="z" data-dir="-1">Z↓</button>
+                <button class="btn btn-sm move-btn" data-axis="z" data-dir="1">Z<i class="bi bi-arrow-up" aria-hidden="true"></i></button>
+                <button class="btn btn-sm move-btn home-btn" id="btn-home-all-z" title="Home All Axes" aria-label="Home all axes"><i class="bi bi-house" aria-hidden="true"></i></button>
+                <button class="btn btn-sm move-btn" data-axis="z" data-dir="-1">Z<i class="bi bi-arrow-down" aria-hidden="true"></i></button>
               </div>
             </div>
             <div class="position-display">
@@ -341,7 +341,7 @@
               </div>
             </div>
             <div class="led-control">
-              <span class="fan-icon">☀️</span>
+              <span class="fan-icon"><i class="bi bi-brightness-high" aria-hidden="true"></i></span>
               <span>Overhead light</span>
               <label class="toggle"><input type="checkbox" id="led-toggle" checked><span class="toggle-slider"></span></label>
             </div>
@@ -349,19 +349,19 @@
               <div id="maintenance-status"></div>
               <div class="maintenance-grid">
                 <button id="btn-self-check" class="btn btn-ghost maintenance-btn" title="Run full self-check (auto-level + vibration + PID)">
-                  <span class="maintenance-icon">🔍</span>
+                  <span class="maintenance-icon"><i class="bi bi-search" aria-hidden="true"></i></span>
                   <span>Self-Check</span>
                 </button>
                 <button id="btn-maintenance-level" class="btn btn-ghost maintenance-btn" title="Auto-level bed probing">
-                  <span class="maintenance-icon">📐</span>
+                  <span class="maintenance-icon"><i class="bi bi-rulers" aria-hidden="true"></i></span>
                   <span>Auto Level</span>
                 </button>
                 <button id="btn-maintenance-vibration" class="btn btn-ghost maintenance-btn" title="Input shaper / vibration optimization">
-                  <span class="maintenance-icon">〰️</span>
+                  <span class="maintenance-icon"><i class="bi bi-activity" aria-hidden="true"></i></span>
                   <span>Vibration</span>
                 </button>
                 <button id="btn-maintenance-pid" class="btn btn-ghost maintenance-btn" title="PID auto-tune for nozzle and bed heaters">
-                  <span class="maintenance-icon">🌡️</span>
+                  <span class="maintenance-icon"><i class="bi bi-thermometer-half" aria-hidden="true"></i></span>
                   <span>PID Tune</span>
                 </button>
               </div>
@@ -375,44 +375,44 @@
           <div class="fan-grid">
             <div class="fan-item">
               <div class="fan-header">
-                <span class="fan-icon">❄️</span>
+                <span class="fan-icon"><i class="bi bi-snow" aria-hidden="true"></i></span>
                 <span class="fan-label">Model</span>
                 <label class="toggle"><input type="checkbox" id="fan-model-toggle" checked><span class="toggle-slider"></span></label>
               </div>
               <div class="fan-adjust">
-                <button class="btn btn-sm fan-dec" data-fan="fan" data-step="-13">−</button>
+                <button class="btn btn-sm fan-dec" data-fan="fan" data-step="-13" aria-label="Decrease"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
                 <div class="fan-bar-wrap"><div class="fan-bar" id="fan-model-bar"></div></div>
                 <span class="fan-value" id="fan-model-value">--%</span>
                 <span class="fan-rpm" id="fan-model-rpm"></span>
-                <button class="btn btn-sm fan-inc" data-fan="fan" data-step="13">+</button>
+                <button class="btn btn-sm fan-inc" data-fan="fan" data-step="13" aria-label="Increase"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
               </div>
             </div>
             <div class="fan-item">
               <div class="fan-header">
-                <span class="fan-icon">❄️</span>
+                <span class="fan-icon"><i class="bi bi-snow" aria-hidden="true"></i></span>
                 <span class="fan-label">Assistance</span>
                 <label class="toggle"><input type="checkbox" id="fan-aux-toggle"><span class="toggle-slider"></span></label>
               </div>
               <div class="fan-adjust">
-                <button class="btn btn-sm fan-dec" data-fan="aux_fan" data-step="-13">−</button>
+                <button class="btn btn-sm fan-dec" data-fan="aux_fan" data-step="-13" aria-label="Decrease"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
                 <div class="fan-bar-wrap"><div class="fan-bar" id="fan-aux-bar"></div></div>
                 <span class="fan-value" id="fan-aux-value">--%</span>
                 <span class="fan-rpm" id="fan-aux-rpm"></span>
-                <button class="btn btn-sm fan-inc" data-fan="aux_fan" data-step="13">+</button>
+                <button class="btn btn-sm fan-inc" data-fan="aux_fan" data-step="13" aria-label="Increase"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
               </div>
             </div>
             <div class="fan-item">
               <div class="fan-header">
-                <span class="fan-icon">❄️</span>
+                <span class="fan-icon"><i class="bi bi-snow" aria-hidden="true"></i></span>
                 <span class="fan-label">Case</span>
                 <label class="toggle"><input type="checkbox" id="fan-case-toggle" checked><span class="toggle-slider"></span></label>
               </div>
               <div class="fan-adjust">
-                <button class="btn btn-sm fan-dec" data-fan="box_fan" data-step="-13">−</button>
+                <button class="btn btn-sm fan-dec" data-fan="box_fan" data-step="-13" aria-label="Decrease"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
                 <div class="fan-bar-wrap"><div class="fan-bar" id="fan-case-bar"></div></div>
                 <span class="fan-value" id="fan-case-value">--%</span>
                 <span class="fan-rpm" id="fan-case-rpm"></span>
-                <button class="btn btn-sm fan-inc" data-fan="box_fan" data-step="13">+</button>
+                <button class="btn btn-sm fan-inc" data-fan="box_fan" data-step="13" aria-label="Increase"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
               </div>
             </div>
           </div>
@@ -463,8 +463,8 @@
         <!-- Print History -->
         <div class="card" id="print-history-card">
           <div class="card-header">
-            <h3>📜 Print History</h3>
-            <button id="btn-history-refresh" class="btn btn-sm btn-ghost" title="Refresh print history">⟳ Refresh</button>
+            <h3><i class="bi bi-clock-history bi-lead" aria-hidden="true"></i> Print History</h3>
+            <button id="btn-history-refresh" class="btn btn-sm btn-ghost" title="Refresh print history"><i class="bi bi-arrow-repeat bi-lead" aria-hidden="true"></i> Refresh</button>
           </div>
           <!-- Sibling of the list (ELEG-50), for the same reason as Files: the entries
                are replaced wholesale whenever a 1036 response lands. -->
@@ -478,8 +478,8 @@
         <!-- Print Reports -->
         <div class="card" id="print-reports-card">
           <div class="card-header">
-            <h3>📊 Print Reports</h3>
-            <button id="btn-reports-refresh" class="btn btn-sm btn-ghost" title="Refresh reports">⟳ Refresh</button>
+            <h3><i class="bi bi-bar-chart bi-lead" aria-hidden="true"></i> Print Reports</h3>
+            <button id="btn-reports-refresh" class="btn btn-sm btn-ghost" title="Refresh reports"><i class="bi bi-arrow-repeat bi-lead" aria-hidden="true"></i> Refresh</button>
           </div>
           <!-- Sibling of the list (ELEG-51): the entries are replaced wholesale. -->
           <div id="print-reports-controls"></div>
@@ -491,10 +491,10 @@
         <!-- Files -->
         <div class="card" id="files-card">
           <div class="files-header">
-            <h3>📁 Files</h3>
+            <h3><i class="bi bi-folder bi-lead" aria-hidden="true"></i> Files</h3>
             <div class="files-header-actions">
               <label class="btn btn-sm btn-primary file-upload-label" id="file-upload-label">
-                📤 Upload
+                <i class="bi bi-upload bi-lead" aria-hidden="true"></i> Upload
                 <input type="file" id="file-upload-input" accept=".gcode,.3mf" hidden>
               </label>
               <div class="file-source-tabs">
@@ -518,12 +518,12 @@
         <!-- Timelapse -->
         <div class="card" id="timelapse-card">
           <div class="files-header">
-            <h3>🎬 Timelapse</h3>
-            <button class="btn btn-sm btn-ghost" id="timelapse-refresh">⟳ Refresh</button>
+            <h3><i class="bi bi-film bi-lead" aria-hidden="true"></i> Timelapse</h3>
+            <button class="btn btn-sm btn-ghost" id="timelapse-refresh"><i class="bi bi-arrow-repeat bi-lead" aria-hidden="true"></i> Refresh</button>
           </div>
           <div id="timelapse-player-wrap" class="timelapse-player-wrap hidden">
             <video id="timelapse-player" controls class="timelapse-video"></video>
-            <button class="btn btn-sm btn-ghost timelapse-close-btn" id="timelapse-close">✕ Close</button>
+            <button class="btn btn-sm btn-ghost timelapse-close-btn" id="timelapse-close"><i class="bi bi-x-lg bi-lead" aria-hidden="true"></i> Close</button>
           </div>
           <!-- Sibling of the list (ELEG-52): the list is replaced on every 1036 response. -->
           <div id="timelapse-controls"></div>
@@ -535,12 +535,12 @@
         <!-- Log -->
         <div class="card log-card" id="log-card">
           <div class="log-header">
-            <h3>📋 MQTT Log</h3>
+            <h3><i class="bi bi-list-columns bi-lead" aria-hidden="true"></i> MQTT Log</h3>
             <div class="log-tabs">
               <button class="log-tab active" data-tab="structured">Structured</button>
               <button class="log-tab" data-tab="raw">Raw</button>
             </div>
-            <button class="btn btn-sm" id="btn-mqtt-capture" title="Capture all raw MQTT messages to file for debugging">📥 Capture</button>
+            <button class="btn btn-sm" id="btn-mqtt-capture" title="Capture all raw MQTT messages to file for debugging"><i class="bi bi-record-circle bi-lead" aria-hidden="true"></i> Capture</button>
           </div>
 
           <!-- Structured tab -->
@@ -549,6 +549,11 @@
               <input type="text" id="slog-search" placeholder="Search..." class="log-filter-input">
               <select id="slog-direction-filter" class="log-select">
                 <option value="all">All</option>
+                <!--
+                  Text arrows, not <i class="bi …"> like everywhere else: <option> may
+                  only contain text, so an element here renders as nothing at all in
+                  every browser. Leave these as characters.
+                -->
                 <option value="sent">Sent →</option>
                 <option value="received">Received ←</option>
               </select>
@@ -565,9 +570,9 @@
               <label class="log-autoscroll-label">
                 <input type="checkbox" id="slog-autoscroll" checked> Auto-scroll
               </label>
-              <button class="btn btn-sm btn-ghost" id="slog-pause" title="Pause updates">⏸</button>
+              <button class="btn btn-sm btn-ghost" id="slog-pause" title="Pause updates" aria-label="Pause updates"><i class="bi bi-pause-fill" aria-hidden="true"></i></button>
               <button class="btn btn-sm btn-ghost" id="slog-diff" title="Toggle diff view">Δ Diff</button>
-              <button class="btn btn-sm btn-ghost" id="slog-export" title="Download the filtered log as JSON">⬇ Export</button>
+              <button class="btn btn-sm btn-ghost" id="slog-export" title="Download the filtered log as JSON"><i class="bi bi-download bi-lead" aria-hidden="true"></i> Export</button>
               <button class="btn btn-sm btn-ghost" id="slog-clear">Clear</button>
             </div>
             <p class="settings-hint log-export-note">Exports the messages currently shown. The payloads include the printer's serial number and local IP — check before posting one publicly.</p>
@@ -585,7 +590,7 @@
               <label class="log-autoscroll-label">
                 <input type="checkbox" id="log-autoscroll" checked> Auto-scroll
               </label>
-              <button class="btn btn-sm btn-ghost" id="log-export" title="Download the filtered log as JSON">⬇ Export</button>
+              <button class="btn btn-sm btn-ghost" id="log-export" title="Download the filtered log as JSON"><i class="bi bi-download bi-lead" aria-hidden="true"></i> Export</button>
               <button class="btn btn-sm btn-ghost" id="log-clear">Clear</button>
             </div>
             <p class="settings-hint log-export-note">Exports the messages currently shown. The payloads include the printer's serial number and local IP — check before posting one publicly.</p>
@@ -608,7 +613,7 @@
     <!-- Tools tab (hidden by default) -->
     <div id="tools-tab-content" class="settings-page hidden">
       <div class="settings-page-inner" style="max-width: 1000px">
-        <h2 class="settings-page-title">🧮 Spool Calculator</h2>
+        <h2 class="settings-page-title"><i class="bi bi-calculator bi-lead" aria-hidden="true"></i> Spool Calculator</h2>
         <div id="tools-content"></div>
       </div>
     </div>
@@ -616,7 +621,7 @@
     <!-- Settings tab (hidden by default, shown when Settings tab is active) -->
     <div id="settings-tab-content" class="settings-page hidden">
       <div class="settings-page-inner">
-        <h2 class="settings-page-title">⚙️ Settings</h2>
+        <h2 class="settings-page-title"><i class="bi bi-gear bi-lead" aria-hidden="true"></i> Settings</h2>
         <div id="settings-content" class="settings-content-full"></div>
       </div>
     </div>
@@ -624,11 +629,11 @@
     <!-- Debug tab -->
     <div id="debug-tab-content" class="settings-page hidden">
       <div class="settings-page-inner" style="max-width: 1400px">
-        <h2 class="settings-page-title">🐛 Debug Panel</h2>
+        <h2 class="settings-page-title"><i class="bi bi-bug bi-lead" aria-hidden="true"></i> Debug Panel</h2>
         <div class="debug-panel">
           <div class="debug-controls">
             <input type="text" id="debug-filter" placeholder="Filter fields..." class="log-filter-input">
-            <button class="btn btn-sm" id="debug-log-toggle">▶ Start Logging</button>
+            <button class="btn btn-sm" id="debug-log-toggle"><i class="bi bi-play-fill bi-lead" aria-hidden="true"></i> Start Logging</button>
             <select id="debug-log-timeout" class="log-select">
               <option value="1">Auto-stop: 1m</option>
               <option value="5" selected>Auto-stop: 5m</option>
@@ -637,25 +642,25 @@
               <option value="60">Auto-stop: 60m</option>
             </select>
             <span id="debug-logging-badge" class="log-paused-badge hidden">LOGGING</span>
-            <button class="btn btn-sm btn-ghost" id="debug-export-state" title="Export current state as JSON">📤 State</button>
-            <button class="btn btn-sm btn-ghost" id="debug-export-log" title="Export change log as JSON">📥 Changes</button>
-            <button class="btn btn-sm btn-ghost" id="debug-clear-log">🗑 Clear</button>
+            <button class="btn btn-sm btn-ghost" id="debug-export-state" title="Export current state as JSON"><i class="bi bi-box-arrow-up bi-lead" aria-hidden="true"></i> State</button>
+            <button class="btn btn-sm btn-ghost" id="debug-export-log" title="Export change log as JSON"><i class="bi bi-download bi-lead" aria-hidden="true"></i> Changes</button>
+            <button class="btn btn-sm btn-ghost" id="debug-clear-log"><i class="bi bi-trash bi-lead" aria-hidden="true"></i> Clear</button>
           </div>
           <div class="debug-watched">
             <span class="debug-watched-label">Watched:</span>
             <div id="debug-watched-list" class="debug-watched-list">
-              <span class="debug-empty-inline">Click ○ on any value to watch it</span>
+              <span class="debug-empty-inline">Click <i class="bi bi-circle bi-lead" aria-hidden="true"></i> on any value to watch it</span>
             </div>
           </div>
           <div class="debug-actions" style="display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--border);">
             <span style="font-size: 12px; color: var(--text-muted); align-self: center;">Video Stream:</span>
-            <button class="btn btn-sm" id="debug-videostream-sdcp" title="Send CmdVideoStreamControl Enable=1 via SDCP WebSocket (port 3030) — matches official app">📡 SDCP Enable</button>
-            <button class="btn btn-sm" id="debug-videostream-mqtt" title="Send method 1054 (CTRL_LIVE_STREAM) Enable=1 via MQTT">📡 MQTT 1054</button>
+            <button class="btn btn-sm" id="debug-videostream-sdcp" title="Send CmdVideoStreamControl Enable=1 via SDCP WebSocket (port 3030) — matches official app"><i class="bi bi-arrow-right bi-lead" aria-hidden="true"></i> SDCP Enable</button>
+            <button class="btn btn-sm" id="debug-videostream-mqtt" title="Send method 1054 (CTRL_LIVE_STREAM) Enable=1 via MQTT"><i class="bi bi-arrow-right bi-lead" aria-hidden="true"></i> MQTT 1054</button>
             <span id="debug-videostream-result" style="font-size: 12px; color: var(--text-muted); align-self: center;"></span>
           </div>
           <div class="debug-split">
             <div class="debug-state-section">
-              <h3>Live State <span class="debug-hint">(○ = watch, ▶ = expand)</span></h3>
+              <h3>Live State <span class="debug-hint">(<i class="bi bi-circle bi-lead" aria-hidden="true"></i> = watch, <i class="bi bi-caret-right-fill bi-lead" aria-hidden="true"></i> = expand)</span></h3>
               <div id="debug-state-tree" class="debug-state-tree"></div>
             </div>
             <div class="debug-log-section">
@@ -673,7 +678,7 @@
     <!-- Help tab -->
     <div id="help-tab-content" class="settings-page hidden">
       <div class="settings-page-inner" style="max-width: 1000px">
-        <h2 class="settings-page-title">❓ Help &amp; API Reference</h2>
+        <h2 class="settings-page-title"><i class="bi bi-question-circle bi-lead" aria-hidden="true"></i> Help &amp; API Reference</h2>
         <div id="help-content"></div>
       </div>
     </div>

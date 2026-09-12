@@ -12,37 +12,36 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # No `version:` on purpose — action-setup then reads `packageManager` from
-      # package.json, so CI uses the exact pnpm developers use. `version: latest`
-      # silently moved CI to pnpm 11 while everyone here was on 10.x, which broke
-      # the frozen install two different ways (ELEG-4). Still optional-when-
-      # packageManager-is-present in v6, so the bump did not reintroduce it.
+      # Pinned to an exact patch, deliberately — not `latest` and not `1.x`.
       #
-      # Stay on `pnpm/action-setup`. Its successor `pnpm/setup` requires pnpm v11+,
-      # and moving there is ELEG-9's deliberate decision, not a side effect of a
-      # runtime bump.
-      - uses: pnpm/action-setup@v6
-
-      # `cache: pnpm` is explicit and must stay. setup-node v5 added automatic
-      # caching driven by `packageManager`, then v6 narrowed that to npm only — so
-      # the automatic path does not cover pnpm and dropping this line would silently
-      # lose the store cache. This step must also stay AFTER action-setup: the cache
-      # resolution shells out to pnpm.
-      - uses: actions/setup-node@v7
+      # `version: latest` on the old pnpm/action-setup is precisely how CI silently
+      # moved to pnpm 11 while everyone here was on 10.x and broke the frozen install
+      # two different ways (ELEG-4). Bun is a bigger lever than pnpm was: it is the
+      # package manager, the TypeScript runtime AND the HTTP server, so a version
+      # moving under CI can change how the service behaves, not just how it installs.
+      #
+      # Keep this in step with the FROM lines in Dockerfile and the floor checked by
+      # contrib/install.sh. Those are the three places a Bun version is named.
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
-          cache: pnpm
+          bun-version: 1.4.2
 
-      - run: pnpm install --frozen-lockfile
+      # No `cache:` line and none needed — setup-bun caches ~/.bun/install/cache keyed
+      # on bun.lock by default. The pnpm setup needed `cache: pnpm` on setup-node plus
+      # a strict ordering between the two steps; that whole hazard went with Node.
+      #
+      # --frozen-lockfile is the point of the step: it fails rather than re-resolving,
+      # so CI installs exactly what the committed bun.lock says.
+      - run: bun install --frozen-lockfile
 
       # One step, not four. `scripts/gates.sh` is the single list of what has to pass,
       # so a gate can no longer exist in the repo but be missing from CI — which is
       # exactly how the backend went unchecked (ELEG-5).
       #
-      # It is a strict superset of the four steps it replaced: `biome ci src/` covers
-      # both `lint` and `format:check`, `tsc` + `vite build` is `build`, `vitest run`
-      # is `test` — PLUS `service:check`, the typecheck of src/server that
-      # tsconfig.json excludes and CI therefore never ran.
+      # It is a strict superset of the four steps it replaced: `biome ci` covers both
+      # `lint` and `format:check`, `tsc` + `vite build` is `build`, `vitest run` is
+      # `test` — PLUS `service:check`, the typecheck of src/server that tsconfig.json
+      # excludes and CI therefore never ran.
       #
       # It also reports every failing gate in one run rather than stopping at the first.
-      - run: pnpm gates
+      - run: bun run gates

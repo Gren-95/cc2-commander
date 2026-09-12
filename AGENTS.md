@@ -39,30 +39,32 @@ rule below.
 ## Setup
 
 ```bash
-pnpm install
+bun install
 cp .env.example .env       # set PRINTER_IP at minimum
-pnpm dev                   # vite on :5173 + the service on :8088, concurrently
-pnpm dev:web               # frontend only
-pnpm dev:service           # service only (tsx watch)
+bun run dev                # vite on :5173 + the service on :8088, concurrently
+bun run dev:web            # frontend only
+bun run dev:service        # service only (bun --watch)
 ```
 
-Node ≥ 22, pnpm 10.x. There is no database and no container needed for development.
+Bun ≥ 1.2.3. There is no Node, no pnpm, no tsx, no database and no container needed
+for development. Bun is the package manager, the TypeScript runtime *and* the HTTP
+server — see the front-door note in `.agents/architecture.md`.
 
 ## Build / test / lint (run before finishing any change)
 
 ```bash
-pnpm gates          # ⭐ everything (scripts/gates.sh) — and this is literally what CI runs
-pnpm gates --fix    # biome --write first, then the gates — commit what it rewrites
+bun run gates          # ⭐ everything (scripts/gates.sh) — and this is literally what CI runs
+bun run gates --fix    # biome --write first, then the gates — commit what it rewrites
 ```
 
-`pnpm gates` is the one to run: `biome ci` (**non-writing**, as CI does it),
-`tsc` (the browser half), **`pnpm service:check`** (the server + telegram half),
+`bun run gates` is the one to run: `biome ci` (**non-writing**, as CI does it),
+`tsc` (the browser half), **`bun run service:check`** (the server + telegram half),
 **`knip`** (unreachable modules — ELEG-65), `vite build`, and `vitest run`. The
 individual scripts still exist for a tight inner
 loop; details, traps and the known gaps are in
 [`.agents/gates.md`](.agents/gates.md) — the file `.agents/repo.json` names as `gatesDoc`.
 
-**`ci.yml` runs `pnpm gates` as a single step** (ELEG-5), so the gate list lives in one
+**`ci.yml` runs `bun run gates` as a single step** (ELEG-5), so the gate list lives in one
 place and CI cannot fall behind it — adding a gate to `scripts/gates.sh` needs no
 workflow edit. It used to be four hand-listed steps, which is precisely how the backend
 came to be typechecked by nothing in CI. A green CI now means the same thing a green
@@ -80,28 +82,57 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   `home` drive real motors into whatever is on the bed, `start_print` starts a
   print, `emergency_stop` aborts someone's 14-hour job. Reads are fine and
   encouraged — `GET /api/health`, `/api/status`, `/api/metrics`, the MCP
-  `printer://*` resources, `pnpm dev` against the live printer, watching the MQTT
+  `printer://*` resources, `bun run dev` against the live printer, watching the MQTT
   log. **Writes are for a human at the machine**, and that makes them *operator
   work* (see the rule below). If a change genuinely cannot be verified without a
   command, say so, give the exact command, and ask — never fire it and report the
   result.
-- **TypeScript strict, ESM, and `.js` on every relative import.** `import { loadConfig }
-  from './config.js'` — the extension is required, not decorative: production runs
-  the TypeScript **directly** under `node --import tsx`, so the specifier has to be
-  the one Node resolves. Dropping the `.js` works in vite and breaks the service.
-  **The rule bites on the half that Node executes.** In practice the tree is a clean
-  split — every relative import under `src/server/**` carries `.js`, and every one in
-  the vite-bundled browser half (`src/main.ts`, `src/ui/**`, `src/types.ts`) is
-  extensionless, which `moduleResolution: "bundler"` accepts. Match the half you are
-  editing rather than "fixing" 120 frontend imports.
+- **TypeScript strict, ESM, and `.js` on every relative import under `src/server/**`.**
+  `import { loadConfig } from './config.js'`. Bun resolves `./config.js` to
+  `config.ts`, so this no longer *breaks* the way it did under `node --import tsx`,
+  where the specifier had to be the one Node resolves — it is now a convention rather
+  than a hard constraint. Keep it anyway: the tree is a clean split (every relative
+  import under `src/server/**` carries `.js`, every one in the vite-bundled browser
+  half — `src/main.ts`, `src/ui/**`, `src/types.ts` — is extensionless, which
+  `moduleResolution: "bundler"` accepts), and a half-converted tree is worse than
+  either. Match the half you are editing rather than "fixing" 120 imports in
+  either direction.
 - **There are two tsconfigs and CI only checks one of them.** `tsconfig.json`
   covers the browser half and **excludes `src/server`**; `tsconfig.server.json`
-  covers that (via `pnpm service:check`). `pnpm build` runs the first one only, so the
-  **entire backend can be type-broken while `pnpm build` and CI are green**. Always run
-  `pnpm gates` (or `pnpm service:check` by hand) after touching `src/server/**`.
+  covers that (via `bun run service:check`). `bun run build` runs the first one only, so
+  the **entire backend can be type-broken while the build is green**. Always run
+  `bun run gates` (or `bun run service:check` by hand) after touching `src/server/**`.
+  This bites harder under Bun than it did before: there is no transpile step at all
+  between the checkout and the running service.
   (There used to be a third, `tsconfig.bot.json` — a byte-identical copy of
   `tsconfig.server.json` that no script ever referenced. It went with the dead bot in
   ELEG-23.)
+- **Icons are Bootstrap Icons, named in `src/ui/icons.ts` — never an emoji, never a
+  raw class at the call site.** The frontend used to draw ~180 emoji, which meant the
+  same markup rendered as a flat pictogram on one OS, a colour cartoon on another and a
+  tofu box on the Linux machines this dashboard is most often opened from. The webfont
+  is shipped from `node_modules`, not a CDN: this service sits on the printer's LAN and
+  is regularly opened from a machine with no route to the internet.
+
+  Three call shapes, and **picking the wrong one between the first two is a security
+  bug, not a cosmetic one**:
+
+  | | use | why |
+  | --- | --- | --- |
+  | `icon(name)` | inside an `innerHTML` template, with a label after it | returns an HTML string, carries the `bi-lead` gap |
+  | `iconSolo(name)` | same, but the glyph is the element's whole content | no trailing gap, or icon-only buttons render off-centre |
+  | `iconText(el, name, text)` | replacing an `el.textContent = …` | appends the text as a **text node**. Those sites interpolate filenames and printer error strings; switching one to `innerHTML` to fit a glyph in turns a crafted filename into script execution |
+
+  Add the glyph to the `ICONS` map rather than writing `bi-…` inline, so one name is
+  swapped in one place. Every icon is `aria-hidden`: the accessible name belongs on the
+  button (`aria-label`) or the text beside it.
+
+  Four glyphs are deliberately **not** converted, each with a comment saying why:
+  the two `<option>` arrows in `index.html` (an `<option>` may only contain text), the
+  `⚠️` in the emergency-stop `confirm()` (a native dialog renders plain text), the `▾`
+  in `main.css` (`::after` content cannot carry a class), and `⌀` in the spool
+  calculator's SVG (a typographic symbol, not an icon).
+
 - **Everything the service writes goes under `config.dataDir`, via `data-paths.ts`.**
   Never `process.cwd()`, never a relative `join('data', …)`. The gcode cache and the
   debug-capture endpoints did exactly that until ELEG-70, and it survived unnoticed for
@@ -356,6 +387,6 @@ checkout.
 
 ## Definition of done
 
-`pnpm gates` green (biome + both typechecks + knip + build + tests), `MCP.md` / `README.md`
+`bun run gates` green (biome + both typechecks + knip + build + tests), `MCP.md` / `README.md`
 updated if a documented surface changed, a conventional commit subject that reads as a
 release note, no secrets committed, the issue commented and its PR open.

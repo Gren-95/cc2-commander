@@ -1,7 +1,7 @@
 # Testing — what is covered, and what nothing covers
 
 Be honest about the starting point: **the suite is small and almost entirely pure
-functions.** `pnpm exec vitest list` prints the current set; the list below describes what
+functions.** `bunx vitest list` prints the current set; the list below describes what
 each file is *for*, and quotes no totals on purpose (ELEG-15 — a count in prose only ever
 drifts).
 
@@ -23,7 +23,7 @@ Everything else in this repo — the MQTT bridge, the state store's *event* hand
 REST route, the MCP server's behaviour, both compatibility layers, the Telegram middleware
 wiring and the AI monitor — has **no test at all**.
 
-So `pnpm gates` green means: it compiles, it is formatted, some pure functions still
+So `bun run gates` green means: it compiles, it is formatted, some pure functions still
 work, and one chart still puts its ink inside its own axes. Read that sentence again
 before quoting a green run as evidence in a closing comment.
 
@@ -51,7 +51,7 @@ diff — a missing `ctx.clip()`, a coordinate outside the plot rect, a label dra
 canvas edge (ELEG-16 had all three).
 
 What it cannot tell you is whether the result **looks** right: colour, font, overlap and
-layout need eyes on `pnpm dev:web`. This stub approach is still the right one for canvas
+layout need eyes on `bun run dev:web`. This stub approach is still the right one for canvas
 work — jsdom gives you a DOM, not a renderer, and `getContext('2d')` under it does
 nothing useful.
 
@@ -62,10 +62,10 @@ into the browser typecheck. Frontend tests go in `src/__tests__/`. `vitest.confi
 picks up both.
 
 ```bash
-pnpm test              # vitest run
-pnpm test:watch
-pnpm test:coverage
-pnpm gates             # the whole set — see .agents/gates.md
+bun run test              # vitest run
+bun run test:watch
+bun run test:coverage
+bun run gates             # the whole set — see .agents/gates.md
 ```
 
 `vitest.config.ts` runs in the **node** environment by default and picks up
@@ -131,7 +131,7 @@ another; the two things it establishes:
   not the same claim.
 
 What jsdom still does not give you: layout, paint, real fonts, or `getContext('2d')`.
-Colour, overlap and appearance are still `pnpm dev:web` and eyes, and there is still no
+Colour, overlap and appearance are still `bun run dev:web` and eyes, and there is still no
 browser or screenshot in any gate.
 
 One consequence worth knowing before writing a focus or visibility test: **do not filter
@@ -144,9 +144,9 @@ broken exactly where it is being verified. Filter on explicit hiding (`inert`,
 ## The typechecks are the real safety net, and one of them is easy to miss
 
 With almost no tests, `tsc` is doing most of the work — which is exactly why
-`tsconfig.json` **excluding `src/server`** matters so much. `pnpm build` and CI both run
+`tsconfig.json` **excluding `src/server`** matters so much. `bun run build` and CI both run
 only that one, so **the whole backend can be type-broken while everything looks green.**
-Run `pnpm service:check` (or just `pnpm gates`) after touching `src/server/**`. See
+Run `bun run service:check` (or just `bun run gates`) after touching `src/server/**`. See
 [`.agents/gates.md`](gates.md).
 
 ## Where a test is worth writing here
@@ -229,18 +229,20 @@ question tracked separately, and is a call for a human rather than an agent.
 Then a **`Get…` method can simply be asked**, which is a read and therefore allowed:
 
 ```bash
-# From the repo root, so `ws` resolves. Sends one Get and prints the reply.
-node -e "
-import('ws').then(({WebSocket}) => {
-  const ws = new WebSocket('ws://localhost:8088/ws');
-  ws.on('open', () => setTimeout(() =>
-    ws.send(JSON.stringify({type:'command', method:1062, params:{}})), 500));
-  ws.on('message', (r) => {
-    const m = JSON.parse(r.toString());
-    if (m.type === 'response' && m.method === 1062) { console.log(JSON.stringify(m.data)); ws.close(); }
-  });
-  setTimeout(() => process.exit(0), 8000);
-});
+# Bun has a WebSocket client built in — the `ws` package went with the move to
+# Bun.serve. Sends one Get and prints the reply. No node_modules needed.
+bun -e "
+const ws = new WebSocket('ws://localhost:8088/ws');
+ws.onopen = () => setTimeout(() =>
+  ws.send(JSON.stringify({ type: 'command', method: 1062, params: {} })), 500);
+ws.onmessage = (e) => {
+  const m = JSON.parse(e.data);
+  if (m.type === 'response' && m.method === 1062) {
+    console.log(JSON.stringify(m.data));
+    ws.close();
+  }
+};
+setTimeout(() => process.exit(1), 5000);
 "
 ```
 
@@ -261,7 +263,7 @@ motors into whatever is on the bed, or abort a job that has been running for hou
 Verifying one of those is operator work: give the exact command, ask for the output,
 interpret it. See [`AGENTS.md`](../AGENTS.md).
 
-## `pnpm dev` on this host collides with production — three ways
+## `bun run dev` on this host collides with production — three ways
 
 Production runs on this same machine (see [deployment.md](deployment.md)), and it holds
 **both** service ports:
@@ -271,7 +273,7 @@ LISTEN 0.0.0.0:8088      elegooweb.service   (SERVICE_PORT)
 LISTEN 0.0.0.0:7125      elegooweb.service   (MOONRAKER_PORT)
 ```
 
-So `pnpm dev` / `pnpm dev:service` with default config **fails to bind**, and if you
+So `bun run dev` / `bun run dev:service` with default config **fails to bind**, and if you
 free the ports you hit the worse problem: a second process connecting to the printer's
 MQTT broker means **two registrations for one printer**. The broker is small and the
 two clients fight — which looks like flapping state or dropped updates in *production*,
@@ -297,7 +299,7 @@ the ports:
 ```bash
 TELEGRAM_BOT_TOKEN= TELEGRAM_CHAT_ID= AI_ENABLED=false CAMERA_ENABLED=false \
   SERVICE_PORT=18096 MOONRAKER_PORT=17122 PRINTER_IP=192.0.2.99 DATA_DIR=/tmp/probe \
-  pnpm exec tsx src/server/index.ts
+  bun src/server/index.ts
 ```
 
 `PRINTER_IP` on TEST-NET (`192.0.2.0/24`) is the important part: it means the MQTT
@@ -305,7 +307,7 @@ connection attempt goes nowhere instead of becoming the second registration desc
 above. The service starts and serves HTTP happily without a printer, which is enough to
 probe headers, routes and status codes.
 
-Prefer `pnpm dev:web` (vite on :5173, frontend only) whenever the change is frontend-only.
+Prefer `bun run dev:web` (vite on :5173, frontend only) whenever the change is frontend-only.
 `vite.config.ts` proxies the API to the running service, which means **the dev frontend
 can be pointed at production state without a second connection at all.** That is the
 safest way to work here.
@@ -334,5 +336,5 @@ because nothing answered is worse than no check.
   `/opt/elegooweb` is a different tree.
 
 When you close an issue, state what you actually ran and what it can and cannot prove.
-"`pnpm gates` green" is true and weak here; "gates green, and I read the state-merge
+"`bun run gates` green" is true and weak here; "gates green, and I read the state-merge
 path by hand because nothing tests it" is the honest version.

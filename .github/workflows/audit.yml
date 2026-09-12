@@ -5,10 +5,10 @@ name: Audit
 # WHY THIS IS NOT A GATE IN scripts/gates.sh
 #
 # `scripts/gates.sh` is deliberately the single list of what has to pass, and CI runs
-# exactly it (ELEG-5) — so the obvious move was to add `pnpm audit` there and let CI
-# pick it up with no workflow edit. That was considered and rejected:
+# exactly it (ELEG-5) — so the obvious move was to add `bun audit` there and let CI pick
+# it up with no workflow edit. That was considered and rejected:
 #
-#   - `pnpm gates` is otherwise deterministic and offline. `pnpm audit` queries the
+#   - `bun run gates` is otherwise deterministic and offline. `bun audit` queries the
 #     registry's advisory feed, so the same commit passes today and fails tomorrow
 #     because a third party published something.
 #   - That turns a PR red for a reason that has nothing to do with the PR. This repo
@@ -18,9 +18,9 @@ name: Audit
 # So advisories get their own non-blocking job: it reports, it does not gate. Nothing
 # here should ever be made a required check.
 #
-# Fixing what it finds is usually a FLOOR in `overrides:` in pnpm-workspace.yaml, not a
-# manifest bump — see the comments there and in .github/dependabot.yml for why
-# Dependabot cannot do it for us.
+# Fixing what it finds is usually a FLOOR in `overrides` in package.json, not a manifest
+# bump — see .agents/dependencies.md for the reason behind every existing floor, and
+# .github/dependabot.yml for why Dependabot cannot do it for us.
 
 on:
   schedule:
@@ -29,14 +29,12 @@ on:
   push:
     branches: [main]
     paths:
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
+      - bun.lock
       - package.json
   pull_request:
     branches: [main]
     paths:
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
+      - bun.lock
       - package.json
   workflow_dispatch:
 
@@ -46,38 +44,46 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # No `version:` on purpose — see the note in ci.yml (ELEG-4).
-      - uses: pnpm/action-setup@v6
-
-      - uses: actions/setup-node@v7
+      # Pinned to an exact patch — see the note in ci.yml (ELEG-4).
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
-          cache: pnpm
+          bun-version: 1.4.2
 
-      - run: pnpm install --frozen-lockfile
+      - run: bun install --frozen-lockfile
 
-      - name: pnpm audit
+      - name: bun audit
         run: |
-          pnpm audit --json > audit.json || true
-          node -e '
-            const a = JSON.parse(require("fs").readFileSync("audit.json", "utf8"));
-            const v = a.metadata.vulnerabilities;
-            const total = Object.values(v).reduce((s, n) => s + n, 0);
-            const rows = Object.values(a.advisories ?? {})
-              .map(x => `| ${x.severity} | ${x.module_name} | ${x.vulnerable_versions} | ${x.patched_versions} |`)
-              .sort();
-            const out = total === 0
+          bun audit --json > audit.json || true
+          # `bun audit --json` is shaped { "<package>": [ {id,url,title,severity,
+          # vulnerable_versions,cwe,cvss}, … ] } — flat, keyed by package, and with NO
+          # `patched_versions` field. That is a different shape from the npm/pnpm
+          # `{ advisories, metadata }` this step used to parse, which is why the script
+          # was rewritten rather than repointed.
+          bun -e '
+            const raw = await Bun.file("audit.json").text();
+            const data = raw.trim() ? JSON.parse(raw) : {};
+            const rows = [];
+            const counts = { critical: 0, high: 0, moderate: 0, low: 0, info: 0 };
+            for (const [pkg, advisories] of Object.entries(data)) {
+              for (const a of advisories) {
+                counts[a.severity] = (counts[a.severity] ?? 0) + 1;
+                rows.push(`| ${a.severity} | ${pkg} | \`${a.vulnerable_versions}\` | [${a.title.slice(0, 90)}](${a.url}) |`);
+              }
+            }
+            const out = rows.length === 0
               ? "No known advisories in the dependency tree."
               : [
-                  `**${total} advisory/advisories** (critical ${v.critical}, high ${v.high}, moderate ${v.moderate}, low ${v.low}).`,
+                  `**${rows.length} advisory/advisories** (critical ${counts.critical}, high ${counts.high}, moderate ${counts.moderate}, low ${counts.low}).`,
                   "",
-                  "Fix by raising a floor in `overrides:` in `pnpm-workspace.yaml` — Dependabot cannot write that file.",
+                  "Fix by raising a floor in `overrides` in `package.json` — Dependabot cannot write those. See `.agents/dependencies.md`.",
                   "",
-                  "| severity | package | vulnerable | patched |",
+                  "| severity | package | vulnerable | advisory |",
                   "| --- | --- | --- | --- |",
-                  ...rows,
+                  ...rows.sort(),
                 ].join("\n");
             console.log(out);
+            // appendFileSync, not Bun.write: the step summary is a shared file that
+            // other steps also write to, and Bun.write would truncate theirs.
             require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, out + "\n");
             // Never fail the job: this reports, it does not gate. See the header.
           '

@@ -6,6 +6,8 @@
  * storage and the rendering; everything that decides *what the layout is* lives here.
  */
 
+import { icon } from './icons';
+
 export interface CardLayout {
   sidebar: string[];
   main: string[];
@@ -38,22 +40,29 @@ export const DEFAULT_MAIN = [
 /** All known card IDs */
 export const ALL_CARD_IDS = [...DEFAULT_SIDEBAR, ...DEFAULT_MAIN];
 
-/** Human-readable names for cards */
+/**
+ * Display names for cards, as **HTML fragments** — each carries a Bootstrap Icon.
+ *
+ * HTML rather than plain text because the only consumer interpolates it into a template
+ * literal (`buildCardRows` in settings.ts). Every value here is built from `icon()` and
+ * a literal, so there is nothing to escape; if a caller ever needs the bare label,
+ * add a separate plain-text map rather than stripping tags out of this one.
+ */
 export const CARD_NAMES: Record<string, string> = {
-  'temps-card': '🌡️ Temperatures',
-  'canvas-card': '🎨 Canvas / AMS',
-  'camera-card': '📷 Camera',
-  'ai-card': '🤖 AI Monitor',
-  'event-log-card': '📜 Event Log',
-  'gcode-preview-card': '📐 Layer Preview',
-  'toolhead-card': '🎯 Toolhead',
-  'fans-card': '🌀 Fans',
-  'speed-flow-card': '⚡ Speed & Flow',
-  'files-card': '📁 Files',
-  'print-history-card': '📜 Print History',
-  'print-reports-card': '📊 Print Reports',
-  'timelapse-card': '🎬 Timelapse',
-  'log-card': '📋 MQTT Log',
+  'temps-card': `${icon('temperature')} Temperatures`,
+  'canvas-card': `${icon('canvas')} Canvas / AMS`,
+  'camera-card': `${icon('camera')} Camera`,
+  'ai-card': `${icon('ai')} AI Monitor`,
+  'event-log-card': `${icon('eventLog')} Event Log`,
+  'gcode-preview-card': `${icon('gcode')} Layer Preview`,
+  'toolhead-card': `${icon('toolhead')} Toolhead`,
+  'fans-card': `${icon('fans')} Fans`,
+  'speed-flow-card': `${icon('speed')} Speed & Flow`,
+  'files-card': `${icon('files')} Files`,
+  'print-history-card': `${icon('history')} Print History`,
+  'print-reports-card': `${icon('reports')} Print Reports`,
+  'timelapse-card': `${icon('timelapse')} Timelapse`,
+  'log-card': `${icon('mqttLog')} MQTT Log`,
 };
 
 /** A fresh copy of the shipped layout. Fresh, because callers mutate what they get. */

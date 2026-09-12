@@ -8,18 +8,14 @@
  * This allows Fluidd, Mainsail, and KlipperScreen to connect directly.
  */
 
-import {
-  createServer,
-  request as httpRequest,
-  type IncomingMessage,
-  type ServerResponse,
-} from 'http';
-import { WebSocketServer, WebSocket } from 'ws';
+import { request as httpRequest, type IncomingMessage, type ServerResponse } from 'http';
+import type { ServerWebSocket, WebSocketHandler } from 'bun';
+import { runNodeHandler } from './node-compat.js';
 
-/** WebSocket with keepalive tracking */
-interface AliveWebSocket extends WebSocket {
-  isAlive: boolean;
-}
+/** A Moonraker JSON-RPC client socket. Bun owns it; `ClientState` hangs off the map. */
+type MoonrakerSocket = ServerWebSocket<{ readonly connectionId: number }>;
+
+const WS_OPEN = 1;
 import { readFile as fsRead, writeFile as fsWrite, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
@@ -243,7 +239,7 @@ function rpcNotify(method: string, params: unknown[]): string {
 // ── Per-client subscription state ────────────────────────────────
 
 interface ClientState {
-  ws: WebSocket;
+  ws: MoonrakerSocket;
   connectionId: number;
   identified: boolean;
   subscribedObjects: Record<string, string[] | null>; // object name → attrs or null (all)
@@ -258,11 +254,9 @@ let nextConnectionId = 1;
 // ── Standalone Moonraker Server ──────────────────────────────────
 
 export class MoonrakerServer {
-  private httpServer: ReturnType<typeof createServer>;
-  private wss: WebSocketServer;
-  private clients = new Map<WebSocket, ClientState>();
+  private server: ReturnType<typeof Bun.serve> | null = null;
+  private clients = new Map<MoonrakerSocket, ClientState>();
   private statusListener: (() => void) | null = null;
-  private pingInterval: ReturnType<typeof setInterval> | null = null;
   private statusInterval: ReturnType<typeof setInterval> | null = null;
   private procStatInterval: ReturnType<typeof setInterval> | null = null;
   private db: MoonrakerDatabase;
@@ -277,74 +271,6 @@ export class MoonrakerServer {
     // OctoPrint compat (Moonraker's octoprint_compat module). Allows OrcaSlicer,
     // PrusaSlicer, Cura and similar slicers to connect via the OctoPrint host type.
     this.octoPrintHandler = createOctoPrintRouter(store, bridge, config);
-    // ── HTTP Server ──
-    this.httpServer = createServer((req, res) => this.handleHttp(req, res));
-
-    // ── WebSocket Server ──
-    this.wss = new WebSocketServer({ server: this.httpServer, path: '/websocket' });
-    // Also accept connections at root path for clients that connect to ws://host:7125/
-    const wssRoot = new WebSocketServer({ noServer: true });
-    this.httpServer.on('upgrade', (req, socket, head) => {
-      const pathname = (req.url || '/').split('?')[0];
-      if (pathname === '/websocket') {
-        // Let the primary WSS handle it
-        return;
-      }
-      // Accept all other upgrade paths (/, /klippy, etc.)
-      wssRoot.handleUpgrade(req, socket, head, (ws) => {
-        wssRoot.emit('connection', ws, req);
-      });
-    });
-
-    const setupWs = (ws: WebSocket) => {
-      const client: ClientState = {
-        ws,
-        connectionId: nextConnectionId++,
-        identified: false,
-        subscribedObjects: {},
-        lastSent: {},
-        lastMessageTime: Date.now(),
-      };
-      this.clients.set(ws, client);
-      log.info(`WS client connected (id: ${client.connectionId}, total: ${this.clients.size})`);
-
-      // Mark alive on pong response (for server-initiated ping keepalive)
-      (ws as AliveWebSocket).isAlive = true;
-      ws.on('pong', () => {
-        (ws as AliveWebSocket).isAlive = true;
-      });
-
-      ws.on('message', (raw) => {
-        this.handleWsMessage(client, raw.toString());
-      });
-
-      ws.on('close', () => {
-        this.clients.delete(ws);
-        log.info(
-          `WS client disconnected (id: ${client.connectionId}, total: ${this.clients.size})`,
-        );
-      });
-
-      ws.on('error', (err) => {
-        log.error(`WS error (id: ${client.connectionId}):`, err.message);
-      });
-    };
-
-    this.wss.on('connection', setupWs);
-    wssRoot.on('connection', setupWs);
-
-    // ── WebSocket keepalive: ping every 10s, terminate unresponsive clients ──
-    this.pingInterval = setInterval(() => {
-      for (const [ws] of this.clients) {
-        if ((ws as AliveWebSocket).isAlive === false) {
-          ws.terminate();
-          continue;
-        }
-        (ws as AliveWebSocket).isAlive = false;
-        ws.ping();
-      }
-    }, 10_000);
-
     // ── Subscribe to state changes for notification push ──
     this.statusListener = () => this.pushStatusUpdates();
     this.store.on('status', this.statusListener);
@@ -357,16 +283,80 @@ export class MoonrakerServer {
     this.procStatInterval = setInterval(() => this.pushProcStatUpdates(), 5000);
   }
 
+  /**
+   * The JSON-RPC socket handlers.
+   *
+   * Keepalive is Bun's: `sendPings` (on by default) drives the ping frames the old
+   * 10s `setInterval` used to send by hand, and `idleTimeout` below drops a client
+   * that stops answering — which is what `isAlive` + `ws.terminate()` were for.
+   */
+  private readonly wsHandlers: WebSocketHandler<{ readonly connectionId: number }> = {
+    idleTimeout: 30,
+
+    open: (ws) => {
+      const client: ClientState = {
+        ws,
+        connectionId: ws.data.connectionId,
+        identified: false,
+        subscribedObjects: {},
+        lastSent: {},
+        lastMessageTime: Date.now(),
+      };
+      this.clients.set(ws, client);
+      log.info(`WS client connected (id: ${client.connectionId}, total: ${this.clients.size})`);
+    },
+
+    message: (ws, raw) => {
+      const client = this.clients.get(ws);
+      if (!client) return;
+      this.handleWsMessage(client, typeof raw === 'string' ? raw : raw.toString());
+    },
+
+    close: (ws) => {
+      this.clients.delete(ws);
+      log.info(`WS client disconnected (id: ${ws.data.connectionId}, total: ${this.clients.size})`);
+    },
+  };
+
   start(): void {
     void this.db.load().then(() => this.seedDefaultWebcam());
-    this.httpServer.listen(this.config.moonrakerPort, '0.0.0.0', () => {
-      log.info(`Moonraker compat server on :${this.config.moonrakerPort}`);
+
+    this.server = Bun.serve({
+      port: this.config.moonrakerPort,
+      hostname: '0.0.0.0',
+      // Long file uploads and downloads share this port with the JSON-RPC socket.
+      idleTimeout: 255,
+
+      fetch: (request, self) => {
+        // Fluidd and Mainsail connect to /websocket; KlipperScreen and others use /
+        // or /klippy. The old server accepted the upgrade on every path, so this does
+        // too — the discriminator is the Upgrade header, not the path.
+        if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
+          const data = { connectionId: nextConnectionId++ };
+          if (self.upgrade(request, { data })) return undefined;
+          return new Response('Expected a WebSocket upgrade', { status: 426 });
+        }
+
+        return runNodeHandler(
+          (req, res) => this.handleHttp(req, res),
+          request,
+          self.requestIP(request)?.address,
+        );
+      },
+
+      websocket: this.wsHandlers,
+
+      error: (err) => {
+        log.error('Unhandled request error:', err);
+        return new Response('Internal server error', { status: 500 });
+      },
     });
+
+    log.info(`Moonraker compat server on :${this.server.port}`);
   }
 
   stop(): void {
     this.db.stop();
-    if (this.pingInterval) clearInterval(this.pingInterval);
     if (this.statusInterval) clearInterval(this.statusInterval);
     if (this.procStatInterval) clearInterval(this.procStatInterval);
     if (this.statusListener) {
@@ -376,8 +366,9 @@ export class MoonrakerServer {
     for (const [ws] of this.clients) {
       ws.close();
     }
-    this.wss.close();
-    this.httpServer.close();
+    this.clients.clear();
+    this.server?.stop(true);
+    this.server = null;
   }
 
   /** Seed a default webcam entry if the webcams namespace is empty. */
@@ -427,7 +418,7 @@ export class MoonrakerServer {
 
     for (const client of this.clients.values()) {
       if (Object.keys(client.subscribedObjects).length === 0) continue;
-      if (client.ws.readyState !== WebSocket.OPEN) continue;
+      if (client.ws.readyState !== WS_OPEN) continue;
 
       // If no message sent in 5s, reset lastSent to force a full update.
       // Fluidd has a 10s application-level timeout (SOCKET_PING_INTERVAL)
@@ -482,7 +473,7 @@ export class MoonrakerServer {
     };
     const msg = rpcNotify('notify_proc_stat_update', [notification]);
     for (const client of this.clients.values()) {
-      if (client.ws.readyState === WebSocket.OPEN) {
+      if (client.ws.readyState === WS_OPEN) {
         client.ws.send(msg);
         client.lastMessageTime = Date.now();
       }
@@ -688,7 +679,7 @@ export class MoonrakerServer {
         }
         client.ws.send(rpcResult(msg.id, 'ok'));
         // Also notify gcode response
-        if (client.ws.readyState === WebSocket.OPEN) {
+        if (client.ws.readyState === WS_OPEN) {
           client.ws.send(rpcNotify('notify_gcode_response', [`// ${script}: ok`]));
         }
         break;
@@ -1990,7 +1981,7 @@ export class MoonrakerServer {
       log.info(`File delete: ${decoded}`);
       // Notify clients about delete
       for (const client of this.clients.values()) {
-        if (client.ws.readyState === WebSocket.OPEN) {
+        if (client.ws.readyState === WS_OPEN) {
           client.ws.send(
             rpcNotify('notify_filelist_changed', [
               {
@@ -2345,7 +2336,7 @@ export class MoonrakerServer {
 
         // Notify WS clients about file change
         for (const client of this.clients.values()) {
-          if (client.ws.readyState === WebSocket.OPEN) {
+          if (client.ws.readyState === WS_OPEN) {
             client.ws.send(
               rpcNotify('notify_filelist_changed', [
                 {

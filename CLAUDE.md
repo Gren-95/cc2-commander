@@ -23,6 +23,9 @@ on demand when working in that area:
   with **no authentication**, and `/mcp` can drive the machine
 - `.agents/mcp.md` — the `/mcp` surface, connecting a client, and the `MCP.md`
   doc-parity rule
+- `.agents/dependencies.md` — why each `overrides` floor in `package.json` exists (the
+  reasons that used to be comments in `pnpm-workspace.yaml`), and what
+  `trustedDependencies` admits
 
 ## Commands — you invoke these
 

@@ -7,9 +7,18 @@
  *                            ┌──────────────────┼──────────────────┐
  *                            WebSocket        REST/Camera      Telegram
  *                           (browsers)        (snapshots)       (bot)
+ *
+ * The front door is `Bun.serve`. Three things reach the socket by three different
+ * paths, fastest first:
+ *
+ *   dist/**   Bun's static route table, built once at startup (spa.ts). Served
+ *             without entering JavaScript — this is the SPA's whole asset burst.
+ *   /ws       Bun's native WebSocket server (ws-transport.ts). No `ws` package.
+ *   the rest  the existing Node-style routers, through the adapter in node-compat.ts.
  */
 
-import { createServer } from 'http';
+import { runNodeHandler, type NodeHandler } from './node-compat.js';
+import { buildStaticRoutes } from './spa.js';
 import { loadConfig } from './config.js';
 import { MqttBridge } from './mqtt-bridge.js';
 import { StateStore } from './state-store.js';
@@ -102,7 +111,13 @@ const restHandler = createRestRouter(store, config, aiMonitor, reportCollector, 
 const octoPrintHandler = createOctoPrintRouter(store, bridge, config);
 const moonrakerHandler = createMoonrakerRouter(store, bridge, config);
 const moonrakerServer = new MoonrakerServer(store, bridge, config);
-const httpServer = createServer((req, res) => {
+
+/**
+ * The non-static, non-WebSocket half of the service, unchanged from when this was an
+ * `http.createServer` callback — one `res` threaded through the whole chain, so the
+ * CORS headers each branch applies still survive a fall-through to the next router.
+ */
+const nodeRouter: NodeHandler = (req, res) => {
   const url = req.url || '';
   if (url === '/mcp' || url.startsWith('/mcp?')) {
     // CORS for MCP endpoint — same-origin unless CORS_ALLOWED_ORIGINS says otherwise
@@ -170,10 +185,10 @@ const httpServer = createServer((req, res) => {
   }
 
   restHandler(req, res);
-});
+};
 
 // --- WebSocket Transport (for browser clients) ---
-const wsTransport = new WebSocketTransport(httpServer, store, bridge);
+const wsTransport = new WebSocketTransport(store, bridge);
 
 // Provide service references for status panel
 wsTransport.setServices({ telegram, aiMonitor });
@@ -200,6 +215,8 @@ if (aiMonitor) {
   );
 }
 
+let server: ReturnType<typeof Bun.serve> | null = null;
+
 // --- Startup ---
 async function start(): Promise<void> {
   // Restore persisted state before connecting
@@ -212,10 +229,41 @@ async function start(): Promise<void> {
   // Start MQTT connection
   bridge.connect();
 
-  // Start HTTP + WebSocket server
-  httpServer.listen(config.servicePort, '0.0.0.0', () => {
-    log.info(`Listening on :${config.servicePort}`);
+  // Start HTTP + WebSocket server. Bun.serve binds as soon as it is constructed, so
+  // it is created here rather than at module scope — nothing is answered until the
+  // persisted state is back and the report collector is initialised.
+  server = Bun.serve({
+    port: config.servicePort,
+    hostname: '0.0.0.0',
+
+    // dist/**, answered from Bun's route table without running any of our code.
+    routes: buildStaticRoutes(),
+
+    // The camera endpoints hold a response open for as long as the client watches,
+    // and 255s is the ceiling Bun allows. The MJPEG stream writes a frame every few
+    // hundred milliseconds, so this only bites when the upstream camera itself stalls.
+    idleTimeout: 255,
+
+    fetch(request, self) {
+      const { pathname } = new URL(request.url);
+
+      if (pathname === '/ws') {
+        if (self.upgrade(request, { data: wsTransport.upgradeData() })) return undefined;
+        return new Response('Expected a WebSocket upgrade', { status: 426 });
+      }
+
+      return runNodeHandler(nodeRouter, request, self.requestIP(request)?.address);
+    },
+
+    websocket: wsTransport.handlers,
+
+    error(err) {
+      log.error('Unhandled request error:', err);
+      return new Response('Internal server error', { status: 500 });
+    },
   });
+
+  log.info(`Listening on :${server.port}`);
 
   // Start dedicated Moonraker compat server
   moonrakerServer.start();
@@ -240,7 +288,7 @@ function shutdown(): void {
   wsTransport.close();
   telegram?.stop();
   bridge.disconnect();
-  httpServer.close();
+  server?.stop(true);
   process.exit(0);
 }
 

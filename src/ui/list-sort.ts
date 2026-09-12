@@ -12,6 +12,8 @@
  * were large enough to want one.
  */
 
+import { icon } from './icons';
+
 export type SortDirection = 'asc' | 'desc';
 
 /** What a single sortable column extracts from a row. */
@@ -182,5 +184,5 @@ export function spanSeconds(
 
 /** The arrow shown on the active column's button. */
 export function directionIndicator(dir: SortDirection): string {
-  return dir === 'asc' ? '↑' : '↓';
+  return dir === 'asc' ? icon('sortAsc') : icon('sortDesc');
 }

@@ -2,6 +2,7 @@
  * Print Reports UI — lists saved print reports with download buttons.
  */
 
+import { icon, iconSolo } from './icons';
 import { $, escapeHtml, formatTime, fetchTimeout } from './helpers';
 import { type ListControls, createListControls } from './list-controls';
 import { nonZero } from './list-sort';
@@ -113,11 +114,16 @@ function renderReportList(): void {
 
   let html = '';
   if (data.active) {
-    html += '<div class="report-active">📊 Report collection in progress…</div>';
+    html += `<div class="report-active">${icon('reports')} Report collection in progress…</div>`;
   }
 
   for (const r of reports) {
-    const statusIcon = r.outcome === 'completed' ? '✅' : r.outcome === 'failed' ? '❌' : '⏹';
+    const statusIcon =
+      r.outcome === 'completed'
+        ? icon('ok')
+        : r.outcome === 'failed'
+          ? icon('error')
+          : icon('stop');
     const statusClass =
       r.outcome === 'completed' ? 'success' : r.outcome === 'failed' ? 'danger' : 'warning';
     const date = new Date(r.startedAt).toLocaleString();
@@ -129,13 +135,13 @@ function renderReportList(): void {
           <span class="report-filename" title="${escapeHtml(r.filename)}">${escapeHtml(r.filename)}</span>
         </div>
         <div class="report-entry-meta">
-          <span>🕐 ${escapeHtml(date)}</span>
-          <span>⏱ ${escapeHtml(duration)}</span>
+          <span>${icon('clock')} ${escapeHtml(date)}</span>
+          <span>${icon('duration')} ${escapeHtml(duration)}</span>
         </div>
         <div class="report-actions">
-          <a href="/api/reports/${encodeURIComponent(r.id)}/pdf" class="btn btn-sm btn-primary" title="Download PDF report" download>📄 PDF</a>
+          <a href="/api/reports/${encodeURIComponent(r.id)}/pdf" class="btn btn-sm btn-primary" title="Download PDF report" download>${icon('pdf')} PDF</a>
           <a href="/api/reports/${encodeURIComponent(r.id)}" class="btn btn-sm btn-ghost" title="View raw JSON data" target="_blank">{ }</a>
-          <button class="btn btn-sm btn-danger report-delete-btn" data-report-id="${escapeHtml(r.id)}" title="Delete report">🗑</button>
+          <button class="btn btn-sm btn-danger report-delete-btn" data-report-id="${escapeHtml(r.id)}" title="Delete report" aria-label="Delete report">${iconSolo('trash')}</button>
         </div>
       </div>`;
   }

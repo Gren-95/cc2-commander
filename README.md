@@ -1,6 +1,6 @@
 # elegoo-web
 
-A web frontend + backend service for Elegoo Centauri Carbon 2 (CC2) FDM printers. The Node.js service maintains a single MQTT connection to the printer and exposes state to browsers via WebSocket, REST API, and Prometheus metrics.
+A web frontend + backend service for Elegoo Centauri Carbon 2 (CC2) FDM printers. The Bun service maintains a single MQTT connection to the printer and exposes state to browsers via WebSocket, REST API, and Prometheus metrics.
 
 ## Features
 
@@ -30,7 +30,7 @@ A web frontend + backend service for Elegoo Centauri Carbon 2 (CC2) FDM printers
 
 ## How It Works
 
-The Node.js backend service (`src/server/`) connects to the printer's MQTT broker over TCP:1883 and acts as a bridge:
+The backend service (`src/server/`) runs on Bun and connects to the printer's MQTT broker over TCP:1883, acting as a bridge:
 - **WebSocket** (`/ws`): Real-time state updates pushed to all connected browsers
 - **REST API** (`/api/*`): Snapshots, file operations, camera proxy, commands
 - **Static files**: Serves the built `dist/` frontend in production (SPA fallback to `index.html`)
@@ -186,15 +186,17 @@ All persistent data lives under `/app/data` inside the container:
 
 ## Prerequisites
 
-- Node.js 20+
-- pnpm
+- [Bun](https://bun.sh) 1.2.3 or newer — `curl -fsSL https://bun.sh/install | bash`
 - An Elegoo CC2 printer on the same network, set to **LAN-only mode**
+
+Bun is the package manager, the TypeScript runtime and the HTTP server. There is no
+Node.js, no pnpm and no transpile step; `src/server/` runs as-is.
 
 ## Quick Start
 
 ```bash
-pnpm install
-pnpm dev
+bun install
+bun run dev
 ```
 
 This starts both the backend service and Vite dev server. Open `http://localhost:5173`.
@@ -212,19 +214,26 @@ This is a **dev-server** setting: `vite build` ignores it, and production never 
 ## Build
 
 ```bash
-pnpm build
+bun run build
 ```
 
-Production output goes to `dist/`. The service serves it automatically on port 8088.
+Production output goes to `dist/`. The service serves it on port 8088 from Bun's static
+route table, which is built once at startup — so a rebuild needs a service restart to
+be picked up.
 
 ## Production Deployment
 
 Install as a systemd service:
 
 ```bash
-pnpm build
+bun run build
 sudo bash contrib/install.sh
 ```
+
+`install.sh` resolves the absolute path to `bun` and writes it into the systemd unit.
+The unit runs with `ProtectHome=true`, so a Bun installed under `~/.bun` will not work —
+install it system-wide (for example `install -m 0755 ~/.bun/bin/bun /usr/local/bin/bun`)
+and the installer will say so if you have not.
 
 This creates:
 - Service user `elegooweb`

@@ -1,3 +1,4 @@
+import { iconText } from './ui/icons';
 import { WsClient } from './ws-client';
 import { PrinterState } from './printer-state';
 import { LogStore } from './log-store';
@@ -263,7 +264,8 @@ function showDashboard(): void {
     expandBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const expanded = cameraCard.classList.toggle('camera-expanded');
-      expandBtn.textContent = expanded ? '⤡ Collapse' : '⤢ Expand';
+      if (expanded) iconText(expandBtn, 'collapse', 'Collapse');
+      else iconText(expandBtn, 'expand', 'Expand');
     });
 
     // Camera overlay toggle
@@ -279,12 +281,12 @@ function showDashboard(): void {
       e.stopPropagation();
       if (snapshotBtn.disabled) return;
       snapshotBtn.disabled = true;
-      snapshotBtn.textContent = '⏳ ...';
+      iconText(snapshotBtn, 'pending', '...');
       try {
         let res: Response | undefined;
         for (let attempt = 0; attempt < 3; attempt++) {
           if (attempt > 0) {
-            snapshotBtn.textContent = `⏳ retry ${attempt}...`;
+            iconText(snapshotBtn, 'pending', `retry ${attempt}...`);
             await new Promise((r) => setTimeout(r, 1000 * 2 ** (attempt - 1)));
           }
           try {
@@ -311,7 +313,7 @@ function showDashboard(): void {
         toast('Snapshot failed', 'error');
       } finally {
         snapshotBtn.disabled = false;
-        snapshotBtn.textContent = '📸 Snapshot';
+        iconText(snapshotBtn, 'snapshot', 'Snapshot');
       }
     });
   }

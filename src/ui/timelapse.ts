@@ -9,6 +9,7 @@
  * The video list itself comes from print history (method 1036).
  */
 
+import { icon, iconSolo, iconText } from './icons';
 import type { CommandSender } from '../ws-client';
 import type { PrinterState } from '../printer-state';
 import { $, escapeHtml, escapeAttr, formatBytes } from './helpers';
@@ -113,15 +114,15 @@ export function renderTimelapse(state: PrinterState): void {
     // Status 2 = already exported (has URL), status 1 = captured but needs export
     const isExported = status === STATUS_EXPORTED && videoUrl;
     const actionBtn = isExported
-      ? `<button class="btn btn-sm btn-primary timelapse-play-btn" data-url="${escapeAttr(videoUrl)}">▶ Play</button>`
-      : `<button class="btn btn-sm btn-ghost timelapse-export-btn" data-url="${escapeAttr(videoUrl || name)}">⬆ Export</button>`;
+      ? `<button class="btn btn-sm btn-primary timelapse-play-btn" data-url="${escapeAttr(videoUrl)}">${icon('play')} Play</button>`
+      : `<button class="btn btn-sm btn-ghost timelapse-export-btn" data-url="${escapeAttr(videoUrl || name)}">${icon('exportFile')} Export</button>`;
 
     html += `
       <div class="file-item timelapse-item" data-filename="${escapeAttr(name)}">
-        <div class="file-icon">🎬</div>
+        <div class="file-icon">${iconSolo('timelapse')}</div>
         <div class="file-details">
           <div class="file-name" title="${escapeAttr(name)}">${escapeHtml(name)}</div>
-          <div class="file-size">${meta}${isExported ? ' · ✅ Ready' : ' · ⏳ Needs export'}</div>
+          <div class="file-size">${meta}${isExported ? ` · ${icon('ok')} Ready` : ` · ${icon('pending')} Needs export`}</div>
         </div>
         ${actionBtn}
       </div>`;
@@ -144,7 +145,7 @@ export function renderTimelapse(state: PrinterState): void {
       if (url && playerClient) {
         playerClient.sendCommand(1051, { url });
         (e.currentTarget as HTMLButtonElement).disabled = true;
-        (e.currentTarget as HTMLButtonElement).textContent = '⏳ Exporting…';
+        iconText(e.currentTarget as HTMLButtonElement, 'pending', 'Exporting…');
       }
     });
   });

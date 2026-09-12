@@ -1,5 +1,6 @@
 /** Event Log panel — shows important printer events (start, error, milestones, layer changes) */
 
+import { icon } from './icons';
 import { $, escapeHtml } from './helpers';
 import { timestampSpan } from './relative-time';
 
@@ -29,31 +30,31 @@ function fmtDuration(sec: number): string {
 function eventMeta(type: string): { icon: string; cls: string } {
   switch (type) {
     case 'connected':
-      return { icon: '🔗', cls: 'event-success' };
+      return { icon: icon('link'), cls: 'event-success' };
     case 'disconnected':
-      return { icon: '🔌', cls: 'event-warning' };
+      return { icon: icon('unplug'), cls: 'event-warning' };
     case 'print_started':
-      return { icon: '▶️', cls: 'event-info' };
+      return { icon: icon('play'), cls: 'event-info' };
     case 'print_completed':
-      return { icon: '✅', cls: 'event-success' };
+      return { icon: icon('ok'), cls: 'event-success' };
     case 'print_failed':
-      return { icon: '❌', cls: 'event-error' };
+      return { icon: icon('error'), cls: 'event-error' };
     case 'print_progress':
-      return { icon: '📊', cls: 'event-muted' };
+      return { icon: icon('reports'), cls: 'event-muted' };
     case 'error':
-      return { icon: '🚨', cls: 'event-error' };
+      return { icon: icon('critical'), cls: 'event-error' };
     case 'filament_runout':
-      return { icon: '🧵', cls: 'event-error' };
+      return { icon: icon('filament'), cls: 'event-error' };
     case 'layer_change':
-      return { icon: '📏', cls: 'event-muted' };
+      return { icon: icon('ruler'), cls: 'event-muted' };
     case 'first_layer_complete':
-      return { icon: '🥇', cls: 'event-success' };
+      return { icon: icon('firstLayer'), cls: 'event-success' };
     case 'status_change':
-      return { icon: '🔄', cls: 'event-info' };
+      return { icon: icon('refresh'), cls: 'event-info' };
     case 'sub_status_change':
-      return { icon: '↪️', cls: 'event-muted' };
+      return { icon: icon('zone'), cls: 'event-muted' };
     default:
-      return { icon: '📋', cls: 'event-muted' };
+      return { icon: icon('mqttLog'), cls: 'event-muted' };
   }
 }
 
@@ -109,9 +110,9 @@ function eventDescription(e: Record<string, unknown>): string {
       return `First layer complete: ${fn}${dur}`;
     }
     case 'status_change':
-      return `Status: ${escapeHtml(String(e.from))} → ${escapeHtml(String(e.to))}`;
+      return `Status: ${escapeHtml(String(e.from))} ${icon('changeTo')} ${escapeHtml(String(e.to))}`;
     case 'sub_status_change':
-      return `Sub-status: ${escapeHtml(String(e.from || 'Default'))} → ${escapeHtml(String(e.to || 'Default'))}`;
+      return `Sub-status: ${escapeHtml(String(e.from || 'Default'))} ${icon('changeTo')} ${escapeHtml(String(e.to || 'Default'))}`;
     default:
       return `Event: ${escapeHtml(type)}`;
   }

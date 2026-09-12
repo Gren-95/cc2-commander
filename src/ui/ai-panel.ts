@@ -1,5 +1,6 @@
 /** AI Monitor panel — shows live analysis results and alert history */
 
+import { icon } from './icons';
 import { $, escapeHtml, escapeAttr } from './helpers';
 import { toast } from './toast';
 
@@ -77,8 +78,9 @@ export function handleAIAlert(data: Record<string, unknown>): void {
   if (alertHistory.length > MAX_HISTORY) alertHistory.pop();
 
   // Show toast for alerts
-  const icon = alert.status === 'critical' ? '🚨' : '⚠️';
-  toast(`${icon} AI: ${alert.description}`, alert.status === 'critical' ? 'error' : 'warning');
+  // No icon in the message: `toast()` escapes it (so an <i> would show as literal
+  // markup) and already draws its own glyph for the level passed below.
+  toast(`AI: ${alert.description}`, alert.status === 'critical' ? 'error' : 'warning');
 
   renderAIPanel();
 }
@@ -86,13 +88,13 @@ export function handleAIAlert(data: Record<string, unknown>): void {
 function statusIcon(status: string): string {
   switch (status) {
     case 'ok':
-      return '✅';
+      return icon('ok');
     case 'warning':
-      return '⚠️';
+      return icon('warning');
     case 'critical':
-      return '🚨';
+      return icon('critical');
     default:
-      return '❓';
+      return icon('unknown');
   }
 }
 
@@ -241,13 +243,13 @@ export function renderAIPanel(): void {
 function aiStatusIcon(): string {
   switch (aiServiceStatus) {
     case 'monitoring':
-      return '🔍';
+      return icon('inspect');
     case 'idle':
-      return '✅';
+      return icon('ok');
     case 'stopped':
-      return '⏹';
+      return icon('stop');
     default:
-      return '⚫';
+      return icon('idle');
   }
 }
 
@@ -268,25 +270,25 @@ function renderConfigInfo(): string {
   if (!aiConfig || aiServiceStatus === 'disabled') return '';
 
   const vlm = aiConfig.vlmEnabled
-    ? `<span class="ai-config-on">✓ VLM</span> <span class="ai-config-detail">${escapeHtml(String(aiConfig.vlmModel))} @ ${escapeHtml(String(aiConfig.vlmBaseUrl))}</span>`
-    : '<span class="ai-config-off">✗ VLM disabled</span>';
+    ? `<span class="ai-config-on">${icon('check')} VLM</span> <span class="ai-config-detail">${escapeHtml(String(aiConfig.vlmModel))} @ ${escapeHtml(String(aiConfig.vlmBaseUrl))}</span>`
+    : `<span class="ai-config-off">${icon('cross')} VLM disabled</span>`;
 
   const local = aiConfig.localEnabled
-    ? `<span class="ai-config-on">✓ CLIP</span> <span class="ai-config-detail">${escapeHtml(String(aiConfig.localModel))}${aiConfig.localReady ? '' : ' (loading...)'}</span>`
-    : '<span class="ai-config-off">✗ Local CLIP disabled</span>';
+    ? `<span class="ai-config-on">${icon('check')} CLIP</span> <span class="ai-config-detail">${escapeHtml(String(aiConfig.localModel))}${aiConfig.localReady ? '' : ' (loading...)'}</span>`
+    : `<span class="ai-config-off">${icon('cross')} Local CLIP disabled</span>`;
 
   const interval = `every ${aiConfig.intervalSec}s`;
   const threshold = `alert after ${aiConfig.alertThreshold} warnings`;
 
   const stats = aiConfig.analysisCount
-    ? `<div class="ai-config-row">📊 ${aiConfig.analysisCount} analyses performed, ${aiConfig.consecutiveWarnings} consecutive warnings</div>`
+    ? `<div class="ai-config-row">${icon('reports')} ${aiConfig.analysisCount} analyses performed, ${aiConfig.consecutiveWarnings} consecutive warnings</div>`
     : '';
 
   return `
     <div class="ai-config-info">
       <div class="ai-config-row">${vlm}</div>
       <div class="ai-config-row">${local}</div>
-      <div class="ai-config-row">⏱ ${interval} · ${threshold}</div>
+      <div class="ai-config-row">${icon('duration')} ${interval} · ${threshold}</div>
       ${stats}
     </div>
   `;

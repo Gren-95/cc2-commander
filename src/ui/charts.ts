@@ -1,5 +1,6 @@
 /** Lightweight canvas-based live line chart — no dependencies */
 
+import { icon } from './icons';
 import type { ChartStore, Series } from '../chart-store';
 import { saveChartWindow, getChartWindow } from './ui-settings';
 import { chartPalette } from './chart-palette';
@@ -361,7 +362,7 @@ function drawChart(config: ChartConfig): void {
     const zoomLabel = `${inter.zoomFactor.toFixed(1)}x`;
     const panLabel = inter.panOffset !== 0 ? ` pan:${(inter.panOffset / 1000).toFixed(0)}s` : '';
     ctx.fillText(
-      `🔍 ${zoomLabel}${panLabel} (dblclick to reset)`,
+      `${icon('singleLayer')} ${zoomLabel}${panLabel} (dblclick to reset)`,
       PADDING.left + 4,
       PADDING.top + 2,
     );

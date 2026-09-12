@@ -4,8 +4,8 @@
   "trackerSlug": "elegoo-web",
   "visibility": "public",
   "gates": {
-    "all": "pnpm gates",
-    "fix": "pnpm gates --fix"
+    "all": "bun run gates",
+    "fix": "bun run gates --fix"
   },
   "release": "release-it",
   "ci": "github-hosted",

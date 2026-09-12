@@ -26,6 +26,7 @@
  * Both buttons command the printer. Neither was ever fired to test this, per AGENTS.md.
  */
 
+import { icon } from './icons';
 import type { CommandSender } from '../ws-client';
 import type { PowerLossState } from '../types';
 import { escapeHtml } from './helpers';
@@ -73,7 +74,7 @@ function showPowerLossDialog(filename: string | undefined, client: CommandSender
   overlay.innerHTML = `
     <div class="print-dialog">
       <div class="print-dialog-header">
-        <span>⚡ Power loss detected</span>
+        <span>${icon('powerLoss')} Power loss detected</span>
       </div>
       <div class="print-dialog-body">
         <p>The printer lost power during a print and is waiting for a decision.</p>

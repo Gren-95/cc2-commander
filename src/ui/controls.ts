@@ -1,3 +1,4 @@
+import { iconText } from './icons';
 import type { CommandSender } from '../ws-client';
 import { $, fetchTimeout } from './helpers';
 import { toast } from './toast';
@@ -96,6 +97,10 @@ export function bindControls(client: CommandSender): void {
   // Emergency Stop
   const btnEStop = $('btn-estop') as HTMLButtonElement;
   btnEStop.addEventListener('click', () => {
+    // The one emoji left in the frontend, and deliberately: this is the browser's
+    // native confirm(), which renders plain text only — a <i class="bi …"> here would
+    // show as literal markup. Given what the button does, losing the visual warning
+    // entirely was the worse option.
     if (confirm('⚠️ EMERGENCY STOP\nThis immediately halts all motion and heaters.\nContinue?')) {
       guardedSend(client, 1007, {}, btnEStop);
     }
@@ -223,7 +228,7 @@ export function bindControls(client: CommandSender): void {
     if (captureBtn.disabled) return;
     const duration = 10;
     captureBtn.disabled = true;
-    captureBtn.textContent = `⏳ ${duration}s...`;
+    iconText(captureBtn, 'pending', `${duration}s...`);
     try {
       const res = await fetchTimeout(
         '/api/debug/capture',
@@ -236,9 +241,9 @@ export function bindControls(client: CommandSender): void {
       );
       const data = (await res.json()) as { ok?: boolean; file?: string; error?: string };
       if (!res.ok) {
-        captureBtn.textContent = '❌ ' + (data.error ?? 'Error');
+        iconText(captureBtn, 'error', String(data.error ?? 'Error'));
         setTimeout(() => {
-          captureBtn.textContent = '📥 Capture';
+          iconText(captureBtn, 'capture', 'Capture');
           captureBtn.disabled = false;
         }, 3000);
         return;
@@ -248,20 +253,20 @@ export function bindControls(client: CommandSender): void {
       const timer = setInterval(() => {
         remaining--;
         if (remaining > 0) {
-          captureBtn.textContent = `⏳ ${remaining}s...`;
+          iconText(captureBtn, 'pending', `${remaining}s...`);
         } else {
           clearInterval(timer);
-          captureBtn.textContent = '✅ Saved!';
+          iconText(captureBtn, 'ok', 'Saved!');
           setTimeout(() => {
-            captureBtn.textContent = '📥 Capture';
+            iconText(captureBtn, 'capture', 'Capture');
             captureBtn.disabled = false;
           }, 3000);
         }
       }, 1000);
     } catch {
-      captureBtn.textContent = '❌ Failed';
+      iconText(captureBtn, 'error', 'Failed');
       setTimeout(() => {
-        captureBtn.textContent = '📥 Capture';
+        iconText(captureBtn, 'capture', 'Capture');
         captureBtn.disabled = false;
       }, 3000);
     }

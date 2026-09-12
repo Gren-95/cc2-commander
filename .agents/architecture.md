@@ -21,22 +21,64 @@ transport   .ts      server.ts   compat.ts      compat.ts     server.ts  + teleg
 ```
 
 `src/server/index.ts` wires exactly one of each and is the only place that does. Read
-it first: it is ~220 lines and is the whole composition.
+it first: it is short and it is the whole composition.
 
 ## The two HTTP servers
 
+Both are `Bun.serve`. There is no `http.createServer` and no `ws` package anywhere in
+this repo any more.
+
 | Port | Source | Serves |
 | --- | --- | --- |
-| `SERVICE_PORT` (8088) | `createServer` in `index.ts` | `/mcp`, `/octoprint/*`, `/moonraker/*`, then everything else falls through to `rest-api.ts` (`/api/*`, `/webcam/*`, and the built `dist/` with SPA fallback) — plus the `/ws` WebSocket upgrade |
-| `MOONRAKER_PORT` (7125) | `moonraker-server.ts` | a **dedicated** Moonraker endpoint on its own port, for clients (Mainsail, Fluidd, KlipperScreen) that expect Moonraker at the root |
+| `SERVICE_PORT` (8088) | `Bun.serve` in `index.ts` | the built `dist/` as static routes, the `/ws` WebSocket, then `/mcp`, `/octoprint/*`, `/moonraker/*` and everything else falling through to `rest-api.ts` (`/api/*`, `/webcam/*`, SPA fallback) |
+| `MOONRAKER_PORT` (7125) | `Bun.serve` in `moonraker-server.ts` | a **dedicated** Moonraker endpoint on its own port, for clients (Mainsail, Fluidd, KlipperScreen) that expect Moonraker at the root |
 
 So the Moonraker compatibility layer exists **twice**, deliberately: path-prefixed on
 8088 and root-level on 7125. A change to Moonraker behaviour usually belongs in
 `moonraker-compat.ts` (shared logic) rather than in one of the two entry points.
 
-Dispatch on 8088 is **ordered prefix matching in a single handler**, not a router
-library. A new route is an `if (url === …)` branch in `rest-api.ts`, and order matters:
-the first match wins, and the static/SPA fallback is last.
+### Three ways in, and the one you are probably editing
+
+A request to 8088 is answered by exactly one of these, checked in this order:
+
+1. **Bun's static route table** — `src/server/spa.ts` walks `dist/` once at startup and
+   hands every file to `Bun.serve({ routes })`. These are answered **without entering
+   JavaScript**: no handler runs, no object is allocated, and Bun adds `ETag` and
+   `Last-Modified` itself. This is the browser's entire asset burst when someone opens
+   the dashboard, and it is why the hand-rolled `serveStatic()` (an `existsSync` +
+   `createReadStream` per request, with its own MIME table) was deleted from
+   `rest-api.ts`.
+
+   The table is built **once**. A `vite build` while the service is running is not
+   picked up until it restarts — which is already how production works, since
+   `contrib/install.sh` rsyncs and then restarts the unit.
+
+2. **`/ws`** — upgraded in `fetch()` to Bun's native WebSocket server, handled by
+   `ws-transport.ts`. Note it does *not* use `server.publish()` for broadcast; see the
+   comment on `broadcast()` for why the per-client backpressure check is load-bearing.
+
+3. **Everything else** — the Node-style routers, through `runNodeHandler()` in
+   `src/server/node-compat.ts`.
+
+### Why node-compat.ts exists
+
+`rest-api.ts`, `octoprint-compat.ts`, `moonraker-compat.ts`, `moonraker-server.ts` and
+the MCP SDK's transport are ~11k lines written against `IncomingMessage` /
+`ServerResponse`. Rewriting them to the fetch types would be an 11k-line change to
+routes that **no test exercises** (see [gates.md](gates.md)), so instead they keep their
+signature and one adapter object is allocated per request. The static path — the hot one
+— skips it entirely.
+
+`node-compat.ts` is the only piece of the Bun migration with no upstream to trust, so it
+is also the only part with real test coverage: `src/server/__tests__/node-compat.test.ts`.
+If you touch it, read those tests first; two of them exist because the first version of
+the shim was wrong in production while looking correct under the test runner.
+
+Dispatch on 8088 is otherwise **ordered prefix matching in a single handler**, not a
+router library. The chain lives in `nodeRouter` in `index.ts` and threads **one** `res`
+through every router, which is what lets a branch apply CORS headers and then fall
+through to the next one. A new route is an `if (url === …)` branch in `rest-api.ts`, and
+order matters: the first match wins, and the SPA fallback is last.
 
 ## Where a change belongs
 

@@ -12,8 +12,8 @@ repo. Read them together the first time a gate fails in a pass.
 ## The command
 
 ```bash
-pnpm gates          # scripts/gates.sh — the whole set, with a ✓/✗ summary
-pnpm gates --fix    # biome check --write first; commit what it rewrites
+bun run gates          # scripts/gates.sh — the whole set, with a ✓/✗ summary
+bun run gates --fix    # biome check --write first; commit what it rewrites
 ```
 
 Six checks — and since ELEG-5, **`ci.yml` runs this exact script as its only step**, so
@@ -44,8 +44,8 @@ warning says so. Until ELEG-79 the gate ran `biome ci src/` while `includes` sai
 nothing. Measured at the time — with `"*.config.ts"` added to `includes`:
 
 ```
-pnpm exec biome ci src/   -> Checked 84 files, PASS   (path arg wins; config files unseen)
-pnpm exec biome ci        -> Checked 87 files, FAIL   (real formatting drift in both)
+bunx biome ci src/   -> Checked 84 files, PASS   (path arg wins; config files unseen)
+bunx biome ci        -> Checked 87 files, FAIL   (real formatting drift in both)
 ```
 
 Both root config files had genuine drift sitting there uncaught. So **do not reintroduce
@@ -60,7 +60,7 @@ not affect the exit code. Do not read them as a red gate.
 ## Both root config files are typechecked, via `tsconfig.json`
 
 `vite.config.ts` and `vitest.config.ts` are in `tsconfig.json`'s `include` (ELEG-79), so
-`pnpm exec tsc` and `pnpm build` cover them. Before that they were in **no** tsconfig and
+`bunx tsc` and `bun run build` cover them. Before that they were in **no** tsconfig and
 **no** biome scope: a type error in either was caught by nothing, and in
 `vitest.config.ts` it surfaced as a *test* gate failure, which reads like a broken test
 rather than a broken config.
@@ -72,49 +72,62 @@ in a tsconfig `include` and matched by `biome.json`'s `includes`:
 git ls-files '*.ts' '*.tsx' | grep -v '^src/'
 ```
 
-## There are two typechecks, and `pnpm build` is only one of them
+## There are two typechecks, and `bun run build` is only one of them
 
-`tsconfig.json` **excludes `src/server`**, and `pnpm build` (`tsc &&
-vite build`) runs only that config. So `pnpm build` passing says **nothing** about the
+`tsconfig.json` **excludes `src/server`**, and `bun run build` (`tsc &&
+vite build`) runs only that config. So `bun run build` passing says **nothing** about the
 backend. Measured, by appending `const __probe: number = "not a number"` to
 `src/server/config.ts`:
 
 ```
-pnpm exec tsc        -> PASS   (the browser config never sees src/server)
-pnpm build           -> PASS   (same config, so also blind)
-pnpm service:check   -> FAIL   caught
-pnpm gates           -> FAIL   caught
+bunx tsc        -> PASS   (the browser config never sees src/server)
+bun run build           -> PASS   (same config, so also blind)
+bun run service:check   -> FAIL   caught
+bun run gates           -> FAIL   caught
 ```
 
 **This used to be a hole in CI and is not any more** (ELEG-5): CI ran `lint`,
 `format:check`, `build`, `test`, so the entire backend was typechecked by nothing and a
-type-broken service merged green. `ci.yml` now runs `pnpm gates`, which includes
+type-broken service merged green. `ci.yml` now runs `bun run gates`, which includes
 `service:check`.
 
-The trap that remains is the one the table above encodes: **`pnpm build` is not a
+The trap that remains is the one the table above encodes: **`bun run build` is not a
 typecheck of the backend.** If you are running single checks by hand rather than
-`pnpm gates`, run both typechecks — the second is the one that matters for
+`bun run gates`, run both typechecks — the second is the one that matters for
 `src/server/**`.
 
-Production is why this bites: the service runs the TypeScript **directly** under
-`node --import tsx`, so there is no compile step between a type error and the running
-service — the process just throws at runtime, restarts (`Restart=always`), and throws
-again.
+Production is why this bites: the service runs the TypeScript **directly** under bun, so
+there is no compile step between a type error and the running service — the process just
+throws at runtime, restarts (`Restart=always`), and throws again.
 
-### And neither typecheck proves an import specifier actually resolves
+### ~~And neither typecheck proves an import specifier actually resolves~~ — closed by the move to Bun
 
-Both tsconfigs set `moduleResolution: "bundler"`, which **accepts extensionless relative
-specifiers that Node rejects**. So `./allowlist` instead of `./allowlist.js` under
-`src/server/**` passes `service:check`, passes `vite build`, passes CI — and then throws
-`ERR_MODULE_NOT_FOUND` at the running service, which restarts and throws again. This is
-the enforcement gap behind the `.js`-on-every-relative-import rule in `AGENTS.md`: the
-rule is real, and **no gate checks it.**
+**This gap is gone.** It is recorded because it cost a release (ELEG-23) and because the
+reasoning explains why `AGENTS.md` still asks for `.js` on relative imports.
 
-If you move or rename a file under `src/server/**`, resolve it under real Node before
-you trust the green run (ELEG-23):
+It used to work like this: both tsconfigs set `moduleResolution: "bundler"`, which
+accepts extensionless relative specifiers **that Node rejects**. So `./allowlist`
+instead of `./allowlist.js` under `src/server/**` passed `service:check`, passed
+`vite build`, passed CI — and then threw `ERR_MODULE_NOT_FOUND` at the running service,
+which restarted and threw again.
+
+Bun resolves both forms. Measured on 1.4.2, with `dep.ts` on disk:
+
+```
+import { x } from './dep'      -> resolves
+import { x } from './dep.js'   -> resolves
+```
+
+So the `.js` convention is now a consistency rule rather than a load-bearing one, and
+the class of failure it guarded against cannot reach production through this door any
+more. Keep writing it — a half-converted tree is worse than either — but a missing `.js`
+is no longer an outage.
+
+If you move or rename a file under `src/server/**` and want to confirm it still
+resolves:
 
 ```bash
-node --import tsx -e "await import('./src/server/<the-importer>.ts'); console.log('resolved')"
+bun -e "await import('./src/server/<the-importer>.ts'); console.log('resolved')"
 ```
 
 Pick an importer that has **no import-time side effects** — check the module scope first.
@@ -129,7 +142,9 @@ to the printer against the running service.
 applies by default: **a red check on your branch is now most likely yours.** Both
 historical reds are kept below because their shapes recur, not because they are live.
 
-1. ~~**`pnpm install --frozen-lockfile` fails in CI**~~ — **fixed in ELEG-4.** The cause
+1. ~~**`pnpm install --frozen-lockfile` fails in CI**~~ — **fixed in ELEG-4, and the
+   whole class is gone since the move to Bun: there is no pnpm in this repo any more.
+   Kept because the *shape* of the failure recurs with any package manager.** The cause
    was never really the `overrides` block: it was that `ci.yml` asked
    `pnpm/action-setup@v4` for `version: latest`, so **CI silently moved to pnpm 11 while
    every developer here was on 10.x**. Two different reds came out of that one drift, and
@@ -191,10 +206,10 @@ hundred milliseconds.
 Three consequences, all of them the *opposite* of RCP's:
 
 - **There is nothing for the orchestrator to run serially.** Every worktree runs the whole
-  of `pnpm gates` concurrently and the results are independent.
+  of `bun run gates` concurrently and the results are independent.
 - **There is no fast gate to split off, and adding one would be inventing a field.**
   `.agents/repo.json` lists `gates.all` and `gates.fix` and no `gates.quick`; absent means
-  absent. `pnpm gates` *is* the fast gate here.
+  absent. `bun run gates` *is* the fast gate here.
 - **N is not capped by test-server adoption**, because nothing serialises behind the
   orchestrator. The real ceilings are CI (a public repo on `ubuntu-latest`, so minutes are
   free but runs still queue) and the reviewer's own capacity to verify N branches — which
@@ -204,7 +219,7 @@ Three consequences, all of them the *opposite* of RCP's:
 **What does not relax, and is the reason this section is not simply "parallelism is free
 here":**
 
-- **The printer boundary.** `pnpm gates` cannot touch the printer, so more concurrency adds
+- **The printer boundary.** `bun run gates` cannot touch the printer, so more concurrency adds
   no hardware risk *from the gates* — but N agents is N chances for one of them to decide a
   `Set…` would settle a question. The boundary is per-agent and does not scale with
   cleverness. See "The gate no script can run" below.
@@ -229,7 +244,7 @@ which made warnings hard errors; do not paste either repo's framing into the oth
 ### `vite build` exits 0 on its own warnings too — and one of them is dated (ELEG-87)
 
 biome is not the only gate that warns without failing. **`vite build` exits 0 while
-printing warnings about your config**, so a green `pnpm gates` says nothing about
+printing warnings about your config**, so a green `bun run gates` says nothing about
 whether `vite.config.ts` still loads under the loader vite is moving to:
 
 ```
@@ -277,7 +292,7 @@ What remains true: `biome.json` scopes `files.includes` to `src/**` and `*.confi
 rather than assumed:
 
 ```
-$ pnpm exec biome check .agents/gates.md
+$ bunx biome check .agents/gates.md
 Checked 0 files in 782µs.
   × No files were processed in the specified paths.
   i These paths were provided but ignored:
@@ -309,7 +324,7 @@ twice:
 
 ## Green gates prove very little here — the honest list
 
-The suite is **small and almost entirely pure functions**. `pnpm exec vitest list` prints
+The suite is **small and almost entirely pure functions**. `bunx vitest list` prints
 the current set — trust that over this page, which describes *shape* deliberately and
 quotes no totals (ELEG-15):
 
@@ -357,7 +372,7 @@ more here than in a repo with real coverage:
 2. **Grep the diff for `it(`/`test(` with no `expect(`.**
 3. **Read the state-merge path by hand** when you touched it: a field absent from a
    printer delta means *unchanged*, not *cleared*, and no test enforces that.
-4. **Look at the page** for any `src/ui/**` or `index.html` change. `pnpm dev:web`
+4. **Look at the page** for any `src/ui/**` or `index.html` change. `bun run dev:web`
    (vite :5173) with the API proxied at the running service is the cheap way, and it opens
    no second printer connection.
 5. **Verify every identifier you introduced** — route path, MCP tool name, env var,
@@ -416,7 +431,7 @@ the gate is the deterministic, quiet signal, and the noisier one stays available
 on demand:
 
 ```bash
-pnpm exec knip --include exports,types   # report only; deliberately NOT a gate
+bunx knip --include exports,types   # report only; deliberately NOT a gate
 ```
 
 That is a judgement call and it does give something up: a genuinely unused export will
@@ -459,8 +474,8 @@ have accidentally imported them.
 
 ## Dependency advisories are deliberately NOT a gate
 
-`pnpm audit` is not in `scripts/gates.sh` and should not be added to it (ELEG-63). The
-gate set is otherwise deterministic and offline; `pnpm audit` queries a third-party
+`bun audit` is not in `scripts/gates.sh` and should not be added to it (ELEG-63). The
+gate set is otherwise deterministic and offline; `bun audit` queries a third-party
 advisory feed, so the same commit passes today and fails tomorrow because someone
 published. That would turn a PR red for a reason unrelated to the PR — and "a red check
 on your branch is yours" is a signal this repo spends real effort keeping true.
@@ -471,19 +486,19 @@ job.** Do not make it a required check.
 
 Two things to know when it reports something:
 
-- **The fix is almost always a floor in `overrides:` in `pnpm-workspace.yaml`**, not a
+- **The fix is almost always a floor in `overrides` in `package.json`**, not a
   manifest bump. Every one of the 38 advisories open at ELEG-63 was transitive.
 - **Dependabot will not do it for you**, even though it is enabled on this repo. It bumps
-  what it finds in a manifest; it does not write pnpm overrides. It had opened zero PRs
+  what it finds in a manifest; it does not write overrides. It had opened zero PRs
   for those 38. Enabled ≠ covered.
 
-An override is a floor, not a pin: `pnpm why <pkg>` tells you whether the parent's own
+An override is a floor, not a pin: `bun why <pkg>` tells you whether the parent's own
 range has caught up, at which point delete the line rather than leave a number nobody can
 date.
 
 ## The gate no script can run: the printer
 
-`pnpm gates` cannot tell you whether a change does the right thing to a **physical
+`bun run gates` cannot tell you whether a change does the right thing to a **physical
 machine**, and the temptation after a green run is to "just try it". Don't:
 `set_temperature`, `fan`, `move`, `home`, `start_print`, `pause_print`, `stop_print` and
 `emergency_stop` reach real hardware. Reads are fine — `/api/health`, `/api/status`,
@@ -504,7 +519,7 @@ otherwise**. The probe, if you want it:
 
 ```bash
 git stash push -u -m probe && git switch main
-pnpm gates
+bun run gates
 git switch - && git stash pop
 ```
 

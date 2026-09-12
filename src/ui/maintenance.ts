@@ -1,3 +1,4 @@
+import { icon } from './icons';
 import type { CommandSender } from '../ws-client';
 import type { PrinterState } from '../printer-state';
 import { $, escapeHtml } from './helpers';
@@ -95,9 +96,9 @@ export function renderMaintenance(state: PrinterState): void {
     let html = `<div class="maintenance-active">`;
     if (subInfo) {
       const cls = subInfo.ok ? 'maintenance-ok' : 'maintenance-fail';
-      html += `<span class="${cls}">${subInfo.ok ? '✅' : '❌'} ${escapeHtml(subInfo.text)}</span>`;
+      html += `<span class="${cls}">${subInfo.ok ? icon('ok') : icon('error')} ${escapeHtml(subInfo.text)}</span>`;
     } else {
-      html += `<span class="maintenance-running">⏳ ${escapeHtml(maintenanceLabel)}...</span>`;
+      html += `<span class="maintenance-running">${icon('pending')} ${escapeHtml(maintenanceLabel)}...</span>`;
     }
     html += '</div>';
     statusEl.innerHTML = html;

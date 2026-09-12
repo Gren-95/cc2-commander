@@ -1,5 +1,6 @@
 /** Filament editing modal for Canvas/AMS tray info */
 
+import { iconSolo } from './icons';
 import type { CommandSender } from '../ws-client';
 import { escapeHtml, escapeAttr } from './helpers';
 import { toast } from './toast';
@@ -475,7 +476,7 @@ function buildModal(): HTMLElement {
     <div class="modal-content">
       <div class="modal-header">
         <h3>Edit Filament — Slot <span id="fm-slot"></span></h3>
-        <button class="btn btn-sm btn-ghost modal-close" id="fm-close">✕</button>
+        <button class="btn btn-sm btn-ghost modal-close" id="fm-close" aria-label="Close">${iconSolo('close')}</button>
       </div>
       <div class="modal-body">
         <div class="form-group">

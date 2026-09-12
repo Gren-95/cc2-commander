@@ -1,3 +1,4 @@
+import { icon } from './icons';
 import { $ } from './helpers';
 
 let helpRendered = false;
@@ -248,11 +249,11 @@ export function renderHelp(): void {
   <table class="help-api">
     <thead><tr><th>Topic</th><th>Direction</th><th>Description</th></tr></thead>
     <tbody>
-      <tr><td>elegoo/+/api_status</td><td>← Printer</td><td>Status discovery (wildcard for SN)</td></tr>
-      <tr><td>elegoo/&lt;sn&gt;/api_status</td><td>← Printer</td><td>Delta status updates</td></tr>
-      <tr><td>elegoo/&lt;sn&gt;/api_register</td><td>→ Printer</td><td>Client registration</td></tr>
-      <tr><td>elegoo/&lt;sn&gt;/&lt;cid&gt;/api_request</td><td>→ Printer</td><td>Commands to printer</td></tr>
-      <tr><td>elegoo/&lt;sn&gt;/&lt;cid&gt;/api_response</td><td>← Printer</td><td>Command responses</td></tr>
+      <tr><td>elegoo/+/api_status</td><td>${icon('received')} Printer</td><td>Status discovery (wildcard for SN)</td></tr>
+      <tr><td>elegoo/&lt;sn&gt;/api_status</td><td>${icon('received')} Printer</td><td>Delta status updates</td></tr>
+      <tr><td>elegoo/&lt;sn&gt;/api_register</td><td>${icon('sent')} Printer</td><td>Client registration</td></tr>
+      <tr><td>elegoo/&lt;sn&gt;/&lt;cid&gt;/api_request</td><td>${icon('sent')} Printer</td><td>Commands to printer</td></tr>
+      <tr><td>elegoo/&lt;sn&gt;/&lt;cid&gt;/api_response</td><td>${icon('received')} Printer</td><td>Command responses</td></tr>
     </tbody>
   </table>
 </div>

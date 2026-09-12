@@ -1,5 +1,6 @@
 /** Service status — compact header badge with click-to-expand dropdown + system info */
 
+import { icon } from './icons';
 import { $, escapeHtml } from './helpers';
 import type { PrinterState } from '../printer-state';
 import {
@@ -157,7 +158,7 @@ export function renderServiceStatus(): void {
   const headline = mqttBannerHeadline(phase, s.mqttRegisterAttempts);
   const firmwareBanner = headline
     ? `<div class="svc-firmware-warning">
-        ⚠️ <strong>${escapeHtml(headline)}</strong> — ${escapeHtml(mqttPhaseMessage(phase))}
+        ${icon('warning')} <strong>${escapeHtml(headline)}</strong> — ${escapeHtml(mqttPhaseMessage(phase))}
         ${phase === 'registering' ? `(${s.mqttRegisterAttempts} registration attempts)` : ''}
       </div>`
     : '';

@@ -1,3 +1,4 @@
+import { icon, iconSolo, iconText } from './icons';
 import type { PrinterState } from '../printer-state';
 import type { CommandSender } from '../ws-client';
 import type { FileEntry } from '../types';
@@ -212,14 +213,14 @@ function showFilePopover(file: FileEntry, anchor: HTMLElement): void {
     const d = new Date(file.create_time * 1000);
     html += `<tr><td>Created</td><td>${d.toLocaleDateString()} ${d.toLocaleTimeString()}</td></tr>`;
   }
-  if (isCached) html += `<tr><td>Cache</td><td>⚡ Cached on server</td></tr>`;
+  if (isCached) html += `<tr><td>Cache</td><td>${icon('cached')} Cached on server</td></tr>`;
   html += '</table>';
 
   // Action buttons
   html += '<div class="file-popover-actions">';
-  html += `<button class="btn btn-sm btn-ghost file-popover-preview" title="Full preview">🖼️ Preview</button>`;
-  html += `<button class="btn btn-sm btn-ghost file-popover-download" title="Download">📥 Download</button>`;
-  html += `<button class="btn btn-sm btn-ghost file-popover-delete" title="Delete">🗑️ Delete</button>`;
+  html += `<button class="btn btn-sm btn-ghost file-popover-preview" title="Full preview">${icon('preview')} Preview</button>`;
+  html += `<button class="btn btn-sm btn-ghost file-popover-download" title="Download">${icon('download')} Download</button>`;
+  html += `<button class="btn btn-sm btn-ghost file-popover-delete" title="Delete">${icon('trash')} Delete</button>`;
   html += '</div>';
 
   html += '</div></div>';
@@ -420,7 +421,7 @@ function renderBreadcrumb(_client: CommandSender): string {
   if (currentDir === '/') return '';
   const parts = currentDir.split('/').filter(Boolean);
   let html = '<div class="file-breadcrumb">';
-  html += `<button class="btn btn-sm btn-ghost file-nav-btn" data-dir="/">🏠 Root</button>`;
+  html += `<button class="btn btn-sm btn-ghost file-nav-btn" data-dir="/">${icon('home')} Root</button>`;
   let path = '';
   for (let i = 0; i < parts.length; i++) {
     path += '/' + parts[i];
@@ -542,7 +543,7 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
 
   // Show USB not-connected warning
   if (currentSource === 'u-disk' && !state.status?.external_device?.u_disk) {
-    html += '<div class="file-empty">⚠️ No USB drive detected</div>';
+    html += `<div class="file-empty">${icon('warning')} No USB drive detected</div>`;
   }
 
   html += renderBreadcrumb(client);
@@ -577,12 +578,12 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
     const isCached = cachedFiles.has(fullPath);
     const cachedThumb = thumbnailCache.get(fullPath);
     const cacheMarker = isCached
-      ? ' <span class="file-cache-marker" title="Cached on server">⚡</span>'
+      ? ` <span class="file-cache-marker" title="Cached on server">${iconSolo('cached')}</span>`
       : '';
 
     let iconHtml: string;
     if (isFolder) {
-      iconHtml = '📁';
+      iconHtml = icon('folder');
     } else if (cachedThumb) {
       iconHtml = `<img src="data:image/png;base64,${cachedThumb}" alt="Thumb" class="file-inline-thumb ${THUMBNAIL_CLASS}">`;
     } else if (file.filename.toLowerCase().endsWith('.gcode')) {
@@ -592,7 +593,7 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
       // (ELEG-42). Replaced in place by handleInlineThumbnail when one arrives.
       iconHtml = `<img src="${THUMBNAIL_PLACEHOLDER_SRC}" alt="No preview" class="file-inline-thumb thumb-img-fallback">`;
     } else {
-      iconHtml = '📄';
+      iconHtml = icon('file');
     }
 
     html += `
@@ -606,7 +607,7 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
             <div class="file-size">${meta}</div>
           </div>
           <div class="file-actions">
-            ${isFolder ? '' : `<button class="btn btn-sm btn-primary file-print-btn" title="Print">▶</button>`}
+            ${isFolder ? '' : `<button class="btn btn-sm btn-primary file-print-btn" title="Print" aria-label="Print">${iconSolo('play')}</button>`}
           </div>
         </div>
       </div>`;
@@ -675,14 +676,18 @@ async function uploadFile(file: File, client: CommandSender): Promise<void> {
     progressEl.classList.remove('hidden');
     progressEl.classList.add('upload-error');
     fillEl.style.width = '0%';
-    textEl.textContent = `✗ Invalid file type "${ext}" — only .gcode and .3mf allowed`;
+    iconText(textEl, 'cross', `Invalid file type "${ext}" — only .gcode and .3mf allowed`);
     return;
   }
   if (file.size > MAX_UPLOAD_SIZE) {
     progressEl.classList.remove('hidden');
     progressEl.classList.add('upload-error');
     fillEl.style.width = '0%';
-    textEl.textContent = `✗ File too large (${(file.size / 1024 / 1024).toFixed(0)} MB) — max 500 MB`;
+    iconText(
+      textEl,
+      'cross',
+      `File too large (${(file.size / 1024 / 1024).toFixed(0)} MB) — max 500 MB`,
+    );
     return;
   }
 
@@ -727,7 +732,7 @@ async function uploadFile(file: File, client: CommandSender): Promise<void> {
     });
 
     fillEl.style.width = '100%';
-    textEl.textContent = `✓ ${file.name} uploaded`;
+    iconText(textEl, 'check', `${file.name} uploaded`);
     // Refresh file list
     client.sendCommand(1044, {
       storage_media: currentSource,
@@ -737,7 +742,7 @@ async function uploadFile(file: File, client: CommandSender): Promise<void> {
     });
     client.sendCommand(1048, { storage_media: currentSource });
   } catch (err) {
-    textEl.textContent = `✗ ${(err as Error).message}`;
+    iconText(textEl, 'cross', (err as Error).message);
     fillEl.style.width = '0%';
     progressEl.classList.add('upload-error');
   } finally {

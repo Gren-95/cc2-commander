@@ -1,6 +1,62 @@
 /* Elegoo Web — Modern dark theme */
 
 /*
+ * Bootstrap Icons, self-hosted.
+ *
+ * Must be the first rule in the file: CSS `@import` is only legal before any other
+ * statement, and a later one is dropped silently.
+ *
+ * From node_modules rather than a CDN on purpose. This service runs on the same LAN as
+ * the printer and is routinely reached from a machine with no route to the internet —
+ * a jsDelivr <link> would leave every control in the UI as a blank square exactly when
+ * someone is standing at the machine. Vite inlines this and emits the woff2 into
+ * dist/assets/, which Bun then serves immutably (src/server/spa.ts).
+ *
+ * Usage is the ordinary Bootstrap Icons one, an empty element carrying the class:
+ *
+ *   <button class="btn" aria-label="Settings"><i class="bi bi-gear"></i></button>
+ *
+ * The glyph is decorative and carries no accessible name of its own, so mark it
+ * `aria-hidden="true"` and put the name on the interactive element (`aria-label`, or
+ * visible text beside it). A bare icon button with neither is unreadable to a screen
+ * reader — see the accessibility checklist in AGENTS.md.
+ */
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+/*
+ * Icons inherit the text colour and sit on the text baseline by default, which is what
+ * a glyph replacing an emoji should do. This only corrects the optical alignment inside
+ * buttons and headings, where the font's own line box sits a little low.
+ */
+.bi {
+  line-height: 1;
+  vertical-align: -0.125em;
+}
+
+/*
+ * The gap between a glyph and the label that follows it.
+ *
+ * A class rather than a blanket `.bi { margin-inline-end }` because the same element is
+ * used both ways and no selector can separate them: `button.btn.btn-sm.btn-ghost` is an
+ * icon-with-label in the camera card and an icon-only button in the settings card list.
+ * `:only-child` does not help — a text sibling is not an element, so it matches both.
+ *
+ * So the decision is made where the markup is generated: `icon()` in src/ui/icons.ts
+ * adds this, `iconSolo()` does not. An icon-only button that gets it renders visibly
+ * off-centre.
+ */
+.bi-lead {
+  margin-inline-end: 0.4em;
+}
+
+/* The mirror image: a glyph that trails its label, as in the "Cool ❄" temperature
+   preset. Rare, but a `bi-lead` there pads the wrong side and the button looks
+   mis-centred. */
+.bi-trail {
+  margin-inline-start: 0.4em;
+}
+
+/*
  * TRUNCATION RULE (ELEG-43) — truncate in CSS, never in TypeScript.
  *
  * Long filenames and labels are shortened with `overflow: hidden` +
@@ -296,6 +352,9 @@ body {
 .card > .card-header > h3::after,
 .card > .files-header > h3::after,
 .card > .log-header > h3::after {
+  /* A CSS-generated caret, not a Bootstrap Icon: ::after content cannot carry a
+     class, so using the icon font here would mean hardcoding its private-use
+     codepoint and its font-family — a worse dependency than one character. */
   content: "▾";
   position: absolute;
   right: 0;

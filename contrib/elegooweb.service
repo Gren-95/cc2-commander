@@ -10,7 +10,13 @@ User=elegooweb
 Group=elegooweb
 WorkingDirectory=/opt/elegooweb
 EnvironmentFile=/opt/elegooweb/.env
-ExecStart=/usr/bin/node --import tsx src/server/index.ts
+# @BUN@ is substituted by contrib/install.sh with the absolute path it resolved from
+# `command -v bun`. systemd does not search $PATH, and bun's installer drops the binary
+# in a different place depending on how it was run — so the path is decided at install
+# time rather than guessed here.
+#
+# No `--import tsx` and no build step: bun executes the TypeScript directly.
+ExecStart=@BUN@ src/server/index.ts
 Restart=always
 RestartSec=5
 

@@ -1,3 +1,4 @@
+import { icon } from './icons';
 import type { LogStore, LogEntry } from '../log-store';
 import { $, escapeHtml } from './helpers';
 import { exportLogEntries } from './log-export';
@@ -60,7 +61,7 @@ export function renderLog(store: LogStore): void {
   for (let i = 0; i < entries.length; i++) {
     const e = entries[i];
     const dirClass = e.direction === 'sent' ? 'log-sent' : 'log-recv';
-    const dirArrow = e.direction === 'sent' ? '→' : '←';
+    const dirArrow = e.direction === 'sent' ? icon('sent') : icon('received');
     const isExpanded = expandedEntries.has(e.timestamp);
 
     html += `<div class="log-row ${dirClass}" data-idx="${i}" data-ts="${e.timestamp}">`;

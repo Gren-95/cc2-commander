@@ -10,7 +10,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "lib": ["ES2022"]
+    "lib": ["ES2022"],
+    // Bun globals (Bun.serve, Bun.file) and the node typings @types/bun pulls in.
+    "types": ["bun"]
   },
   "include": ["src/server/**/*", "src/types.ts"]
 }

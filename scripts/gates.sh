@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 # The gate set, in one place.
 #
-#   pnpm gates          # everything
-#   pnpm gates --fix    # `biome check --write` first, then everything
+#   bun run gates          # everything
+#   bun run gates --fix    # `biome check --write` first, then everything
 #
 # THIS FILE IS WHAT CI RUNS (ELEG-5). .github/workflows/ci.yml is one step,
-# `pnpm gates`, so this script is the single list of what has to pass and the two
+# `bun run gates`, so this script is the single list of what has to pass and the two
 # cannot drift apart. Add a gate here and CI picks it up with no workflow edit.
 #
 # It used to be four hand-listed steps in ci.yml, which is how `service:check` came
 # to be missing from them: tsconfig.json excludes src/server, CI only
 # ran the build (which uses that config), and so the entire backend was typechecked by
 # nothing in CI. Measured at the time — a deliberate type error in src/server/config.ts
-# left `pnpm build` PASSING and only `service:check` caught it. Production runs the
-# TypeScript directly under `node --import tsx`, so such an error reaches the running
-# service with no compile step in between.
+# left the build PASSING and only `service:check` caught it. Production runs the
+# TypeScript directly under bun, so such an error reaches the running service with no
+# compile step in between.
 #
-# On biome: CI runs the NON-writing `biome ci`. `pnpm check` auto-fixes and exits 0,
+# On biome: CI runs the NON-writing `biome ci`. `bun run check` auto-fixes and exits 0,
 # so an auto-fix you did not commit still fails CI's lint step — hence --fix runs the
 # writer first and then re-checks, and you commit what it rewrote.
 #
@@ -65,21 +65,24 @@ run() {
 
 if [ "$fix" = 1 ]; then
   printf '\n\033[1m▶ biome check --write\033[0m  (fixing before the gates)\n'
-  pnpm check || true
+  bun run check || true
 fi
 
 # Order mirrors ci.yml: cheapest signal first.
-run 'biome ci (non-writing, as CI runs it)' pnpm exec biome ci
-run 'typecheck: browser half (tsconfig.json)' pnpm exec tsc
-run 'typecheck: service half (tsconfig.server.json)' pnpm run service:check
+run 'biome ci (non-writing, as CI runs it)' bunx biome ci
+run 'typecheck: browser half (tsconfig.json)' bunx tsc
+run 'typecheck: service half (tsconfig.server.json)' bun run service:check
 # Dead-code check (ELEG-65). Neither typecheck complains about a module nothing
 # imports, and `vite build` tree-shakes it out SILENTLY — so an unreachable file
 # survives looking perfectly legitimate. Four have been found that way, all by hand.
 # Scoped to `files` only: unused *exports* are noisy here because dashboard.ts
 # re-exports a barrel, and a check that cries wolf gets ignored. See .agents/gates.md.
-run 'dead code (knip)' pnpm exec knip --no-config-hints
-run 'build (vite)' pnpm exec vite build
-run 'unit tests (vitest)' pnpm exec vitest run
+run 'dead code (knip)' bunx knip --no-config-hints
+run 'build (vite)' bunx vite build
+# Vitest, not `bun test`. The suite leans on `vi.resetModules()` to re-evaluate modules
+# under different env — seven tests do — and bun:test has no equivalent. Vitest itself
+# runs fine under bun, so this is a deliberate stop, not an unfinished migration.
+run 'unit tests (vitest)' bunx vitest run
 
 printf '\n\033[1m── gates ──\033[0m\n'
 for g in "${passed[@]:-}"; do [ -n "$g" ] && printf '\033[32m  ✓ %s\033[0m\n' "$g"; done
@@ -92,5 +95,5 @@ fi
 printf '\n\033[32mAll gates green.\033[0m\n'
 printf '\033[2mNo browser and no screenshot — see .agents/gates.md for what this does NOT prove.\033[0m\n'
 if [ "$fix" = 0 ]; then
-  echo 'Reminder: if you edit anything else, re-run `pnpm gates --fix` and commit what biome rewrites.'
+  echo 'Reminder: if you edit anything else, re-run `bun run gates --fix` and commit what biome rewrites.'
 fi

@@ -1,3 +1,4 @@
+import { icon, iconSolo } from './icons';
 import type { CommandSender } from '../ws-client';
 import type { PrinterState } from '../printer-state';
 import { $, escapeHtml, escapeAttr, formatTime } from './helpers';
@@ -99,12 +100,12 @@ export function renderPrintHistory(state: PrinterState): void {
               : '';
       const statusIcon =
         item.status === 'completed'
-          ? '✅'
+          ? icon('ok')
           : item.status === 'failed'
-            ? '❌'
+            ? icon('error')
             : item.status === 'stopped'
-              ? '⏹'
-              : '❓';
+              ? icon('stop')
+              : icon('unknown');
 
       const begin = item.begin_time ? new Date(item.begin_time * 1000).toLocaleString() : '--';
       const _end = item.end_time ? new Date(item.end_time * 1000).toLocaleString() : '--';
@@ -114,7 +115,7 @@ export function renderPrintHistory(state: PrinterState): void {
       // A record with no task_id cannot be addressed by 1038, so it gets no button
       // rather than one that silently does nothing.
       const deleteBtn = item.uuid
-        ? `<button class="btn btn-sm btn-ghost history-delete-btn" data-task-id="${escapeAttr(item.uuid)}" data-filename="${escapeAttr(item.filename)}" title="Delete this entry from the printer">🗑</button>`
+        ? `<button class="btn btn-sm btn-ghost history-delete-btn" data-task-id="${escapeAttr(item.uuid)}" data-filename="${escapeAttr(item.filename)}" title="Delete this entry from the printer" aria-label="Delete this entry from the printer">${iconSolo('trash')}</button>`
         : '';
 
       return `<div class="history-entry">
@@ -124,8 +125,8 @@ export function renderPrintHistory(state: PrinterState): void {
         ${deleteBtn}
       </div>
       <div class="history-entry-meta">
-        <span title="Start time">🕐 ${escapeHtml(begin)}</span>
-        <span title="Duration">⏱ ${escapeHtml(duration)}</span>
+        <span title="Start time">${icon('clock')} ${escapeHtml(begin)}</span>
+        <span title="Duration">${icon('duration')} ${escapeHtml(duration)}</span>
       </div>
     </div>`;
     })

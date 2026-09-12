@@ -11,7 +11,7 @@ are different trees that can silently disagree.
 | unit | `elegooweb.service` (`/etc/systemd/system/elegooweb.service`, `enabled`) |
 | user | `elegooweb` (system user, no home, no shell) |
 | working dir | **`/opt/elegooweb` — not a git checkout.** `git -C /opt/elegooweb status` fails |
-| exec | `/usr/bin/node --import tsx src/server/index.ts` — the **TypeScript is run directly**, so `src/**` in that directory *is* the production code |
+| exec | `<abs path to bun> src/server/index.ts` — the **TypeScript is run directly**, so `src/**` in that directory *is* the production code. The path is substituted into the unit by `contrib/install.sh` (`@BUN@`), because systemd does not search `$PATH` and bun installs to different places. |
 | env | `EnvironmentFile=/opt/elegooweb/.env` (separate from the checkout's `.env`) |
 | ports | `SERVICE_PORT` 8088 (web + API + `/ws` + `/mcp`), `MOONRAKER_PORT` 7125 |
 | hardening | `NoNewPrivileges`, `ProtectSystem=strict`, `ProtectHome=true`, `PrivateTmp`, `ReadWritePaths=/opt/elegooweb`, `UMask=0027` |
@@ -37,10 +37,10 @@ here. Don't reason about this host's behaviour from the compose file.
 
 ## How a deploy happens
 
-`contrib/install.sh` (`sudo pnpm service:install`) is the mechanism: it creates the
+`contrib/install.sh` (`sudo bun run service:install`) is the mechanism: it creates the
 user and the directory, then **`rsync -a --delete`** of `src/`, `dist/` and `public/`
-(one directory at a time) plus a plain copy of `package.json`, `pnpm-lock.yaml` and the
-tsconfigs, writes the build stamp, `pnpm install --prod`,
+(one directory at a time) plus a plain copy of `package.json`, `bun.lock` and the
+tsconfigs, writes the build stamp, `bun install --production`,
 `chown -R elegooweb:elegooweb`, install the unit, `systemctl enable` + restart. It
 preserves an existing `.env`, and **requires `rsync`** — it exits rather than falling
 back to a copy that cannot delete.
@@ -48,7 +48,7 @@ back to a copy that cannot delete.
 **`/opt/elegooweb` never gets devDependencies.** The install there is `--prod` and only
 `--prod`; if the source tree has no `dist/`, the installer builds it in the *checkout*
 (dropping to `$SUDO_USER`, so root does not leave artefacts in your working tree) and
-rsyncs the result. It used to run a full `pnpm install` + `pnpm build` inside
+rsyncs the result. It used to run a full `bun install` + `bun run build` inside
 `/opt/elegooweb` on first install, which put vite, vitest, typescript and release-it
 into production and left every later `--prod` run pruning them back out — the source of
 the `Failed to create bin … ENOENT` warnings that made a healthy deploy read as broken
@@ -79,7 +79,7 @@ Three consequences that have already produced a real artefact:
    curl -s localhost:8088/api/health | jq .build
    # {"commit":"a8157a9…","shortCommit":"a8157a9","describe":"v1.4.0-3-ga8157a9",…}
    ```
-   **All-null `build` means unstamped, not broken** — a `pnpm dev` run, or a deploy made
+   **All-null `build` means unstamped, not broken** — a `bun run dev` run, or a deploy made
    before ELEG-10 landed. Nothing else distinguishes the two; the first stamped install
    is what fixes that. The old hand-diff still works and is the only check that catches a
    *stale* file rather than an old one:
@@ -127,7 +127,7 @@ restart the service or copy files into `/opt`.
 ```bash
 # what is running, and since when
 systemctl status elegooweb --no-pager
-journalctl -u elegooweb -n 100 --no-pager        # or: pnpm service:logs
+journalctl -u elegooweb -n 100 --no-pager        # or: bun run service:logs
 
 # is production the same code as the checkout?
 diff -rq --exclude=node_modules --exclude=data --exclude=.env --exclude=dist \
@@ -143,8 +143,8 @@ done
 
 # deploy (from a clean, merged checkout on main)
 git switch main && git pull --ff-only
-pnpm install && pnpm gates && pnpm build        # dist/ must be current
-sudo pnpm service:install                       # rsync --delete + install --prod + restart
+bun install && bun run gates && bun run build        # dist/ must be current
+sudo bun run service:install                       # rsync --delete + install --prod + restart
 
 # restart / stop only
 sudo systemctl restart elegooweb
@@ -195,7 +195,7 @@ ELEG has `tracksProduction` **on**, so `IN_PRODUCTION` exists and is meaningful:
   new code. That is operator work — file it as its own `OPERATOR:` issue rather than
   leaving a code issue open across a manual step, give the exact commands above, and
   ask for the output. **The evidence is `build.commit` from `/api/health` matching the
-  commit that was deployed**, not a successful `sudo pnpm service:install` — set the
+  commit that was deployed**, not a successful `sudo bun run service:install` — set the
   status from that output rather than from the install having exited 0.
 - The status automation never moves an issue backwards out of `MERGED` /
   `IN_PRODUCTION`, so setting `IN_PRODUCTION` optimistically is not correctable later.
