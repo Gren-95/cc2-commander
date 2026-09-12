@@ -144,7 +144,8 @@ export function renderEventLog(): void {
   if (!container) return;
 
   if (entries.length === 0) {
-    container.innerHTML = '<div class="event-log-empty">No events yet</div>';
+    container.innerHTML =
+      '<div class="text-fg-muted text-[0.85rem] p-3 text-center">No events yet</div>';
     return;
   }
 
@@ -156,10 +157,10 @@ export function renderEventLog(): void {
       const type = (entry.event.type as string) || 'unknown';
       const meta = eventMeta(type);
       const desc = eventDescription(entry.event);
-      return `<div class="event-log-row ${meta.cls}">
-      <span class="event-log-icon">${meta.icon}</span>
+      return `<div class="flex items-center gap-2 [padding:4px_8px] text-[0.8rem] rounded-chip bg-input hover:bg-[var(--bg-hover,_rgba(255,_255,_255,_0.06))] ${meta.cls}">
+      <span class="shrink-0 text-[0.9rem]">${meta.icon}</span>
       ${timestampSpan('event-log-time', entry.ts, fmtTime(entry.ts))}
-      <span class="event-log-desc" title="${desc}">${desc}</span>
+      <span class="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap [.event-success_&]:text-[#4caf50] [.event-warning_&]:text-[#ff9800] [.event-error_&]:text-[#f44336] [.event-info_&]:text-[#58a6ff] [.event-muted_&]:text-fg-muted" title="${desc}">${desc}</span>
     </div>`;
     })
     .join('');

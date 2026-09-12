@@ -1,11 +1,13 @@
 /** Settings panel — persistent card layout + Telegram config */
 
+import { toggleState } from './state-classes';
 import { icon, iconSolo } from './icons';
 import { $, fetchTimeout } from './helpers';
 import {
   CARD_NAMES,
   CARD_WIDTH_LABELS,
   CARD_WIDTHS,
+  CARD_WIDTH_UTILITIES,
   type CardLayout,
   type CardWidth,
   defaultCardLayout,
@@ -54,7 +56,7 @@ export function toggleCardCollapse(cardId: string): void {
     currentLayout.collapsed.push(cardId);
   }
   const card = document.getElementById(cardId);
-  if (card) card.classList.toggle('collapsed', currentLayout.collapsed.includes(cardId));
+  if (card) toggleState(card, 'collapsed', currentLayout.collapsed.includes(cardId));
   saveCardLayout(currentLayout);
 }
 
@@ -74,7 +76,7 @@ export function applyCardLayout(): void {
     // order is all the reordering there is.
     grid.appendChild(card);
     card.style.display = currentLayout.hidden.includes(id) ? 'none' : '';
-    card.classList.toggle('collapsed', currentLayout.collapsed.includes(id));
+    toggleState(card, 'collapsed', currentLayout.collapsed.includes(id));
     applyCardWidth(card, widthOf(currentLayout, id));
   }
 
@@ -99,7 +101,23 @@ export function applyCardLayout(): void {
 
 /** One `card-w-*` class at a time, so a width change cannot leave two spans applied. */
 function applyCardWidth(card: HTMLElement, width: CardWidth): void {
-  for (const w of CARD_WIDTHS) card.classList.toggle(`card-w-${w}`, w === width);
+  /*
+   * Remove first, then add — and only remove what the chosen width does NOT want.
+   *
+   * All three widths share `col-[span_12]` as their mobile-first base, so a naive
+   * "toggle each width on or off in turn" adds that class for the selected width and
+   * then strips it again while switching the other two off. Every card ended up with
+   * `grid-column: auto` on a phone, 26px wide.
+   */
+  const wanted = new Set(CARD_WIDTH_UTILITIES[width].split(' ').filter(Boolean));
+  for (const w of CARD_WIDTHS) {
+    card.classList.toggle(`card-w-${w}`, w === width);
+    if (w === width) continue;
+    for (const u of CARD_WIDTH_UTILITIES[w].split(' ')) {
+      if (u && !wanted.has(u)) card.classList.remove(u);
+    }
+  }
+  for (const u of wanted) card.classList.add(u);
 }
 
 // ---- Settings Tab ----
@@ -129,7 +147,7 @@ export function switchHelpSubtab(sub: HelpSubtab): void {
   for (const btn of document.querySelectorAll('.subtab')) {
     const el = btn as HTMLElement;
     const on = el.dataset.subtab === sub;
-    el.classList.toggle('active', on);
+    toggleState(el, 'active', on);
     el.setAttribute('aria-selected', String(on));
   }
   document.getElementById('help-subtab-help')?.classList.toggle('hidden', sub !== 'help');
@@ -165,7 +183,7 @@ export function switchToTab(tab: 'dashboard' | 'settings' | 'tools' | 'help' | '
 
   tabs.forEach((t) => {
     const el = t as HTMLElement;
-    el.classList.toggle('active', el.dataset.tab === mainTab);
+    toggleState(el, 'active', el.dataset.tab === mainTab);
   });
 
   // Hide all pages first
@@ -238,21 +256,21 @@ function buildSettingsHTML(content: HTMLElement): void {
         const first = index === 0;
         const last = index === order.length - 1;
         return `
-        <div class="settings-card-row${isHidden ? ' settings-card-row-hidden' : ''}" data-card-id="${id}">
-          <span class="settings-card-index" aria-hidden="true">${index + 1}</span>
-          <label class="settings-card-label">
+        <div class="flex items-center gap-2 [padding:6px_8px] rounded-chip bg-input hover:bg-[rgba(255,_255,_255,_0.05)] ${isHidden ? ' settings-card-row-hidden' : ''}" data-card-id="${id}">
+          <span class="" aria-hidden="true">${index + 1}</span>
+          <label class="flex-1 flex items-center gap-2 cursor-pointer text-[0.85rem] [&_input[type="checkbox"]]:[accent-color:var(--accent)]">
             <input type="checkbox" class="settings-card-visible" data-card-id="${id}" ${isHidden ? '' : 'checked'}>
             <span>${name}</span>
           </label>
-          <select class="settings-card-width log-select" data-card-id="${id}" aria-label="Width">
+          <select class="settings-card-width bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] [.spool-calc-inputs_&]:w-full [.spool-calc-inputs_&]:[padding:6px_10px] [.spool-calc-inputs_&]:text-[14px]" data-card-id="${id}" aria-label="Width">
             ${CARD_WIDTHS.map(
               (w) =>
                 `<option value="${w}" ${w === width ? 'selected' : ''}>${CARD_WIDTH_LABELS[w]}</option>`,
             ).join('')}
           </select>
-          <span class="settings-card-move">
-            <button class="btn btn-sm btn-ghost settings-move-up" data-card-id="${id}" title="Move up" aria-label="Move ${id} up" ${first ? 'disabled' : ''}>${iconSolo('moveUp')}</button>
-            <button class="btn btn-sm btn-ghost settings-move-down" data-card-id="${id}" title="Move down" aria-label="Move ${id} down" ${last ? 'disabled' : ''}>${iconSolo('moveDown')}</button>
+          <span class="settings-card-move flex [gap:2px]">
+            <button class="settings-move-up inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-card-id="${id}" title="Move up" aria-label="Move ${id} up" ${first ? 'disabled' : ''}>${iconSolo('moveUp')}</button>
+            <button class="settings-move-down inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-card-id="${id}" title="Move down" aria-label="Move ${id} down" ${last ? 'disabled' : ''}>${iconSolo('moveDown')}</button>
           </span>
         </div>
       `;
@@ -261,70 +279,70 @@ function buildSettingsHTML(content: HTMLElement): void {
   }
 
   content.innerHTML = `
-    <section class="settings-section">
+    <section class="mb-5 [&_h3]:text-[13px] [&_h3]:font-semibold [&_h3]:text-fg-soft [&_h3]:uppercase [&_h3]:tracking-[0.5px] [&_h3]:mb-2">
       <h3>Appearance</h3>
-      <p class="settings-hint">Auto follows your operating system's light/dark setting.</p>
-      <div class="settings-row">
+      <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Auto follows your operating system's light/dark setting.</p>
+      <div class="flex items-center gap-3 [padding:6px_0] [&_label]:text-fg-soft [&_label]:text-[13px] [&_label]:min-w-30">
         <label for="settings-theme">Theme</label>
-        <select id="settings-theme" class="log-select">
+        <select id="settings-theme" class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] [.spool-calc-inputs_&]:w-full [.spool-calc-inputs_&]:[padding:6px_10px] [.spool-calc-inputs_&]:text-[14px]">
           <option value="auto">Auto</option>
           <option value="dark">Dark</option>
           <option value="light">Light</option>
         </select>
       </div>
-      <p class="settings-hint">Relative log timestamps read as &ldquo;2m ago&rdquo; instead of a clock. The exact time stays on hover. Absolute is the default, because it is what you need when comparing against <code>journalctl</code>, the printer&rsquo;s display or someone else&rsquo;s screenshot.</p>
-      <div class="settings-row">
+      <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Relative log timestamps read as &ldquo;2m ago&rdquo; instead of a clock. The exact time stays on hover. Absolute is the default, because it is what you need when comparing against <code>journalctl</code>, the printer&rsquo;s display or someone else&rsquo;s screenshot.</p>
+      <div class="flex items-center gap-3 [padding:6px_0] [&_label]:text-fg-soft [&_label]:text-[13px] [&_label]:min-w-30">
         <label for="settings-relative-time">Relative log timestamps</label>
         <input type="checkbox" id="settings-relative-time">
       </div>
     </section>
 
-    <section class="settings-section">
+    <section class="mb-5 [&_h3]:text-[13px] [&_h3]:font-semibold [&_h3]:text-fg-soft [&_h3]:uppercase [&_h3]:tracking-[0.5px] [&_h3]:mb-2">
       <h3>Alerts</h3>
-      <p class="settings-hint">Play a sound when a print finishes, fails, or hits a critical error. Off by default. Only events arriving live make a sound — reconnecting never replays old ones.</p>
-      <div class="settings-row">
+      <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Play a sound when a print finishes, fails, or hits a critical error. Off by default. Only events arriving live make a sound — reconnecting never replays old ones.</p>
+      <div class="flex items-center gap-3 [padding:6px_0] [&_label]:text-fg-soft [&_label]:text-[13px] [&_label]:min-w-30">
         <label for="settings-alert-sound">Audible alerts</label>
         <input type="checkbox" id="settings-alert-sound">
       </div>
-      <div class="settings-row">
+      <div class="flex items-center gap-3 [padding:6px_0] [&_label]:text-fg-soft [&_label]:text-[13px] [&_label]:min-w-30">
         <label for="settings-alert-volume">Volume</label>
         <input type="range" id="settings-alert-volume" min="0" max="100" step="5">
       </div>
-      <div class="settings-actions">
-        <button id="settings-alert-test" class="btn btn-sm btn-ghost">Test sound</button>
+      <div class="mt-2 flex gap-2">
+        <button id="settings-alert-test" class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]">Test sound</button>
       </div>
-      <div id="settings-alert-status" class="settings-hint"></div>
+      <div id="settings-alert-status" class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]"></div>
     </section>
 
-    <section class="settings-section">
+    <section class="mb-5 [&_h3]:text-[13px] [&_h3]:font-semibold [&_h3]:text-fg-soft [&_h3]:uppercase [&_h3]:tracking-[0.5px] [&_h3]:mb-2">
       <h3>Dashboard layout</h3>
-      <p class="settings-hint">
+      <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">
         The dashboard is one grid, in this order. Untick a card to hide it, and set how
         much of a row each one takes — <strong>Compact</strong> is a quarter of a wide
         screen, <strong>Wide</strong> a half, <strong>Full</strong> the whole row. Narrow
         screens collapse everything to one column regardless.
       </p>
-      <div id="settings-card-list" class="settings-card-list">
+      <div id="settings-card-list" class="flex flex-col [gap:2px]">
         ${buildCardRows(currentLayout.order)}
       </div>
-      <div class="settings-actions">
-        <button id="settings-reset-layout" class="btn btn-sm btn-ghost">Reset to default</button>
+      <div class="mt-2 flex gap-2">
+        <button id="settings-reset-layout" class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]">Reset to default</button>
       </div>
     </section>
 
-    <section class="settings-section">
+    <section class="mb-5 [&_h3]:text-[13px] [&_h3]:font-semibold [&_h3]:text-fg-soft [&_h3]:uppercase [&_h3]:tracking-[0.5px] [&_h3]:mb-2">
       <h3>Telegram</h3>
-      <div id="settings-telegram" class="settings-telegram">
-        <p class="settings-hint">Telegram settings are configured via environment variables in <code>.env</code> and require a service restart.</p>
+      <div id="settings-telegram" class="">
+        <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Telegram settings are configured via environment variables in <code>.env</code> and require a service restart.</p>
         <div id="settings-telegram-status"></div>
       </div>
     </section>
 
-    <section class="settings-section">
+    <section class="mb-5 [&_h3]:text-[13px] [&_h3]:font-semibold [&_h3]:text-fg-soft [&_h3]:uppercase [&_h3]:tracking-[0.5px] [&_h3]:mb-2">
       <h3>AI Local Labels</h3>
-      <p class="settings-hint">Customize the CLIP/SigLIP classification labels, their severity types, and detection thresholds.</p>
+      <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Customize the CLIP/SigLIP classification labels, their severity types, and detection thresholds.</p>
       <div id="settings-ai-labels">
-        <div class="settings-hint">Loading...</div>
+        <div class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Loading...</div>
       </div>
     </section>
   `;
@@ -485,7 +503,8 @@ async function loadTelegramStatus(): Promise<void> {
   try {
     const res = await fetchTimeout('/api/config/telegram');
     if (!res.ok) {
-      container.innerHTML = '<span class="settings-hint">Could not load Telegram config</span>';
+      container.innerHTML =
+        '<span class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Could not load Telegram config</span>';
       return;
     }
     const data = (await res.json()) as {
@@ -497,29 +516,29 @@ async function loadTelegramStatus(): Promise<void> {
 
     if (!data.enabled) {
       container.innerHTML = `
-        <div class="settings-telegram-row">
-          <span class="ai-config-off">Disabled</span>
-          <span class="settings-hint">Set <code>TELEGRAM_BOT_TOKEN</code> and <code>TELEGRAM_CHAT_ID</code> in <code>.env</code></span>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-fg-muted">Disabled</span>
+          <span class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Set <code>TELEGRAM_BOT_TOKEN</code> and <code>TELEGRAM_CHAT_ID</code> in <code>.env</code></span>
         </div>
       `;
       return;
     }
 
     container.innerHTML = `
-      <div class="settings-telegram-row">
-        <span class="ai-config-on">Enabled</span>
-        ${data.botUsername ? `<span class="settings-hint">Bot: @${data.botUsername}</span>` : ''}
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-[#4caf50] font-semibold">Enabled</span>
+        ${data.botUsername ? `<span class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Bot: @${data.botUsername}</span>` : ''}
       </div>
-      <div class="settings-telegram-field">
+      <div class="mb-2 [&_label]:block [&_label]:text-[0.8rem] [&_label]:text-fg-muted [&_label]:mb-1">
         <label>Chat ID</label>
-        <input type="text" class="settings-input" value="${data.chatId}" disabled>
+        <input type="text" class="bg-input border border-line rounded-chip text-[var(--text)] [padding:6px_10px] text-[0.85rem] w-full disabled:opacity-[0.5] [.settings-input-row_&]:w-20 [.ai-label-config-field_&]:text-[0.8rem] [.ai-label-config-field_&]:[padding:4px_6px] [.ai-label-config-field_&]:resize-y [.ai-label-config-field_&]:min-h-9 [.ai-label-config-field_&]:font-sans" value="${data.chatId}" disabled>
       </div>
-      <div class="settings-telegram-field">
+      <div class="mb-2 [&_label]:block [&_label]:text-[0.8rem] [&_label]:text-fg-muted [&_label]:mb-1">
         <label>Progress interval</label>
-        <div class="settings-input-row">
-          <input type="number" id="settings-tg-progress" class="settings-input" value="${data.progressInterval}" min="5" max="50" step="5">
-          <span class="settings-hint">%</span>
-          <button id="settings-tg-save" class="btn btn-sm btn-primary">Save</button>
+        <div class="settings-input-row flex items-center gap-2">
+          <input type="number" id="settings-tg-progress" class="bg-input border border-line rounded-chip text-[var(--text)] [padding:6px_10px] text-[0.85rem] w-full disabled:opacity-[0.5] [.settings-input-row_&]:w-20 [.ai-label-config-field_&]:text-[0.8rem] [.ai-label-config-field_&]:[padding:4px_6px] [.ai-label-config-field_&]:resize-y [.ai-label-config-field_&]:min-h-9 [.ai-label-config-field_&]:font-sans" value="${data.progressInterval}" min="5" max="50" step="5">
+          <span class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">%</span>
+          <button id="settings-tg-save" class="inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.print-dialog-footer_&]:min-w-25 hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]">Save</button>
         </div>
       </div>
     `;
@@ -547,7 +566,8 @@ async function loadTelegramStatus(): Promise<void> {
       }
     });
   } catch {
-    container.innerHTML = '<span class="settings-hint">Could not reach service</span>';
+    container.innerHTML =
+      '<span class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Could not reach service</span>';
   }
 }
 
@@ -569,21 +589,23 @@ async function loadAILabels(): Promise<void> {
   try {
     const res = await fetchTimeout('/api/config/ai-labels');
     if (!res.ok) {
-      container.innerHTML = '<span class="settings-hint">Could not load AI label config</span>';
+      container.innerHTML =
+        '<span class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Could not load AI label config</span>';
       return;
     }
     const data = (await res.json()) as { labels: AILabelConfig[]; enabled: boolean };
 
     if (!data.enabled) {
       container.innerHTML = `
-        <div class="settings-hint">AI local classification is not enabled. Set <code>AI_ENABLED=true</code> and <code>AI_LOCAL_ENABLED=true</code> in <code>.env</code>.</div>
+        <div class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">AI local classification is not enabled. Set <code>AI_ENABLED=true</code> and <code>AI_LOCAL_ENABLED=true</code> in <code>.env</code>.</div>
       `;
       return;
     }
 
     renderAILabelEditor(container, data.labels);
   } catch {
-    container.innerHTML = '<span class="settings-hint">Could not reach service</span>';
+    container.innerHTML =
+      '<span class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Could not reach service</span>';
   }
 }
 
@@ -606,34 +628,34 @@ function renderAILabelEditor(container: HTMLElement, labels: AILabelConfig[]): v
         .map((g) => `<option value="${g}" ${lc.group === g ? 'selected' : ''}>${g}</option>`)
         .join('');
       return `
-      <div class="ai-label-config-row" data-idx="${idx}">
-        <div class="ai-label-config-field ai-label-config-label">
+      <div class="ai-label-config-row grid grid-cols-[1fr_120px_100px_70px_70px_36px] [gap:6px] items-end p-2 bg-input rounded-chip max-[700px]:grid-cols-[1fr_1fr]" data-idx="${idx}">
+        <div class="ai-label-config-field max-[700px]:col-[1_/_-1] [&_label]:block [&_label]:text-[0.7rem] [&_label]:text-fg-muted [&_label]:[margin-bottom:2px]">
           <label>Label</label>
-          <textarea class="settings-input ai-lc-label" rows="2" data-idx="${idx}" title="${lc.label}">${lc.label}</textarea>
+          <textarea class="ai-lc-label bg-input border border-line rounded-chip text-[var(--text)] [padding:6px_10px] text-[0.85rem] w-full disabled:opacity-[0.5] [.settings-input-row_&]:w-20 [.ai-label-config-field_&]:text-[0.8rem] [.ai-label-config-field_&]:[padding:4px_6px] [.ai-label-config-field_&]:resize-y [.ai-label-config-field_&]:min-h-9 [.ai-label-config-field_&]:font-sans" rows="2" data-idx="${idx}" title="${lc.label}">${lc.label}</textarea>
         </div>
-        <div class="ai-label-config-field">
+        <div class="ai-label-config-field [&_label]:block [&_label]:text-[0.7rem] [&_label]:text-fg-muted [&_label]:[margin-bottom:2px]">
           <label>Issue Type</label>
-          <input type="text" class="settings-input ai-lc-issue" value="${lc.issueType}" data-idx="${idx}" placeholder="e.g. spaghetti">
+          <input type="text" class="ai-lc-issue bg-input border border-line rounded-chip text-[var(--text)] [padding:6px_10px] text-[0.85rem] w-full disabled:opacity-[0.5] [.settings-input-row_&]:w-20 [.ai-label-config-field_&]:text-[0.8rem] [.ai-label-config-field_&]:[padding:4px_6px] [.ai-label-config-field_&]:resize-y [.ai-label-config-field_&]:min-h-9 [.ai-label-config-field_&]:font-sans" value="${lc.issueType}" data-idx="${idx}" placeholder="e.g. spaghetti">
         </div>
-        <div class="ai-label-config-field">
+        <div class="ai-label-config-field [&_label]:block [&_label]:text-[0.7rem] [&_label]:text-fg-muted [&_label]:[margin-bottom:2px]">
           <label>Group</label>
-          <select class="settings-input ai-lc-group" data-idx="${idx}">${groupOpts}</select>
+          <select class="ai-lc-group bg-input border border-line rounded-chip text-[var(--text)] [padding:6px_10px] text-[0.85rem] w-full disabled:opacity-[0.5] [.settings-input-row_&]:w-20 [.ai-label-config-field_&]:text-[0.8rem] [.ai-label-config-field_&]:[padding:4px_6px] [.ai-label-config-field_&]:resize-y [.ai-label-config-field_&]:min-h-9 [.ai-label-config-field_&]:font-sans" data-idx="${idx}">${groupOpts}</select>
         </div>
-        <div class="ai-label-config-field">
+        <div class="ai-label-config-field [&_label]:block [&_label]:text-[0.7rem] [&_label]:text-fg-muted [&_label]:[margin-bottom:2px]">
           <label>Severity</label>
-          <select class="settings-input ai-lc-severity" data-idx="${idx}">${sevOpts}</select>
+          <select class="ai-lc-severity bg-input border border-line rounded-chip text-[var(--text)] [padding:6px_10px] text-[0.85rem] w-full disabled:opacity-[0.5] [.settings-input-row_&]:w-20 [.ai-label-config-field_&]:text-[0.8rem] [.ai-label-config-field_&]:[padding:4px_6px] [.ai-label-config-field_&]:resize-y [.ai-label-config-field_&]:min-h-9 [.ai-label-config-field_&]:font-sans" data-idx="${idx}">${sevOpts}</select>
         </div>
-        <div class="ai-label-config-field">
+        <div class="ai-label-config-field [&_label]:block [&_label]:text-[0.7rem] [&_label]:text-fg-muted [&_label]:[margin-bottom:2px]">
           <label>Warn @</label>
-          <input type="number" class="settings-input ai-lc-warn" value="${lc.warnThreshold}" data-idx="${idx}" min="0" max="1" step="0.05">
+          <input type="number" class="ai-lc-warn bg-input border border-line rounded-chip text-[var(--text)] [padding:6px_10px] text-[0.85rem] w-full disabled:opacity-[0.5] [.settings-input-row_&]:w-20 [.ai-label-config-field_&]:text-[0.8rem] [.ai-label-config-field_&]:[padding:4px_6px] [.ai-label-config-field_&]:resize-y [.ai-label-config-field_&]:min-h-9 [.ai-label-config-field_&]:font-sans" value="${lc.warnThreshold}" data-idx="${idx}" min="0" max="1" step="0.05">
         </div>
-        <div class="ai-label-config-field">
+        <div class="ai-label-config-field [&_label]:block [&_label]:text-[0.7rem] [&_label]:text-fg-muted [&_label]:[margin-bottom:2px]">
           <label>Crit @</label>
-          <input type="number" class="settings-input ai-lc-crit" value="${lc.critThreshold}" data-idx="${idx}" min="0" max="1" step="0.05">
+          <input type="number" class="ai-lc-crit bg-input border border-line rounded-chip text-[var(--text)] [padding:6px_10px] text-[0.85rem] w-full disabled:opacity-[0.5] [.settings-input-row_&]:w-20 [.ai-label-config-field_&]:text-[0.8rem] [.ai-label-config-field_&]:[padding:4px_6px] [.ai-label-config-field_&]:resize-y [.ai-label-config-field_&]:min-h-9 [.ai-label-config-field_&]:font-sans" value="${lc.critThreshold}" data-idx="${idx}" min="0" max="1" step="0.05">
         </div>
-        <div class="ai-label-config-field ai-label-config-delete">
+        <div class="ai-label-config-field ai-label-config-delete [&_label]:block [&_label]:text-[0.7rem] [&_label]:text-fg-muted [&_label]:[margin-bottom:2px]">
           <label>&nbsp;</label>
-          <button class="btn btn-sm btn-ghost ai-lc-delete" data-idx="${idx}" title="Delete this label" aria-label="Delete this label">${iconSolo('close')}</button>
+          <button class="ai-lc-delete inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-idx="${idx}" title="Delete this label" aria-label="Delete this label">${iconSolo('close')}</button>
         </div>
       </div>
     `;
@@ -641,11 +663,11 @@ function renderAILabelEditor(container: HTMLElement, labels: AILabelConfig[]): v
     .join('');
 
   container.innerHTML = `
-    <div class="ai-label-config-list">${rows}</div>
-    <div class="settings-actions">
-      <button id="ai-labels-add" class="btn btn-sm btn-ghost">${icon('add')} Add Label</button>
-      <button id="ai-labels-save" class="btn btn-sm btn-primary">Save Labels</button>
-      <button id="ai-labels-reset" class="btn btn-sm btn-ghost">Reset to Defaults</button>
+    <div class="flex flex-col gap-2 overflow-y-auto">${rows}</div>
+    <div class="mt-2 flex gap-2">
+      <button id="ai-labels-add" class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]">${icon('add')} Add Label</button>
+      <button id="ai-labels-save" class="inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.print-dialog-footer_&]:min-w-25 hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]">Save Labels</button>
+      <button id="ai-labels-reset" class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]">Reset to Defaults</button>
     </div>
   `;
 

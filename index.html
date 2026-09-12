@@ -42,30 +42,30 @@
     </script>
   </head>
 <body>
-  <header id="app-header">
-    <div class="header-left">
+  <header id="app-header" class="flex justify-between items-center [padding:0_20px] h-[var(--header-height)] bg-surface border-b border-line sticky top-0 z-[100] [backdrop-filter:blur(8px)] max-[700px]:[padding:0_12px] max-[700px]:[gap:10px] max-[700px]:backdrop-filter-none">
+    <div class="max-[700px]:min-w-0 max-[700px]:[flex:1_1_auto] max-[700px]:overflow-hidden [&_h1]:text-[16px] [&_h1]:font-semibold [&_h1]:text-accent [&_h1]:tracking-[-0.01em] [&_h1]:whitespace-nowrap max-[800px]:[&_h1]:text-[14px]">
       <!--
         Two spellings of the same name. The full one does not fit a phone header —
         it wrapped to three lines at 390px — and CSS cannot shorten a text node, so
         both are in the DOM and the breakpoint picks one. aria-label carries the real
         name either way, which is why both spans are aria-hidden.
       -->
-      <h1 class="brand" aria-label="Elegoo CC2 web frontend">
-        <span class="brand-full" aria-hidden="true">Elegoo CC2 web frontend</span>
-        <span class="brand-short" aria-hidden="true">CC2</span>
+      <h1 class="" aria-label="Elegoo CC2 web frontend">
+        <span class="max-[700px]:hidden" aria-hidden="true">Elegoo CC2 web frontend</span>
+        <span class="hidden max-[700px]:inline" aria-hidden="true">CC2</span>
       </h1>
-      <span id="printer-name" class="subtitle"></span>
+      <span id="printer-name" class="text-[11px] text-fg-soft max-[700px]:hidden"></span>
     </div>
-    <div class="header-center">
-      <nav class="main-tabs" id="main-tabs">
-        <button class="main-tab active" data-tab="dashboard"><i class="bi bi-printer bi-lead" aria-hidden="true"></i><span class="main-tab-label">Dashboard</span></button>
-        <button class="main-tab" data-tab="tools"><i class="bi bi-calculator bi-lead" aria-hidden="true"></i><span class="main-tab-label">Tools</span></button>
-        <button class="main-tab" data-tab="settings"><i class="bi bi-gear bi-lead" aria-hidden="true"></i><span class="main-tab-label">Settings</span></button>
-        <button class="main-tab" data-tab="help"><i class="bi bi-info-circle bi-lead" aria-hidden="true"></i><span class="main-tab-label">About</span></button>
+    <div class="flex items-center min-w-0 max-[700px]:fixed max-[700px]:[inset:auto_0_0_0] max-[700px]:z-[200] max-[700px]:bg-surface max-[700px]:border-t max-[700px]:border-line max-[700px]:[padding-bottom:env(safe-area-inset-bottom,_0)]">
+      <nav class="flex [gap:1px] bg-input rounded-card [padding:3px] max-[700px]:flex max-[700px]:w-full max-[700px]:gap-0 max-[700px]:p-0 max-[700px]:rounded-none max-[700px]:bg-transparent" id="main-tabs">
+        <button class="main-tab active inline-flex items-center justify-center [padding:6px_14px] bg-accent border-0 rounded-[calc(var(--radius)_-_3px)] text-white text-[12px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap max-[800px]:[padding:5px_10px] min-[701px]:max-[800px]:text-[11px] max-[700px]:flex-1 max-[700px]:flex-col max-[700px]:[gap:2px] max-[700px]:min-w-0 max-[700px]:h-[var(--bottom-nav-height)] max-[700px]:[padding:6px_2px] max-[700px]:rounded-none max-[700px]:text-[10px] max-[700px]:leading-[1.1] hover:text-fg hover:bg-[rgba(255,_255,_255,_0.04)] max-[700px]:bg-transparent max-[700px]:text-accent max-[700px]:[box-shadow:inset_0_2px_0_0_var(--accent)] max-[700px]:hover:bg-transparent" data-tab="dashboard"><i class="bi bi-printer bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i><span class="max-[700px]:max-w-full max-[700px]:overflow-hidden max-[700px]:text-ellipsis max-[700px]:whitespace-nowrap">Dashboard</span></button>
+        <button class="main-tab inline-flex items-center justify-center [padding:6px_14px] bg-transparent border-0 rounded-[calc(var(--radius)_-_3px)] text-fg-muted text-[12px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap max-[800px]:[padding:5px_10px] min-[701px]:max-[800px]:text-[11px] max-[700px]:flex-1 max-[700px]:flex-col max-[700px]:[gap:2px] max-[700px]:min-w-0 max-[700px]:h-[var(--bottom-nav-height)] max-[700px]:[padding:6px_2px] max-[700px]:rounded-none max-[700px]:text-[10px] max-[700px]:leading-[1.1] hover:text-fg hover:bg-[rgba(255,_255,_255,_0.04)] max-[700px]:hover:bg-transparent" data-tab="tools"><i class="bi bi-calculator bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i><span class="max-[700px]:max-w-full max-[700px]:overflow-hidden max-[700px]:text-ellipsis max-[700px]:whitespace-nowrap">Tools</span></button>
+        <button class="main-tab inline-flex items-center justify-center [padding:6px_14px] bg-transparent border-0 rounded-[calc(var(--radius)_-_3px)] text-fg-muted text-[12px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap max-[800px]:[padding:5px_10px] min-[701px]:max-[800px]:text-[11px] max-[700px]:flex-1 max-[700px]:flex-col max-[700px]:[gap:2px] max-[700px]:min-w-0 max-[700px]:h-[var(--bottom-nav-height)] max-[700px]:[padding:6px_2px] max-[700px]:rounded-none max-[700px]:text-[10px] max-[700px]:leading-[1.1] hover:text-fg hover:bg-[rgba(255,_255,_255,_0.04)] max-[700px]:hover:bg-transparent" data-tab="settings"><i class="bi bi-gear bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i><span class="max-[700px]:max-w-full max-[700px]:overflow-hidden max-[700px]:text-ellipsis max-[700px]:whitespace-nowrap">Settings</span></button>
+        <button class="main-tab inline-flex items-center justify-center [padding:6px_14px] bg-transparent border-0 rounded-[calc(var(--radius)_-_3px)] text-fg-muted text-[12px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap max-[800px]:[padding:5px_10px] min-[701px]:max-[800px]:text-[11px] max-[700px]:flex-1 max-[700px]:flex-col max-[700px]:[gap:2px] max-[700px]:min-w-0 max-[700px]:h-[var(--bottom-nav-height)] max-[700px]:[padding:6px_2px] max-[700px]:rounded-none max-[700px]:text-[10px] max-[700px]:leading-[1.1] hover:text-fg hover:bg-[rgba(255,_255,_255,_0.04)] max-[700px]:hover:bg-transparent" data-tab="help"><i class="bi bi-info-circle bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i><span class="max-[700px]:max-w-full max-[700px]:overflow-hidden max-[700px]:text-ellipsis max-[700px]:whitespace-nowrap">About</span></button>
       </nav>
     </div>
-    <div class="header-right">
-      <div class="svc-header-wrap" id="svc-header-wrap">
+    <div class="flex items-center gap-2 min-w-0 max-[700px]:[flex:0_0_auto] max-[700px]:[gap:6px]">
+      <div class="relative" id="svc-header-wrap">
         <!--
           One status control, not two. The printer link used to have its own
           "Disconnected" pill beside this badge, which meant the header carried two
@@ -73,44 +73,44 @@
           glyph here, so the collapsed badge answers "is the printer connected?"
           without being opened.
         -->
-        <button class="svc-header-badge" id="svc-header-badge">
-          <i class="bi" id="svc-printer-icon" aria-hidden="true"></i>
-          <span id="svc-printer-state" class="svc-printer-state"></span>
-          <span id="svc-header-dots"></span>
+        <button class="svc-header-badge inline-flex items-center [gap:6px] [padding:4px_10px] rounded-[12px] border border-line bg-input text-fg-soft text-[11px] font-semibold cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:bg-hover hover:border-fg-muted" id="svc-header-badge">
+          <i class="bi max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0] text-[13px] leading-[1] [.svc-header-badge.svc-printer-connected_&]:text-ok [.svc-header-badge.svc-printer-connecting_&]:text-warn [.svc-header-badge.svc-printer-disconnected_&]:text-bad" id="svc-printer-icon" aria-hidden="true"></i>
+          <span id="svc-printer-state" class="font-semibold max-[700px]:hidden [.svc-header-badge.svc-printer-connecting_&]:text-warn [.svc-header-badge.svc-printer-disconnected_&]:text-bad"></span>
+          <span id="svc-header-dots" class="inline-flex [gap:3px] items-center"></span>
           <span id="svc-header-count">--</span>
         </button>
-        <div class="svc-dropdown hidden" id="svc-dropdown">
-          <div class="svc-dropdown-header">Service Status</div>
-          <div id="service-status" class="svc-dropdown-body"></div>
-          <div class="svc-dropdown-header">System Info</div>
-          <div id="system-info" class="svc-dropdown-body svc-system-info">
-            <div class="svc-loading">Connect to view system info</div>
+        <div class="hidden absolute top-[calc(100%_+_8px)] right-0 w-80 bg-card border border-line rounded-card shadow-float z-[200] overflow-hidden" id="svc-dropdown">
+          <div class="[padding:10px_14px] text-[11px] font-semibold uppercase tracking-[0.6px] text-fg-muted border-b border-line bg-surface">Service Status</div>
+          <div id="service-status" class="[padding:6px]"></div>
+          <div class="[padding:10px_14px] text-[11px] font-semibold uppercase tracking-[0.6px] text-fg-muted border-b border-line bg-surface">System Info</div>
+          <div id="system-info" class="[padding:6px] max-h-75 overflow-y-auto">
+            <div class="text-fg-muted text-[0.82rem] [padding:8px_10px]">Connect to view system info</div>
           </div>
         </div>
       </div>
     </div>
   </header>
 
-  <main id="app">
+  <main id="app" class="p-0 min-h-[calc(100vh_-_var(--header-height))]">
     <!-- Connect dialog -->
-    <div id="connect-dialog" class="card connect-card">
+    <div id="connect-dialog" class="card bg-card rounded-card p-8 shadow-card border border-line [transition:border-color_0.15s] max-w-100 [margin:80px_auto] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] [&_h2]:text-[20px] [&_h2]:mb-5 [&_h2]:text-accent hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]">
       <h2>Connect to Printer</h2>
-      <div class="form-group">
+      <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
         <label for="printer-ip">Printer IP Address</label>
         <input type="text" id="printer-ip" value="172.20.100.236" placeholder="192.168.1.100">
       </div>
-      <div class="form-group">
+      <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
         <label for="printer-password">Password</label>
         <input type="password" id="printer-password" value="123456" placeholder="123456 (default)">
       </div>
-      <button id="connect-btn" class="btn btn-primary">Connect</button>
-      <p id="connect-error" class="error-text"></p>
+      <button id="connect-btn" class="inline-flex items-center justify-center [padding:8px_16px] border-0 rounded-chip text-[13px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent max-[800px]:[padding:8px_16px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.print-dialog-footer_&]:min-w-25 hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]">Connect</button>
+      <p id="connect-error" class="text-bad text-[12px] mt-2 min-h-[18px]"></p>
     </div>
 
     <!-- Dashboard (hidden until connected) -->
-    <div id="dashboard" class="dashboard hidden">
+    <div id="dashboard" class="hidden flex-col h-[calc(100vh_-_var(--header-height))] overflow-hidden max-[1200px]:overflow-auto">
       <!-- Exception/error banner -->
-      <div id="exception-banner" class="exception-banner hidden"></div>
+      <div id="exception-banner" class="hidden [padding:8px_12px] rounded-card flex-col [gap:6px] [margin:8px_12px] shrink-0 bg-card border border-line max-[480px]:m-1"></div>
 
       <!--
         One grid, no sidebar.
@@ -120,274 +120,274 @@
         a wide one at the top. Order and width are separate choices now, both set in
         Settings, and the cards flow in a single responsive grid. See card-layout.ts.
       -->
-      <div class="dashboard-grid" id="dashboard-grid">
+      <div class="grid grid-cols-[minmax(0,_1fr)] min-[701px]:grid-cols-[repeat(12,_minmax(0,_1fr))] content-start [gap:10px] flex-1 min-h-0 p-3 overflow-y-auto max-[700px]:gap-2 max-[700px]:p-2 max-[480px]:[padding:6px] max-[700px]:[padding-bottom:calc(var(--bottom-nav-height)_+_env(safe-area-inset-bottom,_0)_+_8px)]" id="dashboard-grid">
           <!-- Print status (compact, in sidebar) -->
-          <div id="print-status-bar" class="card print-status-card">
-            <div class="print-status-top">
-              <div id="print-thumbnail-wrap" class="print-thumbnail-wrap">
-                <img id="print-thumbnail" class="print-thumbnail thumb-img hidden" alt="">
-                <div id="print-thumbnail-placeholder" class="print-thumbnail-placeholder"><i class="bi bi-printer" aria-hidden="true"></i></div>
+          <div id="print-status-bar" class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] flex flex-col [gap:10px] shrink-0 max-[480px]:m-1 max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]">
+            <div class="flex gap-3 items-start max-[800px]:flex-col max-[800px]:items-stretch">
+              <div id="print-thumbnail-wrap" class="w-16 h-16 rounded-chip overflow-hidden bg-surface shrink-0 flex items-center justify-center">
+                <img id="print-thumbnail" class="hidden w-full h-full object-cover" alt="">
+                <div id="print-thumbnail-placeholder" class="text-[32px] opacity-[0.3]"><i class="bi bi-printer max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></div>
               </div>
-              <div class="print-info">
-                <div class="print-file" id="print-filename">No active print</div>
-                <div class="print-status-badge" id="print-status-badge"></div>
-              </div>
-            </div>
-            <div class="print-progress-wrap">
-              <span class="progress-text-lg" id="print-progress-text">--%</span>
-              <div class="progress-bar">
-                <div class="progress-fill" id="print-progress-bar"></div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold text-[14px] whitespace-nowrap overflow-hidden text-ellipsis" id="print-filename">No active print</div>
+                <div class="print-status-badge inline-block [padding:3px_12px] rounded-[10px] text-[13px] font-semibold [margin:4px_0] tracking-[0.02em]" id="print-status-badge"></div>
               </div>
             </div>
-            <div class="print-details">
-              <div class="print-meta">
+            <div class="flex items-center [gap:10px] [margin:4px_0]">
+              <span class="text-[22px] font-bold text-accent min-w-[50px] font-mono" id="print-progress-text">--%</span>
+              <div class="flex-1 h-[6px] bg-input rounded-[3px] overflow-hidden">
+                <div class="h-full bg-accent rounded-[3px] [transition:width_0.5s_ease] relative overflow-hidden" id="print-progress-bar"></div>
+              </div>
+            </div>
+            <div class="flex flex-col [gap:2px]">
+              <div class="flex gap-3 text-[12px] text-fg-soft flex-wrap max-[800px]:flex-wrap max-[800px]:gap-2">
                 <span id="print-layer">Layer: --/--</span>
                 <span id="print-filament">--</span>
               </div>
-              <div class="print-meta">
+              <div class="flex gap-3 text-[12px] text-fg-soft flex-wrap max-[800px]:flex-wrap max-[800px]:gap-2">
                 <span id="print-active-filament">--</span>
                 <span id="print-color-changes">--</span>
               </div>
-              <div class="print-meta">
+              <div class="flex gap-3 text-[12px] text-fg-soft flex-wrap max-[800px]:flex-wrap max-[800px]:gap-2">
                 <span id="print-elapsed">--</span>
                 <span id="print-remaining">--</span>
               </div>
-              <div class="print-meta">
+              <div class="flex gap-3 text-[12px] text-fg-soft flex-wrap max-[800px]:flex-wrap max-[800px]:gap-2">
                 <span id="print-started">--</span>
                 <span id="print-eta">--</span>
               </div>
             </div>
-            <div class="print-actions">
-              <button id="btn-pause" class="btn btn-warning btn-icon" title="Pause" aria-label="Pause"><i class="bi bi-pause-fill" aria-hidden="true"></i></button>
-              <button id="btn-resume" class="btn btn-success btn-icon hidden" title="Resume" aria-label="Resume"><i class="bi bi-play-fill" aria-hidden="true"></i></button>
-              <button id="btn-stop" class="btn btn-danger btn-icon" title="Stop" aria-label="Stop"><i class="bi bi-stop-fill" aria-hidden="true"></i></button>
-              <button id="btn-estop" class="btn btn-danger btn-icon" title="Emergency Stop" aria-label="Emergency Stop"><i class="bi bi-exclamation-octagon-fill" aria-hidden="true"></i></button>
+            <div class="flex gap-2 shrink-0 justify-center">
+              <button id="btn-pause" class="inline-flex items-center justify-center p-0 border-0 rounded-card text-[18px] font-medium cursor-pointer [transition:all_0.15s] text-[#111] bg-warn w-[38px] h-[38px] max-[800px]:[padding:8px_16px] pointer-coarse:min-h-11 pointer-coarse:min-w-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Pause" aria-label="Pause"><i class="bi bi-pause-fill max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
+              <button id="btn-resume" class="hidden items-center justify-center p-0 border-0 rounded-card text-[18px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-ok w-[38px] h-[38px] max-[800px]:[padding:8px_16px] pointer-coarse:min-h-11 pointer-coarse:min-w-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Resume" aria-label="Resume"><i class="bi bi-play-fill max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
+              <button id="btn-stop" class="inline-flex items-center justify-center p-0 border-0 rounded-card text-[18px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-bad w-[38px] h-[38px] max-[800px]:[padding:8px_16px] pointer-coarse:min-h-11 pointer-coarse:min-w-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Stop" aria-label="Stop"><i class="bi bi-stop-fill max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
+              <button id="btn-estop" class="inline-flex items-center justify-center p-0 border-2 border-[#f44] rounded-card text-[16px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-[#b00] w-[38px] h-[38px] max-[800px]:[padding:8px_16px] pointer-coarse:min-h-11 pointer-coarse:min-w-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)] hover:bg-[#d00]" title="Emergency Stop" aria-label="Emergency Stop"><i class="bi bi-exclamation-octagon-fill max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
             </div>
           </div>
 
 
 
         <!-- Temperatures -->
-        <div class="card" id="temps-card">
-          <h3><i class="bi bi-thermometer-half bi-lead" aria-hidden="true"></i> Temperatures</h3>
-          <div class="temp-grid">
-            <div class="temp-item">
-              <div class="temp-row">
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="temps-card">
+          <h3><i class="bi bi-thermometer-half bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Temperatures</h3>
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-1">
+              <div class="flex items-end justify-between gap-2">
                 <div>
-                  <div class="temp-label">Nozzle</div>
-                  <div class="temp-value">
+                  <div class="text-[11px] text-fg-soft uppercase tracking-[0.5px]">Nozzle</div>
+                  <div class="temp-value text-[22px] font-bold font-mono leading-[1.1]">
                     <span id="temp-nozzle">--</span>°C
-                    <span class="temp-target">/ <span id="temp-nozzle-target">--</span>°C</span>
+                    <span class="[.temp-value_&]:text-[14px] [.temp-value_&]:font-normal [.temp-value_&]:text-fg-muted">/ <span id="temp-nozzle-target">--</span>°C</span>
                   </div>
                 </div>
-                <div class="temp-control">
+                <div class="flex gap-1 items-center shrink-0 [&_input]:w-14 [&_input]:[padding:3px_6px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[12px] [&_input]:font-mono [&_input:focus]:[outline:none] [&_input:focus]:border-accent">
                   <input type="number" id="set-nozzle-temp" placeholder="210" min="0" max="300" step="5">
-                  <button class="btn btn-sm" id="btn-set-nozzle">Set</button>
-                  <button class="btn btn-sm btn-ghost" id="btn-off-nozzle">Off</button>
+                  <button class="inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-hover max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="btn-set-nozzle">Set</button>
+                  <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="btn-off-nozzle">Off</button>
                 </div>
               </div>
-              <div class="temp-bar-wrap">
-                <div class="temp-bar nozzle-bar" id="temp-nozzle-bar"></div>
+              <div class="h-1 bg-input rounded-[2px] overflow-hidden">
+                <div class="h-full rounded-[2px] [transition:width_0.5s_ease] bg-nozzle" id="temp-nozzle-bar"></div>
               </div>
             </div>
-            <div class="temp-item">
-              <div class="temp-row">
+            <div class="flex flex-col gap-1">
+              <div class="flex items-end justify-between gap-2">
                 <div>
-                  <div class="temp-label">Bed</div>
-                  <div class="temp-value">
+                  <div class="text-[11px] text-fg-soft uppercase tracking-[0.5px]">Bed</div>
+                  <div class="temp-value text-[22px] font-bold font-mono leading-[1.1]">
                     <span id="temp-bed">--</span>°C
-                    <span class="temp-target">/ <span id="temp-bed-target">--</span>°C</span>
+                    <span class="[.temp-value_&]:text-[14px] [.temp-value_&]:font-normal [.temp-value_&]:text-fg-muted">/ <span id="temp-bed-target">--</span>°C</span>
                   </div>
                 </div>
-                <div class="temp-control">
+                <div class="flex gap-1 items-center shrink-0 [&_input]:w-14 [&_input]:[padding:3px_6px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[12px] [&_input]:font-mono [&_input:focus]:[outline:none] [&_input:focus]:border-accent">
                   <input type="number" id="set-bed-temp" placeholder="60" min="0" max="120" step="5">
-                  <button class="btn btn-sm" id="btn-set-bed">Set</button>
-                  <button class="btn btn-sm btn-ghost" id="btn-off-bed">Off</button>
+                  <button class="inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-hover max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="btn-set-bed">Set</button>
+                  <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="btn-off-bed">Off</button>
                 </div>
               </div>
-              <div class="temp-bar-wrap">
-                <div class="temp-bar bed-bar" id="temp-bed-bar"></div>
+              <div class="h-1 bg-input rounded-[2px] overflow-hidden">
+                <div class="h-full rounded-[2px] [transition:width_0.5s_ease] bg-bed" id="temp-bed-bar"></div>
               </div>
             </div>
-            <div class="temp-item">
-              <div class="temp-label">Chamber</div>
-              <div class="temp-value">
+            <div class="flex flex-col gap-1">
+              <div class="text-[11px] text-fg-soft uppercase tracking-[0.5px]">Chamber</div>
+              <div class="temp-value text-[22px] font-bold font-mono leading-[1.1]">
                 <span id="temp-chamber">--</span>°C
-                <span class="temp-range" id="temp-chamber-range"></span>
+                <span class="text-[11px] text-fg-muted ml-1" id="temp-chamber-range"></span>
               </div>
             </div>
           </div>
-          <div class="temp-presets">
-            <span class="preset-label">Presets:</span>
-            <button class="btn btn-sm btn-ghost temp-preset-btn" data-nozzle="210" data-bed="60">PLA</button>
-            <button class="btn btn-sm btn-ghost temp-preset-btn" data-nozzle="240" data-bed="80">PETG</button>
-            <button class="btn btn-sm btn-ghost temp-preset-btn" data-nozzle="250" data-bed="100">ABS</button>
-            <button class="btn btn-sm btn-ghost temp-preset-btn" data-nozzle="230" data-bed="70">TPU</button>
-            <button class="btn btn-sm btn-ghost temp-preset-btn" data-nozzle="0" data-bed="0">Cool<i class="bi bi-snow bi-trail" aria-hidden="true"></i></button>
+          <div class="flex items-center gap-1 [margin-top:10px] [padding-top:10px] border-t border-line flex-wrap">
+            <span class="text-[11px] text-fg-muted mr-1">Presets:</span>
+            <button class="temp-preset-btn inline-flex items-center justify-center [padding:3px_10px] border border-line rounded-[14px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-nozzle="210" data-bed="60">PLA</button>
+            <button class="temp-preset-btn inline-flex items-center justify-center [padding:3px_10px] border border-line rounded-[14px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-nozzle="240" data-bed="80">PETG</button>
+            <button class="temp-preset-btn inline-flex items-center justify-center [padding:3px_10px] border border-line rounded-[14px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-nozzle="250" data-bed="100">ABS</button>
+            <button class="temp-preset-btn inline-flex items-center justify-center [padding:3px_10px] border border-line rounded-[14px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-nozzle="230" data-bed="70">TPU</button>
+            <button class="temp-preset-btn inline-flex items-center justify-center [padding:3px_10px] border border-line rounded-[14px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-nozzle="0" data-bed="0">Cool<i class="bi bi-snow bi-trail [margin-inline-start:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
           </div>
-          <div class="chart-wrap">
-            <div class="chart-time-selector">
-              <button class="chart-time-btn" data-chart="chart-temps" data-window="60">1m</button>
-              <button class="chart-time-btn active" data-chart="chart-temps" data-window="300">5m</button>
-              <button class="chart-time-btn" data-chart="chart-temps" data-window="900">15m</button>
-              <button class="chart-time-btn" data-chart="chart-temps" data-window="3600">1h</button>
+          <div class="mt-3 border-t border-line pt-2">
+            <div class="flex [gap:2px] mb-1 justify-end pointer-coarse:gap-1 pointer-coarse:items-center">
+              <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-temps" data-window="60">1m</button>
+              <button class="chart-time-btn active [padding:2px_8px] border-0 bg-accent text-white text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-temps" data-window="300">5m</button>
+              <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-temps" data-window="900">15m</button>
+              <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-temps" data-window="3600">1h</button>
             </div>
-            <canvas id="chart-temps" class="live-chart"></canvas>
+            <canvas id="chart-temps" class="w-full h-40 block"></canvas>
           </div>
         </div>
 
         <!-- Canvas / AMS -->
-        <div class="card" id="canvas-card">
-          <h3><i class="bi bi-palette bi-lead" aria-hidden="true"></i> Canvas / AMS</h3>
-          <div id="canvas-status" class="canvas-grid">
-            <div class="canvas-empty">Not connected</div>
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="canvas-card">
+          <h3><i class="bi bi-palette bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Canvas / AMS</h3>
+          <div id="canvas-status" class="flex flex-col gap-3">
+            <div class="text-fg-muted [font-style:italic] p-5 text-center">Not connected</div>
           </div>
         </div>
 
         <!-- Camera -->
-        <div class="card" id="camera-card">
-          <div class="card-header">
-            <h3><i class="bi bi-camera-video bi-lead" aria-hidden="true"></i> Camera</h3>
-            <div class="camera-header-actions">
-              <button id="camera-snapshot-btn" class="btn btn-sm btn-ghost" title="Save snapshot"><i class="bi bi-camera bi-lead" aria-hidden="true"></i> Snapshot</button>
-              <button id="camera-overlay-btn" class="btn btn-sm btn-ghost" title="Toggle status overlay"><i class="bi bi-bar-chart-line bi-lead" aria-hidden="true"></i> Overlay</button>
-              <button id="camera-expand-btn" class="btn btn-sm btn-ghost" title="Toggle large view"><i class="bi bi-arrows-angle-expand bi-lead" aria-hidden="true"></i> Expand</button>
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="camera-card">
+          <div class="card-header flex items-center justify-between mb-3 max-[700px]:flex-wrap max-[700px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
+            <h3><i class="bi bi-camera-video bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Camera</h3>
+            <div class="camera-header-actions flex gap-1 max-[700px]:flex-wrap max-[700px]:min-w-0">
+              <button id="camera-snapshot-btn" class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Save snapshot"><i class="bi bi-camera bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Snapshot</button>
+              <button id="camera-overlay-btn" class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Toggle status overlay"><i class="bi bi-bar-chart-line bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Overlay</button>
+              <button id="camera-expand-btn" class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Toggle large view"><i class="bi bi-arrows-angle-expand bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Expand</button>
             </div>
           </div>
-          <div class="camera-wrap" id="camera-wrap" title="Click to enlarge">
-            <img id="camera-feed" alt="Camera off" class="camera-img">
-            <div class="camera-overlay" id="camera-overlay">Camera not available</div>
+          <div class="relative bg-[#000] rounded-chip overflow-hidden min-h-50 max-[700px]:max-w-full" id="camera-wrap" title="Click to enlarge">
+            <img id="camera-feed" alt="Camera off" class="w-full block cursor-pointer max-[700px]:max-w-full [#camera-card.camera-expanded_&]:max-h-[60vh] [#camera-card.camera-expanded_&]:object-contain">
+            <div class="absolute inset-0 flex items-center justify-center text-fg-muted [font-style:italic]" id="camera-overlay">Camera not available</div>
           </div>
         </div>
 
         <!-- AI Monitor -->
-        <div class="card" id="ai-card">
-          <h3><i class="bi bi-robot bi-lead" aria-hidden="true"></i> AI Monitor</h3>
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="ai-card">
+          <h3><i class="bi bi-robot bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> AI Monitor</h3>
           <div id="ai-panel">
-            <div class="ai-empty">AI monitoring disabled or not started</div>
+            <div class="text-fg-muted text-[0.85rem] [padding:8px_0]">AI monitoring disabled or not started</div>
           </div>
-          <div class="ai-charts-grid">
-            <div class="chart-wrap ai-chart-wrap">
-              <h4 class="ai-chart-title">Motion Detection</h4>
-              <div class="chart-time-selector">
-                <button class="chart-time-btn" data-chart="chart-ai-motion" data-window="60">1m</button>
-                <button class="chart-time-btn active" data-chart="chart-ai-motion" data-window="300">5m</button>
-                <button class="chart-time-btn" data-chart="chart-ai-motion" data-window="900">15m</button>
-                <button class="chart-time-btn" data-chart="chart-ai-motion" data-window="3600">1h</button>
+          <div class="grid grid-cols-[1fr_1fr] gap-3 mt-3 max-[700px]:grid-cols-[1fr]">
+            <div class="mt-0 border-t0 pt-0">
+              <h4 class="text-[0.8rem] font-semibold text-fg-muted [margin:0_0_4px_0]">Motion Detection</h4>
+              <div class="flex [gap:2px] mb-1 justify-end pointer-coarse:gap-1 pointer-coarse:items-center">
+                <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-ai-motion" data-window="60">1m</button>
+                <button class="chart-time-btn active [padding:2px_8px] border-0 bg-accent text-white text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-ai-motion" data-window="300">5m</button>
+                <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-ai-motion" data-window="900">15m</button>
+                <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-ai-motion" data-window="3600">1h</button>
               </div>
-              <canvas id="chart-ai-motion" class="live-chart"></canvas>
+              <canvas id="chart-ai-motion" class="w-full h-40 block"></canvas>
             </div>
-            <div class="chart-wrap ai-chart-wrap">
-              <h4 class="ai-chart-title">AI Classification</h4>
-              <div class="chart-time-selector">
-                <button class="chart-time-btn" data-chart="chart-ai-class" data-window="60">1m</button>
-                <button class="chart-time-btn active" data-chart="chart-ai-class" data-window="300">5m</button>
-                <button class="chart-time-btn" data-chart="chart-ai-class" data-window="900">15m</button>
-                <button class="chart-time-btn" data-chart="chart-ai-class" data-window="3600">1h</button>
+            <div class="mt-0 border-t0 pt-0">
+              <h4 class="text-[0.8rem] font-semibold text-fg-muted [margin:0_0_4px_0]">AI Classification</h4>
+              <div class="flex [gap:2px] mb-1 justify-end pointer-coarse:gap-1 pointer-coarse:items-center">
+                <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-ai-class" data-window="60">1m</button>
+                <button class="chart-time-btn active [padding:2px_8px] border-0 bg-accent text-white text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-ai-class" data-window="300">5m</button>
+                <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-ai-class" data-window="900">15m</button>
+                <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-ai-class" data-window="3600">1h</button>
               </div>
-              <canvas id="chart-ai-class" class="live-chart"></canvas>
+              <canvas id="chart-ai-class" class="w-full h-40 block"></canvas>
             </div>
           </div>
         </div>
 
         <!-- Event Log -->
-        <div class="card" id="event-log-card">
-          <h3><i class="bi bi-journal-text bi-lead" aria-hidden="true"></i> Event Log</h3>
-          <div id="event-log-entries" class="event-log-entries">
-            <div class="event-log-empty">No events yet</div>
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="event-log-card">
+          <h3><i class="bi bi-journal-text bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Event Log</h3>
+          <div id="event-log-entries" class="max-h-100 overflow-y-auto flex flex-col [gap:2px]">
+            <div class="text-fg-muted text-[0.85rem] p-3 text-center">No events yet</div>
           </div>
         </div>
 
         <!-- Maintenance / Self-Check -->
         <!-- Gcode Preview -->
-        <div class="card" id="gcode-preview-card">
-          <div class="card-header">
-            <h3><i class="bi bi-bounding-box bi-lead" aria-hidden="true"></i> Gcode Preview</h3>
-            <div class="gcode-preview-actions">
-              <button id="btn-gcode-follow" class="btn btn-sm btn-ghost active" title="Follow print progress"><i class="bi bi-geo-alt bi-lead" aria-hidden="true"></i> Follow</button>
-              <button id="btn-gcode-single-layer" class="btn btn-sm btn-ghost active" title="Show only current layer"><i class="bi bi-search bi-lead" aria-hidden="true"></i> Single Layer</button>
-              <button id="btn-load-gcode" class="btn btn-sm btn-ghost" title="Load gcode file"><i class="bi bi-folder2-open bi-lead" aria-hidden="true"></i> Load</button>
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="gcode-preview-card">
+          <div class="card-header flex items-center justify-between mb-3 max-[700px]:flex-wrap max-[700px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
+            <h3><i class="bi bi-bounding-box bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Gcode Preview</h3>
+            <div class="gcode-preview-actions flex gap-1 max-[700px]:flex-wrap max-[700px]:min-w-0">
+              <button id="btn-gcode-follow" class="active inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.camera-header-actions_&]:bg-accent [.camera-header-actions_&]:text-app [.gcode-preview-actions_&]:bg-accent [.gcode-preview-actions_&]:text-white hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Follow print progress"><i class="bi bi-geo-alt bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Follow</button>
+              <button id="btn-gcode-single-layer" class="active inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.camera-header-actions_&]:bg-accent [.camera-header-actions_&]:text-app [.gcode-preview-actions_&]:bg-accent [.gcode-preview-actions_&]:text-white hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Show only current layer"><i class="bi bi-search bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Single Layer</button>
+              <button id="btn-load-gcode" class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Load gcode file"><i class="bi bi-folder2-open bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Load</button>
               <input type="file" id="gcode-file-input" accept=".gcode,.gco,.g" style="display:none">
-              <button id="btn-reset-layer-data" class="btn btn-sm btn-ghost" title="Reset layer duration data"><i class="bi bi-arrow-counterclockwise bi-lead" aria-hidden="true"></i> Reset</button>
+              <button id="btn-reset-layer-data" class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Reset layer duration data"><i class="bi bi-arrow-counterclockwise bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Reset</button>
             </div>
           </div>
-          <div class="gcode-preview-wrap">
-            <canvas id="gcode-preview-canvas" class="gcode-preview-canvas"></canvas>
-            <div id="gcode-preview-status" class="gcode-preview-status"></div>
+          <div class="relative max-[700px]:max-w-full">
+            <canvas id="gcode-preview-canvas" class="w-full h-[350px] block rounded-[4px]"></canvas>
+            <div id="gcode-preview-status" class="absolute top-2 left-2 text-[11px] text-fg-soft bg-[rgba(0,_0,_0,_0.5)] [padding:2px_8px] rounded-[4px] pointer-events-none"></div>
           </div>
-          <div class="gcode-preview-controls">
-            <input type="range" id="gcode-layer-slider" min="1" max="1" value="1" class="gcode-layer-slider">
-            <div id="gcode-preview-info" class="gcode-preview-info"></div>
+          <div class="[padding:4px_0]">
+            <input type="range" id="gcode-layer-slider" min="1" max="1" value="1" class="w-full m-0 [accent-color:var(--accent)]">
+            <div id="gcode-preview-info" class="text-[11px] text-fg-soft text-center [padding:2px_0]"></div>
           </div>
-          <div class="chart-wrap">
-            <canvas id="chart-layer-time" class="live-chart"></canvas>
+          <div class="mt-3 border-t border-line pt-2">
+            <canvas id="chart-layer-time" class="w-full h-40 block"></canvas>
           </div>
         </div>
 
         <!-- Control -->
-        <div class="card" id="toolhead-card">
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="toolhead-card">
           <h3>Control</h3>
-          <div class="control-layout">
-            <div class="move-section">
-              <div class="move-xy-grid">
+          <div class="flex flex-col gap-3">
+            <div class="flex gap-4 items-center">
+              <div class="grid grid-cols-[repeat(3,_44px)] [grid-template-rows:repeat(3,_38px)] [gap:3px]">
                 <div></div>
-                <button class="btn btn-sm move-btn" data-axis="y" data-dir="1">Y+</button>
+                <button class="move-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-full text-[11px] font-semibold cursor-pointer [transition:all_0.15s] text-fg bg-surface w-11 h-[38px] max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-axis="y" data-dir="1">Y+</button>
                 <div></div>
-                <button class="btn btn-sm move-btn" data-axis="x" data-dir="-1">X-</button>
-                <button class="btn btn-sm move-btn home-btn" id="btn-home-all" title="Home All Axes" aria-label="Home all axes"><i class="bi bi-house" aria-hidden="true"></i></button>
-                <button class="btn btn-sm move-btn" data-axis="x" data-dir="1">X+</button>
+                <button class="move-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-full text-[11px] font-semibold cursor-pointer [transition:all_0.15s] text-fg bg-surface w-11 h-[38px] max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-axis="x" data-dir="-1">X-</button>
+                <button class="move-btn home-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-full text-[16px] font-semibold cursor-pointer [transition:all_0.15s] text-fg bg-hover w-11 h-[38px] max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="btn-home-all" title="Home All Axes" aria-label="Home all axes"><i class="bi bi-house max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
+                <button class="move-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-full text-[11px] font-semibold cursor-pointer [transition:all_0.15s] text-fg bg-surface w-11 h-[38px] max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-axis="x" data-dir="1">X+</button>
                 <div></div>
-                <button class="btn btn-sm move-btn" data-axis="y" data-dir="-1">Y-</button>
+                <button class="move-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-full text-[11px] font-semibold cursor-pointer [transition:all_0.15s] text-fg bg-surface w-11 h-[38px] max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-axis="y" data-dir="-1">Y-</button>
                 <div></div>
               </div>
-              <div class="move-z-col">
-                <button class="btn btn-sm move-btn" data-axis="z" data-dir="1">Z<i class="bi bi-arrow-up" aria-hidden="true"></i></button>
-                <button class="btn btn-sm move-btn home-btn" id="btn-home-all-z" title="Home All Axes" aria-label="Home all axes"><i class="bi bi-house" aria-hidden="true"></i></button>
-                <button class="btn btn-sm move-btn" data-axis="z" data-dir="-1">Z<i class="bi bi-arrow-down" aria-hidden="true"></i></button>
+              <div class="flex flex-col [gap:3px]">
+                <button class="move-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-full text-[11px] font-semibold cursor-pointer [transition:all_0.15s] text-fg bg-surface w-11 h-[38px] max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-axis="z" data-dir="1">Z<i class="bi bi-arrow-up max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
+                <button class="move-btn home-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-full text-[16px] font-semibold cursor-pointer [transition:all_0.15s] text-fg bg-hover w-11 h-[38px] max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="btn-home-all-z" title="Home All Axes" aria-label="Home all axes"><i class="bi bi-house max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
+                <button class="move-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-full text-[11px] font-semibold cursor-pointer [transition:all_0.15s] text-fg bg-surface w-11 h-[38px] max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-axis="z" data-dir="-1">Z<i class="bi bi-arrow-down max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
               </div>
             </div>
-            <div class="position-display">
-              <span class="axis" data-home="x"><span class="home-dot" id="home-x" title="X not homed"></span>X:<span id="pos-x">--</span></span>
-              <span class="axis" data-home="y"><span class="home-dot" id="home-y" title="Y not homed"></span>Y:<span id="pos-y">--</span></span>
-              <span class="axis" data-home="z"><span class="home-dot" id="home-z" title="Z not homed"></span>Z:<span id="pos-z">--</span></span>
+            <div class="flex gap-6 font-mono text-[13px] max-[800px]:flex-wrap">
+              <span class="[&_span]:text-accent [&_span]:font-semibold" data-home="x"><span class="inline-block w-2 h-2 rounded-full bg-[var(--danger,_#e74c3c)] mr-1 align-[middle] [transition:background_0.3s]" id="home-x" title="X not homed"></span>X:<span id="pos-x">--</span></span>
+              <span class="[&_span]:text-accent [&_span]:font-semibold" data-home="y"><span class="inline-block w-2 h-2 rounded-full bg-[var(--danger,_#e74c3c)] mr-1 align-[middle] [transition:background_0.3s]" id="home-y" title="Y not homed"></span>Y:<span id="pos-y">--</span></span>
+              <span class="[&_span]:text-accent [&_span]:font-semibold" data-home="z"><span class="inline-block w-2 h-2 rounded-full bg-[var(--danger,_#e74c3c)] mr-1 align-[middle] [transition:background_0.3s]" id="home-z" title="Z not homed"></span>Z:<span id="pos-z">--</span></span>
             </div>
-            <div class="move-distance">
-              <button class="btn btn-sm dist-btn" data-dist="0.1">0.1mm</button>
-              <button class="btn btn-sm dist-btn" data-dist="1">1mm</button>
-              <button class="btn btn-sm dist-btn active" data-dist="10">10mm</button>
-              <button class="btn btn-sm dist-btn" data-dist="30">30mm</button>
+            <div class="flex gap-1">
+              <button class="dist-btn inline-flex items-center justify-center [padding:4px_14px] border border-line rounded-[16px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-surface max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-dist="0.1">0.1mm</button>
+              <button class="dist-btn inline-flex items-center justify-center [padding:4px_14px] border border-line rounded-[16px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-surface max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-dist="1">1mm</button>
+              <button class="dist-btn active inline-flex items-center justify-center [padding:4px_14px] border border-line rounded-[16px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] border-accent [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.camera-header-actions_&]:bg-accent [.camera-header-actions_&]:text-app [.gcode-preview-actions_&]:bg-accent [.gcode-preview-actions_&]:text-white hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-dist="10">10mm</button>
+              <button class="dist-btn inline-flex items-center justify-center [padding:4px_14px] border border-line rounded-[16px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-surface max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-dist="30">30mm</button>
             </div>
-            <div class="speed-control">
+            <div class="flex items-center gap-3 [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:whitespace-nowrap">
               <label>Print Speed</label>
-              <div class="speed-buttons">
-                <button class="btn btn-sm speed-btn" data-mode="50">Silent</button>
-                <button class="btn btn-sm speed-btn active" data-mode="100">Balanced</button>
-                <button class="btn btn-sm speed-btn" data-mode="130">Sport</button>
-                <button class="btn btn-sm speed-btn" data-mode="160">Ludicrous</button>
+              <div class="flex gap-1 flex-wrap">
+                <button class="speed-btn inline-flex items-center justify-center [padding:4px_14px] border border-line rounded-[16px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-surface max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-mode="50">Silent</button>
+                <button class="speed-btn active inline-flex items-center justify-center [padding:4px_14px] border border-line rounded-[16px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] border-accent [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.camera-header-actions_&]:bg-accent [.camera-header-actions_&]:text-app [.gcode-preview-actions_&]:bg-accent [.gcode-preview-actions_&]:text-white hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-mode="100">Balanced</button>
+                <button class="speed-btn inline-flex items-center justify-center [padding:4px_14px] border border-line rounded-[16px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-surface max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-mode="130">Sport</button>
+                <button class="speed-btn inline-flex items-center justify-center [padding:4px_14px] border border-line rounded-[16px] text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-surface max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-mode="160">Ludicrous</button>
               </div>
             </div>
-            <div class="led-control">
-              <span class="fan-icon"><i class="bi bi-brightness-high" aria-hidden="true"></i></span>
+            <div class="flex items-center gap-2 [padding-top:10px] border-t border-line text-[13px] [&_span:last-of-type]:flex-1">
+              <span class="text-[14px]"><i class="bi bi-brightness-high max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></span>
               <span>Overhead light</span>
-              <label class="toggle"><input type="checkbox" id="led-toggle" checked><span class="toggle-slider"></span></label>
+              <label class="toggle relative inline-block w-10 h-[22px] shrink-0 [&_input]:opacity-[0] [&_input]:w-0 [&_input]:h-0"><input type="checkbox" id="led-toggle" checked><span class="absolute cursor-pointer inset-0 bg-input rounded-[22px] border border-line [transition:0.2s] before:content-[''] before:absolute before:h-4 before:w-4 before:left-[2px] before:bottom-[2px] before:bg-fg-muted before:rounded-full before:[transition:0.2s] [.toggle_input:checked+&]:bg-accent [.toggle_input:checked+&]:border-accent before:[.toggle_input:checked+&]:[transform:translateX(18px)] before:[.toggle_input:checked+&]:bg-white"></span></label>
             </div>
-            <div class="control-maintenance">
+            <div class="mt-3 pt-3 border-t border-line [&_h4]:[margin:0_0_8px] [&_h4]:text-[0.85em] [&_h4]:text-fg-soft [&_h4]:font-medium">
               <div id="maintenance-status"></div>
-              <div class="maintenance-grid">
-                <button id="btn-self-check" class="btn btn-ghost maintenance-btn" title="Run full self-check (auto-level + vibration + PID)">
-                  <span class="maintenance-icon"><i class="bi bi-search" aria-hidden="true"></i></span>
+              <div class="grid grid-cols-[1fr_1fr] gap-2">
+                <button id="btn-self-check" class="flex items-center justify-center [padding:12px_8px] border border-line rounded-chip text-[0.85em] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:8px_16px] flex-col gap-1 text-center pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Run full self-check (auto-level + vibration + PID)">
+                  <span class="text-[1.4em]"><i class="bi bi-search max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></span>
                   <span>Self-Check</span>
                 </button>
-                <button id="btn-maintenance-level" class="btn btn-ghost maintenance-btn" title="Auto-level bed probing">
-                  <span class="maintenance-icon"><i class="bi bi-rulers" aria-hidden="true"></i></span>
+                <button id="btn-maintenance-level" class="flex items-center justify-center [padding:12px_8px] border border-line rounded-chip text-[0.85em] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:8px_16px] flex-col gap-1 text-center pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Auto-level bed probing">
+                  <span class="text-[1.4em]"><i class="bi bi-rulers max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></span>
                   <span>Auto Level</span>
                 </button>
-                <button id="btn-maintenance-vibration" class="btn btn-ghost maintenance-btn" title="Input shaper / vibration optimization">
-                  <span class="maintenance-icon"><i class="bi bi-activity" aria-hidden="true"></i></span>
+                <button id="btn-maintenance-vibration" class="flex items-center justify-center [padding:12px_8px] border border-line rounded-chip text-[0.85em] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:8px_16px] flex-col gap-1 text-center pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Input shaper / vibration optimization">
+                  <span class="text-[1.4em]"><i class="bi bi-activity max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></span>
                   <span>Vibration</span>
                 </button>
-                <button id="btn-maintenance-pid" class="btn btn-ghost maintenance-btn" title="PID auto-tune for nozzle and bed heaters">
-                  <span class="maintenance-icon"><i class="bi bi-thermometer-half" aria-hidden="true"></i></span>
+                <button id="btn-maintenance-pid" class="flex items-center justify-center [padding:12px_8px] border border-line rounded-chip text-[0.85em] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:8px_16px] flex-col gap-1 text-center pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="PID auto-tune for nozzle and bed heaters">
+                  <span class="text-[1.4em]"><i class="bi bi-thermometer-half max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></span>
                   <span>PID Tune</span>
                 </button>
               </div>
@@ -396,257 +396,257 @@
         </div>
 
         <!-- Fans -->
-        <div class="card" id="fans-card">
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="fans-card">
           <h3>Fans & Light</h3>
-          <div class="fan-grid">
-            <div class="fan-item">
-              <div class="fan-header">
-                <span class="fan-icon"><i class="bi bi-snow" aria-hidden="true"></i></span>
-                <span class="fan-label">Model</span>
-                <label class="toggle"><input type="checkbox" id="fan-model-toggle" checked><span class="toggle-slider"></span></label>
+          <div class="flex flex-col [gap:14px] mb-4">
+            <div class="flex flex-col [gap:6px]">
+              <div class="flex items-center gap-2">
+                <span class="text-[14px]"><i class="bi bi-snow max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></span>
+                <span class="text-[13px] text-fg flex-1">Model</span>
+                <label class="toggle relative inline-block w-10 h-[22px] shrink-0 [&_input]:opacity-[0] [&_input]:w-0 [&_input]:h-0"><input type="checkbox" id="fan-model-toggle" checked><span class="absolute cursor-pointer inset-0 bg-input rounded-[22px] border border-line [transition:0.2s] before:content-[''] before:absolute before:h-4 before:w-4 before:left-[2px] before:bottom-[2px] before:bg-fg-muted before:rounded-full before:[transition:0.2s] [.toggle_input:checked+&]:bg-accent [.toggle_input:checked+&]:border-accent before:[.toggle_input:checked+&]:[transform:translateX(18px)] before:[.toggle_input:checked+&]:bg-white"></span></label>
               </div>
-              <div class="fan-adjust">
-                <button class="btn btn-sm fan-dec" data-fan="fan" data-step="-13" aria-label="Decrease"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
-                <div class="fan-bar-wrap"><div class="fan-bar" id="fan-model-bar"></div></div>
-                <span class="fan-value" id="fan-model-value">--%</span>
-                <span class="fan-rpm" id="fan-model-rpm"></span>
-                <button class="btn btn-sm fan-inc" data-fan="fan" data-step="13" aria-label="Increase"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
-              </div>
-            </div>
-            <div class="fan-item">
-              <div class="fan-header">
-                <span class="fan-icon"><i class="bi bi-snow" aria-hidden="true"></i></span>
-                <span class="fan-label">Assistance</span>
-                <label class="toggle"><input type="checkbox" id="fan-aux-toggle"><span class="toggle-slider"></span></label>
-              </div>
-              <div class="fan-adjust">
-                <button class="btn btn-sm fan-dec" data-fan="aux_fan" data-step="-13" aria-label="Decrease"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
-                <div class="fan-bar-wrap"><div class="fan-bar" id="fan-aux-bar"></div></div>
-                <span class="fan-value" id="fan-aux-value">--%</span>
-                <span class="fan-rpm" id="fan-aux-rpm"></span>
-                <button class="btn btn-sm fan-inc" data-fan="aux_fan" data-step="13" aria-label="Increase"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+              <div class="flex items-center gap-2">
+                <button class="fan-dec inline-flex items-center justify-center p-0 border border-line rounded-full text-[14px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-surface w-7 h-7 max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-fan="fan" data-step="-13" aria-label="Decrease"><i class="bi bi-dash-lg max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
+                <div class="flex-1 h-[6px] bg-input rounded-[3px] overflow-hidden"><div class="h-full bg-accent rounded-[3px] [transition:width_0.5s_ease]" id="fan-model-bar"></div></div>
+                <span class="w-10 text-right text-[13px] font-mono text-fg-soft" id="fan-model-value">--%</span>
+                <span class="text-[11px] text-fg-muted font-mono min-w-[55px] text-right" id="fan-model-rpm"></span>
+                <button class="fan-inc inline-flex items-center justify-center p-0 border border-line rounded-full text-[14px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-surface w-7 h-7 max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-fan="fan" data-step="13" aria-label="Increase"><i class="bi bi-plus-lg max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
               </div>
             </div>
-            <div class="fan-item">
-              <div class="fan-header">
-                <span class="fan-icon"><i class="bi bi-snow" aria-hidden="true"></i></span>
-                <span class="fan-label">Case</span>
-                <label class="toggle"><input type="checkbox" id="fan-case-toggle" checked><span class="toggle-slider"></span></label>
+            <div class="flex flex-col [gap:6px]">
+              <div class="flex items-center gap-2">
+                <span class="text-[14px]"><i class="bi bi-snow max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></span>
+                <span class="text-[13px] text-fg flex-1">Assistance</span>
+                <label class="toggle relative inline-block w-10 h-[22px] shrink-0 [&_input]:opacity-[0] [&_input]:w-0 [&_input]:h-0"><input type="checkbox" id="fan-aux-toggle"><span class="absolute cursor-pointer inset-0 bg-input rounded-[22px] border border-line [transition:0.2s] before:content-[''] before:absolute before:h-4 before:w-4 before:left-[2px] before:bottom-[2px] before:bg-fg-muted before:rounded-full before:[transition:0.2s] [.toggle_input:checked+&]:bg-accent [.toggle_input:checked+&]:border-accent before:[.toggle_input:checked+&]:[transform:translateX(18px)] before:[.toggle_input:checked+&]:bg-white"></span></label>
               </div>
-              <div class="fan-adjust">
-                <button class="btn btn-sm fan-dec" data-fan="box_fan" data-step="-13" aria-label="Decrease"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
-                <div class="fan-bar-wrap"><div class="fan-bar" id="fan-case-bar"></div></div>
-                <span class="fan-value" id="fan-case-value">--%</span>
-                <span class="fan-rpm" id="fan-case-rpm"></span>
-                <button class="btn btn-sm fan-inc" data-fan="box_fan" data-step="13" aria-label="Increase"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+              <div class="flex items-center gap-2">
+                <button class="fan-dec inline-flex items-center justify-center p-0 border border-line rounded-full text-[14px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-surface w-7 h-7 max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-fan="aux_fan" data-step="-13" aria-label="Decrease"><i class="bi bi-dash-lg max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
+                <div class="flex-1 h-[6px] bg-input rounded-[3px] overflow-hidden"><div class="h-full bg-accent rounded-[3px] [transition:width_0.5s_ease]" id="fan-aux-bar"></div></div>
+                <span class="w-10 text-right text-[13px] font-mono text-fg-soft" id="fan-aux-value">--%</span>
+                <span class="text-[11px] text-fg-muted font-mono min-w-[55px] text-right" id="fan-aux-rpm"></span>
+                <button class="fan-inc inline-flex items-center justify-center p-0 border border-line rounded-full text-[14px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-surface w-7 h-7 max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-fan="aux_fan" data-step="13" aria-label="Increase"><i class="bi bi-plus-lg max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
+              </div>
+            </div>
+            <div class="flex flex-col [gap:6px]">
+              <div class="flex items-center gap-2">
+                <span class="text-[14px]"><i class="bi bi-snow max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></span>
+                <span class="text-[13px] text-fg flex-1">Case</span>
+                <label class="toggle relative inline-block w-10 h-[22px] shrink-0 [&_input]:opacity-[0] [&_input]:w-0 [&_input]:h-0"><input type="checkbox" id="fan-case-toggle" checked><span class="absolute cursor-pointer inset-0 bg-input rounded-[22px] border border-line [transition:0.2s] before:content-[''] before:absolute before:h-4 before:w-4 before:left-[2px] before:bottom-[2px] before:bg-fg-muted before:rounded-full before:[transition:0.2s] [.toggle_input:checked+&]:bg-accent [.toggle_input:checked+&]:border-accent before:[.toggle_input:checked+&]:[transform:translateX(18px)] before:[.toggle_input:checked+&]:bg-white"></span></label>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="fan-dec inline-flex items-center justify-center p-0 border border-line rounded-full text-[14px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-surface w-7 h-7 max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-fan="box_fan" data-step="-13" aria-label="Decrease"><i class="bi bi-dash-lg max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
+                <div class="flex-1 h-[6px] bg-input rounded-[3px] overflow-hidden"><div class="h-full bg-accent rounded-[3px] [transition:width_0.5s_ease]" id="fan-case-bar"></div></div>
+                <span class="w-10 text-right text-[13px] font-mono text-fg-soft" id="fan-case-value">--%</span>
+                <span class="text-[11px] text-fg-muted font-mono min-w-[55px] text-right" id="fan-case-rpm"></span>
+                <button class="fan-inc inline-flex items-center justify-center p-0 border border-line rounded-full text-[14px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-surface w-7 h-7 max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-fan="box_fan" data-step="13" aria-label="Increase"><i class="bi bi-plus-lg max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
               </div>
             </div>
           </div>
-          <div class="chart-wrap">
-            <div class="chart-time-selector">
-              <button class="chart-time-btn" data-chart="chart-fans" data-window="60">1m</button>
-              <button class="chart-time-btn active" data-chart="chart-fans" data-window="300">5m</button>
-              <button class="chart-time-btn" data-chart="chart-fans" data-window="900">15m</button>
-              <button class="chart-time-btn" data-chart="chart-fans" data-window="3600">1h</button>
+          <div class="mt-3 border-t border-line pt-2">
+            <div class="flex [gap:2px] mb-1 justify-end pointer-coarse:gap-1 pointer-coarse:items-center">
+              <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-fans" data-window="60">1m</button>
+              <button class="chart-time-btn active [padding:2px_8px] border-0 bg-accent text-white text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-fans" data-window="300">5m</button>
+              <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-fans" data-window="900">15m</button>
+              <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-fans" data-window="3600">1h</button>
             </div>
-            <canvas id="chart-fans" class="live-chart"></canvas>
+            <canvas id="chart-fans" class="w-full h-40 block"></canvas>
           </div>
         </div>
 
         <!-- Speed & Flow -->
-        <div class="card" id="speed-flow-card">
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="speed-flow-card">
           <h3>Speed &amp; Flow</h3>
-          <div class="speed-flow-live">
-            <div class="speed-flow-item">
-              <span class="speed-flow-label">Speed</span>
-              <span class="speed-flow-value" id="live-speed">-- mm/min</span>
+          <div class="flex gap-4 mb-4 flex-wrap">
+            <div class="flex flex-col [gap:2px] flex-1 min-w-20">
+              <span class="text-[11px] text-fg-muted uppercase tracking-[0.5px]">Speed</span>
+              <span class="text-[16px] font-mono text-fg" id="live-speed">-- mm/min</span>
             </div>
-            <div class="speed-flow-item">
-              <span class="speed-flow-label">Extrusion</span>
-              <span class="speed-flow-value" id="live-extrusion">-- mm/s</span>
+            <div class="flex flex-col [gap:2px] flex-1 min-w-20">
+              <span class="text-[11px] text-fg-muted uppercase tracking-[0.5px]">Extrusion</span>
+              <span class="text-[16px] font-mono text-fg" id="live-extrusion">-- mm/s</span>
             </div>
-            <div class="speed-flow-item">
-              <span class="speed-flow-label">Flow</span>
-              <span class="speed-flow-value" id="live-flow">-- mm³/s</span>
+            <div class="flex flex-col [gap:2px] flex-1 min-w-20">
+              <span class="text-[11px] text-fg-muted uppercase tracking-[0.5px]">Flow</span>
+              <span class="text-[16px] font-mono text-fg" id="live-flow">-- mm³/s</span>
             </div>
-            <div class="speed-flow-item">
-              <span class="speed-flow-label">Mass</span>
-              <span class="speed-flow-value" id="live-mass-flow">-- mg/s</span>
+            <div class="flex flex-col [gap:2px] flex-1 min-w-20">
+              <span class="text-[11px] text-fg-muted uppercase tracking-[0.5px]">Mass</span>
+              <span class="text-[16px] font-mono text-fg" id="live-mass-flow">-- mg/s</span>
             </div>
           </div>
-          <div id="filament-usage-display" class="filament-usage-display"></div>
-          <div class="chart-wrap">
-            <div class="chart-time-selector">
-              <button class="chart-time-btn" data-chart="chart-speed" data-window="60">1m</button>
-              <button class="chart-time-btn active" data-chart="chart-speed" data-window="300">5m</button>
-              <button class="chart-time-btn" data-chart="chart-speed" data-window="900">15m</button>
-              <button class="chart-time-btn" data-chart="chart-speed" data-window="3600">1h</button>
+          <div id="filament-usage-display" class="mt-3 border-t border-line pt-2 empty:hidden"></div>
+          <div class="mt-3 border-t border-line pt-2">
+            <div class="flex [gap:2px] mb-1 justify-end pointer-coarse:gap-1 pointer-coarse:items-center">
+              <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-speed" data-window="60">1m</button>
+              <button class="chart-time-btn active [padding:2px_8px] border-0 bg-accent text-white text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-speed" data-window="300">5m</button>
+              <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-speed" data-window="900">15m</button>
+              <button class="chart-time-btn [padding:2px_8px] border-0 bg-transparent text-fg-muted text-[10px] font-medium cursor-pointer rounded-[10px] [transition:all_0.15s] pointer-coarse:[padding:0_12px] pointer-coarse:text-[12px] pointer-coarse:rounded-[8px] hover:text-fg pointer-coarse:[&:not(.active)]:bg-raised" data-chart="chart-speed" data-window="3600">1h</button>
             </div>
-            <canvas id="chart-speed" class="live-chart"></canvas>
+            <canvas id="chart-speed" class="w-full h-40 block"></canvas>
           </div>
         </div>
 
         <!-- Print History -->
-        <div class="card" id="print-history-card">
-          <div class="card-header">
-            <h3><i class="bi bi-clock-history bi-lead" aria-hidden="true"></i> Print History</h3>
-            <button id="btn-history-refresh" class="btn btn-sm btn-ghost" title="Refresh print history"><i class="bi bi-arrow-repeat bi-lead" aria-hidden="true"></i> Refresh</button>
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="print-history-card">
+          <div class="card-header flex items-center justify-between mb-3 max-[700px]:flex-wrap max-[700px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
+            <h3><i class="bi bi-clock-history bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Print History</h3>
+            <button id="btn-history-refresh" class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Refresh print history"><i class="bi bi-arrow-repeat bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Refresh</button>
           </div>
           <!-- Sibling of the list (ELEG-50), for the same reason as Files: the entries
                are replaced wholesale whenever a 1036 response lands. -->
           <div id="print-history-controls"></div>
-          <div id="print-history-entries" class="print-history-entries">
-            <div class="file-empty">Click refresh to load history</div>
+          <div id="print-history-entries" class="max-h-100 overflow-y-auto flex flex-col gap-1">
+            <div class="text-fg-muted [font-style:italic] p-5 text-center">Click refresh to load history</div>
           </div>
           <div id="print-history-total"></div>
         </div>
 
         <!-- Print Reports -->
-        <div class="card" id="print-reports-card">
-          <div class="card-header">
-            <h3><i class="bi bi-bar-chart bi-lead" aria-hidden="true"></i> Print Reports</h3>
-            <button id="btn-reports-refresh" class="btn btn-sm btn-ghost" title="Refresh reports"><i class="bi bi-arrow-repeat bi-lead" aria-hidden="true"></i> Refresh</button>
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="print-reports-card">
+          <div class="card-header flex items-center justify-between mb-3 max-[700px]:flex-wrap max-[700px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
+            <h3><i class="bi bi-bar-chart bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Print Reports</h3>
+            <button id="btn-reports-refresh" class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Refresh reports"><i class="bi bi-arrow-repeat bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Refresh</button>
           </div>
           <!-- Sibling of the list (ELEG-51): the entries are replaced wholesale. -->
           <div id="print-reports-controls"></div>
           <div id="print-reports-entries">
-            <div class="file-empty">Click refresh to load reports</div>
+            <div class="text-fg-muted [font-style:italic] p-5 text-center">Click refresh to load reports</div>
           </div>
         </div>
 
         <!-- Files -->
-        <div class="card" id="files-card">
-          <div class="files-header">
-            <h3><i class="bi bi-folder bi-lead" aria-hidden="true"></i> Files</h3>
-            <div class="files-header-actions">
-              <label class="btn btn-sm btn-primary file-upload-label" id="file-upload-label">
-                <i class="bi bi-upload bi-lead" aria-hidden="true"></i> Upload
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="files-card">
+          <div class="files-header flex items-center justify-between mb-3 min-[701px]:max-[800px]:flex-wrap max-[800px]:gap-2 max-[700px]:flex-wrap max-[700px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
+            <h3><i class="bi bi-folder bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Files</h3>
+            <div class="flex items-center gap-2">
+              <label class="inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent gap-1 max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.print-dialog-footer_&]:min-w-25 hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="file-upload-label">
+                <i class="bi bi-upload bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Upload
                 <input type="file" id="file-upload-input" accept=".gcode,.3mf" hidden>
               </label>
-              <div class="file-source-tabs">
-                <button class="file-source-tab active" data-source="local">Local</button>
-                <button class="file-source-tab" data-source="u-disk">USB</button>
+              <div class="flex [gap:2px] bg-input rounded-chip [padding:2px]">
+                <button class="file-source-tab active [padding:3px_12px] border-0 bg-accent text-white text-[11px] font-medium cursor-pointer rounded-chip [transition:all_0.15s] max-[800px]:[padding:6px_14px] max-[800px]:text-[12px] hover:[&:not(.active)]:text-fg" data-source="local">Local</button>
+                <button class="file-source-tab [padding:3px_12px] border-0 bg-transparent text-fg-soft text-[11px] font-medium cursor-pointer rounded-chip [transition:all_0.15s] max-[800px]:[padding:6px_14px] max-[800px]:text-[12px] hover:[&:not(.active)]:text-fg" data-source="u-disk">USB</button>
               </div>
             </div>
           </div>
-          <div id="upload-progress" class="upload-progress hidden">
-            <div class="upload-progress-bar"><div class="upload-progress-fill" id="upload-progress-fill"></div></div>
+          <div id="upload-progress" class="upload-progress hidden items-center gap-2 [padding:6px_0] mb-1 text-[12px] text-fg-soft">
+            <div class="flex-1 h-[6px] bg-input rounded-[3px] overflow-hidden"><div class="h-full bg-accent rounded-[3px] [transition:width_0.2s] [.upload-progress.upload-error_&]:bg-[var(--error)]" id="upload-progress-fill"></div></div>
             <span id="upload-progress-text">Uploading...</span>
           </div>
           <!-- Sibling of the list, not inside it: #file-list is replaced wholesale on
                every render, and a filter input inside it would lose focus mid-typing. -->
           <div id="file-list-controls"></div>
-          <div id="file-list" class="file-list">
-            <div class="loading">Loading...</div>
+          <div id="file-list" class="max-h-100 overflow-y-auto flex flex-col gap-1">
+            <div class="text-fg-muted text-center p-5">Loading...</div>
           </div>
         </div>
 
         <!-- Timelapse -->
-        <div class="card" id="timelapse-card">
-          <div class="files-header">
-            <h3><i class="bi bi-film bi-lead" aria-hidden="true"></i> Timelapse</h3>
-            <button class="btn btn-sm btn-ghost" id="timelapse-refresh"><i class="bi bi-arrow-repeat bi-lead" aria-hidden="true"></i> Refresh</button>
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="timelapse-card">
+          <div class="files-header flex items-center justify-between mb-3 min-[701px]:max-[800px]:flex-wrap max-[800px]:gap-2 max-[700px]:flex-wrap max-[700px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
+            <h3><i class="bi bi-film bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Timelapse</h3>
+            <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="timelapse-refresh"><i class="bi bi-arrow-repeat bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Refresh</button>
           </div>
-          <div id="timelapse-player-wrap" class="timelapse-player-wrap hidden">
-            <video id="timelapse-player" controls class="timelapse-video"></video>
-            <button class="btn btn-sm btn-ghost timelapse-close-btn" id="timelapse-close"><i class="bi bi-x-lg bi-lead" aria-hidden="true"></i> Close</button>
+          <div id="timelapse-player-wrap" class="hidden [margin-bottom:10px] relative">
+            <video id="timelapse-player" controls class="w-full rounded-chip bg-[#000] max-h-75"></video>
+            <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent absolute top-2 right-2 max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="timelapse-close"><i class="bi bi-x-lg bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Close</button>
           </div>
           <!-- Sibling of the list (ELEG-52): the list is replaced on every 1036 response. -->
           <div id="timelapse-controls"></div>
-          <div id="timelapse-list" class="file-list">
-            <div class="file-empty">Click refresh to load timelapse list</div>
+          <div id="timelapse-list" class="max-h-100 overflow-y-auto flex flex-col gap-1">
+            <div class="text-fg-muted [font-style:italic] p-5 text-center">Click refresh to load timelapse list</div>
           </div>
         </div>
 
         <!-- Log -->
-        <div class="card log-card" id="log-card">
-          <div class="log-header">
-            <h3><i class="bi bi-list-columns bi-lead" aria-hidden="true"></i> MQTT Log</h3>
-            <div class="log-tabs">
-              <button class="log-tab active" data-tab="structured">Structured</button>
-              <button class="log-tab" data-tab="raw">Raw</button>
+        <div class="card bg-card rounded-card p-4 shadow-card border border-line [transition:border-color_0.15s] max-[480px]:p-3 max-[700px]:min-w-0 [&>h3]:relative [&_h3]:text-[11px] [&_h3]:font-semibold [&_h3]:text-fg-muted [&_h3]:mb-3 [&_h3]:uppercase [&_h3]:tracking-[0.6px] hover:border-line-soft [&>h3::after]:content-['▾'] [&>h3::after]:absolute [&>h3::after]:right-0 [&>h3::after]:top-0 [&>h3::after]:text-[12px] [&>h3::after]:text-fg-muted [&>h3::after]:[transition:transform_0.2s] [&>.card-header_>_h3::after]:content-['▾'] [&>.card-header_>_h3::after]:absolute [&>.card-header_>_h3::after]:right-0 [&>.card-header_>_h3::after]:top-0 [&>.card-header_>_h3::after]:text-[12px] [&>.card-header_>_h3::after]:text-fg-muted [&>.card-header_>_h3::after]:[transition:transform_0.2s] [&>.files-header_>_h3::after]:content-['▾'] [&>.files-header_>_h3::after]:absolute [&>.files-header_>_h3::after]:right-0 [&>.files-header_>_h3::after]:top-0 [&>.files-header_>_h3::after]:text-[12px] [&>.files-header_>_h3::after]:text-fg-muted [&>.files-header_>_h3::after]:[transition:transform_0.2s] [&>.log-header_>_h3::after]:content-['▾'] [&>.log-header_>_h3::after]:absolute [&>.log-header_>_h3::after]:right-0 [&>.log-header_>_h3::after]:top-0 [&>.log-header_>_h3::after]:text-[12px] [&>.log-header_>_h3::after]:text-fg-muted [&>.log-header_>_h3::after]:[transition:transform_0.2s]" id="log-card">
+          <div class="log-header flex items-center gap-3 flex-wrap mb-2 max-[700px]:flex-wrap max-[700px]:min-w-0 [&_h3]:m-0 [&_h3]:flex-1 [.card>&]:relative">
+            <h3><i class="bi bi-list-columns bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> MQTT Log</h3>
+            <div class="flex [gap:2px] bg-input rounded-chip [padding:2px]">
+              <button class="log-tab active [padding:4px_14px] border-0 bg-accent text-white text-[12px] font-medium cursor-pointer rounded-chip [transition:all_0.15s] hover:[&:not(.active)]:text-fg" data-tab="structured">Structured</button>
+              <button class="log-tab [padding:4px_14px] border-0 bg-transparent text-fg-soft text-[12px] font-medium cursor-pointer rounded-chip [transition:all_0.15s] hover:[&:not(.active)]:text-fg" data-tab="raw">Raw</button>
             </div>
-            <button class="btn btn-sm" id="btn-mqtt-capture" title="Capture all raw MQTT messages to file for debugging"><i class="bi bi-record-circle bi-lead" aria-hidden="true"></i> Capture</button>
+            <button class="inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-hover max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="btn-mqtt-capture" title="Capture all raw MQTT messages to file for debugging"><i class="bi bi-record-circle bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Capture</button>
           </div>
 
           <!-- Structured tab -->
-          <div id="log-tab-structured" class="log-tab-content">
-            <div class="log-controls">
-              <input type="text" id="slog-search" placeholder="Search..." class="log-filter-input">
-              <select id="slog-direction-filter" class="log-select">
+          <div id="log-tab-structured" class="flex flex-col [gap:6px]">
+            <div class="flex items-center gap-2 flex-wrap">
+              <input type="text" id="slog-search" placeholder="Search..." class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] w-35 [.debug-controls_&]:min-w-50">
+              <select id="slog-direction-filter" class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] [.spool-calc-inputs_&]:w-full [.spool-calc-inputs_&]:[padding:6px_10px] [.spool-calc-inputs_&]:text-[14px]">
                 <option value="all">All</option>
                 <!--
-                  Text arrows, not <i class="bi …"> like everywhere else: <option> may
+                  Text arrows, not <i class="bi max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]"> like everywhere else: <option> may
                   only contain text, so an element here renders as nothing at all in
                   every browser. Leave these as characters.
                 -->
                 <option value="sent">Sent →</option>
                 <option value="received">Received ←</option>
               </select>
-              <select id="slog-type-filter" class="log-select">
+              <select id="slog-type-filter" class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] [.spool-calc-inputs_&]:w-full [.spool-calc-inputs_&]:[padding:6px_10px] [.spool-calc-inputs_&]:text-[14px]">
                 <option value="all">All types</option>
                 <option value="status">Status (6000)</option>
                 <option value="command">Commands</option>
                 <option value="response">Responses</option>
                 <option value="heartbeat">Heartbeat</option>
               </select>
-              <select id="slog-method-filter" class="log-select">
+              <select id="slog-method-filter" class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] [.spool-calc-inputs_&]:w-full [.spool-calc-inputs_&]:[padding:6px_10px] [.spool-calc-inputs_&]:text-[14px]">
                 <option value="all">All methods</option>
               </select>
-              <label class="log-autoscroll-label">
+              <label class="text-[0.8rem] text-fg-soft flex items-center gap-1 cursor-pointer">
                 <input type="checkbox" id="slog-autoscroll" checked> Auto-scroll
               </label>
-              <button class="btn btn-sm btn-ghost" id="slog-pause" title="Pause updates" aria-label="Pause updates"><i class="bi bi-pause-fill" aria-hidden="true"></i></button>
-              <button class="btn btn-sm btn-ghost" id="slog-diff" title="Toggle diff view">Δ Diff</button>
-              <button class="btn btn-sm btn-ghost" id="slog-export" title="Download the filtered log as JSON"><i class="bi bi-download bi-lead" aria-hidden="true"></i> Export</button>
-              <button class="btn btn-sm btn-ghost" id="slog-clear">Clear</button>
+              <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="slog-pause" title="Pause updates" aria-label="Pause updates"><i class="bi bi-pause-fill max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
+              <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="slog-diff" title="Toggle diff view">Δ Diff</button>
+              <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="slog-export" title="Download the filtered log as JSON"><i class="bi bi-download bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Export</button>
+              <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="slog-clear">Clear</button>
             </div>
-            <p class="settings-hint log-export-note">Exports the messages currently shown. The payloads include the printer's serial number and local IP — check before posting one publicly.</p>
-            <div id="slog-entries" class="log-entries"></div>
-            <div class="log-status-bar">
+            <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Exports the messages currently shown. The payloads include the printer's serial number and local IP — check before posting one publicly.</p>
+            <div id="slog-entries" class="h-80 overflow-y-auto font-mono text-[0.75rem] leading-[1.5] bg-app rounded-card p-1"></div>
+            <div class="flex justify-between items-center text-[11px] text-fg-muted [padding:2px_4px]">
               <span id="slog-count">0 messages</span>
-              <span id="slog-paused-badge" class="log-paused-badge hidden">PAUSED</span>
+              <span id="slog-paused-badge" class="hidden bg-[rgba(239,_83,_80,_0.2)] text-bad [padding:2px_8px] rounded-[8px] text-[10px] font-semibold [animation:pulse_1.5s_infinite] [.debug-controls_&]:bg-[#f85149] [.debug-controls_&]:text-white [.debug-controls_&]:[animation:debug-pulse_2s_ease-in-out_infinite]">PAUSED</span>
             </div>
           </div>
 
           <!-- Raw tab -->
-          <div id="log-tab-raw" class="log-tab-content hidden">
-            <div class="log-controls">
-              <input type="text" id="log-filter" placeholder="Filter..." class="log-filter-input">
-              <label class="log-autoscroll-label">
+          <div id="log-tab-raw" class="hidden flex-col [gap:6px]">
+            <div class="flex items-center gap-2 flex-wrap">
+              <input type="text" id="log-filter" placeholder="Filter..." class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] w-35 [.debug-controls_&]:min-w-50">
+              <label class="text-[0.8rem] text-fg-soft flex items-center gap-1 cursor-pointer">
                 <input type="checkbox" id="log-autoscroll" checked> Auto-scroll
               </label>
-              <button class="btn btn-sm btn-ghost" id="log-export" title="Download the filtered log as JSON"><i class="bi bi-download bi-lead" aria-hidden="true"></i> Export</button>
-              <button class="btn btn-sm btn-ghost" id="log-clear">Clear</button>
+              <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="log-export" title="Download the filtered log as JSON"><i class="bi bi-download bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Export</button>
+              <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="log-clear">Clear</button>
             </div>
-            <p class="settings-hint log-export-note">Exports the messages currently shown. The payloads include the printer's serial number and local IP — check before posting one publicly.</p>
-            <div id="log-entries" class="log-entries"></div>
+            <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Exports the messages currently shown. The payloads include the printer's serial number and local IP — check before posting one publicly.</p>
+            <div id="log-entries" class="h-80 overflow-y-auto font-mono text-[0.75rem] leading-[1.5] bg-app rounded-card p-1"></div>
           </div>
         </div>
       </div>
 
       <!-- Camera Fullscreen Overlay (positioned fixed, outside the grid) -->
-      <div id="camera-modal" class="camera-modal hidden" tabindex="-1">
-        <div class="camera-modal-content">
-          <img id="camera-modal-img" alt="Camera" class="camera-modal-img">
-          <button id="camera-modal-close" class="camera-modal-close" title="Close">&times;</button>
+      <div id="camera-modal" class="hidden fixed inset-0 z-[9999] bg-[rgba(0,_0,_0,_0.92)] items-center justify-center cursor-pointer" tabindex="-1">
+        <div class="relative max-w-[95vw] max-h-[95vh]">
+          <img id="camera-modal-img" alt="Camera" class="max-w-[95vw] max-h-[95vh] object-contain rounded-[8px]">
+          <button id="camera-modal-close" class="absolute top--3 right--3 w-8 h-8 rounded-full border-0 bg-card text-[var(--text)] text-[20px] cursor-pointer flex items-center justify-center [box-shadow:0_2px_8px_rgba(0,_0,_0,_0.5)]" title="Close">&times;</button>
         </div>
       </div>
     </div>
 
     <!-- Tools tab (hidden by default) -->
-    <div id="tools-tab-content" class="settings-page hidden">
-      <div class="settings-page-inner" style="max-width: 1000px">
-        <h2 class="settings-page-title"><i class="bi bi-calculator bi-lead" aria-hidden="true"></i> Spool Calculator</h2>
+    <div id="tools-tab-content" class="hidden h-[calc(100vh_-_var(--header-height))] overflow-y-auto p-5">
+      <div class="max-w-200 mx-auto" style="max-width: 1000px">
+        <h2 class="text-[18px] font-semibold text-fg mb-5"><i class="bi bi-calculator bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Spool Calculator</h2>
         <div id="tools-content"></div>
       </div>
     </div>
 
     <!-- Settings tab (hidden by default, shown when Settings tab is active) -->
-    <div id="settings-tab-content" class="settings-page hidden">
-      <div class="settings-page-inner">
-        <h2 class="settings-page-title"><i class="bi bi-gear bi-lead" aria-hidden="true"></i> Settings</h2>
-        <div id="settings-content" class="settings-content-full"></div>
+    <div id="settings-tab-content" class="hidden h-[calc(100vh_-_var(--header-height))] overflow-y-auto p-5">
+      <div class="max-w-200 mx-auto">
+        <h2 class="text-[18px] font-semibold text-fg mb-5"><i class="bi bi-gear bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Settings</h2>
+        <div id="settings-content" class=""></div>
       </div>
     </div>
 
@@ -660,14 +660,14 @@
       stacked: the API reference is long, and burying a live debugging tool under it
       would make the tool unusable.
     -->
-    <div id="help-tab-content" class="settings-page hidden">
-      <div class="settings-page-inner" style="max-width: 1400px">
-        <h2 class="settings-page-title"><i class="bi bi-info-circle bi-lead" aria-hidden="true"></i> About this project</h2>
-        <div id="about-card" class="about-card"></div>
+    <div id="help-tab-content" class="hidden h-[calc(100vh_-_var(--header-height))] overflow-y-auto p-5">
+      <div class="max-w-200 mx-auto" style="max-width: 1400px">
+        <h2 class="text-[18px] font-semibold text-fg mb-5"><i class="bi bi-info-circle bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> About this project</h2>
+        <div id="about-card" class="mb-5"></div>
 
-        <nav class="subtab-strip" id="help-subtabs" aria-label="Help and debug sections">
-          <button class="subtab active" data-subtab="help" aria-selected="true"><i class="bi bi-question-circle bi-lead" aria-hidden="true"></i>Help &amp; API</button>
-          <button class="subtab" data-subtab="debug" aria-selected="false"><i class="bi bi-bug bi-lead" aria-hidden="true"></i>Debug</button>
+        <nav class="flex gap-1 mb-4 border-b border-line" id="help-subtabs" aria-label="Help and debug sections">
+          <button class="subtab active inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-accent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg [border-bottom-color:var(--accent)]" data-subtab="help" aria-selected="true"><i class="bi bi-question-circle bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i>Help &amp; API</button>
+          <button class="subtab inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-fg-muted text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="debug" aria-selected="false"><i class="bi bi-bug bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i>Debug</button>
         </nav>
 
         <section id="help-subtab-help">
@@ -675,45 +675,45 @@
         </section>
 
         <section id="help-subtab-debug" class="hidden">
-          <div class="debug-panel">
-            <div class="debug-controls">
-              <input type="text" id="debug-filter" placeholder="Filter fields..." class="log-filter-input">
-              <button class="btn btn-sm" id="debug-log-toggle"><i class="bi bi-play-fill bi-lead" aria-hidden="true"></i> Start Logging</button>
-              <select id="debug-log-timeout" class="log-select">
+          <div class="flex flex-col gap-3">
+            <div class="debug-controls flex flex-wrap gap-2 items-center [padding:8px_0]">
+              <input type="text" id="debug-filter" placeholder="Filter fields..." class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] w-35 [.debug-controls_&]:min-w-50">
+              <button class="inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-hover max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="debug-log-toggle"><i class="bi bi-play-fill bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Start Logging</button>
+              <select id="debug-log-timeout" class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] [.spool-calc-inputs_&]:w-full [.spool-calc-inputs_&]:[padding:6px_10px] [.spool-calc-inputs_&]:text-[14px]">
                 <option value="1">Auto-stop: 1m</option>
                 <option value="5" selected>Auto-stop: 5m</option>
                 <option value="15">Auto-stop: 15m</option>
                 <option value="30">Auto-stop: 30m</option>
                 <option value="60">Auto-stop: 60m</option>
               </select>
-              <span id="debug-logging-badge" class="log-paused-badge hidden">LOGGING</span>
-              <button class="btn btn-sm btn-ghost" id="debug-export-state" title="Export current state as JSON"><i class="bi bi-box-arrow-up bi-lead" aria-hidden="true"></i> State</button>
-              <button class="btn btn-sm btn-ghost" id="debug-export-log" title="Export change log as JSON"><i class="bi bi-download bi-lead" aria-hidden="true"></i> Changes</button>
-              <button class="btn btn-sm btn-ghost" id="debug-clear-log"><i class="bi bi-trash bi-lead" aria-hidden="true"></i> Clear</button>
+              <span id="debug-logging-badge" class="hidden bg-[rgba(239,_83,_80,_0.2)] text-bad [padding:2px_8px] rounded-[8px] text-[10px] font-semibold [animation:pulse_1.5s_infinite] [.debug-controls_&]:bg-[#f85149] [.debug-controls_&]:text-white [.debug-controls_&]:[animation:debug-pulse_2s_ease-in-out_infinite]">LOGGING</span>
+              <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="debug-export-state" title="Export current state as JSON"><i class="bi bi-box-arrow-up bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> State</button>
+              <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="debug-export-log" title="Export change log as JSON"><i class="bi bi-download bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Changes</button>
+              <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="debug-clear-log"><i class="bi bi-trash bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Clear</button>
             </div>
-            <div class="debug-watched">
-              <span class="debug-watched-label">Watched:</span>
-              <div id="debug-watched-list" class="debug-watched-list">
-                <span class="debug-empty-inline">Click <i class="bi bi-circle bi-lead" aria-hidden="true"></i> on any value to watch it</span>
+            <div class="flex items-center gap-2 flex-wrap [padding:4px_0]">
+              <span class="text-fg-soft text-[12px] shrink-0">Watched:</span>
+              <div id="debug-watched-list" class="flex flex-wrap gap-1 items-center">
+                <span class="text-fg-soft text-[11px] [font-style:italic]">Click <i class="bi bi-circle bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> on any value to watch it</span>
               </div>
             </div>
-            <div class="debug-actions" style="display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--border);">
+            <div class="" style="display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--border);">
               <span style="font-size: 12px; color: var(--text-muted); align-self: center;">Video Stream:</span>
-              <button class="btn btn-sm" id="debug-videostream-sdcp" title="Send CmdVideoStreamControl Enable=1 via SDCP WebSocket (port 3030) — matches official app"><i class="bi bi-arrow-right bi-lead" aria-hidden="true"></i> SDCP Enable</button>
-              <button class="btn btn-sm" id="debug-videostream-mqtt" title="Send method 1054 (CTRL_LIVE_STREAM) Enable=1 via MQTT"><i class="bi bi-arrow-right bi-lead" aria-hidden="true"></i> MQTT 1054</button>
+              <button class="inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-hover max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="debug-videostream-sdcp" title="Send CmdVideoStreamControl Enable=1 via SDCP WebSocket (port 3030) — matches official app"><i class="bi bi-arrow-right bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> SDCP Enable</button>
+              <button class="inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg bg-hover max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="debug-videostream-mqtt" title="Send method 1054 (CTRL_LIVE_STREAM) Enable=1 via MQTT"><i class="bi bi-arrow-right bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> MQTT 1054</button>
               <span id="debug-videostream-result" style="font-size: 12px; color: var(--text-muted); align-self: center;"></span>
             </div>
-            <div class="debug-split">
-              <div class="debug-state-section">
-                <h3>Live State <span class="debug-hint">(<i class="bi bi-circle bi-lead" aria-hidden="true"></i> = watch, <i class="bi bi-caret-right-fill bi-lead" aria-hidden="true"></i> = expand)</span></h3>
-                <div id="debug-state-tree" class="debug-state-tree"></div>
+            <div class="grid grid-cols-[1fr_1fr] gap-4 min-h-125 max-[900px]:grid-cols-[1fr]">
+              <div class="flex flex-col gap-1 [&_h3]:m-0 [&_h3]:text-[14px] [&_h3]:text-fg-soft [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2">
+                <h3>Live State <span class="text-[11px] font-normal text-fg-soft">(<i class="bi bi-circle bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> = watch, <i class="bi bi-caret-right-fill bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> = expand)</span></h3>
+                <div id="debug-state-tree" class="bg-card border border-line rounded-[8px] p-2 overflow-auto max-h-[70vh] font-mono text-[12px] leading-[1.6]"></div>
               </div>
-              <div class="debug-log-section">
-                <h3>Change Log <span id="debug-log-count" class="debug-log-count">0 changes</span></h3>
-                <label class="log-autoscroll-label">
+              <div class="flex flex-col gap-1 [&_h3]:m-0 [&_h3]:text-[14px] [&_h3]:text-fg-soft [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2">
+                <h3>Change Log <span id="debug-log-count" class="text-[11px] text-fg-soft font-normal">0 changes</span></h3>
+                <label class="text-[0.8rem] text-fg-soft flex items-center gap-1 cursor-pointer">
                   <input type="checkbox" id="debug-log-autoscroll" checked> Auto-scroll
                 </label>
-                <div id="debug-change-log" class="debug-change-log"></div>
+                <div id="debug-change-log" class="bg-card border border-line rounded-[8px] p-2 overflow-auto max-h-[70vh] font-mono text-[11px] leading-[1.5]"></div>
               </div>
             </div>
           </div>

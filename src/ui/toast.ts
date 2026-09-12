@@ -22,7 +22,8 @@ function ensureContainer(): HTMLElement {
   if (!container) {
     container = document.createElement('div');
     container.id = 'toast-container';
-    container.className = 'toast-container';
+    container.className =
+      'toast-container fixed top-14 right-4 z-[1000] flex flex-col gap-2 pointer-events-none max-w-95';
     document.body.appendChild(container);
   }
   return container;
@@ -33,10 +34,10 @@ function render(): void {
   el.innerHTML = toasts
     .map(
       (t) =>
-        `<div class="toast toast-${t.level}" data-id="${t.id}">` +
-        `<span class="toast-icon">${iconFor(t.level)}</span>` +
-        `<span class="toast-msg">${escapeHtml(t.message)}</span>` +
-        `<button class="toast-close" aria-label="Dismiss">${iconSolo('close')}</button>` +
+        `<div class="flex items-center gap-2 [padding:10px_14px] rounded-card bg-card border border-line shadow-card text-[13px] pointer-events-auto [animation:toast-in_0.25s_ease] ${t.level}" data-id="${t.id}">` +
+        `<span class="text-[14px] shrink-0">${iconFor(t.level)}</span>` +
+        `<span class="flex-1 text-fg">${escapeHtml(t.message)}</span>` +
+        `<button class="toast-close bg-transparent border-0 text-fg-muted cursor-pointer text-[12px] [padding:2px_4px] hover:text-fg" aria-label="Dismiss">${iconSolo('close')}</button>` +
         `</div>`,
     )
     .join('');

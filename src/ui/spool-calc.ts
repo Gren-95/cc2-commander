@@ -142,7 +142,7 @@ function renderSVG(p: SpoolParams, calc: ReturnType<typeof calculate>): string {
   const right = cx + spoolW / 2;
 
   // Build SVG
-  let svg = `<svg viewBox="0 0 ${W} ${H}" class="spool-svg" xmlns="http://www.w3.org/2000/svg">`;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" class="w-full max-w-105 h-auto" xmlns="http://www.w3.org/2000/svg">`;
   svg += `<defs>
     <linearGradient id="filament-grad" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="var(--accent-light)" stop-opacity="0.9"/>
@@ -227,90 +227,90 @@ export function renderSpoolCalc(): void {
   const calc = calculate(p);
 
   container.innerHTML = `
-    <div class="spool-calc">
-      <div class="spool-calc-grid">
-        <div class="spool-calc-viz">
+    <div class="mt-2">
+      <div class="grid grid-cols-[1fr_320px] gap-6 items-start max-[700px]:grid-cols-[1fr]">
+        <div class="flex flex-col items-center gap-4 bg-surface rounded-card p-5 border border-line">
           <div id="spool-svg-container">${renderSVG(p, calc)}</div>
-          <div class="spool-calc-stats">
-            <div class="spool-stat">
-              <span class="spool-stat-value" id="sc-meters">${calc.lengthM.toFixed(1)}</span>
-              <span class="spool-stat-label">meters left</span>
+          <div class="grid grid-cols-[repeat(4,_1fr)] gap-3 w-full max-[700px]:grid-cols-[repeat(2,_1fr)]">
+            <div class="text-center bg-card rounded-chip [padding:10px_6px] border border-line">
+              <span class="block text-[22px] font-bold text-accent-light [font-variant-numeric:tabular-nums]" id="sc-meters">${calc.lengthM.toFixed(1)}</span>
+              <span class="block text-[11px] text-fg-muted [margin-top:2px] uppercase tracking-[0.3px]">meters left</span>
             </div>
-            <div class="spool-stat">
-              <span class="spool-stat-value" id="sc-full-meters">${calc.fullLengthM.toFixed(1)}</span>
-              <span class="spool-stat-label">meters full</span>
+            <div class="text-center bg-card rounded-chip [padding:10px_6px] border border-line">
+              <span class="block text-[22px] font-bold text-accent-light [font-variant-numeric:tabular-nums]" id="sc-full-meters">${calc.fullLengthM.toFixed(1)}</span>
+              <span class="block text-[11px] text-fg-muted [margin-top:2px] uppercase tracking-[0.3px]">meters full</span>
             </div>
-            <div class="spool-stat">
-              <span class="spool-stat-value" id="sc-grams">${calc.filamentMass.toFixed(0)}</span>
-              <span class="spool-stat-label">grams filament</span>
+            <div class="text-center bg-card rounded-chip [padding:10px_6px] border border-line">
+              <span class="block text-[22px] font-bold text-accent-light [font-variant-numeric:tabular-nums]" id="sc-grams">${calc.filamentMass.toFixed(0)}</span>
+              <span class="block text-[11px] text-fg-muted [margin-top:2px] uppercase tracking-[0.3px]">grams filament</span>
             </div>
-            <div class="spool-stat">
-              <span class="spool-stat-value" id="sc-percent">${calc.percentRemaining.toFixed(0)}%</span>
-              <span class="spool-stat-label">remaining</span>
+            <div class="text-center bg-card rounded-chip [padding:10px_6px] border border-line">
+              <span class="block text-[22px] font-bold text-accent-light [font-variant-numeric:tabular-nums]" id="sc-percent">${calc.percentRemaining.toFixed(0)}%</span>
+              <span class="block text-[11px] text-fg-muted [margin-top:2px] uppercase tracking-[0.3px]">remaining</span>
             </div>
           </div>
         </div>
-        <div class="spool-calc-inputs">
+        <div class="spool-calc-inputs bg-card rounded-card p-4 border border-line [&_h4]:text-[12px] [&_h4]:font-semibold [&_h4]:text-fg-soft [&_h4]:uppercase [&_h4]:tracking-[0.4px] [&_h4]:[margin:14px_0_8px] [&_h4:first-child]:mt-0 [&_.form-group_label]:text-[12px] [&_.form-group_label]:text-fg-soft [&_.form-group_label]:[margin-bottom:3px] [&_.form-group_label]:block">
           <h4>Spool Dimensions</h4>
-          <div class="form-group">
+          <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
             <label for="sc-hub-dia">Hub Diameter (inner)</label>
-            <div class="input-with-unit">
+            <div class="flex items-center [gap:6px] [&_input]:flex-1 [&_input]:[padding:6px_10px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [&_input]:[font-variant-numeric:tabular-nums] [&_input:focus]:border-accent">
               <input type="number" id="sc-hub-dia" value="${p.hubDiameter}" min="10" max="120" step="1">
-              <span class="input-unit">mm</span>
+              <span class="text-[12px] text-fg-muted min-w-7">mm</span>
             </div>
           </div>
-          <div class="form-group">
+          <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
             <label for="sc-flange-dia">Flange Diameter (outer)</label>
-            <div class="input-with-unit">
+            <div class="flex items-center [gap:6px] [&_input]:flex-1 [&_input]:[padding:6px_10px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [&_input]:[font-variant-numeric:tabular-nums] [&_input:focus]:border-accent">
               <input type="number" id="sc-flange-dia" value="${p.flangeDiameter}" min="50" max="400" step="1">
-              <span class="input-unit">mm</span>
+              <span class="text-[12px] text-fg-muted min-w-7">mm</span>
             </div>
           </div>
-          <div class="form-group">
+          <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
             <label for="sc-width">Spool Width</label>
-            <div class="input-with-unit">
+            <div class="flex items-center [gap:6px] [&_input]:flex-1 [&_input]:[padding:6px_10px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [&_input]:[font-variant-numeric:tabular-nums] [&_input:focus]:border-accent">
               <input type="number" id="sc-width" value="${p.spoolWidth}" min="10" max="150" step="1">
-              <span class="input-unit">mm</span>
+              <span class="text-[12px] text-fg-muted min-w-7">mm</span>
             </div>
           </div>
 
           <h4>Weight</h4>
-          <div class="form-group">
+          <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
             <label for="sc-empty-weight">Empty Spool Weight</label>
-            <div class="input-with-unit">
+            <div class="flex items-center [gap:6px] [&_input]:flex-1 [&_input]:[padding:6px_10px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [&_input]:[font-variant-numeric:tabular-nums] [&_input:focus]:border-accent">
               <input type="number" id="sc-empty-weight" value="${p.emptyWeight}" min="0" max="2000" step="1">
-              <span class="input-unit">g</span>
+              <span class="text-[12px] text-fg-muted min-w-7">g</span>
             </div>
           </div>
-          <div class="form-group">
+          <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
             <label for="sc-full-weight">Full Spool Weight (spool + filament)</label>
-            <div class="input-with-unit">
+            <div class="flex items-center [gap:6px] [&_input]:flex-1 [&_input]:[padding:6px_10px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [&_input]:[font-variant-numeric:tabular-nums] [&_input:focus]:border-accent">
               <input type="number" id="sc-full-weight" value="${p.fullWeight}" min="0" max="10000" step="1">
-              <span class="input-unit">g</span>
+              <span class="text-[12px] text-fg-muted min-w-7">g</span>
             </div>
           </div>
-          <div class="form-group">
+          <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
             <label for="sc-current-weight">Current Weight</label>
-            <div class="input-with-unit">
+            <div class="flex items-center [gap:6px] [&_input]:flex-1 [&_input]:[padding:6px_10px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [&_input]:[font-variant-numeric:tabular-nums] [&_input:focus]:border-accent">
               <input type="number" id="sc-current-weight" value="${p.currentWeight}" min="0" max="10000" step="1">
-              <span class="input-unit">g</span>
+              <span class="text-[12px] text-fg-muted min-w-7">g</span>
             </div>
           </div>
 
           <h4>Measure by Diameter</h4>
-          <div class="form-group">
+          <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
             <label for="sc-outer-dia">Current Outer Diameter</label>
-            <div class="input-with-unit">
+            <div class="flex items-center [gap:6px] [&_input]:flex-1 [&_input]:[padding:6px_10px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [&_input]:[font-variant-numeric:tabular-nums] [&_input:focus]:border-accent">
               <input type="number" id="sc-outer-dia" value="${p.currentOuterDiameter || ''}" min="0" max="400" step="1" placeholder="e.g. 180">
-              <span class="input-unit">mm</span>
+              <span class="text-[12px] text-fg-muted min-w-7">mm</span>
             </div>
-            <span class="settings-hint">Measure the filament wound on the spool with a ruler — updates weight automatically</span>
+            <span class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Measure the filament wound on the spool with a ruler — updates weight automatically</span>
           </div>
 
           <h4>Filament</h4>
-          <div class="form-group">
+          <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
             <label for="sc-material">Material</label>
-            <select id="sc-material" class="log-select">
+            <select id="sc-material" class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] [.spool-calc-inputs_&]:w-full [.spool-calc-inputs_&]:[padding:6px_10px] [.spool-calc-inputs_&]:text-[14px]">
               ${Object.keys(MATERIALS)
                 .map(
                   (m) =>
@@ -319,15 +319,15 @@ export function renderSpoolCalc(): void {
                 .join('')}
             </select>
           </div>
-          <div class="form-group">
+          <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
             <label for="sc-filament-dia">Filament Diameter</label>
-            <select id="sc-filament-dia" class="log-select">
+            <select id="sc-filament-dia" class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] [.spool-calc-inputs_&]:w-full [.spool-calc-inputs_&]:[padding:6px_10px] [.spool-calc-inputs_&]:text-[14px]">
               <option value="1.75"${p.filamentDiameter === 1.75 ? ' selected' : ''}>1.75 mm</option>
               <option value="2.85"${p.filamentDiameter === 2.85 ? ' selected' : ''}>2.85 mm</option>
             </select>
           </div>
 
-          <div class="spool-calc-density">
+          <div class="spool-calc-density mt-3 text-[11px] text-fg-muted font-mono">
             Density: ${calc.density} g/cm³ · Cross-section: ${(Math.PI * (p.filamentDiameter / 2) ** 2).toFixed(4)} mm²
           </div>
         </div>

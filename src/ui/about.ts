@@ -35,9 +35,9 @@ function formatInstalledAt(iso: string | null | undefined): string | null {
 /** One `label: value` line, with an optional `title` for the long form. */
 function row(label: string, value: string, title?: string): string {
   const attr = title ? ` title="${escapeHtml(title)}"` : '';
-  return `<div class="about-row">
-      <span class="about-label">${escapeHtml(label)}</span>
-      <span class="about-value"${attr}>${escapeHtml(value)}</span>
+  return `<div class="about-row flex gap-4 justify-between [padding:3px_0] text-[13px]">
+      <span class="about-label text-fg-muted">${escapeHtml(label)}</span>
+      <span class="about-value text-fg font-mono"${attr}>${escapeHtml(value)}</span>
     </div>`;
 }
 
@@ -77,12 +77,12 @@ export function renderAbout(stamp: BuildStampish | null | undefined): void {
   }
 
   host.innerHTML = `
-    <p class="about-summary">${escapeHtml(SUMMARY)}</p>
-    <div class="about-build ${stamped ? '' : 'about-build-unstamped'}">
-      <div class="about-build-title">${icon('printing')} Running build</div>
+    <p class="[margin:0_0_14px] max-w-[70ch] text-fg-soft leading-[1.5]">${escapeHtml(SUMMARY)}</p>
+    <div class="inline-block min-w-65 [padding:12px_16px] border border-line rounded-card bg-raised ${stamped ? '' : 'about-build-unstamped border-[rgba(234,_179,_8,_0.45)]'}">
+      <div class="mb-2 text-fg-muted text-[11px] font-semibold tracking-[0.04em] uppercase">${icon('printing')} Running build</div>
       ${rows.join('')}
     </div>
-    <p class="about-links">
+    <p class="[margin:14px_0_0] text-[13px] [&_a]:text-accent [&_a]:no-underline [&_a:hover]:underline">
       <a href="${PROJECT_URL}" target="_blank" rel="noopener noreferrer">
         ${icon('link')} Source &amp; issue tracker
       </a>

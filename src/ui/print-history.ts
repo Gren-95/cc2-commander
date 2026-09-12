@@ -115,16 +115,16 @@ export function renderPrintHistory(state: PrinterState): void {
       // A record with no task_id cannot be addressed by 1038, so it gets no button
       // rather than one that silently does nothing.
       const deleteBtn = item.uuid
-        ? `<button class="btn btn-sm btn-ghost history-delete-btn" data-task-id="${escapeAttr(item.uuid)}" data-filename="${escapeAttr(item.filename)}" title="Delete this entry from the printer" aria-label="Delete this entry from the printer">${iconSolo('trash')}</button>`
+        ? `<button class="history-delete-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] ml-auto shrink-0 opacity-[0.6] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] hover:opacity-[1] hover:text-bad [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-task-id="${escapeAttr(item.uuid)}" data-filename="${escapeAttr(item.filename)}" title="Delete this entry from the printer" aria-label="Delete this entry from the printer">${iconSolo('trash')}</button>`
         : '';
 
-      return `<div class="history-entry">
-      <div class="history-entry-main">
-        <span class="history-status ${statusClass}" title="${escapeHtml(item.status)}">${statusIcon}</span>
-        <span class="history-filename" title="${escapeHtml(item.filename)}">${escapeHtml(item.filename)}</span>
+      return `<div class="[padding:6px_10px] rounded-[6px] bg-[var(--card-bg)] border border-line">
+      <div class="flex items-center gap-2">
+        <span class="text-[14px] ${statusClass}" title="${escapeHtml(item.status)}">${statusIcon}</span>
+        <span class="font-medium overflow-hidden text-ellipsis whitespace-nowrap flex-1" title="${escapeHtml(item.filename)}">${escapeHtml(item.filename)}</span>
         ${deleteBtn}
       </div>
-      <div class="history-entry-meta">
+      <div class="flex gap-4 mt-1 [padding-left:26px] text-[0.82em] text-fg-muted">
         <span title="Start time">${icon('clock')} ${escapeHtml(begin)}</span>
         <span title="Duration">${icon('duration')} ${escapeHtml(duration)}</span>
       </div>

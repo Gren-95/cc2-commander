@@ -65,30 +65,31 @@ function close(): void {
 function showPowerLossDialog(filename: string | undefined, client: CommandSender): void {
   const overlay = document.createElement('div');
   overlay.id = 'power-loss-overlay';
-  overlay.className = 'print-dialog-overlay';
+  overlay.className =
+    'print-dialog-overlay fixed inset-0 bg-[rgba(0,_0,_0,_0.7)] flex items-center justify-center z-[10000] p-5';
 
   const fileLine = filename
-    ? `<div class="print-dialog-filename" title="${escapeHtml(filename)}">${escapeHtml(filename)}</div>`
+    ? `<div class="font-semibold text-[13px] text-fg [word-break:break-word] [margin-bottom:6px]" title="${escapeHtml(filename)}">${escapeHtml(filename)}</div>`
     : '';
 
   overlay.innerHTML = `
-    <div class="print-dialog">
-      <div class="print-dialog-header">
+    <div class="bg-card border border-line rounded-[8px] w-full max-w-110 max-h-[90vh] flex flex-col [box-shadow:0_8px_32px_rgba(0,_0,_0,_0.5)]">
+      <div class="flex justify-between items-center [padding:12px_16px] border-b border-line font-semibold text-[14px] text-fg">
         <span>${icon('powerLoss')} Power loss detected</span>
       </div>
-      <div class="print-dialog-body">
+      <div class="p-4 overflow-y-auto flex-1">
         <p>The printer lost power during a print and is waiting for a decision.</p>
         ${fileLine}
-        <p class="settings-hint">
+        <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">
           Check the model and the bed before resuming — a print that shifted or came
           loose while the power was off will not recover, and resuming will print into
           the air. Cancelling cannot be undone.
         </p>
       </div>
-      <div class="print-dialog-footer">
-        <button class="btn btn-ghost" id="power-loss-dismiss">Decide later</button>
-        <button class="btn btn-danger" id="power-loss-cancel">Cancel print</button>
-        <button class="btn btn-primary" id="power-loss-resume">Resume print</button>
+      <div class="print-dialog-footer flex justify-end gap-2 [padding:12px_16px] border-t border-line">
+        <button class="inline-flex items-center justify-center [padding:8px_16px] border border-line rounded-chip text-[13px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:8px_16px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="power-loss-dismiss">Decide later</button>
+        <button class="inline-flex items-center justify-center [padding:8px_16px] border-0 rounded-chip text-[13px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-bad max-[800px]:[padding:8px_16px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="power-loss-cancel">Cancel print</button>
+        <button class="inline-flex items-center justify-center [padding:8px_16px] border-0 rounded-chip text-[13px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent max-[800px]:[padding:8px_16px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.print-dialog-footer_&]:min-w-25 hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="power-loss-resume">Resume print</button>
       </div>
     </div>`;
 

@@ -1,4 +1,5 @@
 import path from 'path';
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, loadEnv } from 'vite';
 
 /**
@@ -28,6 +29,11 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, import.meta.dirname, 'VITE_');
 
   return {
+    // Tailwind v4 is a vite plugin rather than a postcss step; there is no
+    // tailwind.config.js — the configuration is the `@theme` block in
+    // src/styles/main.css.
+    plugins: [tailwindcss()],
+
     resolve: {
       alias: {
         // Ensure only one copy of three.js is loaded (gcode-preview peer dep)

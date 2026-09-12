@@ -10,6 +10,7 @@
  * - Search/filter across all fields
  */
 
+import { toggleState } from './state-classes';
 import { icon, iconSolo, iconText } from './icons';
 import { fetchTimeout } from './helpers';
 import { PrinterState } from '../printer-state';
@@ -184,11 +185,11 @@ function buildTreeHtml(obj: unknown, path: string, filter: string, depth = 0): s
     ) {
       return '';
     }
-    return `<div class="debug-leaf${cls}" style="padding-left:${depth * 16}px">
-      ${watched ? `<span class="debug-watch-icon" title="Watched">${iconSolo('watching')}</span>` : ''}
-      <span class="debug-key">${escapeKey(path)}</span>
-      <span class="debug-value debug-null">${String(obj)}</span>
-      <span class="debug-watch" data-path="${escapeHtmlStr(path)}" title="Toggle watch">${watched ? iconSolo('watching') : iconSolo('unwatched')}</span>
+    return `<div class="debug-leaf whitespace-nowrap [padding:1px_0] rounded-[3px] [transition:background_0.3s_ease] ${cls}" style="padding-left:${depth * 16}px">
+      ${watched ? `<span class="text-[10px] [margin-right:2px]" title="Watched">${iconSolo('watching')}</span>` : ''}
+      <span class="text-[#79c0ff] mr-1 after:content-[':'] after:text-fg-soft after:mr-1 after:[.debug-node>&]:content-['']">${escapeKey(path)}</span>
+      <span class="text-[#8b949e] [font-style:italic]">${String(obj)}</span>
+      <span class="debug-watch cursor-pointer text-[10px] opacity-[0.3] ml-1 select-none [transition:opacity_0.15s] [.debug-leaf:hover_&]:opacity-[1] [.debug-node:hover>&]:opacity-[1]" data-path="${escapeHtmlStr(path)}" title="Toggle watch">${watched ? iconSolo('watching') : iconSolo('unwatched')}</span>
     </div>`;
   }
   if (typeof obj !== 'object') {
@@ -204,11 +205,11 @@ function buildTreeHtml(obj: unknown, path: string, filter: string, depth = 0): s
     ) {
       return '';
     }
-    return `<div class="debug-leaf${cls}" style="padding-left:${depth * 16}px">
-      ${watched ? `<span class="debug-watch-icon" title="Watched">${iconSolo('watching')}</span>` : ''}
-      <span class="debug-key">${escapeKey(lastSegment(path))}</span>
-      <span class="debug-value ${typeClass(obj)}">${escapeHtmlStr(display)}</span>
-      <span class="debug-watch" data-path="${escapeHtmlStr(path)}" title="Toggle watch">${watched ? iconSolo('watching') : iconSolo('unwatched')}</span>
+    return `<div class="debug-leaf whitespace-nowrap [padding:1px_0] rounded-[3px] [transition:background_0.3s_ease] ${cls}" style="padding-left:${depth * 16}px">
+      ${watched ? `<span class="text-[10px] [margin-right:2px]" title="Watched">${iconSolo('watching')}</span>` : ''}
+      <span class="text-[#79c0ff] mr-1 after:content-[':'] after:text-fg-soft after:mr-1 after:[.debug-node>&]:content-['']">${escapeKey(lastSegment(path))}</span>
+      <span class="${typeClass(obj)}">${escapeHtmlStr(display)}</span>
+      <span class="debug-watch cursor-pointer text-[10px] opacity-[0.3] ml-1 select-none [transition:opacity_0.15s] [.debug-leaf:hover_&]:opacity-[1] [.debug-node:hover>&]:opacity-[1]" data-path="${escapeHtmlStr(path)}" title="Toggle watch">${watched ? iconSolo('watching') : iconSolo('unwatched')}</span>
     </div>`;
   }
   if (Array.isArray(obj)) {
@@ -222,11 +223,11 @@ function buildTreeHtml(obj: unknown, path: string, filter: string, depth = 0): s
       return '';
     const watched = watchedPaths.has(path);
     const arrow = collapsed ? icon('collapsed') : icon('expanded');
-    return `<div class="debug-node" style="padding-left:${depth * 16}px">
-      <span class="debug-toggle" data-path="${escapeHtmlStr(path)}">${arrow}</span>
-      <span class="debug-key">${escapeKey(lastSegment(path))}</span>
-      <span class="debug-meta">[${obj.length}]</span>
-      <span class="debug-watch" data-path="${escapeHtmlStr(path)}" title="Watch all children">${watched ? iconSolo('watching') : iconSolo('unwatched')}</span>
+    return `<div class="debug-node cursor-default whitespace-nowrap" style="padding-left:${depth * 16}px">
+      <span class="debug-toggle cursor-pointer inline-block w-[14px] text-center text-fg-soft select-none text-[10px] hover:text-accent" data-path="${escapeHtmlStr(path)}">${arrow}</span>
+      <span class="text-[#79c0ff] mr-1 after:content-[':'] after:text-fg-soft after:mr-1 after:[.debug-node>&]:content-['']">${escapeKey(lastSegment(path))}</span>
+      <span class="text-fg-soft text-[11px]">[${obj.length}]</span>
+      <span class="debug-watch cursor-pointer text-[10px] opacity-[0.3] ml-1 select-none [transition:opacity_0.15s] [.debug-leaf:hover_&]:opacity-[1] [.debug-node:hover>&]:opacity-[1]" data-path="${escapeHtmlStr(path)}" title="Watch all children">${watched ? iconSolo('watching') : iconSolo('unwatched')}</span>
     </div>${childrenHtml}`;
   }
   const rec = obj as Record<string, unknown>;
@@ -241,11 +242,11 @@ function buildTreeHtml(obj: unknown, path: string, filter: string, depth = 0): s
   const watched = watchedPaths.has(path);
   const arrow = collapsed ? icon('collapsed') : icon('expanded');
   const label = path ? lastSegment(path) : '{root}';
-  return `<div class="debug-node" style="padding-left:${depth * 16}px">
-    <span class="debug-toggle" data-path="${escapeHtmlStr(path)}">${arrow}</span>
-    <span class="debug-key">${escapeKey(label)}</span>
-    <span class="debug-meta">{${keys.length}}</span>
-    ${path ? `<span class="debug-watch" data-path="${escapeHtmlStr(path)}" title="Watch all children">${watched ? iconSolo('watching') : iconSolo('unwatched')}</span>` : ''}
+  return `<div class="debug-node cursor-default whitespace-nowrap" style="padding-left:${depth * 16}px">
+    <span class="debug-toggle cursor-pointer inline-block w-[14px] text-center text-fg-soft select-none text-[10px] hover:text-accent" data-path="${escapeHtmlStr(path)}">${arrow}</span>
+    <span class="text-[#79c0ff] mr-1 after:content-[':'] after:text-fg-soft after:mr-1 after:[.debug-node>&]:content-['']">${escapeKey(label)}</span>
+    <span class="text-fg-soft text-[11px]">{${keys.length}}</span>
+    ${path ? `<span class="debug-watch cursor-pointer text-[10px] opacity-[0.3] ml-1 select-none [transition:opacity_0.15s] [.debug-leaf:hover_&]:opacity-[1] [.debug-node:hover>&]:opacity-[1]" data-path="${escapeHtmlStr(path)}" title="Watch all children">${watched ? iconSolo('watching') : iconSolo('unwatched')}</span>` : ''}
   </div>${childrenHtml}`;
 }
 
@@ -314,7 +315,9 @@ export function renderDebugPanel(state: PrinterState): void {
   const snapshot = getStateSnapshot(state);
   const filter = currentFilter.toLowerCase();
   const treeHtml = buildTreeHtml(snapshot, '', filter);
-  container.innerHTML = treeHtml || '<div class="debug-empty">No matching fields</div>';
+  container.innerHTML =
+    treeHtml ||
+    '<div class="text-fg-soft [font-style:italic] p-4 text-center">No matching fields</div>';
 
   // Render change log
   renderChangeLog();
@@ -342,18 +345,18 @@ function renderChangeLog(): void {
     const oldStr = formatValue(entry.path, entry.oldValue);
     const newStr = formatValue(entry.path, entry.newValue);
     const watched = isPathWatched(entry.path);
-    html += `<div class="debug-log-entry${watched ? ' debug-log-watched' : ''}">
-      <span class="debug-log-time">${time}</span>
-      ${watched ? `<span class="debug-log-badge">${iconSolo('watching')}</span>` : ''}
-      <span class="debug-log-path">${escapeHtmlStr(entry.path)}</span>
-      <span class="debug-log-old">${escapeHtmlStr(oldStr)}</span>
-      <span class="debug-log-arrow">${iconSolo('changeTo')}</span>
-      <span class="debug-log-new">${escapeHtmlStr(newStr)}</span>
+    html += `<div class="flex [gap:6px] [padding:2px_4px] border-b border-line items-baseline flex-wrap hover:bg-input ${watched ? 'bg-[rgba(88,_166,_255,_0.05)]' : ''}">
+      <span class="text-fg-soft shrink-0 text-[10px]">${time}</span>
+      ${watched ? `<span class="text-[10px] shrink-0">${iconSolo('watching')}</span>` : ''}
+      <span class="text-[#79c0ff] shrink-0 max-w-[250px] overflow-hidden text-ellipsis">${escapeHtmlStr(entry.path)}</span>
+      <span class="text-[#f85149] [text-decoration:line-through] max-w-[150px] overflow-hidden text-ellipsis">${escapeHtmlStr(oldStr)}</span>
+      <span class="text-fg-soft shrink-0">${iconSolo('changeTo')}</span>
+      <span class="text-[#3fb950] max-w-50 overflow-hidden text-ellipsis">${escapeHtmlStr(newStr)}</span>
     </div>`;
   }
   container.innerHTML =
     html ||
-    '<div class="debug-empty">No changes logged yet. Enable logging or watch specific values to start recording.</div>';
+    '<div class="text-fg-soft [font-style:italic] p-4 text-center">No changes logged yet. Enable logging or watch specific values to start recording.</div>';
 
   if (autoScrollLog) {
     container.scrollTop = container.scrollHeight;
@@ -365,12 +368,12 @@ function renderWatchedPaths(): void {
   const container = document.getElementById('debug-watched-list');
   if (!container) return;
   if (watchedPaths.size === 0) {
-    container.innerHTML = `<span class="debug-empty-inline">Click ${icon('unwatched')} on any value to watch it</span>`;
+    container.innerHTML = `<span class="text-fg-soft text-[11px] [font-style:italic]">Click ${icon('unwatched')} on any value to watch it</span>`;
     return;
   }
   let html = '';
   for (const path of watchedPaths) {
-    html += `<span class="debug-watched-tag" data-path="${escapeHtmlStr(path)}">${escapeHtmlStr(path)} ${icon('close')}</span>`;
+    html += `<span class="debug-watched-tag inline-flex items-center gap-1 [padding:2px_8px] bg-[rgba(88,_166,_255,_0.15)] border border-[rgba(88,_166,_255,_0.3)] rounded-[12px] text-[11px] font-mono text-[#79c0ff] cursor-pointer [transition:background_0.15s] hover:bg-[rgba(248,_81,_73,_0.2)] hover:border-[rgba(248,_81,_73,_0.4)] hover:text-[#f85149]" data-path="${escapeHtmlStr(path)}">${escapeHtmlStr(path)} ${icon('close')}</span>`;
   }
   container.innerHTML = html;
 }
@@ -400,7 +403,7 @@ function updateLoggingUI(): void {
   if (btn) {
     if (changeLoggingEnabled) iconText(btn, 'stop', 'Stop Logging');
     else iconText(btn, 'play', 'Start Logging');
-    btn.classList.toggle('active', changeLoggingEnabled);
+    toggleState(btn, 'active', changeLoggingEnabled);
   }
   const badge = document.getElementById('debug-logging-badge');
   if (badge) {

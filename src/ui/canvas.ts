@@ -20,7 +20,8 @@ export function renderCanvas(state: PrinterState): void {
     if (state.monoFilament) {
       renderMonoFilament(container, state.monoFilament);
     } else {
-      container.innerHTML = '<div class="canvas-empty">No Canvas/AMS detected</div>';
+      container.innerHTML =
+        '<div class="text-fg-muted [font-style:italic] p-5 text-center">No Canvas/AMS detected</div>';
     }
     return;
   }
@@ -28,22 +29,22 @@ export function renderCanvas(state: PrinterState): void {
   let html = '';
   for (const unit of canvas.canvas_list) {
     const connected = !!unit.connected;
-    html += `<div class="canvas-unit ${connected ? '' : 'canvas-disconnected'}">`;
-    html += `<div class="canvas-unit-header">Canvas ${unit.canvas_id + 1} ${connected ? `${icon('connected', 'canvas-state-ok')} Connected` : `${icon('disconnected', 'canvas-state-off')} Disconnected`}</div>`;
+    html += `<div class="flex flex-col [gap:10px] ${connected ? '' : 'opacity-[0.5]'}">`;
+    html += `<div class="text-[13px] font-semibold text-fg-soft">Canvas ${unit.canvas_id + 1} ${connected ? `${icon('connected', 'canvas-state-ok')} Connected` : `${icon('disconnected', 'canvas-state-off')} Disconnected`}</div>`;
 
     // Physical layout: 2×2 grid of spools inside a "device" frame
-    html += `<div class="canvas-device">`;
-    html += `<div class="canvas-hub">`;
-    html += `<div class="canvas-hub-label">Canvas</div>`;
-    html += `<div class="canvas-hub-tubes">`;
+    html += `<div class="flex items-center gap-3 bg-surface rounded-card p-4 relative">`;
+    html += `<div class="flex flex-col items-center gap-1 min-w-12">`;
+    html += `<div class="text-[9px] text-fg-muted uppercase tracking-[0.5px]">Canvas</div>`;
+    html += `<div class="flex flex-col [gap:3px]">`;
     for (const tray of unit.tray_list) {
       const color = `#${(tray.filament_color || '434343').replace(/^#/, '')}`;
       const isEmpty = tray.status === 0;
-      html += `<div class="canvas-tube" style="background: ${isEmpty ? '#434343' : escapeAttr(color)}"></div>`;
+      html += `<div class="w-8 h-1 rounded-[2px]" style="background: ${isEmpty ? '#434343' : escapeAttr(color)}"></div>`;
     }
     html += `</div></div>`;
 
-    html += `<div class="canvas-spools">`;
+    html += `<div class="grid grid-cols-[repeat(2,_1fr)] gap-3 flex-1 max-[800px]:[gap:10px]">`;
     // Physical layout is CCW from top-left: 0=TL, 1=BL, 2=BR, 3=TR
     // CSS grid fills row-major: pos0=TL, pos1=TR, pos2=BL, pos3=BR
     // Reorder: grid[0]=tray0, grid[1]=tray3, grid[2]=tray1, grid[3]=tray2
@@ -62,24 +63,24 @@ export function renderCanvas(state: PrinterState): void {
       const tempRange =
         !isEmpty && tray.min_nozzle_temp ? `${tray.min_nozzle_temp}–${tray.max_nozzle_temp}°C` : '';
 
-      html += `<div class="canvas-spool-slot ${statusClass}" title="${escapeAttr(tray.filament_name || typeLabel)} — click to edit" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}" data-type="${escapeAttr(tray.filament_type || '')}" data-color="${escapeAttr(tray.filament_color || '')}" data-brand="${escapeAttr(tray.brand || 'ELEGOO')}" data-name="${escapeAttr(tray.filament_name || '')}" data-min-temp="${tray.min_nozzle_temp || ''}" data-max-temp="${tray.max_nozzle_temp || ''}">`;
-      html += `<div class="spool-number">${tray.tray_id + 1}</div>`;
-      html += `<div class="spool-ring" style="border-color: ${isEmpty ? '#434343' : escapeAttr(color)}">`;
-      html += `<div class="spool-fill" style="background: ${isEmpty ? 'transparent' : escapeAttr(color)}"></div>`;
-      html += `<div class="spool-center"></div>`;
+      html += `<div class="canvas-spool-slot flex flex-col items-center gap-1 relative p-1 ${statusClass}" title="${escapeAttr(tray.filament_name || typeLabel)} — click to edit" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}" data-type="${escapeAttr(tray.filament_type || '')}" data-color="${escapeAttr(tray.filament_color || '')}" data-brand="${escapeAttr(tray.brand || 'ELEGOO')}" data-name="${escapeAttr(tray.filament_name || '')}" data-min-temp="${tray.min_nozzle_temp || ''}" data-max-temp="${tray.max_nozzle_temp || ''}">`;
+      html += `<div class="absolute top--1 left--1 w-5 h-5 rounded-full bg-fg-muted text-app text-[11px] font-bold flex items-center justify-center z-[1] [.spool-active_&]:bg-accent">${tray.tray_id + 1}</div>`;
+      html += `<div class="w-16 h-16 rounded-full [border:4px_solid] relative flex items-center justify-center [transition:all_0.3s] [.spool-empty_&]:opacity-[0.3]" style="border-color: ${isEmpty ? '#434343' : escapeAttr(color)}">`;
+      html += `<div class="w-full h-full rounded-full opacity-[0.3]" style="background: ${isEmpty ? 'transparent' : escapeAttr(color)}"></div>`;
+      html += `<div class="absolute top-[50%] left-[50%] [transform:translate(-50%,_-50%)] w-[18px] h-[18px] rounded-full bg-card border-2 border-[rgba(255,_255,_255,_0.1)]"></div>`;
       if (isActive) {
-        html += `<div class="spool-active-indicator"></div>`;
+        html += `<div class="absolute [inset:-6px] rounded-full border-2 border-accent [animation:pulse_1.5s_infinite]"></div>`;
       }
       html += `</div>`;
-      html += `<div class="spool-label">${escapeHtml(typeLabel)}</div>`;
+      html += `<div class="text-[11px] font-semibold text-fg text-center">${escapeHtml(typeLabel)}</div>`;
       if (tempRange) {
-        html += `<div class="spool-temp">${tempRange}</div>`;
+        html += `<div class="text-[9px] text-fg-muted">${tempRange}</div>`;
       }
-      html += `<div class="spool-actions">`;
+      html += `<div class="spool-actions flex gap-1 justify-center [margin-top:2px]">`;
       if (isActive) {
-        html += `<button class="btn btn-sm btn-ghost spool-unload-btn" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}">Unload</button>`;
+        html += `<button class="spool-unload-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}">Unload</button>`;
       } else if (!isEmpty) {
-        html += `<button class="btn btn-sm btn-primary spool-load-btn" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}">Load</button>`;
+        html += `<button class="spool-load-btn inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.print-dialog-footer_&]:min-w-25 hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}">Load</button>`;
       }
       html += `</div>`;
       html += `</div>`;
@@ -87,16 +88,16 @@ export function renderCanvas(state: PrinterState): void {
     html += `</div>`; // canvas-spools
 
     // Extruder icon
-    html += `<div class="canvas-extruder" title="Extruder">`;
-    html += `<div class="extruder-icon">${iconSolo('extruder')}</div>`;
+    html += `<div class="flex items-center justify-center min-w-12" title="Extruder">`;
+    html += `<div class="text-[32px] text-fg-muted opacity-[0.6]">${iconSolo('extruder')}</div>`;
     html += `</div>`;
 
     html += `</div>`; // canvas-device
 
     // Action bar
-    html += `<div class="canvas-actions">`;
-    html += `<label class="canvas-meta toggle-inline">Auto-refill: `;
-    html += `<label class="toggle"><input type="checkbox" class="auto-refill-toggle" ${canvas.auto_refill ? 'checked' : ''}><span class="toggle-slider"></span></label>`;
+    html += `<div class="flex items-center gap-2">`;
+    html += `<label class="text-[12px] text-fg-muted flex items-center gap-2 cursor-pointer">Auto-refill: `;
+    html += `<label class="toggle relative inline-block w-10 h-[22px] shrink-0 [&_input]:opacity-[0] [&_input]:w-0 [&_input]:h-0"><input type="checkbox" class="auto-refill-toggle" ${canvas.auto_refill ? 'checked' : ''}><span class="absolute cursor-pointer inset-0 bg-input rounded-[22px] border border-line [transition:0.2s] before:content-[''] before:absolute before:h-4 before:w-4 before:left-[2px] before:bottom-[2px] before:bg-fg-muted before:rounded-full before:[transition:0.2s] [.toggle_input:checked+&]:bg-accent [.toggle_input:checked+&]:border-accent before:[.toggle_input:checked+&]:[transform:translateX(18px)] before:[.toggle_input:checked+&]:bg-white"></span></label>`;
     html += `</label>`;
     html += `</div>`;
 
@@ -193,16 +194,16 @@ function renderMonoFilament(container: HTMLElement, info: Record<string, unknown
   const tempRange = minTemp && maxTemp ? `${minTemp}–${maxTemp}°C` : '';
   const brandLabel = brand ? escapeHtml(brand) + ' ' : '';
 
-  let html = '<div class="mono-filament">';
-  html += '<div class="mono-filament-header">Direct Drive Filament</div>';
-  html += '<div class="mono-filament-spool">';
-  html += `<div class="spool-ring mono-spool-ring" style="border-color: ${escapeAttr(colorHex)}">`;
-  html += `<div class="spool-fill" style="background: ${escapeAttr(colorHex)}"></div>`;
-  html += `<div class="spool-center"></div>`;
+  let html = '<div class="p-3">';
+  html += '<div class="text-[13px] font-semibold text-fg-soft mb-3">Direct Drive Filament</div>';
+  html += '<div class="flex items-center gap-4">';
+  html += `<div class="w-13 h-13 rounded-full [border:4px_solid] relative flex items-center justify-center [transition:all_0.3s] shrink-0 [.spool-empty_&]:opacity-[0.3]" style="border-color: ${escapeAttr(colorHex)}">`;
+  html += `<div class="w-full h-full rounded-full opacity-[0.3]" style="background: ${escapeAttr(colorHex)}"></div>`;
+  html += `<div class="absolute top-[50%] left-[50%] [transform:translate(-50%,_-50%)] w-[18px] h-[18px] rounded-full bg-card border-2 border-[rgba(255,_255,_255,_0.1)]"></div>`;
   html += '</div>';
-  html += `<div class="mono-filament-info">`;
-  html += `<div class="mono-filament-type">${brandLabel}${escapeHtml(label)}</div>`;
-  if (tempRange) html += `<div class="mono-filament-temp">${tempRange}</div>`;
+  html += `<div class="flex flex-col [gap:2px]">`;
+  html += `<div class="text-[14px] font-medium">${brandLabel}${escapeHtml(label)}</div>`;
+  if (tempRange) html += `<div class="text-[12px] text-fg-muted">${tempRange}</div>`;
   html += `</div>`;
   html += '</div>';
 
@@ -223,9 +224,9 @@ function renderMonoFilament(container: HTMLElement, info: Record<string, unknown
   ]);
   const extra = Object.entries(info).filter(([k]) => !knownKeys.has(k));
   if (extra.length > 0 && !type && !name) {
-    html += '<div class="mono-filament-raw">';
+    html += '<div class="mt-2 text-[11px] text-fg-muted">';
     for (const [k, v] of extra) {
-      html += `<div class="mono-raw-field"><span>${escapeHtml(k)}:</span> ${escapeHtml(String(v))}</div>`;
+      html += `<div class="[&_span]:text-fg-soft [&_span]:font-medium"><span>${escapeHtml(k)}:</span> ${escapeHtml(String(v))}</div>`;
     }
     html += '</div>';
   }

@@ -64,15 +64,15 @@ export function renderLog(store: LogStore): void {
     const dirArrow = e.direction === 'sent' ? icon('sent') : icon('received');
     const isExpanded = expandedEntries.has(e.timestamp);
 
-    html += `<div class="log-row ${dirClass}" data-idx="${i}" data-ts="${e.timestamp}">`;
+    html += `<div class="log-row flex gap-2 [padding:2px_6px] rounded-[3px] cursor-pointer items-start break-all hover:bg-hover ${dirClass}" data-idx="${i}" data-ts="${e.timestamp}">`;
     html += timestampSpan('log-time', e.timestamp, formatTimestamp(e.timestamp));
-    html += `<span class="log-dir">${dirArrow}</span>`;
-    html += `<span class="log-topic">${escapeHtml(shortTopic(e.topic))}</span>`;
-    html += `<span class="log-method">${escapeHtml(methodLabel(e))}</span>`;
+    html += `<span class="font-bold min-w-[14px] text-center [.log-sent_&]:text-accent-light [.log-recv_&]:text-ok">${dirArrow}</span>`;
+    html += `<span class="text-warn min-w-[90px] whitespace-nowrap">${escapeHtml(shortTopic(e.topic))}</span>`;
+    html += `<span class="text-accent min-w-[50px] whitespace-nowrap font-semibold">${escapeHtml(methodLabel(e))}</span>`;
     if (isExpanded) {
-      html += `<pre class="log-payload expanded">${escapeHtml(JSON.stringify(e.raw, null, 2))}</pre>`;
+      html += `<pre class="expanded text-fg-soft overflow-hidden text-ellipsis whitespace-pre-wrap flex-1 min-w-0 bg-surface [padding:6px_8px] rounded-[4px] [margin-top:2px] max-h-75 overflow-y-auto w-full">${escapeHtml(JSON.stringify(e.raw, null, 2))}</pre>`;
     } else {
-      html += `<span class="log-payload">${escapeHtml(e.payload)}</span>`;
+      html += `<span class="text-fg-soft overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0">${escapeHtml(e.payload)}</span>`;
     }
     html += `</div>`;
   }

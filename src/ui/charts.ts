@@ -1,5 +1,6 @@
 /** Lightweight canvas-based live line chart — no dependencies */
 
+import { toggleState } from './state-classes';
 import { icon } from './icons';
 import type { ChartStore, Series } from '../chart-store';
 import { saveChartWindow, getChartWindow } from './ui-settings';
@@ -85,8 +86,8 @@ function bindTimeWindowButtons(): void {
       }
       // Update active state for this chart's buttons
       const parent = el.parentElement;
-      parent?.querySelectorAll('.chart-time-btn').forEach((b) => b.classList.remove('active'));
-      el.classList.add('active');
+      parent?.querySelectorAll('.chart-time-btn').forEach((b) => toggleState(b, 'active', false));
+      toggleState(el, 'active', true);
     });
   });
 
@@ -99,7 +100,7 @@ function bindTimeWindowButtons(): void {
       const btns = document.querySelectorAll(`.chart-time-btn[data-chart="${canvasId}"]`);
       btns.forEach((b) => {
         const el = b as HTMLElement;
-        b.classList.toggle('active', parseInt(el.dataset.window!) === saved);
+        toggleState(b, 'active', parseInt(el.dataset.window!) === saved);
       });
     }
   }

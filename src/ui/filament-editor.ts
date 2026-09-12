@@ -471,46 +471,47 @@ let modalEl: HTMLElement | null = null;
 function buildModal(): HTMLElement {
   const el = document.createElement('div');
   el.id = 'filament-modal';
-  el.className = 'modal-overlay hidden';
+  el.className =
+    'modal-overlay hidden fixed inset-0 bg-[rgba(0,_0,_0,_0.6)] flex items-center justify-center z-[2000]';
   el.innerHTML = `
-    <div class="modal-content">
-      <div class="modal-header">
+    <div class="bg-card border border-line rounded-card [box-shadow:0_8px_32px_rgba(0,_0,_0,_0.5)] w-95 max-w-[90vw]">
+      <div class="flex justify-between items-center [padding:12px_16px] border-b border-line [&_h3]:m-0 [&_h3]:text-[14px] [&_h3]:text-fg [&_h3]:normal-case [&_h3]:tracking-[0]">
         <h3>Edit Filament — Slot <span id="fm-slot"></span></h3>
-        <button class="btn btn-sm btn-ghost modal-close" id="fm-close" aria-label="Close">${iconSolo('close')}</button>
+        <button class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="fm-close" aria-label="Close">${iconSolo('close')}</button>
       </div>
-      <div class="modal-body">
-        <div class="form-group">
+      <div class="modal-body p-4 [&_select]:w-full [&_select]:[padding:6px_10px] [&_select]:bg-input [&_select]:border [&_select]:border-line [&_select]:rounded-chip [&_select]:text-fg [&_select]:text-[13px] [&_.form-group_label]:block [&_.form-group_label]:text-[12px] [&_.form-group_label]:text-fg-soft [&_.form-group_label]:mb-1 [&_input[type="text"]]:w-full [&_input[type="text"]]:[padding:6px_10px] [&_input[type="text"]]:bg-input [&_input[type="text"]]:border [&_input[type="text"]]:border-line [&_input[type="text"]]:rounded-chip [&_input[type="text"]]:text-fg [&_input[type="text"]]:text-[13px] [&_input[type="number"]]:w-full [&_input[type="number"]]:[padding:6px_10px] [&_input[type="number"]]:bg-input [&_input[type="number"]]:border [&_input[type="number"]]:border-line [&_input[type="number"]]:rounded-chip [&_input[type="number"]]:text-fg [&_input[type="number"]]:text-[13px] [&_input[type="color"]]:w-12 [&_input[type="color"]]:h-8 [&_input[type="color"]]:border [&_input[type="color"]]:border-line [&_input[type="color"]]:rounded-chip [&_input[type="color"]]:bg-input [&_input[type="color"]]:cursor-pointer">
+        <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
           <label for="fm-brand">Brand</label>
-          <select id="fm-brand" class="log-select">
+          <select id="fm-brand" class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] [.spool-calc-inputs_&]:w-full [.spool-calc-inputs_&]:[padding:6px_10px] [.spool-calc-inputs_&]:text-[14px]">
             <option value="ELEGOO">ELEGOO</option>
             <option value="Generic">Generic</option>
           </select>
         </div>
-        <div class="form-group">
+        <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
           <label for="fm-type">Type Filter</label>
-          <select id="fm-type" class="log-select">
+          <select id="fm-type" class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] [.spool-calc-inputs_&]:w-full [.spool-calc-inputs_&]:[padding:6px_10px] [.spool-calc-inputs_&]:text-[14px]">
             <option value="">All</option>
           </select>
         </div>
-        <div class="form-group">
+        <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
           <label for="fm-name">Filament</label>
-          <select id="fm-name" class="log-select"></select>
+          <select id="fm-name" class="bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] [.spool-calc-inputs_&]:w-full [.spool-calc-inputs_&]:[padding:6px_10px] [.spool-calc-inputs_&]:text-[14px]"></select>
         </div>
-        <div class="form-group">
+        <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
           <label>Nozzle Temp</label>
-          <div id="fm-temp-info" class="fm-temp-info">—</div>
+          <div id="fm-temp-info" class="text-fg-muted text-[0.9em]">—</div>
         </div>
-        <div class="form-group">
+        <div class="form-group mb-4 [&_label]:block [&_label]:text-[12px] [&_label]:text-fg-soft [&_label]:mb-1 [&_input]:w-full [&_input]:[padding:8px_12px] [&_input]:bg-input [&_input]:border [&_input]:border-line [&_input]:rounded-chip [&_input]:text-fg [&_input]:text-[14px] [&_input]:[outline:none] [.modal-body_&]:mb-3 [.spool-calc-inputs_&]:[margin-bottom:10px] [&_input:focus]:border-accent last:[.modal-body_&]:mb-0">
           <label for="fm-color">Color</label>
-          <div class="fm-color-row">
+          <div class="flex items-start [gap:10px]">
             <input type="color" id="fm-color" value="#ffffff">
-            <div id="fm-presets" class="fm-color-presets"></div>
+            <div id="fm-presets" class="flex flex-wrap gap-1 max-w-55"></div>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" id="fm-cancel">Cancel</button>
-        <button class="btn btn-primary" id="fm-save">Save</button>
+      <div class="flex justify-end gap-2 [padding:12px_16px] border-t border-line">
+        <button class="inline-flex items-center justify-center [padding:8px_16px] border border-line rounded-chip text-[13px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:8px_16px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="fm-cancel">Cancel</button>
+        <button class="inline-flex items-center justify-center [padding:8px_16px] border-0 rounded-chip text-[13px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent max-[800px]:[padding:8px_16px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.print-dialog-footer_&]:min-w-25 hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" id="fm-save">Save</button>
       </div>
     </div>
   `;

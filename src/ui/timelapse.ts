@@ -114,15 +114,15 @@ export function renderTimelapse(state: PrinterState): void {
     // Status 2 = already exported (has URL), status 1 = captured but needs export
     const isExported = status === STATUS_EXPORTED && videoUrl;
     const actionBtn = isExported
-      ? `<button class="btn btn-sm btn-primary timelapse-play-btn" data-url="${escapeAttr(videoUrl)}">${icon('play')} Play</button>`
-      : `<button class="btn btn-sm btn-ghost timelapse-export-btn" data-url="${escapeAttr(videoUrl || name)}">${icon('exportFile')} Export</button>`;
+      ? `<button class="timelapse-play-btn inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.print-dialog-footer_&]:min-w-25 hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-url="${escapeAttr(videoUrl)}">${icon('play')} Play</button>`
+      : `<button class="timelapse-export-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-url="${escapeAttr(videoUrl || name)}">${icon('exportFile')} Export</button>`;
 
     html += `
-      <div class="file-item timelapse-item" data-filename="${escapeAttr(name)}">
-        <div class="file-icon">${iconSolo('timelapse')}</div>
-        <div class="file-details">
-          <div class="file-name" title="${escapeAttr(name)}">${escapeHtml(name)}</div>
-          <div class="file-size">${meta}${isExported ? ` · ${icon('ok')} Ready` : ` · ${icon('pending')} Needs export`}</div>
+      <div class="file-item flex flex-col gap-1 p-2 bg-surface rounded-chip [transition:background_0.15s] max-[800px]:[padding:10px] max-[800px]:[gap:10px] hover:bg-hover [&[data-type="file"]]:cursor-default" data-filename="${escapeAttr(name)}">
+        <div class="file-icon text-[20px] w-10 h-10 flex items-center justify-center shrink-0">${iconSolo('timelapse')}</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-[13px] font-medium overflow-hidden text-ellipsis whitespace-nowrap min-w-0" title="${escapeAttr(name)}">${escapeHtml(name)}</div>
+          <div class="text-[11px] text-fg-muted">${meta}${isExported ? ` · ${icon('ok')} Ready` : ` · ${icon('pending')} Needs export`}</div>
         </div>
         ${actionBtn}
       </div>`;

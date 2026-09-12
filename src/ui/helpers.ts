@@ -38,6 +38,17 @@ export function fanPct(speed: number): number {
   return Math.round((speed / 255) * 100);
 }
 
+/**
+ * Add or remove a whole set of utility classes at once.
+ *
+ * A "state" is no longer one class the stylesheet reacts to — it is the utilities that
+ * state implies. The hook class is kept alongside them because `querySelector` and
+ * `classList.contains` still look for it.
+ */
+export function toggleClasses(el: Element, classes: string, on: boolean): void {
+  for (const c of classes.split(/\s+/)) if (c) el.classList.toggle(c, on);
+}
+
 export function escapeHtml(s: string): string {
   const div = document.createElement('div');
   div.textContent = s;

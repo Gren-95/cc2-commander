@@ -1,5 +1,6 @@
 /** Service status — compact header badge with click-to-expand dropdown + system info */
 
+import { toggleState } from './state-classes';
 import { ICONS, type IconName, icon } from './icons';
 import { $, escapeHtml } from './helpers';
 import { setBuildStamp } from './settings';
@@ -109,7 +110,10 @@ function renderPrinterLink(): void {
   if (!badge || !iconEl || !stateEl) return;
 
   const link = PRINTER_LINK[printerLink];
-  iconEl.className = `bi bi-${ICONS[link.icon]}`;
+  // Only the glyph class changes: this element carries its own utilities now, and
+  // assigning className outright would wipe them (size and state colour included).
+  for (const c of [...iconEl.classList]) if (c.startsWith('bi-')) iconEl.classList.remove(c);
+  iconEl.classList.add('bi', `bi-${ICONS[link.icon]}`);
   badge.classList.remove(...PRINTER_CLASSES);
   badge.classList.add(link.cls);
 
@@ -144,7 +148,7 @@ function isOk(state: string, okValues: string[]): boolean {
 }
 
 function dotHtml(ok: boolean): string {
-  return `<span class="status-dot ${ok ? 'status-dot-ok' : 'status-dot-err'}"></span>`;
+  return `<span class="w-[7px] h-[7px] rounded-full shrink-0 ${ok ? 'status-dot-ok bg-ok' : 'status-dot-err bg-bad'}"></span>`;
 }
 
 export function renderServiceStatus(): void {
@@ -176,7 +180,9 @@ export function renderServiceStatus(): void {
   if (!lastStatus) {
     dotsEl.innerHTML = '';
     countEl.textContent = '--';
-    if (dropdown) dropdown.innerHTML = '<div class="svc-loading">Waiting for service...</div>';
+    if (dropdown)
+      dropdown.innerHTML =
+        '<div class="text-fg-muted text-[0.82rem] [padding:8px_10px]">Waiting for service...</div>';
     return;
   }
 
@@ -198,8 +204,8 @@ export function renderServiceStatus(): void {
   const allOk = healthy === total;
   dotsEl.innerHTML = checks.map((c) => dotHtml(isOk(c.state, c.okValues))).join('');
   countEl.textContent = `${healthy}/${total}`;
-  badge.classList.toggle('svc-all-ok', allOk);
-  badge.classList.toggle('svc-has-err', !allOk);
+  toggleState(badge, 'svc-all-ok', allOk);
+  toggleState(badge, 'svc-has-err', !allOk);
 
   // Dropdown detail
   if (!dropdown) return;
@@ -219,7 +225,7 @@ export function renderServiceStatus(): void {
   // (ELEG-59). The decision now lives in `mqttBannerHeadline`, where it is testable.
   const headline = mqttBannerHeadline(phase, s.mqttRegisterAttempts);
   const firmwareBanner = headline
-    ? `<div class="svc-firmware-warning">
+    ? `<div class="svc-firmware-warning [padding:8px_10px] [margin-bottom:6px] rounded-chip bg-[rgba(255,_152,_0,_0.12)] border border-[rgba(255,_152,_0,_0.4)] text-[#ffb74d] text-[0.8rem] leading-[1.4] [&_strong]:text-[#ff9800]">
         ${icon('warning')} <strong>${escapeHtml(headline)}</strong> — ${escapeHtml(mqttPhaseMessage(phase))}
         ${phase === 'registering' ? `(${s.mqttRegisterAttempts} registration attempts)` : ''}
       </div>`
@@ -227,15 +233,15 @@ export function renderServiceStatus(): void {
 
   dropdown.innerHTML = `
     ${firmwareBanner}
-    <div class="svc-list">
-      <div class="svc-item">${dotHtml(isOk(s.mqtt, ['connected']))}<span class="svc-label">MQTT</span><span class="svc-value">${mqttLabel}</span></div>
-      <div class="svc-item">${dotHtml(isOk(s.telegram, ['running']))}<span class="svc-label">Telegram</span><span class="svc-value">${s.telegram}</span></div>
-      <div class="svc-item">${dotHtml(isOk(s.ai, ['monitoring', 'idle']))}<span class="svc-label">AI</span><span class="svc-value">${s.ai}</span></div>
-      <div class="svc-item">${dotHtml(isOk(s.camera, ['available']))}<span class="svc-label">Camera</span><span class="svc-value">${s.camera}</span></div>
-      <div class="svc-item">${dotHtml(!!s.printerSn)}<span class="svc-label">Printer</span><span class="svc-value">${s.printerSn || 'unknown'}</span></div>
-      <div class="svc-item">${dotHtml(true)}<span class="svc-label">WS Clients</span><span class="svc-value">${s.wsClients}</span></div>
-      <div class="svc-item">${dotHtml(true)}<span class="svc-label">Uptime</span><span class="svc-value">${formatUptime(s.uptime)}</span></div>
-      <div class="svc-item">${dotHtml(version !== UNKNOWN_VERSION_LABEL)}<span class="svc-label">Version</span><span class="svc-value">${escapeHtml(version)}</span></div>
+    <div class="flex flex-col [gap:2px]">
+      <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(isOk(s.mqtt, ['connected']))}<span class="text-fg-muted whitespace-nowrap">MQTT</span><span class="text-fg ml-auto font-medium">${mqttLabel}</span></div>
+      <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(isOk(s.telegram, ['running']))}<span class="text-fg-muted whitespace-nowrap">Telegram</span><span class="text-fg ml-auto font-medium">${s.telegram}</span></div>
+      <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(isOk(s.ai, ['monitoring', 'idle']))}<span class="text-fg-muted whitespace-nowrap">AI</span><span class="text-fg ml-auto font-medium">${s.ai}</span></div>
+      <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(isOk(s.camera, ['available']))}<span class="text-fg-muted whitespace-nowrap">Camera</span><span class="text-fg ml-auto font-medium">${s.camera}</span></div>
+      <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(!!s.printerSn)}<span class="text-fg-muted whitespace-nowrap">Printer</span><span class="text-fg ml-auto font-medium">${s.printerSn || 'unknown'}</span></div>
+      <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(true)}<span class="text-fg-muted whitespace-nowrap">WS Clients</span><span class="text-fg ml-auto font-medium">${s.wsClients}</span></div>
+      <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(true)}<span class="text-fg-muted whitespace-nowrap">Uptime</span><span class="text-fg ml-auto font-medium">${formatUptime(s.uptime)}</span></div>
+      <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(version !== UNKNOWN_VERSION_LABEL)}<span class="text-fg-muted whitespace-nowrap">Version</span><span class="text-fg ml-auto font-medium">${escapeHtml(version)}</span></div>
     </div>
   `;
 }
@@ -277,9 +283,9 @@ export function renderSystemInfo(state: PrinterState): void {
     rows.push(['Protocol', attrs.protocol_version]);
   }
 
-  let html = '<div class="svc-list">';
+  let html = '<div class="flex flex-col [gap:2px]">';
   for (const [label, value] of rows) {
-    html += `<div class="svc-item"><span class="svc-label">${escapeHtml(label)}</span><span class="svc-value">${escapeHtml(value)}</span></div>`;
+    html += `<div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]"><span class="text-fg-muted whitespace-nowrap">${escapeHtml(label)}</span><span class="text-fg ml-auto font-medium">${escapeHtml(value)}</span></div>`;
   }
   html += '</div>';
 

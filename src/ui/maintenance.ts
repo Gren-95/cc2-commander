@@ -93,12 +93,12 @@ export function renderMaintenance(state: PrinterState): void {
   const maintenanceLabel = MAINTENANCE_STATUSES[machineStatus ?? -1];
   if (maintenanceLabel) {
     const subInfo = SUB_STATUS_DONE[subStatus ?? 0];
-    let html = `<div class="maintenance-active">`;
+    let html = `<div class="[padding:8px_12px] mb-2 rounded-[6px] bg-[var(--card-bg)] text-center">`;
     if (subInfo) {
       const cls = subInfo.ok ? 'maintenance-ok' : 'maintenance-fail';
       html += `<span class="${cls}">${subInfo.ok ? icon('ok') : icon('error')} ${escapeHtml(subInfo.text)}</span>`;
     } else {
-      html += `<span class="maintenance-running">${icon('pending')} ${escapeHtml(maintenanceLabel)}...</span>`;
+      html += `<span class="text-[#58a6ff]">${icon('pending')} ${escapeHtml(maintenanceLabel)}...</span>`;
     }
     html += '</div>';
     statusEl.innerHTML = html;

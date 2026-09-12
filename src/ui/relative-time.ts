@@ -20,7 +20,7 @@
  *     is what fights the auto-scroll and the expand/collapse state, and it is the same
  *     class of problem ELEG-49…52 solved for the list views.
  *
- * So the render sites emit `<span class="…-time" data-ts="…" title="…">`, and `tick()`
+ * So the render sites emit `<span class="" data-ts="…" title="…">`, and `tick()`
  * walks those spans and rewrites their text only. No `innerHTML`, no rebuilt rows,
  * nothing for the auto-scroll or the pause button to fight with.
  */

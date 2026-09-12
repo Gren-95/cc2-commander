@@ -1,3 +1,4 @@
+import { toggleState } from './state-classes';
 import { iconText } from './icons';
 import type { CommandSender } from '../ws-client';
 import { $, fetchTimeout } from './helpers';
@@ -98,7 +99,7 @@ export function bindControls(client: CommandSender): void {
   const btnEStop = $('btn-estop') as HTMLButtonElement;
   btnEStop.addEventListener('click', () => {
     // The one emoji left in the frontend, and deliberately: this is the browser's
-    // native confirm(), which renders plain text only — a <i class="bi …"> here would
+    // native confirm(), which renders plain text only — a <i class="bi max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]"> here would
     // show as literal markup. Given what the button does, losing the visual warning
     // entirely was the worse option.
     if (confirm('⚠️ EMERGENCY STOP\nThis immediately halts all motion and heaters.\nContinue?')) {
@@ -161,8 +162,8 @@ export function bindControls(client: CommandSender): void {
   document.querySelectorAll('.dist-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       currentMoveDistance = parseFloat((btn as HTMLElement).dataset.dist ?? '10');
-      document.querySelectorAll('.dist-btn').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
+      document.querySelectorAll('.dist-btn').forEach((b) => toggleState(b, 'active', false));
+      toggleState(btn, 'active', true);
     });
   });
 

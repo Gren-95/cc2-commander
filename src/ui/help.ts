@@ -9,13 +9,13 @@ export function renderHelp(): void {
   helpRendered = true;
 
   container.innerHTML = `
-<div class="help-section">
+<div class="mb-6 max-[700px]:overflow-x-auto [&_h3]:text-[15px] [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:mb-2 [&_h3]:border-b [&_h3]:border-line [&_h3]:pb-1 [&_h4]:text-[13px] [&_h4]:font-semibold [&_h4]:text-fg-soft [&_h4]:[margin:12px_0_6px] [&_p]:text-[13px] [&_p]:text-fg-soft [&_p]:[margin:0_0_8px] [&_p]:leading-[1.5] [&_code]:bg-input [&_code]:[padding:1px_5px] [&_code]:rounded-[3px] [&_code]:text-[12px] [&_pre]:bg-surface [&_pre]:border [&_pre]:border-line [&_pre]:rounded-card [&_pre]:[padding:10px_12px] [&_pre]:overflow-x-auto [&_pre]:[margin:6px_0_12px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[12px] [&_pre_code]:text-fg [&_pre_code]:leading-[1.6]">
   <h3>Overview</h3>
   <p>This is a browser-based web frontend for Elegoo Centauri Carbon 2 (CC2) FDM printers.
   It connects to the printer via MQTT over WebSocket. A companion Node.js server provides
   REST APIs, compatibility layers for Fluidd/Mainsail (Moonraker), OctoPrint, MCP, and Prometheus metrics.</p>
 
-  <table class="help-ports">
+  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>Service</th><th>Port</th><th>Description</th></tr></thead>
     <tbody>
       <tr><td>Web UI + REST API</td><td>8088</td><td>Main web interface, REST API, MCP, OctoPrint compat, Moonraker compat</td></tr>
@@ -26,10 +26,10 @@ export function renderHelp(): void {
   </table>
 </div>
 
-<div class="help-section">
+<div class="mb-6 max-[700px]:overflow-x-auto [&_h3]:text-[15px] [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:mb-2 [&_h3]:border-b [&_h3]:border-line [&_h3]:pb-1 [&_h4]:text-[13px] [&_h4]:font-semibold [&_h4]:text-fg-soft [&_h4]:[margin:12px_0_6px] [&_p]:text-[13px] [&_p]:text-fg-soft [&_p]:[margin:0_0_8px] [&_p]:leading-[1.5] [&_code]:bg-input [&_code]:[padding:1px_5px] [&_code]:rounded-[3px] [&_code]:text-[12px] [&_pre]:bg-surface [&_pre]:border [&_pre]:border-line [&_pre]:rounded-card [&_pre]:[padding:10px_12px] [&_pre]:overflow-x-auto [&_pre]:[margin:6px_0_12px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[12px] [&_pre_code]:text-fg [&_pre_code]:leading-[1.6]">
   <h3>Native REST API <code>/api/*</code></h3>
   <p>Primary API on port 8088.</p>
-  <table class="help-api">
+  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
     <tbody>
       <tr><td>GET</td><td>/api/health</td><td>Service health check (MQTT status + deployed build)</td></tr>
@@ -56,10 +56,10 @@ export function renderHelp(): void {
   </table>
 </div>
 
-<div class="help-section">
+<div class="mb-6 max-[700px]:overflow-x-auto [&_h3]:text-[15px] [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:mb-2 [&_h3]:border-b [&_h3]:border-line [&_h3]:pb-1 [&_h4]:text-[13px] [&_h4]:font-semibold [&_h4]:text-fg-soft [&_h4]:[margin:12px_0_6px] [&_p]:text-[13px] [&_p]:text-fg-soft [&_p]:[margin:0_0_8px] [&_p]:leading-[1.5] [&_code]:bg-input [&_code]:[padding:1px_5px] [&_code]:rounded-[3px] [&_code]:text-[12px] [&_pre]:bg-surface [&_pre]:border [&_pre]:border-line [&_pre]:rounded-card [&_pre]:[padding:10px_12px] [&_pre]:overflow-x-auto [&_pre]:[margin:6px_0_12px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[12px] [&_pre_code]:text-fg [&_pre_code]:leading-[1.6]">
   <h3>Prometheus Metrics <code>/api/metrics/prometheus</code></h3>
   <p>Scrape-compatible endpoint for Prometheus/Grafana monitoring.</p>
-  <table class="help-api">
+  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>Metric</th><th>Type</th><th>Description</th></tr></thead>
     <tbody>
       <tr><td>elegoo_nozzle_temp_celsius</td><td>gauge</td><td>Current nozzle temperature</td></tr>
@@ -84,12 +84,12 @@ export function renderHelp(): void {
   </table>
 </div>
 
-<div class="help-section">
+<div class="mb-6 max-[700px]:overflow-x-auto [&_h3]:text-[15px] [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:mb-2 [&_h3]:border-b [&_h3]:border-line [&_h3]:pb-1 [&_h4]:text-[13px] [&_h4]:font-semibold [&_h4]:text-fg-soft [&_h4]:[margin:12px_0_6px] [&_p]:text-[13px] [&_p]:text-fg-soft [&_p]:[margin:0_0_8px] [&_p]:leading-[1.5] [&_code]:bg-input [&_code]:[padding:1px_5px] [&_code]:rounded-[3px] [&_code]:text-[12px] [&_pre]:bg-surface [&_pre]:border [&_pre]:border-line [&_pre]:rounded-card [&_pre]:[padding:10px_12px] [&_pre]:overflow-x-auto [&_pre]:[margin:6px_0_12px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[12px] [&_pre_code]:text-fg [&_pre_code]:leading-[1.6]">
   <h3>MCP Server <code>/mcp</code></h3>
   <p>Model Context Protocol endpoint (HTTP + SSE transport) for AI assistant integration.</p>
 
   <h4>Resources</h4>
-  <table class="help-api">
+  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>URI</th><th>Description</th></tr></thead>
     <tbody>
       <tr><td>printer://status</td><td>Human-readable printer status summary</td></tr>
@@ -99,7 +99,7 @@ export function renderHelp(): void {
   </table>
 
   <h4>Tools</h4>
-  <table class="help-api">
+  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>Tool</th><th>Parameters</th><th>Description</th></tr></thead>
     <tbody>
       <tr><td>get_printer_status</td><td>—</td><td>Status summary text</td></tr>
@@ -119,10 +119,10 @@ export function renderHelp(): void {
   </table>
 </div>
 
-<div class="help-section">
+<div class="mb-6 max-[700px]:overflow-x-auto [&_h3]:text-[15px] [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:mb-2 [&_h3]:border-b [&_h3]:border-line [&_h3]:pb-1 [&_h4]:text-[13px] [&_h4]:font-semibold [&_h4]:text-fg-soft [&_h4]:[margin:12px_0_6px] [&_p]:text-[13px] [&_p]:text-fg-soft [&_p]:[margin:0_0_8px] [&_p]:leading-[1.5] [&_code]:bg-input [&_code]:[padding:1px_5px] [&_code]:rounded-[3px] [&_code]:text-[12px] [&_pre]:bg-surface [&_pre]:border [&_pre]:border-line [&_pre]:rounded-card [&_pre]:[padding:10px_12px] [&_pre]:overflow-x-auto [&_pre]:[margin:6px_0_12px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[12px] [&_pre_code]:text-fg [&_pre_code]:leading-[1.6]">
   <h3>OctoPrint Compatibility <code>/octoprint/api/*</code></h3>
   <p>Drop-in OctoPrint API for clients expecting OctoPrint (e.g. Home Assistant, OctoApp).</p>
-  <table class="help-api">
+  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
     <tbody>
       <tr><td>GET</td><td>/octoprint/api/version</td><td>API & server version info</td></tr>
@@ -145,12 +145,12 @@ export function renderHelp(): void {
   </table>
 </div>
 
-<div class="help-section">
+<div class="mb-6 max-[700px]:overflow-x-auto [&_h3]:text-[15px] [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:mb-2 [&_h3]:border-b [&_h3]:border-line [&_h3]:pb-1 [&_h4]:text-[13px] [&_h4]:font-semibold [&_h4]:text-fg-soft [&_h4]:[margin:12px_0_6px] [&_p]:text-[13px] [&_p]:text-fg-soft [&_p]:[margin:0_0_8px] [&_p]:leading-[1.5] [&_code]:bg-input [&_code]:[padding:1px_5px] [&_code]:rounded-[3px] [&_code]:text-[12px] [&_pre]:bg-surface [&_pre]:border [&_pre]:border-line [&_pre]:rounded-card [&_pre]:[padding:10px_12px] [&_pre]:overflow-x-auto [&_pre]:[margin:6px_0_12px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[12px] [&_pre_code]:text-fg [&_pre_code]:leading-[1.6]">
   <h3>Moonraker Compatibility</h3>
   <p>Full Moonraker-compatible API for Fluidd and Mainsail frontends.</p>
 
   <h4>Prefixed REST API <code>/moonraker/*</code> (port 8088)</h4>
-  <table class="help-api">
+  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
     <tbody>
       <tr><td>GET</td><td>/moonraker/server/info</td><td>Server & component status</td></tr>
@@ -178,7 +178,7 @@ export function renderHelp(): void {
 
   <h4>WebSocket <code>ws://host:7125/websocket</code></h4>
   <p>JSON-RPC 2.0 protocol with the following key methods:</p>
-  <table class="help-api">
+  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>Method</th><th>Description</th></tr></thead>
     <tbody>
       <tr><td>server.connection.identify</td><td>Identify client</td></tr>
@@ -203,7 +203,7 @@ export function renderHelp(): void {
   </table>
 
   <h4>Push Notifications (WebSocket)</h4>
-  <table class="help-api">
+  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>Notification</th><th>Description</th></tr></thead>
     <tbody>
       <tr><td>notify_status_update</td><td>Delta updates for subscribed objects</td></tr>
@@ -219,10 +219,10 @@ export function renderHelp(): void {
   <code>/machine/system_info</code>). Full Moonraker REST API compatibility for Fluidd/Mainsail.</p>
 </div>
 
-<div class="help-section">
+<div class="mb-6 max-[700px]:overflow-x-auto [&_h3]:text-[15px] [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:mb-2 [&_h3]:border-b [&_h3]:border-line [&_h3]:pb-1 [&_h4]:text-[13px] [&_h4]:font-semibold [&_h4]:text-fg-soft [&_h4]:[margin:12px_0_6px] [&_p]:text-[13px] [&_p]:text-fg-soft [&_p]:[margin:0_0_8px] [&_p]:leading-[1.5] [&_code]:bg-input [&_code]:[padding:1px_5px] [&_code]:rounded-[3px] [&_code]:text-[12px] [&_pre]:bg-surface [&_pre]:border [&_pre]:border-line [&_pre]:rounded-card [&_pre]:[padding:10px_12px] [&_pre]:overflow-x-auto [&_pre]:[margin:6px_0_12px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[12px] [&_pre_code]:text-fg [&_pre_code]:leading-[1.6]">
   <h3>CC2 MQTT Command Reference</h3>
   <p>Commands sent to the printer via MQTT (<code>elegoo/&lt;sn&gt;/&lt;client_id&gt;/api_request</code>).</p>
-  <table class="help-api">
+  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>Method</th><th>Name</th><th>Description</th></tr></thead>
     <tbody>
       <tr><td>1001</td><td>Get Attributes</td><td>Printer hostname, model, SN, firmware versions</td></tr>
@@ -246,7 +246,7 @@ export function renderHelp(): void {
   </table>
 
   <h4>MQTT Topics</h4>
-  <table class="help-api">
+  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>Topic</th><th>Direction</th><th>Description</th></tr></thead>
     <tbody>
       <tr><td>elegoo/+/api_status</td><td>${icon('received')} Printer</td><td>Status discovery (wildcard for SN)</td></tr>
@@ -258,10 +258,10 @@ export function renderHelp(): void {
   </table>
 </div>
 
-<div class="help-section">
+<div class="mb-6 max-[700px]:overflow-x-auto [&_h3]:text-[15px] [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:mb-2 [&_h3]:border-b [&_h3]:border-line [&_h3]:pb-1 [&_h4]:text-[13px] [&_h4]:font-semibold [&_h4]:text-fg-soft [&_h4]:[margin:12px_0_6px] [&_p]:text-[13px] [&_p]:text-fg-soft [&_p]:[margin:0_0_8px] [&_p]:leading-[1.5] [&_code]:bg-input [&_code]:[padding:1px_5px] [&_code]:rounded-[3px] [&_code]:text-[12px] [&_pre]:bg-surface [&_pre]:border [&_pre]:border-line [&_pre]:rounded-card [&_pre]:[padding:10px_12px] [&_pre]:overflow-x-auto [&_pre]:[margin:6px_0_12px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[12px] [&_pre_code]:text-fg [&_pre_code]:leading-[1.6]">
   <h3>Supported G-code Commands</h3>
   <p>G-code commands accepted via <code>printer.gcode.script</code> (Moonraker) or <code>/printer/gcode/script</code>.</p>
-  <table class="help-api">
+  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>Command</th><th>Action</th></tr></thead>
     <tbody>
       <tr><td>M104 S&lt;temp&gt;</td><td>Set nozzle temperature</td></tr>
@@ -274,7 +274,7 @@ export function renderHelp(): void {
   </table>
 </div>
 
-<div class="help-section">
+<div class="mb-6 max-[700px]:overflow-x-auto [&_h3]:text-[15px] [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:mb-2 [&_h3]:border-b [&_h3]:border-line [&_h3]:pb-1 [&_h4]:text-[13px] [&_h4]:font-semibold [&_h4]:text-fg-soft [&_h4]:[margin:12px_0_6px] [&_p]:text-[13px] [&_p]:text-fg-soft [&_p]:[margin:0_0_8px] [&_p]:leading-[1.5] [&_code]:bg-input [&_code]:[padding:1px_5px] [&_code]:rounded-[3px] [&_code]:text-[12px] [&_pre]:bg-surface [&_pre]:border [&_pre]:border-line [&_pre]:rounded-card [&_pre]:[padding:10px_12px] [&_pre]:overflow-x-auto [&_pre]:[margin:6px_0_12px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[12px] [&_pre_code]:text-fg [&_pre_code]:leading-[1.6]">
   <h3>Integration Examples</h3>
 
   <h4>Prometheus / Grafana</h4>

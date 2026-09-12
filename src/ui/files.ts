@@ -1,3 +1,4 @@
+import { toggleState } from './state-classes';
 import { icon, iconSolo, iconText } from './icons';
 import type { PrinterState } from '../printer-state';
 import type { CommandSender } from '../ws-client';
@@ -180,13 +181,14 @@ function showFilePopover(file: FileEntry, anchor: HTMLElement): void {
   const el = document.createElement('div');
   el.className = 'file-popover';
 
-  let html = '<div class="file-popover-inner">';
+  let html = '<div class="flex flex-col [gap:10px]">';
   if (thumb) {
-    html += `<img class="file-popover-thumb ${THUMBNAIL_CLASS}" src="data:image/png;base64,${thumb}" alt="Preview">`;
+    html += `<img class="file-popover-thumb w-full max-h-45 object-contain rounded-chip bg-surface ${THUMBNAIL_CLASS}" src="data:image/png;base64,${thumb}" alt="Preview">`;
   }
-  html += '<div class="file-popover-details">';
-  html += `<div class="file-popover-name">${escapeHtml(file.filename)}</div>`;
-  html += '<table class="file-popover-table">';
+  html += '<div class="">';
+  html += `<div class="text-[13px] font-semibold text-fg break-all leading-[1.3]">${escapeHtml(file.filename)}</div>`;
+  html +=
+    '<table class="w-full text-[12px] [border-collapse:collapse] [&_td]:[padding:2px_0] [&_td:first-child]:text-fg-muted [&_td:first-child]:pr-3 [&_td:first-child]:whitespace-nowrap [&_td:last-child]:text-fg">';
   html += `<tr><td>Size</td><td>${formatBytes(file.size)}</td></tr>`;
   if (file.print_time)
     html += `<tr><td>Print time</td><td>${formatTime(file.print_time)}</td></tr>`;
@@ -204,7 +206,7 @@ function showFilePopover(file: FileEntry, anchor: HTMLElement): void {
     const swatches = cm
       .map((c) => {
         const hex = c.color.startsWith('#') ? c.color : `#${c.color}`;
-        return `<span class="filament-swatch" style="background:${escapeAttr(hex)}" title="${escapeAttr(c.name)}"></span>`;
+        return `<span class="inline-block w-3 h-3 rounded-[3px] border border-[rgba(255,_255,_255,_0.2)] align-[middle] [margin-right:2px]" style="background:${escapeAttr(hex)}" title="${escapeAttr(c.name)}"></span>`;
       })
       .join(' ');
     html += `<tr><td>Filaments</td><td>${swatches} (${cm.length})</td></tr>`;
@@ -217,10 +219,11 @@ function showFilePopover(file: FileEntry, anchor: HTMLElement): void {
   html += '</table>';
 
   // Action buttons
-  html += '<div class="file-popover-actions">';
-  html += `<button class="btn btn-sm btn-ghost file-popover-preview" title="Full preview">${icon('preview')} Preview</button>`;
-  html += `<button class="btn btn-sm btn-ghost file-popover-download" title="Download">${icon('download')} Download</button>`;
-  html += `<button class="btn btn-sm btn-ghost file-popover-delete" title="Delete">${icon('trash')} Delete</button>`;
+  html +=
+    '<div class="file-popover-actions flex [gap:6px] [margin-top:6px] pt-2 border-t border-line flex-wrap">';
+  html += `<button class="file-popover-preview inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Full preview">${icon('preview')} Preview</button>`;
+  html += `<button class="file-popover-download inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Download">${icon('download')} Download</button>`;
+  html += `<button class="file-popover-delete inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Delete">${icon('trash')} Delete</button>`;
   html += '</div>';
 
   html += '</div></div>';
@@ -384,7 +387,7 @@ function ensureFileDelegation(container: HTMLElement): void {
       currentDir = currentDir === '/' ? '/' + dirname : currentDir + '/' + dirname;
       thumbnailQueue = [];
       thumbnailFetching = null;
-      container.innerHTML = '<div class="loading">Loading...</div>';
+      container.innerHTML = '<div class="text-fg-muted text-center p-5">Loading...</div>';
       _popoverClient.sendCommand(1044, {
         storage_media: currentSource,
         dir: currentDir,
@@ -402,7 +405,7 @@ function ensureFileDelegation(container: HTMLElement): void {
       currentDir = dir;
       thumbnailQueue = [];
       thumbnailFetching = null;
-      container.innerHTML = '<div class="loading">Loading...</div>';
+      container.innerHTML = '<div class="text-fg-muted text-center p-5">Loading...</div>';
       _popoverClient.sendCommand(1044, {
         storage_media: currentSource,
         dir: currentDir,
@@ -420,17 +423,18 @@ function _bindFilePopovers(_container: HTMLElement): void {
 function renderBreadcrumb(_client: CommandSender): string {
   if (currentDir === '/') return '';
   const parts = currentDir.split('/').filter(Boolean);
-  let html = '<div class="file-breadcrumb">';
-  html += `<button class="btn btn-sm btn-ghost file-nav-btn" data-dir="/">${icon('home')} Root</button>`;
+  let html =
+    '<div class="flex items-center [gap:2px] [padding:4px_0] [margin-bottom:6px] text-[12px] flex-wrap">';
+  html += `<button class="file-nav-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-dir="/">${icon('home')} Root</button>`;
   let path = '';
   for (let i = 0; i < parts.length; i++) {
     path += '/' + parts[i];
     const isLast = i === parts.length - 1;
-    html += `<span class="breadcrumb-sep">/</span>`;
+    html += `<span class="text-fg-muted [margin:0_2px]">/</span>`;
     if (isLast) {
-      html += `<span class="breadcrumb-current">${escapeHtml(parts[i])}</span>`;
+      html += `<span class="text-fg font-medium">${escapeHtml(parts[i])}</span>`;
     } else {
-      html += `<button class="btn btn-sm btn-ghost file-nav-btn" data-dir="${escapeAttr(path)}">${escapeHtml(parts[i])}</button>`;
+      html += `<button class="file-nav-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-dir="${escapeAttr(path)}">${escapeHtml(parts[i])}</button>`;
     }
   }
   html += '</div>';
@@ -442,9 +446,9 @@ function renderCapacityBar(state: PrinterState): string {
   if (!cap || cap.total === 0) return '';
   const usedPct = Math.min(100, Math.round((cap.used / cap.total) * 100));
   const warn = usedPct > 90 ? ' capacity-warn' : usedPct > 75 ? ' capacity-high' : '';
-  return `<div class="storage-capacity">
-    <div class="capacity-bar"><div class="capacity-fill${warn}" style="width:${usedPct}%"></div></div>
-    <span class="capacity-text">${formatBytes(cap.used)} / ${formatBytes(cap.total)} (${usedPct}%)</span>
+  return `<div class="flex items-center gap-2 [padding:6px_0] [margin-bottom:6px] max-[800px]:flex-wrap">
+    <div class="flex-1 h-[6px] bg-input rounded-[3px] overflow-hidden"><div class="h-full bg-accent rounded-[3px] [transition:width_0.3s] ${warn}" style="width:${usedPct}%"></div></div>
+    <span class="text-[11px] text-fg-muted whitespace-nowrap">${formatBytes(cap.used)} / ${formatBytes(cap.total)} (${usedPct}%)</span>
   </div>`;
 }
 
@@ -543,7 +547,7 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
 
   // Show USB not-connected warning
   if (currentSource === 'u-disk' && !state.status?.external_device?.u_disk) {
-    html += `<div class="file-empty">${icon('warning')} No USB drive detected</div>`;
+    html += `<div class="text-fg-muted [font-style:italic] p-5 text-center">${icon('warning')} No USB drive detected</div>`;
   }
 
   html += renderBreadcrumb(client);
@@ -578,36 +582,36 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
     const isCached = cachedFiles.has(fullPath);
     const cachedThumb = thumbnailCache.get(fullPath);
     const cacheMarker = isCached
-      ? ` <span class="file-cache-marker" title="Cached on server">${iconSolo('cached')}</span>`
+      ? ` <span class="[margin-left:6px] text-[11px] shrink-0 opacity-[0.8]" title="Cached on server">${iconSolo('cached')}</span>`
       : '';
 
     let iconHtml: string;
     if (isFolder) {
       iconHtml = icon('folder');
     } else if (cachedThumb) {
-      iconHtml = `<img src="data:image/png;base64,${cachedThumb}" alt="Thumb" class="file-inline-thumb ${THUMBNAIL_CLASS}">`;
+      iconHtml = `<img src="data:image/png;base64,${cachedThumb}" alt="Thumb" class="w-10 h-10 object-cover rounded-chip ${THUMBNAIL_CLASS}">`;
     } else if (file.filename.toLowerCase().endsWith('.gcode')) {
       // A gcode file whose thumbnail is queued, absent or unusable. Same placeholder
       // the error handler swaps in, so "no thumbnail" and "bad thumbnail" look alike
       // and deliberate rather than one being a mismatched emoji in a grid of previews
       // (ELEG-42). Replaced in place by handleInlineThumbnail when one arrives.
-      iconHtml = `<img src="${THUMBNAIL_PLACEHOLDER_SRC}" alt="No preview" class="file-inline-thumb thumb-img-fallback">`;
+      iconHtml = `<img src="${THUMBNAIL_PLACEHOLDER_SRC}" alt="No preview" class="thumb-img-fallback w-10 h-10 object-contain rounded-chip opacity-[0.55] [padding:2px]">`;
     } else {
       iconHtml = icon('file');
     }
 
     html += `
-      <div class="file-item ${isFolder ? 'file-item-folder' : ''}" data-filename="${escapeAttr(file.filename)}" data-type="${isFolder ? 'folder' : 'file'}">
-        <div class="file-name-row">
-          <span class="file-name" title="${escapeAttr(file.filename)}">${escapeHtml(file.filename)}</span>${cacheMarker}
+      <div class="file-item flex flex-col gap-1 p-2 bg-surface rounded-chip [transition:background_0.15s] max-[800px]:[padding:10px] max-[800px]:[gap:10px] hover:bg-hover [&[data-type="file"]]:cursor-default ${isFolder ? 'file-item-folder cursor-pointer hover:bg-[color-mix(in_srgb,_var(--accent)_15%,_transparent)]' : ''}" data-filename="${escapeAttr(file.filename)}" data-type="${isFolder ? 'folder' : 'file'}">
+        <div class="flex items-center min-w-0">
+          <span class="text-[13px] font-medium overflow-hidden text-ellipsis whitespace-nowrap min-w-0" title="${escapeAttr(file.filename)}">${escapeHtml(file.filename)}</span>${cacheMarker}
         </div>
-        <div class="file-item-body">
-          <div class="file-icon">${iconHtml}</div>
-          <div class="file-details">
-            <div class="file-size">${meta}</div>
+        <div class="flex items-center [gap:10px]">
+          <div class="file-icon text-[20px] w-10 h-10 flex items-center justify-center shrink-0">${iconHtml}</div>
+          <div class="flex-1 min-w-0">
+            <div class="text-[11px] text-fg-muted">${meta}</div>
           </div>
-          <div class="file-actions">
-            ${isFolder ? '' : `<button class="btn btn-sm btn-primary file-print-btn" title="Print" aria-label="Print">${iconSolo('play')}</button>`}
+          <div class="file-actions flex gap-1 shrink-0 max-[800px]:[gap:6px]">
+            ${isFolder ? '' : `<button class="file-print-btn inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.print-dialog-footer_&]:min-w-25 hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Print" aria-label="Print">${iconSolo('play')}</button>`}
           </div>
         </div>
       </div>`;
@@ -640,9 +644,9 @@ export function bindFileControls(client: CommandSender): void {
       currentDir = '/';
       thumbnailQueue = [];
       thumbnailFetching = null;
-      document.querySelectorAll('.file-source-tab').forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
-      $('file-list').innerHTML = '<div class="loading">Loading...</div>';
+      document.querySelectorAll('.file-source-tab').forEach((t) => toggleState(t, 'active', false));
+      toggleState(tab, 'active', true);
+      $('file-list').innerHTML = '<div class="text-fg-muted text-center p-5">Loading...</div>';
       client.sendCommand(1044, { storage_media: source, dir: '/', offset: 0, limit: 200 });
       client.sendCommand(1048, { storage_media: source });
     });
@@ -694,7 +698,7 @@ async function uploadFile(file: File, client: CommandSender): Promise<void> {
   progressEl.classList.remove('hidden');
   fillEl.style.width = '0%';
   textEl.textContent = `Uploading ${file.name}...`;
-  if (labelEl) labelEl.classList.add('disabled');
+  if (labelEl) toggleState(labelEl, 'disabled', true);
 
   const formData = new FormData();
   formData.append('file', file);
@@ -746,7 +750,7 @@ async function uploadFile(file: File, client: CommandSender): Promise<void> {
     fillEl.style.width = '0%';
     progressEl.classList.add('upload-error');
   } finally {
-    if (labelEl) labelEl.classList.remove('disabled');
+    if (labelEl) toggleState(labelEl, 'disabled', false);
     // Auto-hide progress after 4 seconds on success
     setTimeout(() => {
       if (!progressEl.classList.contains('upload-error')) {

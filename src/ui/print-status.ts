@@ -1,3 +1,4 @@
+import { toggleState } from './state-classes';
 import { icon, iconOnly, iconSolo, iconText } from './icons';
 import type { PrinterState } from '../printer-state';
 import type { CommandSender } from '../ws-client';
@@ -117,7 +118,7 @@ export function toggleCameraOverlay(): void {
     modalImg.src = getCameraStreamUrl();
   }
   if (btn) {
-    btn.classList.toggle('active', overlayEnabled);
+    toggleState(btn, 'active', overlayEnabled);
     // Two glyphs when active (chart + tick), so `iconText` is not enough — but the
     // label is a literal, so innerHTML is safe here.
     btn.innerHTML = overlayEnabled
@@ -199,27 +200,32 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   const subLabel = subStatusName ? ` · ${subStatusName}` : '';
   if (isPrinting && !isPaused) {
     iconText(badge, 'printing', `Printing${subLabel}`);
-    badge.className = 'print-status-badge badge-printing';
+    badge.className =
+      'print-status-badge badge-printing inline-block [padding:3px_12px] rounded-[10px] text-[13px] font-semibold [margin:4px_0] tracking-[0.02em] bg-[rgba(33,_150,_243,_0.2)] text-accent';
   } else if (isPaused) {
     iconText(badge, 'pause', `Paused${subLabel}`);
-    badge.className = 'print-status-badge badge-paused';
+    badge.className =
+      'print-status-badge badge-paused inline-block [padding:3px_12px] rounded-[10px] text-[13px] font-semibold [margin:4px_0] tracking-[0.02em] bg-[rgba(255,_167,_38,_0.2)] text-warn';
   } else if (machineStatus?.status === 5) {
     iconText(badge, 'layer', `${statusName}${subLabel}`);
-    badge.className = 'print-status-badge badge-busy';
+    badge.className =
+      'print-status-badge badge-busy inline-block [padding:3px_12px] rounded-[10px] text-[13px] font-semibold [margin:4px_0] tracking-[0.02em] bg-[rgba(156,_39,_176,_0.2)] text-[#ce93d8]';
   } else if (
     machineStatus?.status === 3 ||
     machineStatus?.status === 4 ||
     machineStatus?.status === 13
   ) {
     iconText(badge, 'refresh', `${statusName}${subLabel}`);
-    badge.className = 'print-status-badge badge-busy';
+    badge.className =
+      'print-status-badge badge-busy inline-block [padding:3px_12px] rounded-[10px] text-[13px] font-semibold [margin:4px_0] tracking-[0.02em] bg-[rgba(156,_39,_176,_0.2)] text-[#ce93d8]';
   } else if (
     machineStatus?.status === 6 ||
     machineStatus?.status === 7 ||
     machineStatus?.status === 8
   ) {
     iconText(badge, 'settings', `${statusName}${subLabel}`);
-    badge.className = 'print-status-badge badge-busy';
+    badge.className =
+      'print-status-badge badge-busy inline-block [padding:3px_12px] rounded-[10px] text-[13px] font-semibold [margin:4px_0] tracking-[0.02em] bg-[rgba(156,_39,_176,_0.2)] text-[#ce93d8]';
   } else if (machineStatus?.status === 14) {
     iconText(badge, 'estop', statusName);
     badge.className = 'print-status-badge badge-error';
@@ -235,10 +241,13 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
         : `${statusName}${subLabel}`,
     );
     badge.className =
-      'print-status-badge ' + (powerLoss === 'awaiting_decision' ? 'badge-error' : 'badge-busy');
+      powerLoss === 'awaiting_decision'
+        ? 'print-status-badge badge-error inline-block [padding:3px_12px] rounded-[10px] text-[13px] font-semibold [margin:4px_0] tracking-[0.02em] bg-[rgba(239,_83,_80,_0.2)] text-bad'
+        : 'print-status-badge badge-busy inline-block [padding:3px_12px] rounded-[10px] text-[13px] font-semibold [margin:4px_0] tracking-[0.02em] bg-[rgba(156,_39,_176,_0.2)] text-[#ce93d8]';
   } else {
     badge.textContent = statusName + subLabel;
-    badge.className = 'print-status-badge badge-idle';
+    badge.className =
+      'print-status-badge badge-idle inline-block [padding:3px_12px] rounded-[10px] text-[13px] font-semibold [margin:4px_0] tracking-[0.02em] bg-[rgba(160,_160,_184,_0.15)] text-fg-soft';
   }
 
   // Progress — compute from durations in delta updates (available every second)
@@ -254,16 +263,16 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   progressText.textContent = isPrinting || isPaused ? `${progress}%` : '';
   const progressBar = $('print-progress-bar') as HTMLElement;
   progressBar.style.width = `${progress}%`;
-  progressBar.classList.toggle('active', isPrinting && !isPaused);
+  toggleState(progressBar, 'active', isPrinting && !isPaused);
   // Pulse progress text every ~2s while printing to show data is live
   const pulseNow = Date.now();
   if ((isPrinting || isPaused) && pulseNow - _lastPulseTime >= 2000) {
     _lastPulseTime = pulseNow;
-    progressText.classList.remove('pulse');
+    toggleState(progressText, 'pulse', false);
     void progressText.offsetWidth;
-    progressText.classList.add('pulse');
+    toggleState(progressText, 'pulse', true);
   } else if (!isPrinting && !isPaused) {
-    progressText.classList.remove('pulse');
+    toggleState(progressText, 'pulse', false);
   }
 
   // Window title — show status and progress
@@ -303,7 +312,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   if (isPrinting || isPaused) {
     const activeInfo = getActiveFilamentInfo(state);
     if (activeInfo) {
-      activeFilamentEl.innerHTML = `<span class="filament-swatch" style="background:${escapeHtml(activeInfo.color)}"></span> ${escapeHtml(activeInfo.type)}`;
+      activeFilamentEl.innerHTML = `<span class="inline-block w-3 h-3 rounded-[3px] border border-[rgba(255,_255,_255,_0.2)] align-[middle] [margin-right:2px]" style="background:${escapeHtml(activeInfo.color)}"></span> ${escapeHtml(activeInfo.type)}`;
     } else {
       iconText(activeFilamentEl, 'filament', getActiveFilamentType(state));
     }
@@ -359,8 +368,9 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     const nozzlePct = ext.target > 0 ? Math.min(100, (ext.temperature / ext.target) * 100) : 0;
     ($('temp-nozzle-bar') as HTMLElement).style.width = `${nozzlePct}%`;
     const nozzleBar = $('temp-nozzle-bar') as HTMLElement;
-    nozzleBar.classList.toggle('heating', ext.temperature < ext.target - 2 && ext.target > 0);
-    nozzleBar.classList.toggle(
+    toggleState(nozzleBar, 'heating', ext.temperature < ext.target - 2 && ext.target > 0);
+    toggleState(
+      nozzleBar,
       'at-target',
       Math.abs(ext.temperature - ext.target) <= 2 && ext.target > 0,
     );
@@ -373,11 +383,8 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     const bedPct = bed.target > 0 ? Math.min(100, (bed.temperature / bed.target) * 100) : 0;
     ($('temp-bed-bar') as HTMLElement).style.width = `${bedPct}%`;
     const bedBar = $('temp-bed-bar') as HTMLElement;
-    bedBar.classList.toggle('heating', bed.temperature < bed.target - 2 && bed.target > 0);
-    bedBar.classList.toggle(
-      'at-target',
-      Math.abs(bed.temperature - bed.target) <= 2 && bed.target > 0,
-    );
+    toggleState(bedBar, 'heating', bed.temperature < bed.target - 2 && bed.target > 0);
+    toggleState(bedBar, 'at-target', Math.abs(bed.temperature - bed.target) <= 2 && bed.target > 0);
   }
 
   const chamber = s.ztemperature_sensor;
@@ -408,7 +415,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   for (const a of ['x', 'y', 'z'] as const) {
     const dot = $(`home-${a}`);
     const isHomed = homed.includes(a);
-    dot.classList.toggle('homed', isHomed);
+    toggleState(dot, 'homed', isHomed);
     dot.title = isHomed ? `${a.toUpperCase()} homed` : `${a.toUpperCase()} not homed`;
   }
 
@@ -455,7 +462,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   const speedMode = speedModeMap[pos?.speed_mode ?? 1] ?? 100;
   document.querySelectorAll('.speed-btn').forEach((btn) => {
     const mode = parseInt((btn as HTMLElement).dataset.mode ?? '100');
-    btn.classList.toggle('active', mode === speedMode);
+    toggleState(btn, 'active', mode === speedMode);
   });
 
   // LED toggle
@@ -515,22 +522,23 @@ function renderFilamentUsage(state: PrinterState): void {
   }
   const totalGrams = usage.reduce((sum, u) => sum + u.grams, 0);
   const totalMeters = usage.reduce((sum, u) => sum + u.meters, 0);
-  let html = '<div class="filament-usage-header">Filament Used</div>';
+  let html =
+    '<div class="text-[11px] text-fg-muted uppercase tracking-[0.5px] [margin-bottom:6px]">Filament Used</div>';
   for (const u of usage) {
     const label = u.trayKey === 'mono' ? u.filamentType : `${u.filamentType}`;
-    html += `<div class="filament-usage-row">
-      <span class="filament-usage-swatch" style="background:${escapeHtml(u.color)}"></span>
-      <span class="filament-usage-label">${escapeHtml(label)}</span>
-      <span class="filament-usage-val">${u.meters.toFixed(3)} m</span>
-      <span class="filament-usage-val">${u.grams.toFixed(3)} g</span>
+    html += `<div class="flex items-center gap-2 [padding:2px_0] text-[13px] font-mono">
+      <span class="w-[10px] h-[10px] rounded-[2px] shrink-0" style="background:${escapeHtml(u.color)}"></span>
+      <span class="flex-1 text-fg-soft">${escapeHtml(label)}</span>
+      <span class="min-w-15 text-right text-fg">${u.meters.toFixed(3)} m</span>
+      <span class="min-w-15 text-right text-fg">${u.grams.toFixed(3)} g</span>
     </div>`;
   }
   if (usage.length > 1) {
-    html += `<div class="filament-usage-row filament-usage-total">
-      <span class="filament-usage-swatch"></span>
-      <span class="filament-usage-label">Total</span>
-      <span class="filament-usage-val">${totalMeters.toFixed(3)} m</span>
-      <span class="filament-usage-val">${totalGrams.toFixed(3)} g</span>
+    html += `<div class="flex items-center gap-2 [padding:2px_0] text-[13px] font-mono border-t border-line mt-1 pt-1 font-semibold">
+      <span class="w-[10px] h-[10px] rounded-[2px] shrink-0"></span>
+      <span class="flex-1 text-fg-soft">Total</span>
+      <span class="min-w-15 text-right text-fg">${totalMeters.toFixed(3)} m</span>
+      <span class="min-w-15 text-right text-fg">${totalGrams.toFixed(3)} g</span>
     </div>`;
   }
   container.innerHTML = html;

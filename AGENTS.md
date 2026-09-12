@@ -130,7 +130,7 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   Four glyphs are deliberately **not** converted, each with a comment saying why:
   the two `<option>` arrows in `index.html` (an `<option>` may only contain text), the
   `⚠️` in the emergency-stop `confirm()` (a native dialog renders plain text), the `▾`
-  in `main.css` (`::after` content cannot carry a class), and `⌀` in the spool
+  in `main.css`'s base layer (`::after` content cannot carry a class), and `⌀` in the spool
   calculator's SVG (a typographic symbol, not an icon).
 
 - **Everything the service writes goes under `config.dataDir`, via `data-paths.ts`.**
@@ -159,9 +159,33 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   ELEG-3's security fix need applying twice. Deleted in ELEG-23; `git log` has it if a
   standalone deployment is ever wanted, and it would need this rule reckoned with.
 - **The frontend is hand-written TypeScript + DOM.** No framework, no JSX, no
-  component library: `src/main.ts` composes modules from `src/ui/*.ts`, styling is
-  CSS custom properties in `src/styles/`. Match the surrounding idiom rather than
-  introducing a framework in one card.
+  component library: `src/main.ts` composes modules from `src/ui/*.ts`. Match the
+  surrounding idiom rather than introducing a framework in one card.
+- **Styling is Tailwind utilities on the element. There is no stylesheet to edit.**
+  `src/styles/main.css` is Tailwind's *configuration* — the palette, `@theme`,
+  keyframes and a handful of base rules — and nothing else. Do not add component CSS
+  to it; put the utilities on the markup.
+
+  Three things carry styling outside the markup, because they are applied at runtime
+  and a class name alone no longer means anything:
+
+  | | |
+  | --- | --- |
+  | `ui/state-classes.ts` | `toggleState(el, 'active', on)` — the utilities a state implies, per base component. GENERATED from the old stylesheet; edit it directly. |
+  | `ui/card-layout.ts` | `CARD_WIDTH_UTILITIES` — the grid span each card width means. |
+  | `helpers.ts` | `toggleClasses(el, 'hook a b c', on)` for one-off runtime states. |
+
+  **Prefer `min-[…]` over `max-[…]` when two variants set the same property.**
+  Tailwind gives no guaranteed order between overlapping arbitrary max-width variants,
+  so `max-[1100px]:col-[span_6]` and `max-[700px]:col-[span_12]` both matched at 390px
+  and the wider one won — every card came out half-width on a phone. Ascending `min-*`
+  variants have an unambiguous order. Where a `max-*` pair is unavoidable, bound the
+  wider one: `min-[701px]:max-[800px]:…`.
+
+  **A class the code queries must stay on the element.** `querySelector`,
+  `classList.contains` and the delegated click handlers still look for `main-tab`,
+  `file-item`, `settings-card-visible` and ~107 others; those are hooks now, carrying
+  no styling. Removing one breaks behaviour silently.
 - **A list view's controls go in a *static sibling* of the list, never inside it.**
   Every list card re-renders wholesale on a WebSocket update — the render function
   assigns `container.innerHTML`. Anything interactive built inside that container is

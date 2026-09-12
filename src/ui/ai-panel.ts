@@ -117,14 +117,14 @@ function renderLabelScores(
       const pct = Math.round(s.score * 100);
       const barColor =
         pct > 30 ? 'var(--warning)' : pct > 15 ? 'var(--accent)' : 'var(--text-muted)';
-      return `<div class="ai-label-row">
-      <div class="ai-label-bar" style="width:${Math.max(2, pct)}%;background:${barColor}"></div>
-      <span class="ai-label-pct">${pct}%</span>
-      <span class="ai-label-text">${escapeHtml(s.label)}</span>
+      return `<div class="flex items-start [gap:6px] relative text-[0.7rem] min-h-[18px] [padding:2px_0]">
+      <div class="absolute left-0 top-0 h-full rounded-[2px] opacity-[0.25] min-w-[2px]" style="width:${Math.max(2, pct)}%;background:${barColor}"></div>
+      <span class="w-8 shrink-0 text-right [font-variant-numeric:tabular-nums] text-[var(--text)] z-[1]">${pct}%</span>
+      <span class="text-fg-muted z-[1] [word-break:break-word]">${escapeHtml(s.label)}</span>
     </div>`;
     })
     .join('');
-  return `<details class="ai-label-details" data-label-source="${source}"><summary>Label scores (${sorted.length})</summary><div class="ai-label-scores">${rows}</div></details>`;
+  return `<details class="[margin-top:6px] [&_summary]:text-[0.75rem] [&_summary]:text-fg-muted [&_summary]:cursor-pointer [&_summary]:select-none" data-label-source="${source}"><summary>Label scores (${sorted.length})</summary><div class="flex flex-col [gap:3px] mt-1">${rows}</div></details>`;
 }
 
 function renderAnalysisCard(a: AIAnalysis): string {
@@ -133,22 +133,22 @@ function renderAnalysisCard(a: AIAnalysis): string {
       ? a.issues
           .map(
             (i) =>
-              `<span class="ai-issue ai-issue-${a.status}" title="${escapeHtml(i.description)}">${escapeHtml(i.type)} (${Math.round(i.confidence * 100)}%)</span>`,
+              `<span class="text-[0.75rem] [padding:2px_6px] rounded-[3px] bg-[var(--bg)] ${a.status}" title="${escapeHtml(i.description)}">${escapeHtml(i.type)} (${Math.round(i.confidence * 100)}%)</span>`,
           )
           .join(' ')
-      : '<span class="ai-no-issues">No issues</span>';
+      : '<span class="text-[0.75rem] text-fg-muted">No issues</span>';
 
   return `
-    <div class="ai-analysis ai-status-${a.status}">
-      <div class="ai-analysis-header">
+    <div class="[padding:8px_10px] rounded-chip bg-input [margin-bottom:6px] border-l-3 border-line ${a.status}">
+      <div class="flex items-center gap-2 text-[0.85rem] mb-1">
         <span>${statusIcon(a.status)}</span>
-        <span class="ai-source">${a.source.toUpperCase()}</span>
-        <span class="ai-confidence">${Math.round(a.confidence * 100)}%</span>
-        <span class="ai-time">${timeAgo(a.timestamp)}</span>
-        <span class="ai-duration">${a.durationMs}ms</span>
+        <span class="font-semibold text-[var(--text)] text-[0.75rem] [padding:1px_6px] bg-[var(--bg)] rounded-[3px]">${a.source.toUpperCase()}</span>
+        <span class="text-[var(--primary)] font-medium">${Math.round(a.confidence * 100)}%</span>
+        <span class="text-fg-muted text-[0.75rem] ml-auto">${timeAgo(a.timestamp)}</span>
+        <span class="text-fg-muted text-[0.75rem]">${a.durationMs}ms</span>
       </div>
-      <div class="ai-description">${escapeHtml(a.description)}</div>
-      <div class="ai-issues">${issues}</div>
+      <div class="text-[0.85rem] text-[var(--text)] mb-1">${escapeHtml(a.description)}</div>
+      <div class="flex flex-wrap gap-1">${issues}</div>
       ${renderLabelScores(a.labelScores, a.source)}
     </div>
   `;
@@ -157,11 +157,11 @@ function renderAnalysisCard(a: AIAnalysis): string {
 function renderAlertItem(a: AIAlert): string {
   const issues = a.issues.map((i) => escapeHtml(i.type)).join(', ') || 'unknown';
   return `
-    <div class="ai-alert-item ai-alert-${a.status}">
+    <div class="flex items-center [gap:6px] [padding:6px_10px] text-[0.85rem] bg-input rounded-chip mb-1 border-l-3 border-line ${a.status}">
       <span>${statusIcon(a.status)}</span>
-      <span class="ai-alert-desc" title="${escapeAttr(a.description)}">${escapeHtml(a.description)}</span>
-      <span class="ai-alert-issues">${issues}</span>
-      <span class="ai-time">${timeAgo(a.timestamp)}</span>
+      <span class="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" title="${escapeAttr(a.description)}">${escapeHtml(a.description)}</span>
+      <span class="text-fg-muted text-[0.75rem]">${issues}</span>
+      <span class="text-fg-muted text-[0.75rem] ml-auto">${timeAgo(a.timestamp)}</span>
     </div>
   `;
 }
@@ -187,13 +187,13 @@ export function renderAIPanel(): void {
   const latestHtml =
     latestCards.length > 0
       ? latestCards.join('')
-      : `<div class="ai-empty">${aiStatusMessage()}</div>`;
+      : `<div class="text-fg-muted text-[0.85rem] [padding:8px_0]">${aiStatusMessage()}</div>`;
 
   // Alert history
   const alertHtml =
     alertHistory.length > 0
       ? alertHistory.slice(0, 10).map(renderAlertItem).join('')
-      : '<div class="ai-empty">No alerts</div>';
+      : '<div class="text-fg-muted text-[0.85rem] [padding:8px_0]">No alerts</div>';
 
   // Recent history (collapsed by default)
   const historyHtml =
@@ -202,32 +202,32 @@ export function renderAIPanel(): void {
           .slice(0, 15)
           .map((a) => {
             const t = new Date(a.timestamp).toLocaleTimeString();
-            return `<div class="ai-history-row ai-status-${a.status}">
+            return `<div class="flex items-center [gap:6px] [padding:3px_6px] text-[0.8rem] border-b border-line ${a.status}">
         <span>${statusIcon(a.status)}</span>
-        <span class="ai-source">${a.source}</span>
-        <span class="ai-hist-desc" title="${escapeAttr(a.description)}">${escapeHtml(a.description)}</span>
-        <span class="ai-time">${t}</span>
+        <span class="font-semibold text-[var(--text)] text-[0.75rem] [padding:1px_6px] bg-[var(--bg)] rounded-[3px]">${a.source}</span>
+        <span class="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[var(--text)]" title="${escapeAttr(a.description)}">${escapeHtml(a.description)}</span>
+        <span class="text-fg-muted text-[0.75rem] ml-auto">${t}</span>
       </div>`;
           })
           .join('')
-      : '<div class="ai-empty">No history</div>';
+      : '<div class="text-fg-muted text-[0.85rem] [padding:8px_0]">No history</div>';
 
   container.innerHTML = `
-    <div class="ai-section">
-      <div class="ai-status-line">${aiStatusIcon()} ${aiStatusMessage()}</div>
+    <div class="ai-section mb-3 [&_h4]:text-[0.8rem] [&_h4]:text-fg-muted [&_h4]:uppercase [&_h4]:tracking-[0.05em] [&_h4]:[margin:0_0_6px] [&_summary]:text-[0.8rem] [&_summary]:text-fg-muted [&_summary]:uppercase [&_summary]:tracking-[0.05em] [&_summary]:cursor-pointer [&_summary]:[margin-bottom:6px]">
+      <div class="text-[0.9rem] font-medium text-[var(--text)] mb-2">${aiStatusIcon()} ${aiStatusMessage()}</div>
       ${renderConfigInfo()}
     </div>
-    <div class="ai-section">
+    <div class="ai-section mb-3 [&_h4]:text-[0.8rem] [&_h4]:text-fg-muted [&_h4]:uppercase [&_h4]:tracking-[0.05em] [&_h4]:[margin:0_0_6px] [&_summary]:text-[0.8rem] [&_summary]:text-fg-muted [&_summary]:uppercase [&_summary]:tracking-[0.05em] [&_summary]:cursor-pointer [&_summary]:[margin-bottom:6px]">
       <h4>Latest Analysis</h4>
       ${latestHtml}
     </div>
-    <div class="ai-section">
+    <div class="ai-section mb-3 [&_h4]:text-[0.8rem] [&_h4]:text-fg-muted [&_h4]:uppercase [&_h4]:tracking-[0.05em] [&_h4]:[margin:0_0_6px] [&_summary]:text-[0.8rem] [&_summary]:text-fg-muted [&_summary]:uppercase [&_summary]:tracking-[0.05em] [&_summary]:cursor-pointer [&_summary]:[margin-bottom:6px]">
       <h4>Alerts</h4>
       ${alertHtml}
     </div>
-    <details class="ai-section"${historyWasOpen ? ' open' : ''}>
+    <details class="ai-section mb-3 [&_h4]:text-[0.8rem] [&_h4]:text-fg-muted [&_h4]:uppercase [&_h4]:tracking-[0.05em] [&_h4]:[margin:0_0_6px] [&_summary]:text-[0.8rem] [&_summary]:text-fg-muted [&_summary]:uppercase [&_summary]:tracking-[0.05em] [&_summary]:cursor-pointer [&_summary]:[margin-bottom:6px]"${historyWasOpen ? ' open' : ''}>
       <summary>History (${analysisHistory.length})</summary>
-      <div class="ai-history">${historyHtml}</div>
+      <div class="">${historyHtml}</div>
     </details>
   `;
 
@@ -270,25 +270,25 @@ function renderConfigInfo(): string {
   if (!aiConfig || aiServiceStatus === 'disabled') return '';
 
   const vlm = aiConfig.vlmEnabled
-    ? `<span class="ai-config-on">${icon('check')} VLM</span> <span class="ai-config-detail">${escapeHtml(String(aiConfig.vlmModel))} @ ${escapeHtml(String(aiConfig.vlmBaseUrl))}</span>`
-    : `<span class="ai-config-off">${icon('cross')} VLM disabled</span>`;
+    ? `<span class="text-[#4caf50] font-semibold">${icon('check')} VLM</span> <span class="text-fg-muted text-[0.75rem]">${escapeHtml(String(aiConfig.vlmModel))} @ ${escapeHtml(String(aiConfig.vlmBaseUrl))}</span>`
+    : `<span class="text-fg-muted">${icon('cross')} VLM disabled</span>`;
 
   const local = aiConfig.localEnabled
-    ? `<span class="ai-config-on">${icon('check')} CLIP</span> <span class="ai-config-detail">${escapeHtml(String(aiConfig.localModel))}${aiConfig.localReady ? '' : ' (loading...)'}</span>`
-    : `<span class="ai-config-off">${icon('cross')} Local CLIP disabled</span>`;
+    ? `<span class="text-[#4caf50] font-semibold">${icon('check')} CLIP</span> <span class="text-fg-muted text-[0.75rem]">${escapeHtml(String(aiConfig.localModel))}${aiConfig.localReady ? '' : ' (loading...)'}</span>`
+    : `<span class="text-fg-muted">${icon('cross')} Local CLIP disabled</span>`;
 
   const interval = `every ${aiConfig.intervalSec}s`;
   const threshold = `alert after ${aiConfig.alertThreshold} warnings`;
 
   const stats = aiConfig.analysisCount
-    ? `<div class="ai-config-row">${icon('reports')} ${aiConfig.analysisCount} analyses performed, ${aiConfig.consecutiveWarnings} consecutive warnings</div>`
+    ? `<div class="flex items-center [gap:6px] flex-wrap">${icon('reports')} ${aiConfig.analysisCount} analyses performed, ${aiConfig.consecutiveWarnings} consecutive warnings</div>`
     : '';
 
   return `
-    <div class="ai-config-info">
-      <div class="ai-config-row">${vlm}</div>
-      <div class="ai-config-row">${local}</div>
-      <div class="ai-config-row">${icon('duration')} ${interval} · ${threshold}</div>
+    <div class="[padding:8px_10px] bg-input rounded-chip text-[0.8rem] flex flex-col gap-1">
+      <div class="flex items-center [gap:6px] flex-wrap">${vlm}</div>
+      <div class="flex items-center [gap:6px] flex-wrap">${local}</div>
+      <div class="flex items-center [gap:6px] flex-wrap">${icon('duration')} ${interval} · ${threshold}</div>
       ${stats}
     </div>
   `;

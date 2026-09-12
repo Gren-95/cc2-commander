@@ -1,5 +1,6 @@
 /** Structured MQTT log viewer with filters, search, pause, and highlighting */
 
+import { toggleState } from './state-classes';
 import { icon, iconOnly, iconSolo } from './icons';
 import type { LogStore, LogEntry } from '../log-store';
 import { $, escapeHtml } from './helpers';
@@ -85,7 +86,10 @@ function highlightMatch(text: string): string {
   const escaped = escapeHtml(text);
   const searchEscaped = escapeHtml(searchText);
   const regex = new RegExp(`(${searchEscaped.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-  return escaped.replace(regex, '<mark class="log-highlight">$1</mark>');
+  return escaped.replace(
+    regex,
+    '<mark class="bg-[rgba(255,_167,_38,_0.35)] text-fg rounded-[2px] [padding:0_1px]">$1</mark>',
+  );
 }
 
 function shortTopic(topic: string): string {
@@ -186,28 +190,28 @@ function renderSlogRow(e: LogEntry, prevStatusRaw: unknown): string {
   const summary = compactPayload(e);
 
   let row = '';
-  row += `<div class="slog-row ${dirClass} ${typeClass} ${isPinned ? 'slog-pinned' : ''}" data-ts="${e.timestamp}">`;
-  row += `<div class="slog-row-header">`;
-  row += `<span class="slog-icon">${typeGlyph}</span>`;
+  row += `<div class="slog-row [padding:4px_8px] rounded-chip cursor-pointer border-l-3 border-transparent [transition:background_0.1s] hover:bg-hover ${dirClass} ${typeClass} ${isPinned ? 'bg-[rgba(33,_150,_243,_0.06)]' : ''}" data-ts="${e.timestamp}">`;
+  row += `<div class="flex gap-2 items-center text-[0.75rem] font-mono leading-[1.6]">`;
+  row += `<span class="text-[12px] shrink-0">${typeGlyph}</span>`;
   row += timestampSpan('slog-time', e.timestamp, formatTimestamp(e.timestamp));
-  row += `<span class="slog-dir">${e.direction === 'sent' ? icon('sent') : icon('received')}</span>`;
-  row += `<span class="slog-method">${highlightMatch(method)}</span>`;
-  row += `<span class="slog-topic">${highlightMatch(shortTopic(e.topic))}</span>`;
-  row += `<span class="slog-summary">${highlightMatch(summary)}</span>`;
-  row += `<button class="slog-pin-btn ${isPinned ? 'pinned' : ''}" data-pin-ts="${e.timestamp}" title="${isPinned ? 'Unpin' : 'Pin'}" aria-label="${isPinned ? 'Unpin' : 'Pin'}">${isPinned ? iconSolo('pinned') : iconSolo('pin')}</button>`;
-  row += `<span class="slog-expand">${isExpanded ? iconSolo('expanded') : iconSolo('collapsed')}</span>`;
+  row += `<span class="font-bold min-w-[14px] text-center [.slog-sent_&]:text-accent-light [.slog-recv_&]:text-ok">${e.direction === 'sent' ? icon('sent') : icon('received')}</span>`;
+  row += `<span class="text-accent min-w-30 whitespace-nowrap font-semibold">${highlightMatch(method)}</span>`;
+  row += `<span class="text-warn min-w-20 whitespace-nowrap">${highlightMatch(shortTopic(e.topic))}</span>`;
+  row += `<span class="text-fg-soft overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0">${highlightMatch(summary)}</span>`;
+  row += `<button class="slog-pin-btn bg-transparent border-0 cursor-pointer text-[10px] opacity-[0.3] [transition:opacity_0.15s] [padding:0_2px] shrink-0 hover:opacity-[0.7] ${isPinned ? 'pinned' : ''}" data-pin-ts="${e.timestamp}" title="${isPinned ? 'Unpin' : 'Pin'}" aria-label="${isPinned ? 'Unpin' : 'Pin'}">${isPinned ? iconSolo('pinned') : iconSolo('pin')}</button>`;
+  row += `<span class="text-fg-muted shrink-0 w-[14px] text-center">${isExpanded ? iconSolo('expanded') : iconSolo('collapsed')}</span>`;
   row += `</div>`;
 
   if (isExpanded) {
     if (showDiff && classifyEntry(e) === 'status' && prevStatusRaw) {
       const diffs = computeDiff(prevStatusRaw, e.raw);
       if (diffs.length) {
-        row += `<pre class="slog-detail slog-diff">${diffs.map((d) => escapeHtml(d)).join('\n')}</pre>`;
+        row += `<pre class="whitespace-pre-wrap bg-surface [padding:8px_10px] rounded-chip [margin:4px_0_4px_22px] max-h-75 overflow-y-auto text-[0.7rem] text-fg-soft">${diffs.map((d) => escapeHtml(d)).join('\n')}</pre>`;
       } else {
-        row += `<pre class="slog-detail slog-diff">No changes from previous status</pre>`;
+        row += `<pre class="whitespace-pre-wrap bg-surface [padding:8px_10px] rounded-chip [margin:4px_0_4px_22px] max-h-75 overflow-y-auto text-[0.7rem] text-fg-soft">No changes from previous status</pre>`;
       }
     } else {
-      row += `<pre class="slog-detail">${escapeHtml(JSON.stringify(e.raw, null, 2))}</pre>`;
+      row += `<pre class="whitespace-pre-wrap bg-surface [padding:8px_10px] rounded-chip [margin:4px_0_4px_22px] max-h-75 overflow-y-auto text-[0.7rem] text-fg-soft">${escapeHtml(JSON.stringify(e.raw, null, 2))}</pre>`;
     }
   }
 
@@ -239,8 +243,8 @@ export function renderStructuredLog(store: LogStore): void {
   let html = '';
 
   if (pinned.length) {
-    html += `<div class="slog-pinned-section">`;
-    html += `<div class="slog-pinned-header">${icon('pinned')} Pinned (${pinned.length})</div>`;
+    html += `<div class="border-b border-line mb-1 pb-1">`;
+    html += `<div class="text-[10px] text-fg-muted [padding:2px_8px] font-semibold">${icon('pinned')} Pinned (${pinned.length})</div>`;
     for (const e of pinned) {
       html += renderSlogRow(e, null);
     }
@@ -314,10 +318,10 @@ export function bindStructuredLogControls(store: LogStore): void {
   const savedTab = loadUISettings().logTab;
   document.querySelectorAll('.log-tab').forEach((tab) => {
     const tabName = (tab as HTMLElement).dataset.tab;
-    tab.classList.toggle('active', tabName === savedTab);
+    toggleState(tab, 'active', tabName === savedTab);
     tab.addEventListener('click', () => {
-      document.querySelectorAll('.log-tab').forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
+      document.querySelectorAll('.log-tab').forEach((t) => toggleState(t, 'active', false));
+      toggleState(tab, 'active', true);
       const name = (tab as HTMLElement).dataset.tab;
       $('log-tab-structured').classList.toggle('hidden', name !== 'structured');
       $('log-tab-raw').classList.toggle('hidden', name !== 'raw');

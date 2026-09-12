@@ -94,6 +94,26 @@ const WAS_SIDEBAR = new Set([
 /** Cards that earn the whole row: long lists and wide tables. */
 const WANTS_FULL = new Set(['log-card', 'event-log-card']);
 
+/**
+ * The grid span each width means, mobile-first.
+ *
+ * Written with `min-[…]` rather than `max-[…]` deliberately. Tailwind does not order
+ * overlapping arbitrary max-width variants by breakpoint, so `max-[1100px]:col-[span_6]`
+ * and `max-[700px]:col-[span_12]` both applied at 390px and the WIDER one won — every
+ * card came out half-width on a phone, overlapping its neighbour. Ascending `min-*`
+ * variants have an unambiguous order: the largest matching one wins, which is the
+ * cascade this needs.
+ *
+ * Breakpoints match the rules this replaced: ≤700 one column, 701–1100 halves,
+ * 1101–1500 thirds, wider still quarters.
+ */
+export const CARD_WIDTH_UTILITIES: Record<CardWidth, string> = {
+  compact:
+    'col-[span_12] min-[701px]:col-[span_6] min-[1101px]:col-[span_4] min-[1501px]:col-[span_3]',
+  wide: 'col-[span_12] min-[1101px]:col-[span_6]',
+  full: 'col-[span_12]',
+};
+
 export function defaultWidthFor(id: string): CardWidth {
   if (WAS_SIDEBAR.has(id)) return 'compact';
   if (WANTS_FULL.has(id)) return 'full';

@@ -1,5 +1,6 @@
 /** Gcode preview — 3D toolpath visualization using gcode-preview library */
 
+import { toggleState } from './state-classes';
 import { WebGLPreview } from 'gcode-preview';
 import {
   ConeGeometry,
@@ -351,7 +352,7 @@ export function bindGcodePreviewControls(): void {
       preview.render();
 
       const followBtn = $('btn-gcode-follow');
-      if (followBtn) followBtn.classList.remove('active');
+      if (followBtn) toggleState(followBtn, 'active', false);
 
       if (preview) {
         preview.singleLayerMode = singleLayerMode;
@@ -366,7 +367,7 @@ export function bindGcodePreviewControls(): void {
     singleBtn.addEventListener('click', () => {
       singleLayerMode = !singleLayerMode;
       localStorage.setItem('gcode-single-layer', String(singleLayerMode));
-      singleBtn.classList.toggle('active', singleLayerMode);
+      toggleState(singleBtn, 'active', singleLayerMode);
       if (preview) {
         preview.singleLayerMode = singleLayerMode;
         preview.render();
@@ -380,7 +381,7 @@ export function bindGcodePreviewControls(): void {
     followBtn.addEventListener('click', () => {
       followMode = !followMode;
       localStorage.setItem('gcode-follow', String(followMode));
-      followBtn.classList.toggle('active', followMode);
+      toggleState(followBtn, 'active', followMode);
       if (followMode && preview) {
         // Reset so the render loop picks up the current print layer
         lastEndLayer = -1;

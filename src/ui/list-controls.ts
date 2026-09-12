@@ -84,14 +84,20 @@ export function createListControls<T>(options: ListControlsOptions<T>): ListCont
     selectValues.set(select.id, getListSelect(`${id}.${select.id}`) ?? 'all');
   }
 
-  container.classList.add('list-controls');
+  container.classList.add(
+    ...'list-controls flex items-center flex-wrap [gap:6px] [padding:6px_0_8px] max-[700px]:min-w-0'.split(
+      ' ',
+    ),
+  );
   container.innerHTML = `
-    <input type="search" class="list-filter" id="${escapeAttr(id)}-filter"
+    <input type="search" class="list-filter [.list-controls_&]:bg-input [.list-controls_&]:border [.list-controls_&]:border-line [.list-controls_&]:rounded-[4px] [.list-controls_&]:text-fg [.list-controls_&]:[padding:4px_8px] [.list-controls_&]:text-[0.8rem] [.list-controls_&]:[flex:1_1_140px] [.list-controls_&]:min-w-30" id="${escapeAttr(id)}-filter"
            placeholder="${escapeAttr(options.filterPlaceholder ?? 'Filter…')}"
            aria-label="${escapeAttr(options.filterPlaceholder ?? 'Filter list')}">
     ${(options.selects ?? [])
       .map(
-        (select) => `<select class="list-select" id="${escapeAttr(`${id}-${select.id}`)}"
+        (
+          select,
+        ) => `<select class="list-select [.list-controls_&]:bg-input [.list-controls_&]:border [.list-controls_&]:border-line [.list-controls_&]:rounded-[4px] [.list-controls_&]:text-fg [.list-controls_&]:[padding:4px_8px] [.list-controls_&]:text-[0.8rem]" id="${escapeAttr(`${id}-${select.id}`)}"
              aria-label="${escapeAttr(select.label)}">
         <option value="all">${escapeHtml(select.label)}: all</option>
         ${select.options
@@ -103,8 +109,8 @@ export function createListControls<T>(options: ListControlsOptions<T>): ListCont
       </select>`,
       )
       .join('')}
-    <div class="list-sort" role="group" aria-label="Sort by"></div>
-    <span class="list-count" aria-live="polite"></span>`;
+    <div class="list-sort flex flex-wrap gap-1" role="group" aria-label="Sort by"></div>
+    <span class="list-count text-[0.72rem] text-fg-muted ml-auto whitespace-nowrap" aria-live="polite"></span>`;
 
   const filterInput = container.querySelector('.list-filter') as HTMLInputElement;
   const sortWrap = container.querySelector('.list-sort') as HTMLElement;
@@ -116,7 +122,7 @@ export function createListControls<T>(options: ListControlsOptions<T>): ListCont
       .map((column) => {
         const active = column.key === sort.key;
         const arrow = active ? ` ${directionIndicator(sort.dir)}` : '';
-        return `<button type="button" class="list-sort-btn${active ? ' active' : ''}"
+        return `<button type="button" class="list-sort-btn bg-input border border-line rounded-[4px] text-fg-soft [padding:4px_8px] text-[0.75rem] cursor-pointer whitespace-nowrap hover:text-fg hover:border-accent-light ${active ? 'active bg-accent-dim text-fg border-accent font-semibold' : ''}"
           data-key="${escapeAttr(column.key)}"
           aria-pressed="${active}"
           title="Sort by ${escapeAttr(column.label)}">${escapeHtml(column.label)}${arrow}</button>`;
@@ -185,8 +191,8 @@ export function createListControls<T>(options: ListControlsOptions<T>): ListCont
     isFiltering,
     emptyHtml(noDataMessage) {
       return isFiltering()
-        ? '<div class="file-empty">Nothing matches your filter. Clear it or try a shorter search.</div>'
-        : `<div class="file-empty">${noDataMessage}</div>`;
+        ? '<div class="text-fg-muted [font-style:italic] p-5 text-center">Nothing matches your filter. Clear it or try a shorter search.</div>'
+        : `<div class="text-fg-muted [font-style:italic] p-5 text-center">${noDataMessage}</div>`;
     },
   };
 }
