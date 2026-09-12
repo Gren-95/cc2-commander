@@ -142,7 +142,8 @@ function updateCamera(hasCamera: boolean, _printerIp: string): void {
   } else {
     img.classList.add('hidden');
     overlay.classList.remove('hidden');
-    overlay.textContent = 'Camera not connected';
+    // Only the text node — `overlay.textContent = …` would take the icon with it.
+    $('camera-overlay-text').textContent = 'Camera not connected';
   }
 }
 
@@ -295,7 +296,8 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   // Layer info — use fileTotalLayers from method 1046 or fallback to print_status
   const totalLayer = ps?.total_layer ?? state.fileTotalLayers ?? '??';
   const currentLayer = ps?.current_layer ?? '--';
-  $('print-layer').textContent = `Layer: ${currentLayer}/${totalLayer}`;
+  // The label lives in the markup now, so this writes the value alone.
+  $('print-layer').textContent = `${currentLayer} of ${totalLayer}`;
 
   // Filament usage from method 1046
   const filamentUsed = state.fileFilamentUsed;
@@ -335,12 +337,12 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   // Remaining time
   const remaining = formatTime(ps?.remaining_time_sec);
   $('print-remaining').textContent =
-    (isPrinting || isPaused) && remaining !== '--' ? `Remaining: ${remaining}` : '--';
+    (isPrinting || isPaused) && remaining !== '--' ? remaining : '--';
 
   // Elapsed time
   const printDur = ps?.print_duration;
   if (printDur != null && (isPrinting || isPaused)) {
-    $('print-elapsed').textContent = `Elapsed: ${formatTime(printDur)}`;
+    $('print-elapsed').textContent = formatTime(printDur);
   } else {
     $('print-elapsed').textContent = '--';
   }
@@ -348,13 +350,13 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   // Start time and ETA (calculated from elapsed / remaining)
   if ((isPrinting || isPaused) && printDur != null) {
     const startedAt = new Date(Date.now() - printDur * 1000);
-    $('print-started').textContent = `Started: ${formatClock(startedAt)}`;
+    $('print-started').textContent = formatClock(startedAt);
   } else {
     $('print-started').textContent = '--';
   }
   if ((isPrinting || isPaused) && ps?.remaining_time_sec != null && ps.remaining_time_sec > 0) {
     const eta = new Date(Date.now() + ps.remaining_time_sec * 1000);
-    $('print-eta').textContent = `ETA: ${formatClock(eta)}`;
+    $('print-eta').textContent = formatClock(eta);
   } else {
     $('print-eta').textContent = '--';
   }
@@ -423,8 +425,9 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     dot.title = isHomed ? `${a.toUpperCase()} homed` : `${a.toUpperCase()} not homed`;
   }
 
-  // Live speed & flow
-  $('live-speed').textContent = pos?.speed ? `${Math.round(pos.speed)} mm/min` : '-- mm/min';
+  // Live speed & flow. The unit is markup beside the value, not part of it —
+  // see the readout/unit split in `ui/design.ts`.
+  $('live-speed').textContent = pos?.speed ? String(Math.round(pos.speed)) : '--';
   const currentE = pos?.extruder ?? pos?.e ?? 0;
   const now = Date.now();
   // Only recompute rates when we get a NEW extruder position (not every render)
@@ -444,11 +447,9 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     _prevE = currentE;
     _prevETime = now;
   }
-  $('live-extrusion').textContent =
-    _lastExtRate > 0 ? `${_lastExtRate.toFixed(1)} mm/s` : '-- mm/s';
-  $('live-flow').textContent = _lastFlowRate > 0 ? `${_lastFlowRate.toFixed(1)} mm³/s` : '-- mm³/s';
-  $('live-mass-flow').textContent =
-    _lastMassFlow > 0 ? `${_lastMassFlow.toFixed(1)} mg/s` : '-- mg/s';
+  $('live-extrusion').textContent = _lastExtRate > 0 ? _lastExtRate.toFixed(1) : '--';
+  $('live-flow').textContent = _lastFlowRate > 0 ? _lastFlowRate.toFixed(1) : '--';
+  $('live-mass-flow').textContent = _lastMassFlow > 0 ? _lastMassFlow.toFixed(1) : '--';
 
   // Per-spool filament usage
   renderFilamentUsage(state);

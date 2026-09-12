@@ -32,37 +32,44 @@ export interface StateDelta {
   remove: string;
 }
 
+/**
+ * What "selected" looks like on a chip, for every segmented picker in the app.
+ *
+ * There used to be five of these, one per hook, differing in which neutral classes they
+ * removed — because each was generated from whatever the old stylesheet happened to say
+ * for that one selector. They all mean the same thing, so they are now one delta against
+ * one base (`CHIP` in `design.ts`). `remove` must name every neutral the base sets for a
+ * property `add` also sets, or the two fight and the winner is undefined.
+ */
+const CHIP_ACTIVE: StateDelta = {
+  add: 'bg-accent text-white border-accent',
+  remove: 'bg-surface text-fg-soft border-line',
+};
+
 export const STATE_UTILITIES: Record<string, Record<string, StateDelta>> = {
   active: {
-    'chart-time-btn': { add: 'bg-accent text-white', remove: 'bg-transparent text-fg-muted' },
-    'dist-btn': { add: 'bg-accent text-white border-accent', remove: 'bg-surface' },
-    'file-source-tab': { add: 'bg-accent text-white', remove: 'bg-transparent text-fg-soft' },
-    'list-sort-btn': {
-      add: 'bg-accent-dim text-fg border-accent font-semibold',
-      remove: 'bg-input text-fg-soft',
-    },
-    'log-tab': { add: 'bg-accent text-white', remove: 'bg-transparent text-fg-soft' },
+    'chart-time-btn': CHIP_ACTIVE,
+    'dist-btn': CHIP_ACTIVE,
+    'file-source-tab': CHIP_ACTIVE,
+    'list-sort-btn': CHIP_ACTIVE,
+    'log-tab': CHIP_ACTIVE,
+    'print-bed-btn': CHIP_ACTIVE,
+    'speed-btn': CHIP_ACTIVE,
+    'temp-preset-btn': CHIP_ACTIVE,
+    'timelapse-play-btn': CHIP_ACTIVE,
     'main-tab': {
       add: 'bg-accent text-white max-[700px]:bg-transparent max-[700px]:text-accent max-[700px]:[box-shadow:inset_0_2px_0_0_var(--accent)]',
       remove: 'bg-transparent text-fg-muted',
     },
-    'print-bed-btn': { add: 'bg-accent text-white', remove: 'bg-surface text-fg-soft' },
     'progress-fill': {
       add: "after:content-[''] after:absolute after:inset-0 after:[background:linear-gradient(_90deg,_transparent_0%,_rgba(255,_255,_255,_0.18)_40%,_rgba(255,_255,_255,_0.28)_50%,_rgba(255,_255,_255,_0.18)_60%,_transparent_100%_)] after:[animation:shimmer_2s_infinite]",
       remove: '',
     },
-    'speed-btn': { add: 'bg-accent text-white border-accent', remove: 'bg-surface' },
     subtab: { add: 'text-accent [border-bottom-color:var(--accent)]', remove: 'text-fg-muted' },
   },
   'at-target': {
     'bed-bar': { add: 'bg-ok', remove: 'bg-bed' },
     'nozzle-bar': { add: 'bg-ok', remove: 'bg-nozzle' },
-  },
-  'capacity-high': {
-    'capacity-fill': { add: 'bg-warn', remove: 'bg-accent' },
-  },
-  'capacity-warn': {
-    'capacity-fill': { add: 'bg-[var(--error)]', remove: 'bg-accent' },
   },
   collapsed: {
     card: {
@@ -78,12 +85,6 @@ export const STATE_UTILITIES: Record<string, Record<string, StateDelta>> = {
   },
   disabled: {
     'file-upload-label': { add: 'opacity-[0.5] pointer-events-none', remove: '' },
-  },
-  expanded: {
-    'log-payload': {
-      add: 'whitespace-pre-wrap bg-surface [padding:6px_8px] rounded-[4px] [margin-top:2px] max-h-75 overflow-y-auto w-full',
-      remove: 'whitespace-nowrap',
-    },
   },
   heating: {
     'bed-bar': { add: '[animation:pulse_1.5s_infinite]', remove: '' },

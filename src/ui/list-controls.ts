@@ -14,6 +14,7 @@
  * alone — never the input.
  */
 
+import { CHIP, EMPTY } from './design';
 import {
   type SortColumn,
   type SortDirection,
@@ -73,6 +74,12 @@ export interface ListControls<T> {
 /** Debounced, because Files kicks off thumbnail and cache fetches on every render. */
 const FILTER_DEBOUNCE_MS = 150;
 
+/** `CHIP` as `toggleState(el, 'active', true)` would leave it. */
+const ACTIVE_CHIP = CHIP.split(' ')
+  .filter((c) => !['bg-surface', 'text-fg-soft', 'border-line'].includes(c))
+  .concat('bg-accent', 'text-white', 'border-accent')
+  .join(' ');
+
 export function createListControls<T>(options: ListControlsOptions<T>): ListControls<T> {
   const { id, container, columns, filterText, group, onChange } = options;
   const keys = columns.map((c) => c.key);
@@ -90,14 +97,14 @@ export function createListControls<T>(options: ListControlsOptions<T>): ListCont
     ),
   );
   container.innerHTML = `
-    <input type="search" class="list-filter [.list-controls_&]:bg-input [.list-controls_&]:border [.list-controls_&]:border-line [.list-controls_&]:rounded-[4px] [.list-controls_&]:text-fg [.list-controls_&]:[padding:4px_8px] [.list-controls_&]:text-[0.8rem] [.list-controls_&]:[flex:1_1_140px] [.list-controls_&]:min-w-30" id="${escapeAttr(id)}-filter"
+    <input type="search" class="list-filter rounded-lg border border-line bg-input px-2.5 py-1.5 text-xs text-fg tabular-nums focus:outline-none focus:border-accent" id="${escapeAttr(id)}-filter"
            placeholder="${escapeAttr(options.filterPlaceholder ?? 'Filter…')}"
            aria-label="${escapeAttr(options.filterPlaceholder ?? 'Filter list')}">
     ${(options.selects ?? [])
       .map(
         (
           select,
-        ) => `<select class="list-select [.list-controls_&]:bg-input [.list-controls_&]:border [.list-controls_&]:border-line [.list-controls_&]:rounded-[4px] [.list-controls_&]:text-fg [.list-controls_&]:[padding:4px_8px] [.list-controls_&]:text-[0.8rem]" id="${escapeAttr(`${id}-${select.id}`)}"
+        ) => `<select class="list-select rounded-lg border border-line bg-input px-2.5 py-1.5 text-xs text-fg tabular-nums focus:outline-none focus:border-accent" id="${escapeAttr(`${id}-${select.id}`)}"
              aria-label="${escapeAttr(select.label)}">
         <option value="all">${escapeHtml(select.label)}: all</option>
         ${select.options
@@ -122,7 +129,7 @@ export function createListControls<T>(options: ListControlsOptions<T>): ListCont
       .map((column) => {
         const active = column.key === sort.key;
         const arrow = active ? ` ${directionIndicator(sort.dir)}` : '';
-        return `<button type="button" class="list-sort-btn bg-input border border-line rounded-[4px] text-fg-soft [padding:4px_8px] text-[0.75rem] cursor-pointer whitespace-nowrap hover:text-fg hover:border-accent-light ${active ? 'active bg-accent-dim text-fg border-accent font-semibold' : ''}"
+        return `<button type="button" class="list-sort-btn ${active ? ACTIVE_CHIP : CHIP}"
           data-key="${escapeAttr(column.key)}"
           aria-pressed="${active}"
           title="Sort by ${escapeAttr(column.label)}">${escapeHtml(column.label)}${arrow}</button>`;
@@ -191,8 +198,8 @@ export function createListControls<T>(options: ListControlsOptions<T>): ListCont
     isFiltering,
     emptyHtml(noDataMessage) {
       return isFiltering()
-        ? '<div class="text-fg-muted [font-style:italic] p-5 text-center">Nothing matches your filter. Clear it or try a shorter search.</div>'
-        : `<div class="text-fg-muted [font-style:italic] p-5 text-center">${noDataMessage}</div>`;
+        ? `<div class="${EMPTY}"><i class="bi bi-funnel" aria-hidden="true"></i>Nothing matches your filter. Clear it or try a shorter search.</div>`
+        : `<div class="${EMPTY}"><i class="bi bi-inbox" aria-hidden="true"></i>${noDataMessage}</div>`;
     },
   };
 }

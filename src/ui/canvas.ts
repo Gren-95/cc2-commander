@@ -1,4 +1,5 @@
 import { icon, iconSolo } from './icons';
+import { EMPTY, SWITCH_KNOB, SWITCH_TRACK } from './design';
 import type { PrinterState } from '../printer-state';
 import type { CommandSender } from '../ws-client';
 import { $, escapeHtml, escapeAttr } from './helpers';
@@ -20,8 +21,7 @@ export function renderCanvas(state: PrinterState): void {
     if (state.monoFilament) {
       renderMonoFilament(container, state.monoFilament);
     } else {
-      container.innerHTML =
-        '<div class="text-fg-muted [font-style:italic] p-5 text-center">No Canvas/AMS detected</div>';
+      container.innerHTML = `<div class="${EMPTY}"><i class="bi bi-palette" aria-hidden="true"></i>No Canvas or AMS detected</div>`;
     }
     return;
   }
@@ -78,9 +78,9 @@ export function renderCanvas(state: PrinterState): void {
       }
       html += `<div class="spool-actions flex gap-1 justify-center [margin-top:2px]">`;
       if (isActive) {
-        html += `<button class="spool-unload-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}">Unload</button>`;
+        html += `<button class="spool-unload-btn inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}">Unload</button>`;
       } else if (!isEmpty) {
-        html += `<button class="spool-load-btn inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.print-dialog-footer_&]:min-w-25 hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}">Load</button>`;
+        html += `<button class="spool-load-btn inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}">Load</button>`;
       }
       html += `</div>`;
       html += `</div>`;
@@ -97,7 +97,7 @@ export function renderCanvas(state: PrinterState): void {
     // Action bar
     html += `<div class="flex items-center gap-2">`;
     html += `<label class="text-[12px] text-fg-muted flex items-center gap-2 cursor-pointer">Auto-refill: `;
-    html += `<label class="toggle relative inline-block w-10 h-[22px] shrink-0 [&_input]:opacity-[0] [&_input]:w-0 [&_input]:h-0"><input type="checkbox" class="auto-refill-toggle" ${canvas.auto_refill ? 'checked' : ''}><span class="absolute cursor-pointer inset-0 bg-input rounded-[22px] border border-line [transition:0.2s] before:content-[''] before:absolute before:h-4 before:w-4 before:left-[2px] before:bottom-[2px] before:bg-fg-muted before:rounded-full before:[transition:0.2s] [.toggle_input:checked+&]:bg-accent [.toggle_input:checked+&]:border-accent before:[.toggle_input:checked+&]:[transform:translateX(18px)] before:[.toggle_input:checked+&]:bg-white"></span></label>`;
+    html += `<label class="${SWITCH_TRACK}"><input type="checkbox" class="auto-refill-toggle peer sr-only" ${canvas.auto_refill ? 'checked' : ''}><span class="${SWITCH_KNOB}"></span></label>`;
     html += `</label>`;
     html += `</div>`;
 

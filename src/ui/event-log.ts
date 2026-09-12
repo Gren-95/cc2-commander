@@ -1,6 +1,7 @@
 /** Event Log panel — shows important printer events (start, error, milestones, layer changes) */
 
 import { icon } from './icons';
+import { EMPTY } from './design';
 import { $, escapeHtml } from './helpers';
 import { timestampSpan } from './relative-time';
 
@@ -144,8 +145,7 @@ export function renderEventLog(): void {
   if (!container) return;
 
   if (entries.length === 0) {
-    container.innerHTML =
-      '<div class="text-fg-muted text-[0.85rem] p-3 text-center">No events yet</div>';
+    container.innerHTML = `<div class="${EMPTY}"><i class="bi bi-list-ul" aria-hidden="true"></i>No events yet</div>`;
     return;
   }
 

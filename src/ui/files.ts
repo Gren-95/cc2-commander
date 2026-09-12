@@ -1,4 +1,5 @@
 import { toggleState } from './state-classes';
+import { EMPTY } from './design';
 import { icon, iconSolo, iconText } from './icons';
 import type { PrinterState } from '../printer-state';
 import type { CommandSender } from '../ws-client';
@@ -221,9 +222,9 @@ function showFilePopover(file: FileEntry, anchor: HTMLElement): void {
   // Action buttons
   html +=
     '<div class="file-popover-actions flex [gap:6px] [margin-top:6px] pt-2 border-t border-line flex-wrap">';
-  html += `<button class="file-popover-preview inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Full preview">${icon('preview')} Preview</button>`;
-  html += `<button class="file-popover-download inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Download">${icon('download')} Download</button>`;
-  html += `<button class="file-popover-delete inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Delete">${icon('trash')} Delete</button>`;
+  html += `<button class="file-popover-preview inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Full preview">${icon('preview')} Preview</button>`;
+  html += `<button class="file-popover-download inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Download">${icon('download')} Download</button>`;
+  html += `<button class="file-popover-delete inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Delete">${icon('trash')} Delete</button>`;
   html += '</div>';
 
   html += '</div></div>';
@@ -387,7 +388,7 @@ function ensureFileDelegation(container: HTMLElement): void {
       currentDir = currentDir === '/' ? '/' + dirname : currentDir + '/' + dirname;
       thumbnailQueue = [];
       thumbnailFetching = null;
-      container.innerHTML = '<div class="text-fg-muted text-center p-5">Loading...</div>';
+      container.innerHTML = `<div class="${EMPTY}"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>Loading…</div>`;
       _popoverClient.sendCommand(1044, {
         storage_media: currentSource,
         dir: currentDir,
@@ -405,7 +406,7 @@ function ensureFileDelegation(container: HTMLElement): void {
       currentDir = dir;
       thumbnailQueue = [];
       thumbnailFetching = null;
-      container.innerHTML = '<div class="text-fg-muted text-center p-5">Loading...</div>';
+      container.innerHTML = `<div class="${EMPTY}"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>Loading…</div>`;
       _popoverClient.sendCommand(1044, {
         storage_media: currentSource,
         dir: currentDir,
@@ -425,7 +426,7 @@ function renderBreadcrumb(_client: CommandSender): string {
   const parts = currentDir.split('/').filter(Boolean);
   let html =
     '<div class="flex items-center [gap:2px] [padding:4px_0] [margin-bottom:6px] text-[12px] flex-wrap">';
-  html += `<button class="file-nav-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-dir="/">${icon('home')} Root</button>`;
+  html += `<button class="file-nav-btn inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" data-dir="/">${icon('home')} Root</button>`;
   let path = '';
   for (let i = 0; i < parts.length; i++) {
     path += '/' + parts[i];
@@ -434,7 +435,7 @@ function renderBreadcrumb(_client: CommandSender): string {
     if (isLast) {
       html += `<span class="text-fg font-medium">${escapeHtml(parts[i])}</span>`;
     } else {
-      html += `<button class="file-nav-btn inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-dir="${escapeAttr(path)}">${escapeHtml(parts[i])}</button>`;
+      html += `<button class="file-nav-btn inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" data-dir="${escapeAttr(path)}">${escapeHtml(parts[i])}</button>`;
     }
   }
   html += '</div>';
@@ -547,7 +548,7 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
 
   // Show USB not-connected warning
   if (currentSource === 'u-disk' && !state.status?.external_device?.u_disk) {
-    html += `<div class="text-fg-muted [font-style:italic] p-5 text-center">${icon('warning')} No USB drive detected</div>`;
+    html += `<div class="${EMPTY}"><i class="bi bi-usb-drive" aria-hidden="true"></i>No USB drive detected</div>`;
   }
 
   html += renderBreadcrumb(client);
@@ -611,7 +612,7 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
             <div class="text-[11px] text-fg-muted">${meta}</div>
           </div>
           <div class="file-actions flex gap-1 shrink-0 max-[800px]:[gap:6px]">
-            ${isFolder ? '' : `<button class="file-print-btn inline-flex items-center justify-center [padding:4px_10px] border-0 rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-white bg-accent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] [.print-dialog-footer_&]:min-w-25 hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" title="Print" aria-label="Print">${iconSolo('play')}</button>`}
+            ${isFolder ? '' : `<button class="file-print-btn inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Print" aria-label="Print">${iconSolo('play')}</button>`}
           </div>
         </div>
       </div>`;
@@ -646,7 +647,8 @@ export function bindFileControls(client: CommandSender): void {
       thumbnailFetching = null;
       document.querySelectorAll('.file-source-tab').forEach((t) => toggleState(t, 'active', false));
       toggleState(tab, 'active', true);
-      $('file-list').innerHTML = '<div class="text-fg-muted text-center p-5">Loading...</div>';
+      $('file-list').innerHTML =
+        `<div class="${EMPTY}"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>Loading…</div>`;
       client.sendCommand(1044, { storage_media: source, dir: '/', offset: 0, limit: 200 });
       client.sendCommand(1048, { storage_media: source });
     });

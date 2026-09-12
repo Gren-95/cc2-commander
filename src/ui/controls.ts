@@ -148,15 +148,12 @@ export function bindControls(client: CommandSender): void {
     });
   });
 
-  // Home buttons — CC2 firmware homes all axes regardless of parameter,
-  // so both buttons send 'xyz' and are disabled together
+  // One home key: CC2 firmware homes all axes whatever it is told, so the jog pad's
+  // second house button was a duplicate of the first and read as a different action.
   const btnHomeAll = $('btn-home-all') as HTMLButtonElement;
-  const btnHomeAllZ = $('btn-home-all-z') as HTMLButtonElement;
-  const homeAll = () => {
-    guardedSend(client, 1026, { homed_axes: 'xyz' }, btnHomeAll, btnHomeAllZ);
-  };
-  btnHomeAll.addEventListener('click', homeAll);
-  btnHomeAllZ.addEventListener('click', homeAll);
+  btnHomeAll.addEventListener('click', () => {
+    guardedSend(client, 1026, { homed_axes: 'xyz' }, btnHomeAll);
+  });
 
   // Distance buttons
   document.querySelectorAll('.dist-btn').forEach((btn) => {

@@ -146,6 +146,17 @@ function onOrbitChange(): void {
 }
 
 /** Exported for main.ts to call on each render frame */
+/**
+ * Show or hide the "No G-code loaded" overlay.
+ *
+ * Called wherever `preview` is assigned, because that is the only thing that decides
+ * whether the canvas has anything on it — a canvas with nothing drawn looks identical
+ * to one that failed to load.
+ */
+function setPreviewEmpty(empty: boolean): void {
+  $('gcode-preview-empty')?.classList.toggle('hidden', !empty);
+}
+
 export function renderGcodePreview(state: PrinterState): void {
   const s = state.status;
   const ps = s?.print_status;
@@ -204,6 +215,7 @@ function initPreview(colorMap?: Array<{ t: number; color: string }>): WebGLPrevi
       /* ignore */
     }
     preview = null;
+    setPreviewEmpty(true);
     nozzleMesh = null;
   }
 
@@ -266,6 +278,7 @@ export async function loadGcode(filename: string, source = 'local'): Promise<voi
 
     // Initialize clean preview with filament colors
     preview = initPreview(cachedColorMap);
+    setPreviewEmpty(false);
     if (!preview) {
       if (statusEl) statusEl.textContent = 'Canvas not found';
       return;
@@ -408,6 +421,7 @@ export function bindGcodePreviewControls(): void {
       reader.onload = async () => {
         const gcode = reader.result as string;
         preview = initPreview(cachedColorMap);
+        setPreviewEmpty(false);
         if (!preview) return;
         await preview.processGCode(gcode);
         loadedFile = file.name;
@@ -443,6 +457,7 @@ export function disposeGcodePreview(): void {
       /* ignore */
     }
     preview = null;
+    setPreviewEmpty(true);
     nozzleMesh = null;
   }
   loadedFile = '';

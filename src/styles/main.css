@@ -215,6 +215,25 @@
 }
 
 /*
+ * `hidden` wins over any other display utility on the same element.
+ *
+ * The app toggles `hidden` at runtime on elements that also carry `flex`,
+ * `inline-flex` or `grid` — modals, dropdowns, the Resume button, the upload progress
+ * row. Both set `display`, Tailwind has no defined order between them, and the one it
+ * happens to emit later wins: measured, the Resume button showed alongside Pause
+ * because `inline-flex` came after `hidden`.
+ *
+ * This is a utility override rather than a per-element fix because the pattern is
+ * everywhere and each instance fails silently — an element that should be gone simply
+ * is not.
+ */
+@layer utilities {
+  .hidden {
+    display: none !important;
+  }
+}
+
+/*
  * Base. Only what an element cannot carry a class for — the document itself, and the
  * scrollbars, which have no utility equivalent in any Tailwind version.
  */

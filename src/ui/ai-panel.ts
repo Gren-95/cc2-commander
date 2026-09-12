@@ -213,19 +213,19 @@ export function renderAIPanel(): void {
       : '<div class="text-fg-muted text-[0.85rem] [padding:8px_0]">No history</div>';
 
   container.innerHTML = `
-    <div class="ai-section mb-3 [&_h4]:text-[0.8rem] [&_h4]:text-fg-muted [&_h4]:uppercase [&_h4]:tracking-[0.05em] [&_h4]:[margin:0_0_6px] [&_summary]:text-[0.8rem] [&_summary]:text-fg-muted [&_summary]:uppercase [&_summary]:tracking-[0.05em] [&_summary]:cursor-pointer [&_summary]:[margin-bottom:6px]">
+    <div class="ai-section mb-3 [&_h4]:text-xs font-medium text-fg-muted mb-1.5 [&_summary]:text-xs font-medium text-fg-muted mb-1.5 [&_summary]:cursor-pointer">
       <div class="text-[0.9rem] font-medium text-[var(--text)] mb-2">${aiStatusIcon()} ${aiStatusMessage()}</div>
       ${renderConfigInfo()}
     </div>
-    <div class="ai-section mb-3 [&_h4]:text-[0.8rem] [&_h4]:text-fg-muted [&_h4]:uppercase [&_h4]:tracking-[0.05em] [&_h4]:[margin:0_0_6px] [&_summary]:text-[0.8rem] [&_summary]:text-fg-muted [&_summary]:uppercase [&_summary]:tracking-[0.05em] [&_summary]:cursor-pointer [&_summary]:[margin-bottom:6px]">
+    <div class="ai-section mb-3 [&_h4]:text-xs font-medium text-fg-muted mb-1.5 [&_summary]:text-xs font-medium text-fg-muted mb-1.5 [&_summary]:cursor-pointer">
       <h4>Latest Analysis</h4>
       ${latestHtml}
     </div>
-    <div class="ai-section mb-3 [&_h4]:text-[0.8rem] [&_h4]:text-fg-muted [&_h4]:uppercase [&_h4]:tracking-[0.05em] [&_h4]:[margin:0_0_6px] [&_summary]:text-[0.8rem] [&_summary]:text-fg-muted [&_summary]:uppercase [&_summary]:tracking-[0.05em] [&_summary]:cursor-pointer [&_summary]:[margin-bottom:6px]">
+    <div class="ai-section mb-3 [&_h4]:text-xs font-medium text-fg-muted mb-1.5 [&_summary]:text-xs font-medium text-fg-muted mb-1.5 [&_summary]:cursor-pointer">
       <h4>Alerts</h4>
       ${alertHtml}
     </div>
-    <details class="ai-section mb-3 [&_h4]:text-[0.8rem] [&_h4]:text-fg-muted [&_h4]:uppercase [&_h4]:tracking-[0.05em] [&_h4]:[margin:0_0_6px] [&_summary]:text-[0.8rem] [&_summary]:text-fg-muted [&_summary]:uppercase [&_summary]:tracking-[0.05em] [&_summary]:cursor-pointer [&_summary]:[margin-bottom:6px]"${historyWasOpen ? ' open' : ''}>
+    <details class="ai-section mb-3 [&_h4]:text-xs font-medium text-fg-muted mb-1.5 [&_summary]:text-xs font-medium text-fg-muted mb-1.5 [&_summary]:cursor-pointer"${historyWasOpen ? ' open' : ''}>
       <summary>History (${analysisHistory.length})</summary>
       <div class="">${historyHtml}</div>
     </details>
