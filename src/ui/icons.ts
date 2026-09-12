@@ -85,6 +85,8 @@ export const ICONS = {
   dragHandle: 'grip-vertical',
   info: 'info-circle-fill',
   printing: 'arrow-repeat',
+  printerOk: 'printer-fill',
+  printerOff: 'plug',
 
   // ── Status ──
   ok: 'check-circle-fill',

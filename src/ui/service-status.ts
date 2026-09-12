@@ -1,6 +1,6 @@
 /** Service status — compact header badge with click-to-expand dropdown + system info */
 
-import { icon } from './icons';
+import { ICONS, type IconName, icon } from './icons';
 import { $, escapeHtml } from './helpers';
 import type { PrinterState } from '../printer-state';
 import {
@@ -65,6 +65,62 @@ function phaseOf(s: ServiceStatus): MqttPhase {
 let lastStatus: ServiceStatus | null = null;
 let dropdownBound = false;
 
+/**
+ * The printer link, as reported by the WebSocket client rather than by the service's
+ * `service_status` broadcast.
+ *
+ * It lives here because it is drawn here. The header used to carry a second pill for
+ * it, which put two overlapping answers to "is anything connected?" side by side — and
+ * on a phone that pill was one of the things pushed off-screen entirely. The two
+ * sources still arrive independently, so the badge renders whichever it has.
+ */
+export type PrinterLink = 'connected' | 'connecting' | 'disconnected' | 'error';
+
+const PRINTER_LINK: Record<PrinterLink, { icon: IconName; label: string; cls: string }> = {
+  connected: { icon: 'printerOk', label: 'Printer connected', cls: 'svc-printer-connected' },
+  connecting: { icon: 'pending', label: 'Connecting…', cls: 'svc-printer-connecting' },
+  disconnected: { icon: 'printerOff', label: 'Disconnected', cls: 'svc-printer-disconnected' },
+  error: { icon: 'printerOff', label: 'Connection error', cls: 'svc-printer-disconnected' },
+};
+
+const PRINTER_CLASSES = Object.values(PRINTER_LINK).map((v) => v.cls);
+
+let printerLink: PrinterLink = 'connecting';
+
+/** Called by the WebSocket client whenever the printer link changes. */
+export function setPrinterLink(state: PrinterLink): void {
+  printerLink = state;
+  renderPrinterLink();
+}
+
+/**
+ * Paint the printer half of the badge.
+ *
+ * Separate from `renderServiceStatus` on purpose: that function returns early until the
+ * first `service_status` arrives, and the printer state is known before then — a badge
+ * that stayed blank for the first few seconds is what this change was meant to remove.
+ */
+function renderPrinterLink(): void {
+  const badge = document.getElementById('svc-header-badge');
+  const iconEl = document.getElementById('svc-printer-icon');
+  const stateEl = document.getElementById('svc-printer-state');
+  if (!badge || !iconEl || !stateEl) return;
+
+  const link = PRINTER_LINK[printerLink];
+  iconEl.className = `bi bi-${ICONS[link.icon]}`;
+  badge.classList.remove(...PRINTER_CLASSES);
+  badge.classList.add(link.cls);
+
+  /*
+   * The word is shown only when something is wrong. Connected is the steady state and
+   * needs no caption — and never relying on colour alone is what the glyph swap is
+   * for: a filled printer when it is up, an unplugged lead when it is not.
+   */
+  stateEl.textContent = printerLink === 'connected' ? '' : link.label;
+  badge.title = `${link.label} · click for service status`;
+  badge.setAttribute('aria-label', badge.title);
+}
+
 export function updateServiceStatus(data: Record<string, unknown>): void {
   lastStatus = data as unknown as ServiceStatus;
   renderServiceStatus();
@@ -110,6 +166,8 @@ export function renderServiceStatus(): void {
       });
     }
   }
+
+  renderPrinterLink();
 
   if (!lastStatus) {
     dotsEl.innerHTML = '';

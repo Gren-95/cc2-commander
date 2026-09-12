@@ -17,7 +17,12 @@ export { registerChart, initCharts } from './charts';
 export { renderStructuredLog, bindStructuredLogControls } from './structured-log';
 export { toast } from './toast';
 export { fetchTimeout } from './helpers';
-export { renderSystemInfo, updateServiceStatus } from './service-status';
+export {
+  renderSystemInfo,
+  updateServiceStatus,
+  setPrinterLink,
+  type PrinterLink,
+} from './service-status';
 export {
   renderTimelapse,
   setTimelapseClient,

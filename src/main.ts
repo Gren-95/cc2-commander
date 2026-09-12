@@ -25,6 +25,8 @@ import {
   renderGcodePreview,
   renderLayerTimeChart,
   updateServiceStatus,
+  setPrinterLink,
+  type PrinterLink,
   fetchTimeout,
   handleAIAnalysis,
   handleAIAlert,
@@ -163,10 +165,14 @@ function $(id: string): HTMLElement {
   return document.getElementById(id)!;
 }
 
+/**
+ * The printer link now lives in the service-status badge rather than in a pill of its
+ * own — see `setPrinterLink`. Kept as a named function because two call sites feed it
+ * and the indirection is where the "which of the two connections is this?" question
+ * gets answered: this is the PRINTER link, not the browser's socket to the service.
+ */
 function updateConnectionBadge(status: string): void {
-  const badge = $('connection-status');
-  badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-  badge.className = `status-badge ${status}`;
+  setPrinterLink(status as PrinterLink);
 }
 
 // Subscribe to state changes

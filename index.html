@@ -62,7 +62,16 @@
     <div class="header-right">
       <button id="sidebar-toggle" class="btn btn-sm btn-ghost" title="Toggle sidebar" aria-label="Toggle sidebar"><i class="bi bi-layout-sidebar" aria-hidden="true"></i></button>
       <div class="svc-header-wrap" id="svc-header-wrap">
-        <button class="svc-header-badge" id="svc-header-badge" title="Service status">
+        <!--
+          One status control, not two. The printer link used to have its own
+          "Disconnected" pill beside this badge, which meant the header carried two
+          things saying overlapping things about connectivity. It is now the leading
+          glyph here, so the collapsed badge answers "is the printer connected?"
+          without being opened.
+        -->
+        <button class="svc-header-badge" id="svc-header-badge">
+          <i class="bi" id="svc-printer-icon" aria-hidden="true"></i>
+          <span id="svc-printer-state" class="svc-printer-state"></span>
           <span id="svc-header-dots"></span>
           <span id="svc-header-count">--</span>
         </button>
@@ -75,7 +84,6 @@
           </div>
         </div>
       </div>
-      <span id="connection-status" class="status-badge connecting">Connecting…</span>
     </div>
   </header>
 

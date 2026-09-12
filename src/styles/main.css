@@ -292,25 +292,12 @@ body {
   color: #fff;
 }
 
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-.status-badge.disconnected {
-  background: var(--danger-dim);
-  color: var(--danger);
-}
-.status-badge.connecting {
-  background: var(--warning-dim);
-  color: var(--warning);
-}
-.status-badge.connected {
-  background: var(--success-dim);
-  color: var(--success);
-}
+/*
+ * `.status-badge` was the standalone "Disconnected" pill in the header. It is gone —
+ * the printer link is now the leading glyph of the service badge (see the
+ * `.svc-printer-*` rules), so there is one status control instead of two saying
+ * overlapping things. `.print-status-badge` is unrelated and still in use.
+ */
 
 /* XYZ position flash after move */
 @keyframes pos-flash {
@@ -2715,6 +2702,49 @@ body {
 .svc-header-badge.svc-has-err {
   border-color: rgba(239, 68, 68, 0.4);
   color: var(--danger);
+}
+
+/*
+ * The printer link, folded into the collapsed badge.
+ *
+ * Colour is the fast read but never the only one: the glyph itself changes (filled
+ * printer / hourglass / unplugged lead) and a word appears whenever the link is not
+ * healthy, so the state survives a monochrome display and a colour-blind reader.
+ * `svc-printer-state` is empty when connected — the steady state needs no caption.
+ */
+#svc-printer-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+.svc-printer-state {
+  font-weight: 600;
+}
+.svc-header-badge.svc-printer-connected #svc-printer-icon {
+  color: var(--success);
+}
+.svc-header-badge.svc-printer-connecting {
+  border-color: rgba(234, 179, 8, 0.45);
+}
+.svc-header-badge.svc-printer-connecting #svc-printer-icon,
+.svc-header-badge.svc-printer-connecting .svc-printer-state {
+  color: var(--warning);
+}
+.svc-header-badge.svc-printer-disconnected {
+  border-color: rgba(239, 68, 68, 0.45);
+}
+.svc-header-badge.svc-printer-disconnected #svc-printer-icon,
+.svc-header-badge.svc-printer-disconnected .svc-printer-state {
+  color: var(--danger);
+}
+
+/*
+ * On a phone the badge is one of three things sharing a 390px header, so the caption
+ * drops and the glyph carries it. `title`/`aria-label` still spell the state out.
+ */
+@media (max-width: 700px) {
+  .svc-printer-state {
+    display: none;
+  }
 }
 #svc-header-dots {
   display: inline-flex;

@@ -14,17 +14,26 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { type ServiceStatus, updateServiceStatus } from '../ui/service-status';
+import { type ServiceStatus, setPrinterLink, updateServiceStatus } from '../ui/service-status';
 
 /** The ids `renderServiceStatus` looks up, and nothing more. */
 function mountShell() {
   document.body.innerHTML = `
     <div id="svc-header-wrap">
-      <div id="svc-header-badge"><span id="svc-header-dots"></span><span id="svc-header-count"></span></div>
+      <div id="svc-header-badge">
+        <i class="bi" id="svc-printer-icon"></i>
+        <span id="svc-printer-state"></span>
+        <span id="svc-header-dots"></span>
+        <span id="svc-header-count"></span>
+      </div>
       <div id="svc-dropdown" class="hidden"><div id="service-status"></div></div>
     </div>`;
   return document.querySelector('#service-status') as HTMLElement;
 }
+
+const badge = () => document.querySelector('#svc-header-badge') as HTMLElement;
+const printerIcon = () => document.querySelector('#svc-printer-icon') as HTMLElement;
+const printerState = () => document.querySelector('#svc-printer-state') as HTMLElement;
 
 const BASE: ServiceStatus = {
   uptime: 120,
@@ -168,5 +177,64 @@ describe('the running version in the panel (ELEG-48)', () => {
     const panel = mountShell();
     render({ mqtt: 'connected', mqttPhase: 'connected', build: undefined });
     expect(panel.textContent).toContain('unknown');
+  });
+});
+
+/**
+ * The printer link, which used to be a separate "Disconnected" pill in the header.
+ *
+ * Folding it into this badge is only an improvement if the collapsed badge actually
+ * answers the question the pill answered — so that is what is asserted here, including
+ * the case the pill handled badly: the link is known before the first `service_status`
+ * broadcast arrives, and the badge has to show it rather than sit blank.
+ */
+describe('printer link on the collapsed badge', () => {
+  it('shows the link before any service_status has arrived', () => {
+    mountShell();
+    setPrinterLink('disconnected');
+
+    expect(badge().classList.contains('svc-printer-disconnected')).toBe(true);
+    expect(printerState().textContent).toBe('Disconnected');
+  });
+
+  it('drops the caption when connected, because steady state needs none', () => {
+    mountShell();
+    setPrinterLink('connected');
+
+    expect(badge().classList.contains('svc-printer-connected')).toBe(true);
+    expect(printerState().textContent).toBe('');
+    // …but the state is still available to a screen reader and on hover.
+    expect(badge().getAttribute('aria-label')).toContain('Printer connected');
+  });
+
+  it('changes the glyph as well as the colour', () => {
+    // Colour alone would be invisible to a colour-blind reader and on a mono display.
+    mountShell();
+    setPrinterLink('connected');
+    const connected = printerIcon().className;
+    setPrinterLink('disconnected');
+    const disconnected = printerIcon().className;
+
+    expect(connected).not.toBe(disconnected);
+    expect(connected).toContain('bi-printer-fill');
+    expect(disconnected).toContain('bi-plug');
+  });
+
+  it('holds exactly one printer state class at a time', () => {
+    mountShell();
+    setPrinterLink('connecting');
+    setPrinterLink('connected');
+
+    const states = [...badge().classList].filter((c) => c.startsWith('svc-printer-'));
+    expect(states).toEqual(['svc-printer-connected']);
+  });
+
+  it('keeps the link when a service_status render follows', () => {
+    mountShell();
+    setPrinterLink('disconnected');
+    render({ mqtt: 'connected', printerSn: 'CC2-123' });
+
+    expect(badge().classList.contains('svc-printer-disconnected')).toBe(true);
+    expect(printerState().textContent).toBe('Disconnected');
   });
 });
