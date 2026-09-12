@@ -175,6 +175,30 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   | `ui/card-layout.ts` | `CARD_WIDTH_UTILITIES` — the grid span each card width means. |
   | `helpers.ts` | `toggleClasses(el, 'hook a b c', on)` for one-off runtime states. |
 
+  **The design system is `ui/design.ts`.** `CARD`, `LABEL`, `READOUT`, `BTN`, `CHIP`,
+  `FIELD`, `GAUGE`, `SWITCH_*`, `EMPTY` and the rest are the vocabulary; a card that
+  needs a button uses `BTN` rather than inventing padding. The file explains the one
+  structural idea behind them — readouts (what the machine tells you) are borderless and
+  mono, actuators (what you tell it) are bordered and grouped — and the two rules that
+  follow: **the accent colour means "this control is engaged" and nothing else**, and a
+  physical quantity keeps the printer's own colour (nozzle red, bed amber). `index.html`
+  cannot import, so it carries the strings literally; the render modules import them.
+
+  **Never put two utilities for one CSS property on one element.** Tailwind guarantees
+  no order between them, so which wins is whatever the generated sheet happens to emit
+  last — and it renders plausibly either way, which is why every instance of this
+  survived review. It is the single cause of every bug the conversion shipped: `hidden`
+  lost to `inline-flex` and the Resume button showed beside Pause; `text-bad` lost to
+  `text-fg` and the emergency stop came out the same grey as everything else; `bg-accent`
+  lost to `bg-surface` and the selected jog step had no fill. `src/__tests__/design-system.test.ts`
+  enforces this for the tokens and the state table; it cannot see your markup.
+
+  The corollary is what a **state delta** is for: `add` names what the state sets,
+  `remove` names the neutral it displaces, and for every property `add` touches `remove`
+  must clear the base's utility for it. Every segmented picker now shares one
+  `CHIP_ACTIVE` against one `CHIP` base — there used to be five, differing only in which
+  neutral each happened to remove.
+
   **Prefer `min-[…]` over `max-[…]` when two variants set the same property.**
   Tailwind gives no guaranteed order between overlapping arbitrary max-width variants,
   so `max-[1100px]:col-[span_6]` and `max-[700px]:col-[span_12]` both matched at 390px
