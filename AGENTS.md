@@ -192,6 +192,9 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   have one. The first version queried `.subtab` across the document, which was fine
   with one strip and wrong the moment there were two — picking a tool would have
   deactivated Help and Debug.
+  About, Help & API and Debug are the three sub-tabs of the About page; Filament Dryer
+  and Spool Calculator are the two under Tools.
+
 
 - **The filament dryer heats the bed on a timer, and that makes it the one tool in
   here with a physical failure mode.** `ui/dryer.ts` holds the presets, the schedule

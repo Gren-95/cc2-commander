@@ -21,7 +21,6 @@ import { renderHelp } from './help';
 import { renderAbout } from './about';
 import { bindSubtabs, switchSubtab } from './subtabs';
 import { isCardVisible, renderFocusRail, watchBreakpoint } from './mobile-focus';
-import type { BuildStampish } from '../types';
 import { getThemeChoice, setThemeChoice, isThemeChoice } from './theme';
 import { playAlert } from './alert-sound';
 import { refreshTimestamps } from './relative-time';
@@ -220,24 +219,12 @@ export function switchToTab(tab: 'dashboard' | 'settings' | 'tools' | 'help' | '
     renderDryer();
   } else if (tab === 'help' || tab === 'debug') {
     helpPage?.classList.remove('hidden');
-    renderAbout(lastBuildStamp);
+    renderAbout();
     renderHelp();
     bindSubtabs('help');
     // An explicit `switchToTab('debug')` overrides whatever was last remembered.
     if (tab === 'debug') switchSubtab('help', 'debug');
   }
-}
-
-/**
- * The last stamp the service reported, kept so the About panel can be drawn on tab
- * open rather than only when a broadcast happens to arrive.
- */
-let lastBuildStamp: BuildStampish | null = null;
-
-/** Called from the service-status renderer on every `service_status` broadcast. */
-export function setBuildStamp(stamp: BuildStampish | null | undefined): void {
-  lastBuildStamp = stamp ?? null;
-  renderAbout(lastBuildStamp);
 }
 
 /** Render settings content into the settings page (called on tab switch) */

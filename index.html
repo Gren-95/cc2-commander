@@ -638,8 +638,8 @@
     <div id="tools-tab-content" class="hidden h-[calc(100vh_-_var(--header-height))] overflow-y-auto p-5">
       <div class="max-w-200 mx-auto" style="max-width: 1000px">
         <nav class="flex gap-1 mb-4 border-b border-line" data-subtab-group="tools" aria-label="Tools">
-          <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="dryer" aria-selected="false"><i class="bi bi-thermometer-half bi-lead" aria-hidden="true"></i>Filament Dryer<span id="dryer-running-dot" class="hidden ml-2 w-2 h-2 rounded-full bg-warn" title="A drying session is running"></span></button>
-          <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="spool" aria-selected="false"><i class="bi bi-calculator bi-lead" aria-hidden="true"></i>Spool Calculator</button>
+          <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="dryer" aria-selected="false"><i class="bi bi-thermometer-half bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Filament Dryer<span id="dryer-running-dot" class="hidden ml-2 w-2 h-2 rounded-full bg-warn" title="A drying session is running"></span></button>
+          <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="spool" aria-selected="false"><i class="bi bi-calculator bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Spool Calculator</button>
         </nav>
 
         <section id="tools-subtab-dryer">
@@ -676,15 +676,17 @@
     -->
     <div id="help-tab-content" class="hidden h-[calc(100vh_-_var(--header-height))] overflow-y-auto p-5">
       <div class="max-w-200 mx-auto" style="max-width: 1400px">
-        <h2 class="text-[18px] font-semibold text-fg mb-5"><i class="bi bi-info-circle bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> About this project</h2>
-        <div id="about-card" class="mb-5"></div>
-
-        <nav class="flex gap-1 mb-4 border-b border-line" data-subtab-group="help" id="help-subtabs" aria-label="Help and debug sections">
-          <button class="subtab active inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-accent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg [border-bottom-color:var(--accent)]" data-subtab="help" aria-selected="true"><i class="bi bi-question-circle bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i>Help &amp; API</button>
+                <nav class="flex gap-1 mb-4 border-b border-line" data-subtab-group="help" id="help-subtabs" aria-label="Help and debug sections">
+          <button class="subtab active inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-accent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg [border-bottom-color:var(--accent)]" data-subtab="about" aria-selected="true"><i class="bi bi-info-circle bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>About</button>
+          <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="help" aria-selected="false"><i class="bi bi-question-circle bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i>Help &amp; API</button>
           <button class="subtab inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-fg-muted text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="debug" aria-selected="false"><i class="bi bi-bug bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i>Debug</button>
         </nav>
 
-        <section id="help-subtab-help">
+        <section id="help-subtab-about">
+          <div id="about-card"></div>
+        </section>
+
+        <section id="help-subtab-help" class="hidden">
           <div id="help-content"></div>
         </section>
 

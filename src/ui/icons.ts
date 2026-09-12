@@ -88,6 +88,7 @@ export const ICONS = {
   printerOk: 'printer-fill',
   printerOff: 'plug',
   showAll: 'grid-3x3-gap',
+  clipboard: 'clipboard',
 
   // ── Status ──
   ok: 'check-circle-fill',
@@ -141,19 +142,26 @@ export type IconName = keyof typeof ICONS;
  * An icon as an HTML string, for the `innerHTML` templates — for the common case where
  * a label follows it.
  *
- * Carries `bi-lead`, which is the gap between glyph and text. It has to be a class
- * rather than a blanket `.bi { margin-inline-end }` because the same element type is
- * used both ways: `button.btn.btn-sm.btn-ghost` is an icon-with-label in the camera
- * card and an icon-only button in the settings list, so no selector can tell them
- * apart. Use `iconSolo()` when the glyph stands alone, or the button ends up visibly
- * off-centre.
+ * Carries the gap between glyph and text as a UTILITY, plus `bi-lead` as an inert
+ * marker for anything that wants to find these.
+ *
+ * It was a bare `bi-lead` class until the Tailwind conversion, which moved
+ * `.bi-lead { margin-inline-end: 0.4em }` onto the elements that carried it in
+ * index.html — and left the ones built here at runtime with a class that styles
+ * nothing. Every icon rendered from TypeScript lost its gap: toasts, list rows, the
+ * About panel. The utility has to be in the string Tailwind can see, which is this one.
+ *
+ * A gap and not a blanket `.bi { margin-inline-end }` because the same element is used
+ * both ways: `button.btn.btn-sm` is an icon-with-label in the camera card and an
+ * icon-only button in the settings list, and no selector can tell them apart. Use
+ * `iconSolo()` when the glyph stands alone, or the button ends up visibly off-centre.
  *
  * `aria-hidden` because the glyph never carries the accessible name — the button or the
  * text beside it does. A screen reader announcing "private use character" helps nobody.
  */
 export function icon(name: IconName, extraClass = ''): string {
   const cls = extraClass ? ` ${extraClass}` : '';
-  return `<i class="bi bi-${ICONS[name]} bi-lead${cls}" aria-hidden="true"></i>`;
+  return `<i class="bi bi-${ICONS[name]} bi-lead [margin-inline-end:0.4em]${cls}" aria-hidden="true"></i>`;
 }
 
 /** An icon that is the whole content of its element — no trailing gap. */
@@ -172,8 +180,10 @@ export function iconSolo(name: IconName, extraClass = ''): string {
  */
 export function iconText(el: HTMLElement, name: IconName, text: string, label?: string): void {
   const i = document.createElement('i');
-  // `bi-lead` only when something follows it — see `icon()` for why this is a class.
-  i.className = text ? `bi bi-${ICONS[name]} bi-lead` : `bi bi-${ICONS[name]}`;
+  // The gap only when something follows it — see `icon()`.
+  i.className = text
+    ? `bi bi-${ICONS[name]} bi-lead [margin-inline-end:0.4em]`
+    : `bi bi-${ICONS[name]}`;
   i.setAttribute('aria-hidden', 'true');
   el.replaceChildren(i, document.createTextNode(text));
   if (label) el.setAttribute('aria-label', label);

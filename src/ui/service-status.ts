@@ -3,8 +3,7 @@
 import { toggleState } from './state-classes';
 import { ICONS, type IconName, icon } from './icons';
 import { $, escapeHtml } from './helpers';
-import { setBuildStamp } from './settings';
-import type { BuildStampish } from '../types';
+import { type AboutStatus, setAboutStatus } from './about';
 import type { PrinterState } from '../printer-state';
 import {
   type MqttPhase,
@@ -129,8 +128,9 @@ function renderPrinterLink(): void {
 
 export function updateServiceStatus(data: Record<string, unknown>): void {
   lastStatus = data as unknown as ServiceStatus;
-  // The About panel shows the running build; this broadcast is where it comes from.
-  setBuildStamp(lastStatus.build as BuildStampish | null | undefined);
+  // The About panel reports the build, the printer and the service; this broadcast is
+  // where all three come from.
+  setAboutStatus(lastStatus as unknown as AboutStatus);
   renderServiceStatus();
 }
 
