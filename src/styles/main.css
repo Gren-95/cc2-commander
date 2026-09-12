@@ -110,7 +110,6 @@
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", "Consolas", monospace;
   --header-height: 52px;
-  --sidebar-width: 380px;
 
   /*
    * Canvas chart palette (ELEG-34).
@@ -506,82 +505,71 @@ body {
   overflow: hidden;
 }
 
-.dashboard-panels {
-  display: flex;
+/*
+ * The dashboard is ONE grid.
+ *
+ * It used to be a flex row: a fixed, resizable left rail plus a content area. That made
+ * a card's width a consequence of which rail it sat in — no narrow card could appear
+ * low down, no wide one at the top — and cost a drag handle, a toggle button and two
+ * localStorage keys to manage. Order and width are independent settings now
+ * (src/ui/card-layout.ts), and the grid is what makes both cheap.
+ *
+ * Twelve columns because it divides by 2, 3 and 4, so `compact` can be a quarter on a
+ * wide screen and a half on a laptop without a second set of classes.
+ */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-content: start;
+  gap: 10px;
   flex: 1;
   min-height: 0;
-  gap: 0;
-}
-
-.dashboard-sidebar {
-  width: var(--sidebar-width);
-  min-width: 260px;
-  max-width: 600px;
-  overflow-y: auto;
-  overflow-x: hidden;
   padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  border-right: 1px solid var(--border);
-  background: var(--bg-secondary);
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-  flex-shrink: 0;
-  transition:
-    width 0.15s ease,
-    min-width 0.15s ease,
-    padding 0.15s ease,
-    opacity 0.15s ease;
-}
-
-/* Sidebar hidden state */
-.dashboard-sidebar.sidebar-hidden {
-  width: 0 !important;
-  min-width: 0 !important;
-  padding: 0 !important;
-  overflow: hidden;
-  border-right: none;
-  opacity: 0;
-}
-.dashboard-sidebar.sidebar-hidden + .sidebar-resize-handle {
-  display: none;
-}
-
-/* Resize handle between sidebar and main */
-.sidebar-resize-handle {
-  width: 5px;
-  cursor: col-resize;
-  background: transparent;
-  flex-shrink: 0;
-  position: relative;
-  z-index: 10;
-  transition: background 0.15s;
-}
-.sidebar-resize-handle:hover,
-.sidebar-resize-handle.dragging {
-  background: var(--accent);
-}
-.sidebar-resize-handle::before {
-  content: "";
-  position: absolute;
-  left: -4px;
-  right: -4px;
-  top: 0;
-  bottom: 0;
-}
-
-.dashboard-main {
-  flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
-  padding: 16px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
-  gap: 14px;
-  align-content: start;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+}
+
+/*
+ * Card widths. `minmax(0, …)` on the tracks above is what lets these actually shrink —
+ * a `1fr` track refuses to go below its content's min-content width, which is how a
+ * non-wrapping button row used to push a card wider than the viewport.
+ */
+.card-w-compact {
+  grid-column: span 3;
+}
+.card-w-wide {
+  grid-column: span 6;
+}
+.card-w-full {
+  grid-column: span 12;
+}
+
+/* Laptops: a quarter is too narrow for a temperature card, so compact becomes a third. */
+@media (max-width: 1500px) {
+  .card-w-compact {
+    grid-column: span 4;
+  }
+}
+
+@media (max-width: 1100px) {
+  .card-w-compact {
+    grid-column: span 6;
+  }
+  .card-w-wide {
+    grid-column: span 12;
+  }
+}
+
+/* Below the shell breakpoint everything is one column, whatever the card asked for. */
+@media (max-width: 700px) {
+  .dashboard-grid {
+    gap: 8px;
+    padding: 8px;
+  }
+  .card-w-compact,
+  .card-w-wide,
+  .card-w-full {
+    grid-column: span 12;
+  }
 }
 
 /* Print status bar — in sidebar, stacks vertically */
@@ -1992,36 +1980,13 @@ body {
 }
 
 /* Responsive */
-/* Responsive: tablet — single column */
+/*
+ * This breakpoint used to reflow the sidebar into a horizontal strip above the main
+ * area and re-specify both panels' grid columns. All of it is gone with the panels: the
+ * single grid reflows through the `.card-w-*` rules beside its definition, which is the
+ * only place column counts are decided now.
+ */
 @media (max-width: 1200px) {
-  .dashboard-panels {
-    flex-direction: column;
-    overflow-y: auto;
-  }
-  .dashboard-sidebar {
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    overflow-y: visible;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    padding: 8px;
-    gap: 8px;
-  }
-  .dashboard-sidebar.sidebar-hidden {
-    display: none !important;
-  }
-  .sidebar-resize-handle {
-    display: none;
-  }
-  .dashboard-main {
-    overflow-y: visible;
-    padding: 8px;
-    gap: 10px;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  }
   .dashboard {
     overflow: auto;
   }
@@ -2029,10 +1994,6 @@ body {
 
 /* Responsive: mobile */
 @media (max-width: 800px) {
-  .dashboard-sidebar,
-  .dashboard-main {
-    grid-template-columns: 1fr !important;
-  }
   .print-status-top {
     flex-direction: column;
     align-items: stretch;
@@ -2123,8 +2084,7 @@ body {
 
 /* Responsive: narrow mobile */
 @media (max-width: 480px) {
-  .dashboard-sidebar,
-  .dashboard-main {
+  .dashboard-grid {
     padding: 6px;
   }
   .print-status-card {
@@ -2139,9 +2099,12 @@ body {
 }
 
 /* ─── Log panel ───────────────────────────── */
-.log-card {
-  grid-column: 1 / -1;
-} /* span full width in main grid */
+/*
+ * No `grid-column` here any more. It hardcoded `1 / -1`, which beat the `.card-w-*`
+ * class and made the MQTT log the one card whose width setting did nothing. Its
+ * default is `full` in card-layout.ts, so it still starts full width — the difference
+ * is that the setting is now allowed to change it.
+ */
 .log-header {
   display: flex;
   align-items: center;
@@ -4513,9 +4476,8 @@ body {
    * `grid-template-columns: 1fr !important` was powerless to stop it. `minmax(0, 1fr)`
    * removes the floor; `min-width: 0` does the same job for flex children.
    */
-  .dashboard-main,
-  .dashboard-sidebar {
-    grid-template-columns: minmax(0, 1fr) !important;
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
   .card {
     min-width: 0;

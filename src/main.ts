@@ -767,60 +767,14 @@ document.querySelectorAll('.main-tab').forEach((btn) => {
 // Apply saved card layout
 applyCardLayout();
 
-// ---- Sidebar resize handle ----
-{
-  const handle = document.getElementById('sidebar-resize-handle');
-  const sidebar = document.getElementById('dashboard-sidebar');
-  const SIDEBAR_KEY = 'elegoo-web-sidebar-width';
-  const SIDEBAR_HIDDEN_KEY = 'elegoo-web-sidebar-hidden';
-
-  // Restore saved sidebar width
-  const savedWidth = localStorage.getItem(SIDEBAR_KEY);
-  if (savedWidth && sidebar) sidebar.style.width = savedWidth;
-
-  // Restore sidebar visibility
-  const wasHidden = localStorage.getItem(SIDEBAR_HIDDEN_KEY) === '1';
-  if (wasHidden && sidebar) sidebar.classList.add('sidebar-hidden');
-
-  if (handle && sidebar) {
-    let startX = 0;
-    let startW = 0;
-
-    const onMove = (e: MouseEvent) => {
-      const newW = Math.max(260, Math.min(600, startW + (e.clientX - startX)));
-      sidebar.style.width = newW + 'px';
-    };
-    const onUp = () => {
-      handle.classList.remove('dragging');
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      localStorage.setItem(SIDEBAR_KEY, sidebar.style.width);
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-
-    handle.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      startX = e.clientX;
-      startW = sidebar.getBoundingClientRect().width;
-      handle.classList.add('dragging');
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
-    });
-  }
-
-  // Sidebar toggle button
-  const toggleBtn = document.getElementById('sidebar-toggle');
-  if (toggleBtn && sidebar) {
-    toggleBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('sidebar-hidden');
-      const hidden = sidebar.classList.contains('sidebar-hidden');
-      localStorage.setItem(SIDEBAR_HIDDEN_KEY, hidden ? '1' : '0');
-    });
-  }
-}
+/*
+ * The sidebar resize handle and toggle used to live here — about 55 lines of drag
+ * maths plus two localStorage keys (`elegoo-web-sidebar-width`,
+ * `elegoo-web-sidebar-hidden`). Both went with the sidebar itself: the dashboard is one
+ * grid now and a card's width is a per-card setting rather than a property of which
+ * rail it happened to be in. The stale keys are harmless if still in storage; nothing
+ * reads them.
+ */
 
 // ---- PWA service worker ----
 //

@@ -4,28 +4,65 @@
  * Deliberately free of DOM and localStorage so it can be unit-tested directly (the
  * vitest environment here is `node`, with no document). `ui/settings.ts` owns the
  * storage and the rendering; everything that decides *what the layout is* lives here.
+ *
+ * THE SIDEBAR IS GONE
+ *
+ * This used to be two lists, `sidebar` and `main`, mirroring a fixed left rail and a
+ * content area. That put the layout question in the wrong place: which cards you want
+ * near the top is a per-user, per-printer choice, but "sidebar" also meant "narrow" and
+ * "always visible", so choosing a position also chose a width and vice versa.
+ *
+ * Now there is ONE ordered list and a width per card. Order is order; width is width.
+ * The old two-panel layouts are migrated rather than discarded — see
+ * `normaliseCardLayout`.
  */
 
 import { icon } from './icons';
 
+/**
+ * How much of the grid a card takes.
+ *
+ * Named rather than numeric because the column count changes with the viewport (see
+ * the `.card-w-*` rules in main.css): `compact` is a quarter of a wide desktop and a
+ * half of a laptop, and everything is full width on a phone. A stored `3` would have
+ * to mean one of those and be wrong on the others.
+ */
+export type CardWidth = 'compact' | 'wide' | 'full';
+
+export const CARD_WIDTHS: readonly CardWidth[] = ['compact', 'wide', 'full'] as const;
+
+export const CARD_WIDTH_LABELS: Record<CardWidth, string> = {
+  compact: 'Compact',
+  wide: 'Wide',
+  full: 'Full width',
+};
+
 export interface CardLayout {
-  sidebar: string[];
-  main: string[];
+  /** Every known card, in the order it appears on the dashboard. */
+  order: string[];
   hidden: string[];
   collapsed: string[];
+  /** Width per card. Missing entries fall back to `DEFAULT_WIDTHS`. */
+  width: Record<string, CardWidth>;
 }
 
-/** Default sidebar cards (always-visible essentials) */
-export const DEFAULT_SIDEBAR = [
+/**
+ * The shipped order.
+ *
+ * Deliberately the old sidebar cards first, then the old main ones: that is the reading
+ * order people already have, and a migration that reshuffles someone's dashboard is a
+ * worse greeting than one that keeps it.
+ */
+export const DEFAULT_ORDER = [
+  // The print status card. It lived at the top of the old sidebar and was never part
+  // of the layout model, which in a single grid meant no width class and a card
+  // rendered 1/12 of a screen wide. Managed like everything else now.
+  'print-status-bar',
   'temps-card',
   'canvas-card',
   'fans-card',
   'toolhead-card',
   'speed-flow-card',
-];
-
-/** Default main area cards (detail/reference) */
-export const DEFAULT_MAIN = [
   'camera-card',
   'gcode-preview-card',
   'files-card',
@@ -37,18 +74,35 @@ export const DEFAULT_MAIN = [
   'log-card',
 ];
 
-/** All known card IDs */
-export const ALL_CARD_IDS = [...DEFAULT_SIDEBAR, ...DEFAULT_MAIN];
+/** All known card IDs. */
+export const ALL_CARD_IDS = [...DEFAULT_ORDER];
 
 /**
- * Display names for cards, as **HTML fragments** — each carries a Bootstrap Icon.
- *
- * HTML rather than plain text because the only consumer interpolates it into a template
- * literal (`buildCardRows` in settings.ts). Every value here is built from `icon()` and
- * a literal, so there is nothing to escape; if a caller ever needs the bare label,
- * add a separate plain-text map rather than stripping tags out of this one.
+ * The cards that used to live in the narrow sidebar. Kept as a named set because it is
+ * what decides a sensible default width, both for the shipped layout and when migrating
+ * a two-panel layout that never recorded widths.
  */
+const WAS_SIDEBAR = new Set([
+  'print-status-bar',
+  'temps-card',
+  'canvas-card',
+  'fans-card',
+  'toolhead-card',
+  'speed-flow-card',
+]);
+
+/** Cards that earn the whole row: long lists and wide tables. */
+const WANTS_FULL = new Set(['log-card', 'event-log-card']);
+
+export function defaultWidthFor(id: string): CardWidth {
+  if (WAS_SIDEBAR.has(id)) return 'compact';
+  if (WANTS_FULL.has(id)) return 'full';
+  return 'wide';
+}
+
+/** Display names for cards, as **HTML fragments** — each carries a Bootstrap Icon. */
 export const CARD_NAMES: Record<string, string> = {
+  'print-status-bar': `${icon('print')} Print Status`,
   'temps-card': `${icon('temperature')} Temperatures`,
   'canvas-card': `${icon('canvas')} Canvas / AMS`,
   'camera-card': `${icon('camera')} Camera`,
@@ -67,7 +121,12 @@ export const CARD_NAMES: Record<string, string> = {
 
 /** A fresh copy of the shipped layout. Fresh, because callers mutate what they get. */
 export function defaultCardLayout(): CardLayout {
-  return { sidebar: [...DEFAULT_SIDEBAR], main: [...DEFAULT_MAIN], hidden: [], collapsed: [] };
+  return {
+    order: [...DEFAULT_ORDER],
+    hidden: [],
+    collapsed: [],
+    width: Object.fromEntries(DEFAULT_ORDER.map((id) => [id, defaultWidthFor(id)])),
+  };
 }
 
 /** Strings only — a hand-edited or half-written layout should not poison the DOM pass. */
@@ -76,34 +135,37 @@ function stringArray(value: unknown): string[] | null {
   return value.filter((v): v is string => typeof v === 'string');
 }
 
-/** Migrate the pre-panel format, `{ order, hidden }`, to sidebar + main. */
-function migrateOldLayout(order: string[], hidden: string[]): CardLayout {
-  const sidebar: string[] = [];
-  const main: string[] = [];
-  for (const id of order) {
-    if (DEFAULT_SIDEBAR.includes(id)) sidebar.push(id);
-    else main.push(id);
+function isCardWidth(value: unknown): value is CardWidth {
+  return typeof value === 'string' && (CARD_WIDTHS as readonly string[]).includes(value);
+}
+
+/** Only recognised widths survive; anything else falls back to the card's default. */
+function widthMap(value: unknown): Record<string, CardWidth> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return {};
+  const out: Record<string, CardWidth> = {};
+  for (const [id, w] of Object.entries(value as Record<string, unknown>)) {
+    if (isCardWidth(w)) out[id] = w;
   }
-  return { sidebar, main, hidden, collapsed: [] };
+  return out;
 }
 
 /**
  * Turn whatever was in storage into a layout that is safe to apply.
  *
- * Three jobs, and the third is the one with history behind it:
+ * Four jobs, and the last two both have history behind them:
  *
  * 1. Defaults for anything absent, and non-strings dropped.
- * 2. The old `{ order, hidden }` format migrated.
- * 3. **Every known card placed.** A card added to the app after a user last saved
- *    their layout is in neither list, and before ELEG-44 this backfill lived in
- *    `applyCardLayout` — which mutated its in-memory copy but never saved it, while
- *    the settings panel re-read straight from storage. So the new card rendered on the
- *    dashboard but was missing from the settings list, and the next reorder saved a
- *    layout that still did not mention it. Doing it here means both paths see the same
- *    layout, because there is only one place that decides.
- *
- * A card named in both panels is kept only in the first (sidebar wins), so it cannot
- * appear twice in the settings list.
+ * 2. **Two older formats migrated** — `{ order, hidden }` from before panels existed,
+ *    and `{ sidebar, main, … }` from while they did. A two-panel layout becomes
+ *    sidebar-then-main in one list, with the sidebar half defaulting to `compact`, so
+ *    an existing dashboard comes back looking like itself.
+ * 3. **Every known card placed.** A card added to the app after a user last saved their
+ *    layout is in no list, and before ELEG-44 this backfill lived in `applyCardLayout`
+ *    — which mutated its in-memory copy but never saved it, while the settings panel
+ *    re-read straight from storage. So the new card rendered on the dashboard but was
+ *    missing from the settings list, and the next reorder saved a layout that still did
+ *    not mention it. Doing it here means both paths see the same layout.
+ * 4. No card listed twice, whatever storage claimed.
  */
 export function normaliseCardLayout(parsed: unknown): CardLayout {
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
@@ -111,31 +173,46 @@ export function normaliseCardLayout(parsed: unknown): CardLayout {
   }
   const fields = parsed as Record<string, unknown>;
 
-  const oldOrder = stringArray(fields.order);
-  const layout = oldOrder
-    ? migrateOldLayout(oldOrder, stringArray(fields.hidden) ?? [])
-    : {
-        sidebar: stringArray(fields.sidebar) ?? [...DEFAULT_SIDEBAR],
-        main: stringArray(fields.main) ?? [...DEFAULT_MAIN],
-        hidden: stringArray(fields.hidden) ?? [],
-        collapsed: stringArray(fields.collapsed) ?? [],
-      };
+  // The two-panel format: concatenated, sidebar first, so the dashboard reads the same
+  // way it did before the panels were removed.
+  const sidebar = stringArray(fields.sidebar);
+  const main = stringArray(fields.main);
+  const twoPanel = sidebar !== null || main !== null;
+
+  const order = twoPanel
+    ? [...(sidebar ?? []), ...(main ?? [])]
+    : (stringArray(fields.order) ?? [...DEFAULT_ORDER]);
+
+  const layout: CardLayout = {
+    order,
+    hidden: stringArray(fields.hidden) ?? [],
+    collapsed: stringArray(fields.collapsed) ?? [],
+    width: widthMap(fields.width),
+  };
 
   const seen = new Set<string>();
-  const firstOnly = (ids: string[]): string[] =>
-    ids.filter((id) => {
-      if (seen.has(id)) return false;
-      seen.add(id);
-      return true;
-    });
-  layout.sidebar = firstOnly(layout.sidebar);
-  layout.main = firstOnly(layout.main);
+  layout.order = layout.order.filter((id) => {
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
 
   for (const id of ALL_CARD_IDS) {
     if (seen.has(id)) continue;
-    (DEFAULT_SIDEBAR.includes(id) ? layout.sidebar : layout.main).push(id);
+    layout.order.push(id);
     seen.add(id);
   }
 
+  // A migrated two-panel layout has no widths of its own; give the old sidebar cards
+  // the narrow one so the dashboard does not silently double in width.
+  for (const id of layout.order) {
+    if (!layout.width[id]) layout.width[id] = defaultWidthFor(id);
+  }
+
   return layout;
+}
+
+/** The width to render a card at, whatever the stored layout does or does not say. */
+export function widthOf(layout: CardLayout, id: string): CardWidth {
+  return layout.width[id] ?? defaultWidthFor(id);
 }

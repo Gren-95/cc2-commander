@@ -2,7 +2,16 @@
 
 import { icon, iconSolo } from './icons';
 import { $, fetchTimeout } from './helpers';
-import { type CardLayout, CARD_NAMES, defaultCardLayout, normaliseCardLayout } from './card-layout';
+import {
+  CARD_NAMES,
+  CARD_WIDTH_LABELS,
+  CARD_WIDTHS,
+  type CardLayout,
+  type CardWidth,
+  defaultCardLayout,
+  normaliseCardLayout,
+  widthOf,
+} from './card-layout';
 import { toast } from './toast';
 import { renderSpoolCalc } from './spool-calc';
 import { renderHelp } from './help';
@@ -51,51 +60,46 @@ export function toggleCardCollapse(cardId: string): void {
 
 /** Apply card order, panel assignment, visibility, and collapse to the DOM */
 export function applyCardLayout(): void {
-  const sidebar = document.getElementById('dashboard-sidebar');
-  const main = document.getElementById('dashboard-main');
-  if (!sidebar || !main) return;
+  const grid = document.getElementById('dashboard-grid');
+  if (!grid) return;
 
   // Backfilling a newly added card used to happen here, on the in-memory copy only —
   // so the settings panel, which re-reads from storage, never saw it. It is part of
   // `normaliseCardLayout` now, which both paths go through (ELEG-44).
 
-  // Move cards into sidebar in order
-  for (const id of currentLayout.sidebar) {
+  for (const id of currentLayout.order) {
     const card = document.getElementById(id);
-    if (card) {
-      sidebar.appendChild(card);
-      card.style.display = currentLayout.hidden.includes(id) ? 'none' : '';
-      card.classList.toggle('collapsed', currentLayout.collapsed.includes(id));
-    }
-  }
-
-  // Move cards into main in order
-  for (const id of currentLayout.main) {
-    const card = document.getElementById(id);
-    if (card) {
-      main.appendChild(card);
-      card.style.display = currentLayout.hidden.includes(id) ? 'none' : '';
-      card.classList.toggle('collapsed', currentLayout.collapsed.includes(id));
-    }
+    if (!card) continue;
+    // appendChild on an element already in the grid MOVES it, so iterating the saved
+    // order is all the reordering there is.
+    grid.appendChild(card);
+    card.style.display = currentLayout.hidden.includes(id) ? 'none' : '';
+    card.classList.toggle('collapsed', currentLayout.collapsed.includes(id));
+    applyCardWidth(card, widthOf(currentLayout, id));
   }
 
   // Bind collapse toggle on card headers (idempotent via data attribute)
-  const allCards = [...sidebar.children, ...main.children] as HTMLElement[];
-  for (const card of allCards) {
-    if (!card.id || card.dataset.collapseInit) continue;
-    card.dataset.collapseInit = '1';
+  for (const child of [...grid.children] as HTMLElement[]) {
+    if (!child.id || child.dataset.collapseInit) continue;
+    child.dataset.collapseInit = '1';
     const header =
-      (card.querySelector('.card-header, .card-head, .files-header, .log-header') as HTMLElement) ||
-      (card.querySelector('h3') as HTMLElement);
+      (child.querySelector(
+        '.card-header, .card-head, .files-header, .log-header',
+      ) as HTMLElement) || (child.querySelector('h3') as HTMLElement);
     if (!header) continue;
     header.style.cursor = 'pointer';
     header.addEventListener('click', (e) => {
       // Don't collapse when clicking buttons/inputs/selects inside the header
       const t = e.target as HTMLElement;
       if (t.closest('button, input, select, label, a, .toggle')) return;
-      toggleCardCollapse(card.id);
+      toggleCardCollapse(child.id);
     });
   }
+}
+
+/** One `card-w-*` class at a time, so a width change cannot leave two spans applied. */
+function applyCardWidth(card: HTMLElement, width: CardWidth): void {
+  for (const w of CARD_WIDTHS) card.classList.toggle(`card-w-${w}`, w === width);
 }
 
 // ---- Settings Tab ----
@@ -218,26 +222,37 @@ export function renderSettingsContent(): void {
 function buildSettingsHTML(content: HTMLElement): void {
   currentLayout = loadCardLayout();
 
-  // Build card list grouped by panel
-  function buildCardRows(cards: string[], panel: 'sidebar' | 'main'): string {
-    return cards
-      .map((id) => {
+  /**
+   * One row per card: visible, width, position.
+   *
+   * The panel dropdown is gone with the sidebar. It used to conflate two decisions —
+   * picking "sidebar" also picked narrow, and there was no way to have a narrow card
+   * further down the page. Width is its own control now.
+   */
+  function buildCardRows(order: string[]): string {
+    return order
+      .map((id, index) => {
         const name = CARD_NAMES[id] || id;
         const isHidden = currentLayout.hidden.includes(id);
+        const width = widthOf(currentLayout, id);
+        const first = index === 0;
+        const last = index === order.length - 1;
         return `
-        <div class="settings-card-row" data-card-id="${id}" data-panel="${panel}">
-          <span class="settings-drag-handle" title="Drag to reorder">${iconSolo('dragHandle')}</span>
+        <div class="settings-card-row${isHidden ? ' settings-card-row-hidden' : ''}" data-card-id="${id}">
+          <span class="settings-card-index" aria-hidden="true">${index + 1}</span>
           <label class="settings-card-label">
             <input type="checkbox" class="settings-card-visible" data-card-id="${id}" ${isHidden ? '' : 'checked'}>
             <span>${name}</span>
           </label>
-          <select class="settings-card-panel log-select" data-card-id="${id}">
-            <option value="sidebar" ${panel === 'sidebar' ? 'selected' : ''}>Sidebar</option>
-            <option value="main" ${panel === 'main' ? 'selected' : ''}>Main</option>
+          <select class="settings-card-width log-select" data-card-id="${id}" aria-label="Width">
+            ${CARD_WIDTHS.map(
+              (w) =>
+                `<option value="${w}" ${w === width ? 'selected' : ''}>${CARD_WIDTH_LABELS[w]}</option>`,
+            ).join('')}
           </select>
           <span class="settings-card-move">
-            <button class="btn btn-sm btn-ghost settings-move-up" data-card-id="${id}" data-panel="${panel}" title="Move up" aria-label="Move up">${iconSolo('moveUp')}</button>
-            <button class="btn btn-sm btn-ghost settings-move-down" data-card-id="${id}" data-panel="${panel}" title="Move down" aria-label="Move down">${iconSolo('moveDown')}</button>
+            <button class="btn btn-sm btn-ghost settings-move-up" data-card-id="${id}" title="Move up" aria-label="Move ${id} up" ${first ? 'disabled' : ''}>${iconSolo('moveUp')}</button>
+            <button class="btn btn-sm btn-ghost settings-move-down" data-card-id="${id}" title="Move down" aria-label="Move ${id} down" ${last ? 'disabled' : ''}>${iconSolo('moveDown')}</button>
           </span>
         </div>
       `;
@@ -282,15 +297,15 @@ function buildSettingsHTML(content: HTMLElement): void {
     </section>
 
     <section class="settings-section">
-      <h3>Panel Layout</h3>
-      <p class="settings-hint">Assign cards to the sidebar (always-visible) or main area. Reorder within each panel.</p>
-      <h4 class="settings-panel-heading">Sidebar</h4>
-      <div id="settings-card-list-sidebar" class="settings-card-list">
-        ${buildCardRows(currentLayout.sidebar, 'sidebar')}
-      </div>
-      <h4 class="settings-panel-heading">Main Area</h4>
-      <div id="settings-card-list-main" class="settings-card-list">
-        ${buildCardRows(currentLayout.main, 'main')}
+      <h3>Dashboard layout</h3>
+      <p class="settings-hint">
+        The dashboard is one grid, in this order. Untick a card to hide it, and set how
+        much of a row each one takes — <strong>Compact</strong> is a quarter of a wide
+        screen, <strong>Wide</strong> a half, <strong>Full</strong> the whole row. Narrow
+        screens collapse everything to one column regardless.
+      </p>
+      <div id="settings-card-list" class="settings-card-list">
+        ${buildCardRows(currentLayout.order)}
       </div>
       <div class="settings-actions">
         <button id="settings-reset-layout" class="btn btn-sm btn-ghost">Reset to default</button>
@@ -331,59 +346,50 @@ function buildSettingsHTML(content: HTMLElement): void {
     });
   });
 
-  // Bind panel (sidebar/main) selector
-  content.querySelectorAll('.settings-card-panel').forEach((sel) => {
+  // Width, which replaced the sidebar/main panel selector.
+  content.querySelectorAll('.settings-card-width').forEach((sel) => {
     sel.addEventListener('change', (e) => {
       const select = e.target as HTMLSelectElement;
-      const cardId = select.dataset.cardId!;
-      const newPanel = select.value as 'sidebar' | 'main';
-      // Remove from current panel
-      currentLayout.sidebar = currentLayout.sidebar.filter((id) => id !== cardId);
-      currentLayout.main = currentLayout.main.filter((id) => id !== cardId);
-      // Add to new panel
-      if (newPanel === 'sidebar') {
-        currentLayout.sidebar.push(cardId);
-      } else {
-        currentLayout.main.push(cardId);
-      }
+      const cardId = select.dataset.cardId;
+      if (!cardId) return;
+      currentLayout.width[cardId] = select.value as CardWidth;
       saveCardLayout(currentLayout);
       applyCardLayout();
-      settingsRendered = false;
-      renderSettingsContent();
+      // No re-render: changing a width does not move anything in this list, and
+      // rebuilding it would throw away the focus the user is holding on the select.
     });
   });
 
-  // Bind move up/down buttons (works within the card's current panel)
+  /**
+   * Move a card one place in the single order list.
+   *
+   * The re-render afterwards is what keeps the row numbers and the disabled state of
+   * the first/last buttons honest — both are derived from position.
+   */
+  const move = (cardId: string, delta: -1 | 1): void => {
+    const list = currentLayout.order;
+    const idx = list.indexOf(cardId);
+    const next = idx + delta;
+    if (idx < 0 || next < 0 || next >= list.length) return;
+    [list[idx], list[next]] = [list[next], list[idx]];
+    saveCardLayout(currentLayout);
+    applyCardLayout();
+    settingsRendered = false;
+    renderSettingsContent();
+    // Keep the keyboard on the button that was just pressed, which has moved with the
+    // row — otherwise a second press needs a fresh tab-hunt down the list.
+    const selector = delta < 0 ? '.settings-move-up' : '.settings-move-down';
+    const again = document.querySelector(
+      `${selector}[data-card-id="${cardId}"]`,
+    ) as HTMLElement | null;
+    again?.focus();
+  };
+
   content.querySelectorAll('.settings-move-up').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const cardId = (btn as HTMLElement).dataset.cardId!;
-      const panel = (btn as HTMLElement).dataset.panel as 'sidebar' | 'main';
-      const list = panel === 'sidebar' ? currentLayout.sidebar : currentLayout.main;
-      const idx = list.indexOf(cardId);
-      if (idx > 0) {
-        [list[idx - 1], list[idx]] = [list[idx], list[idx - 1]];
-        saveCardLayout(currentLayout);
-        applyCardLayout();
-        settingsRendered = false;
-        renderSettingsContent();
-      }
-    });
+    btn.addEventListener('click', () => move((btn as HTMLElement).dataset.cardId ?? '', -1));
   });
-
   content.querySelectorAll('.settings-move-down').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const cardId = (btn as HTMLElement).dataset.cardId!;
-      const panel = (btn as HTMLElement).dataset.panel as 'sidebar' | 'main';
-      const list = panel === 'sidebar' ? currentLayout.sidebar : currentLayout.main;
-      const idx = list.indexOf(cardId);
-      if (idx < list.length - 1) {
-        [list[idx], list[idx + 1]] = [list[idx + 1], list[idx]];
-        saveCardLayout(currentLayout);
-        applyCardLayout();
-        settingsRendered = false;
-        renderSettingsContent();
-      }
-    });
+    btn.addEventListener('click', () => move((btn as HTMLElement).dataset.cardId ?? '', 1));
   });
 
   // Reset button
@@ -452,7 +458,7 @@ function buildSettingsHTML(content: HTMLElement): void {
     if (
       !confirm(
         'Reset the dashboard layout to its default?\n\n' +
-          'Card order, panel assignment, and hidden and collapsed cards are all restored. ' +
+          'Card order, widths, and hidden and collapsed cards are all restored. ' +
           'Other settings — chart resolution, log filters, camera selection — are kept.',
       )
     ) {

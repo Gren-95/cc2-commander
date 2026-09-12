@@ -65,7 +65,6 @@
       </nav>
     </div>
     <div class="header-right">
-      <button id="sidebar-toggle" class="btn btn-sm btn-ghost" title="Toggle sidebar" aria-label="Toggle sidebar"><i class="bi bi-layout-sidebar" aria-hidden="true"></i></button>
       <div class="svc-header-wrap" id="svc-header-wrap">
         <!--
           One status control, not two. The printer link used to have its own
@@ -113,8 +112,15 @@
       <!-- Exception/error banner -->
       <div id="exception-banner" class="exception-banner hidden"></div>
 
-      <div class="dashboard-panels">
-        <aside class="dashboard-sidebar" id="dashboard-sidebar">
+      <!--
+        One grid, no sidebar.
+
+        There used to be a fixed left rail plus a content area, which meant a card's
+        POSITION also decided its WIDTH — you could not have a narrow card lower down or
+        a wide one at the top. Order and width are separate choices now, both set in
+        Settings, and the cards flow in a single responsive grid. See card-layout.ts.
+      -->
+      <div class="dashboard-grid" id="dashboard-grid">
           <!-- Print status (compact, in sidebar) -->
           <div id="print-status-bar" class="card print-status-card">
             <div class="print-status-top">
@@ -160,9 +166,7 @@
           </div>
 
 
-        </aside>
-        <div class="sidebar-resize-handle" id="sidebar-resize-handle" title="Drag to resize sidebar"></div>
-        <main class="dashboard-main" id="dashboard-main">
+
         <!-- Temperatures -->
         <div class="card" id="temps-card">
           <h3><i class="bi bi-thermometer-half bi-lead" aria-hidden="true"></i> Temperatures</h3>
@@ -619,11 +623,9 @@
             <div id="log-entries" class="log-entries"></div>
           </div>
         </div>
-
-        </main>
       </div>
 
-      <!-- Camera Fullscreen Overlay (positioned fixed, outside panels) -->
+      <!-- Camera Fullscreen Overlay (positioned fixed, outside the grid) -->
       <div id="camera-modal" class="camera-modal hidden" tabindex="-1">
         <div class="camera-modal-content">
           <img id="camera-modal-img" alt="Camera" class="camera-modal-img">
