@@ -16,6 +16,7 @@ import {
 } from './card-layout';
 import { toast } from './toast';
 import { renderSpoolCalc } from './spool-calc';
+import { renderDryer } from './dryer-panel';
 import { renderHelp } from './help';
 import { renderAbout } from './about';
 import { isCardVisible, renderFocusRail, watchBreakpoint } from './mobile-focus';
@@ -224,6 +225,7 @@ export function switchToTab(tab: 'dashboard' | 'settings' | 'tools' | 'help' | '
   } else if (tab === 'tools') {
     toolsPage?.classList.remove('hidden');
     renderSpoolCalc();
+    renderDryer();
   } else if (tab === 'help' || tab === 'debug') {
     helpPage?.classList.remove('hidden');
     bindHelpSubtabs();

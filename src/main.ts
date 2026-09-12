@@ -17,6 +17,7 @@ import {
   bindFileControls,
   toast,
   setCanvasClient,
+  setDryerClient,
   renderSystemInfo,
   renderTimelapse,
   setTimelapseClient,
@@ -198,6 +199,7 @@ function showDashboard(): void {
     bindStructuredLogControls(logStore);
     bindFileControls(client!);
     setCanvasClient(client!);
+    setDryerClient(client!);
     setTimelapseClient(client!);
     setHistoryClient(client!);
     setMaintenanceClient(client!);

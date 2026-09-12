@@ -1,3 +1,4 @@
+import { setDryerPrinting } from './dryer-panel';
 import { toggleState } from './state-classes';
 import { icon, iconOnly, iconSolo, iconText } from './icons';
 import type { PrinterState } from '../printer-state';
@@ -152,6 +153,9 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   const machineStatus = s.machine_status;
   const ps = s.print_status;
   const isPrinting = machineStatus?.status === 2;
+  // The dryer refuses to start mid-print: it would hold the bed at a fixed temperature
+  // for hours. This is the one place that already knows, so it is the one that tells.
+  setDryerPrinting(isPrinting);
   const isPaused = machineStatus?.sub_status === 2502 || machineStatus?.sub_status === 2505;
   const statusName = STATUS_NAMES[machineStatus?.status] ?? 'Unknown';
   const subStatusName = SUB_STATUS_NAMES[machineStatus?.sub_status] ?? '';

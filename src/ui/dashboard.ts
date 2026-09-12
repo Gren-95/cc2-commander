@@ -16,6 +16,7 @@ export { bindControls, onCommandResponse } from './controls';
 export { registerChart, initCharts } from './charts';
 export { renderStructuredLog, bindStructuredLogControls } from './structured-log';
 export { toast } from './toast';
+export { renderDryer, setDryerClient, setDryerPrinting } from './dryer-panel';
 export { fetchTimeout } from './helpers';
 export {
   renderSystemInfo,

@@ -5,85 +5,121 @@
  * turned a tab blue. With the stylesheet gone the class name means nothing on its own,
  * so the utilities each state implies live here and `toggleState` applies them.
  *
- * The map is keyed state → base class → utilities, because the same state means
- * different things on different components: `active` is a filled blue pill on a tab
- * and an underline on a sub-tab. The base class is still on the element (the code
- * queries it), so the right entry can be found at runtime.
+ * ## Why each entry has a `remove` as well as an `add`
+ *
+ * Two utilities setting the same property on one element have no defined winner:
+ * Tailwind orders its own output, and the source cascade that used to decide is gone.
+ * Adding `bg-accent text-white` on top of the base `bg-transparent text-fg-muted` is
+ * therefore a coin toss — measured, it left the active tab with a near-transparent
+ * background and dark text, i.e. invisible.
+ *
+ * So each entry also names what the state OVERRIDES, taken from the old stylesheet by
+ * resolving the base alone and the base-plus-state and diffing both ways. Turning a
+ * state on removes those; turning it off puts them back.
+ *
+ * The map is keyed state → base class → delta, because the same state means different
+ * things on different components: `active` is a filled blue pill on a tab and an
+ * underline on a sub-tab. The base class is still on the element (the code queries it),
+ * so the right entry can be found at runtime.
  *
  * GENERATED from the stylesheet this replaced. If a state needs new styling, edit it
  * here — there is no CSS file to go back to.
  */
 
-export const STATE_UTILITIES: Record<string, Record<string, string>> = {
+/** What a state adds, and what it overrides on the way. Both are class lists. */
+export interface StateDelta {
+  add: string;
+  remove: string;
+}
+
+export const STATE_UTILITIES: Record<string, Record<string, StateDelta>> = {
   active: {
-    'chart-time-btn': 'bg-accent text-white',
-    'dist-btn': 'bg-accent text-white border-accent',
-    'file-source-tab': 'bg-accent text-white',
-    'list-sort-btn': 'bg-accent-dim text-fg border-accent font-semibold',
-    'log-tab': 'bg-accent text-white',
-    'main-tab':
-      'bg-accent text-white max-[700px]:bg-transparent max-[700px]:text-accent max-[700px]:[box-shadow:inset_0_2px_0_0_var(--accent)]',
-    'print-bed-btn': 'bg-accent text-white',
-    'progress-fill':
-      "after:content-[''] after:absolute after:inset-0 after:[background:linear-gradient(_90deg,_transparent_0%,_rgba(255,_255,_255,_0.18)_40%,_rgba(255,_255,_255,_0.28)_50%,_rgba(255,_255,_255,_0.18)_60%,_transparent_100%_)] after:[animation:shimmer_2s_infinite]",
-    'speed-btn': 'bg-accent text-white border-accent',
-    subtab: 'text-accent [border-bottom-color:var(--accent)]',
+    'chart-time-btn': { add: 'bg-accent text-white', remove: 'bg-transparent text-fg-muted' },
+    'dist-btn': { add: 'bg-accent text-white border-accent', remove: 'bg-surface' },
+    'file-source-tab': { add: 'bg-accent text-white', remove: 'bg-transparent text-fg-soft' },
+    'list-sort-btn': {
+      add: 'bg-accent-dim text-fg border-accent font-semibold',
+      remove: 'bg-input text-fg-soft',
+    },
+    'log-tab': { add: 'bg-accent text-white', remove: 'bg-transparent text-fg-soft' },
+    'main-tab': {
+      add: 'bg-accent text-white max-[700px]:bg-transparent max-[700px]:text-accent max-[700px]:[box-shadow:inset_0_2px_0_0_var(--accent)]',
+      remove: 'bg-transparent text-fg-muted',
+    },
+    'print-bed-btn': { add: 'bg-accent text-white', remove: 'bg-surface text-fg-soft' },
+    'progress-fill': {
+      add: "after:content-[''] after:absolute after:inset-0 after:[background:linear-gradient(_90deg,_transparent_0%,_rgba(255,_255,_255,_0.18)_40%,_rgba(255,_255,_255,_0.28)_50%,_rgba(255,_255,_255,_0.18)_60%,_transparent_100%_)] after:[animation:shimmer_2s_infinite]",
+      remove: '',
+    },
+    'speed-btn': { add: 'bg-accent text-white border-accent', remove: 'bg-surface' },
+    subtab: { add: 'text-accent [border-bottom-color:var(--accent)]', remove: 'text-fg-muted' },
   },
   'at-target': {
-    'bed-bar': 'bg-ok',
-    'nozzle-bar': 'bg-ok',
+    'bed-bar': { add: 'bg-ok', remove: 'bg-bed' },
+    'nozzle-bar': { add: 'bg-ok', remove: 'bg-nozzle' },
   },
   'capacity-high': {
-    'capacity-fill': 'bg-warn',
+    'capacity-fill': { add: 'bg-warn', remove: 'bg-accent' },
   },
   'capacity-warn': {
-    'capacity-fill': 'bg-[var(--error)]',
+    'capacity-fill': { add: 'bg-[var(--error)]', remove: 'bg-accent' },
   },
   collapsed: {
-    card: 'max-h-12 overflow-hidden [&>h3::after]:[transform:rotate(-90deg)] [&>.card-header_>_h3::after]:[transform:rotate(-90deg)] [&>.files-header_>_h3::after]:[transform:rotate(-90deg)] [&>.log-header_>_h3::after]:[transform:rotate(-90deg)]',
+    card: {
+      add: 'max-h-12 overflow-hidden [&>h3::after]:[transform:rotate(-90deg)] [&>.card-header_>_h3::after]:[transform:rotate(-90deg)] [&>.files-header_>_h3::after]:[transform:rotate(-90deg)] [&>.log-header_>_h3::after]:[transform:rotate(-90deg)]',
+      remove: '',
+    },
   },
   critical: {
-    'exception-item': 'bg-[rgba(239,_83,_80,_0.15)] text-bad border-l-3 border-bad',
+    'exception-item': {
+      add: 'bg-[rgba(239,_83,_80,_0.15)] text-bad border-l-3 border-bad',
+      remove: '',
+    },
   },
   disabled: {
-    'file-upload-label': 'opacity-[0.5] pointer-events-none',
+    'file-upload-label': { add: 'opacity-[0.5] pointer-events-none', remove: '' },
   },
   expanded: {
-    'log-payload':
-      'whitespace-pre-wrap bg-surface [padding:6px_8px] rounded-[4px] [margin-top:2px] max-h-75 overflow-y-auto w-full',
+    'log-payload': {
+      add: 'whitespace-pre-wrap bg-surface [padding:6px_8px] rounded-[4px] [margin-top:2px] max-h-75 overflow-y-auto w-full',
+      remove: 'whitespace-nowrap',
+    },
   },
   heating: {
-    'bed-bar': '[animation:pulse_1.5s_infinite]',
-    'nozzle-bar': '[animation:pulse_1.5s_infinite]',
+    'bed-bar': { add: '[animation:pulse_1.5s_infinite]', remove: '' },
+    'nozzle-bar': { add: '[animation:pulse_1.5s_infinite]', remove: '' },
   },
   homed: {
-    'home-dot': 'bg-[var(--success,_#2ecc71)]',
+    'home-dot': { add: 'bg-[var(--success,_#2ecc71)]', remove: 'bg-[var(--danger,_#e74c3c)]' },
   },
   pinned: {
-    'slog-pin-btn': 'opacity-[1]',
+    'slog-pin-btn': { add: 'opacity-[1]', remove: 'opacity-[0.3]' },
   },
   pulse: {
-    'progress-fill': '[animation:progress-pulse_0.4s_ease-out]',
-    'progress-text-lg': '[animation:progress-pulse_0.4s_ease-out]',
+    'progress-fill': { add: '[animation:progress-pulse_0.4s_ease-out]', remove: '' },
+    'progress-text-lg': { add: '[animation:progress-pulse_0.4s_ease-out]', remove: '' },
   },
   'svc-all-ok': {
-    'svc-header-badge': 'border-[rgba(34,_197,_94,_0.3)]',
+    'svc-header-badge': { add: 'border-[rgba(34,_197,_94,_0.3)]', remove: '' },
   },
   'svc-has-err': {
-    'svc-header-badge': 'text-bad border-[rgba(239,_68,_68,_0.4)]',
+    'svc-header-badge': { add: 'text-bad border-[rgba(239,_68,_68,_0.4)]', remove: 'text-fg-soft' },
   },
   'svc-printer-connecting': {
-    'svc-header-badge': 'border-[rgba(234,_179,_8,_0.45)]',
+    'svc-header-badge': { add: 'border-[rgba(234,_179,_8,_0.45)]', remove: '' },
   },
   'svc-printer-disconnected': {
-    'svc-header-badge': 'border-[rgba(239,_68,_68,_0.45)]',
+    'svc-header-badge': { add: 'border-[rgba(239,_68,_68,_0.45)]', remove: '' },
   },
   warning: {
-    'exception-item': 'bg-[rgba(255,_167,_38,_0.12)] text-warn border-l-3 border-warn',
+    'exception-item': {
+      add: 'bg-[rgba(255,_167,_38,_0.12)] text-warn border-l-3 border-warn',
+      remove: '',
+    },
   },
 };
 /**
- * Turn a state on or off: the hook class plus everything it implies.
+ * Turn a state on or off: the hook class, what it implies, and what it overrides.
  *
  * The hook is kept because `classList.contains`, `querySelector` and the delegated
  * click handlers still look for it — only the styling moved.
@@ -94,6 +130,12 @@ export function toggleState(el: Element, state: string, on: boolean): void {
   if (!byBase) return;
   for (const base of Object.keys(byBase)) {
     if (!el.classList.contains(base)) continue;
-    for (const u of byBase[base].split(' ')) if (u) el.classList.toggle(u, on);
+    const { add, remove } = byBase[base];
+    const applied = add.split(' ').filter(Boolean);
+    const overridden = remove.split(' ').filter(Boolean);
+    for (const u of applied) el.classList.toggle(u, on);
+    // The mirror image: what the state overrides comes off with it, and back when it
+    // goes. Without this the two fight and Tailwind's ordering picks the winner.
+    for (const u of overridden) el.classList.toggle(u, !on);
   }
 }

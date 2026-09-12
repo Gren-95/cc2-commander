@@ -186,6 +186,21 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   `classList.contains` and the delegated click handlers still look for `main-tab`,
   `file-item`, `settings-card-visible` and ~107 others; those are hooks now, carrying
   no styling. Removing one breaks behaviour silently.
+- **The filament dryer heats the bed on a timer, and that makes it the one tool in
+  here with a physical failure mode.** `ui/dryer.ts` holds the presets, the schedule
+  maths and the clamps; `ui/dryer-panel.ts` is the only place that sends `1028`
+  (`Set temperature`) for drying. Three properties must survive any change:
+
+  - **`MAX_SAFE_C` is a ceiling on everything**, including a temperature typed by hand
+    and one restored from localStorage. A non-finite input clamps to the FLOOR, not the
+    ceiling — a heater fails cold.
+  - **The session stores an absolute `startedAt`.** A tab reopened hours later resolves
+    it, sees it expired, and turns the bed off. Storing a remaining-duration instead
+    would make a closed tab pause the clock and leave the bed hot.
+  - **Every exit turns the heater off** — finished, stopped, or resumed-expired all go
+    through `finish()`. Closing the tab mid-session is the case nothing can cover; the
+    panel says so rather than implying otherwise.
+
 - **The phone dashboard shows ONE card at a time.** Below 700px a vertical rail down
   the right edge (`ui/mobile-focus.ts`) focuses a single card; `All` restores the
   scrolling dashboard. Two consequences for anything that touches the dashboard:
