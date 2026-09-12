@@ -239,15 +239,21 @@ body {
   font-weight: 600;
   color: var(--accent);
   letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.brand-short {
+  display: none;
 }
 .header-center {
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 .header-right {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 .subtitle {
   font-size: 11px;
@@ -263,6 +269,9 @@ body {
   padding: 3px;
 }
 .main-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 6px 14px;
   background: transparent;
   border: none;
@@ -2060,19 +2069,20 @@ body {
     font-size: 11px;
   }
 
-  /* Larger touch targets */
+  /*
+   * Touch sizing used to live here, keyed on width. It moved to the
+   * `@media (pointer: coarse)` block at the end of this file — width is the wrong
+   * question (a 1024px tablet is still a thumb, a 700px desktop window is still a
+   * mouse), and `.btn-sm { min-height: 36px }` here silently outranked the new rule's
+   * bare `button` selector, which is why 47 controls stayed under the minimum after
+   * it was added. Padding and type scale stay, because those are about density.
+   */
   .btn {
-    min-height: 40px;
     padding: 8px 16px;
   }
   .btn-sm {
-    min-height: 36px;
     padding: 6px 12px;
     font-size: 13px;
-  }
-  .btn-icon {
-    width: 44px;
-    height: 44px;
   }
 
   /* File browser mobile */
@@ -4337,4 +4347,229 @@ body {
   color: var(--text-muted);
   margin-left: auto;
   white-space: nowrap;
+}
+
+/* ═══ Responsive shell ════════════════════════════════════════════════════
+ *
+ * Measured before any of this existed: at 390px the page was 699px wide and
+ * scrolled sideways. The header is three flex groups, and the middle one — five
+ * text tabs — needs ~450px on its own, so the brand wrapped to three lines and
+ * every control on the right was pushed off-screen and unreachable.
+ *
+ * Widening the tabs was never going to work. Below `--bp-phone` the navigation
+ * leaves the header entirely and becomes a bottom bar: a full-width row gets the
+ * whole viewport instead of a third of it, the targets get big enough to hit with
+ * a thumb, and the header is left with only the two things it can fit.
+ */
+
+:root {
+  /* One place for the shell breakpoint. Media queries cannot read a custom
+     property, so the value is repeated in the @media below — keep them in step. */
+  --bp-phone: 700px;
+  --bottom-nav-height: 58px;
+}
+
+@media (max-width: 700px) {
+  #app-header {
+    padding: 0 12px;
+    gap: 10px;
+  }
+
+  /*
+   * The bottom bar below is `position: fixed`, and it is a descendant of the header.
+   *
+   * `backdrop-filter` on an ancestor makes that ancestor the containing block for
+   * fixed-position descendants — so the bar resolved `bottom: 0` against the 52px
+   * header and rendered across the TOP of the screen. Same trap as `transform`,
+   * `filter` and `will-change`; it costs nothing here because the header background
+   * is already opaque, and it is the one line standing between this layout and a
+   * baffling bug.
+   */
+  #app-header {
+    backdrop-filter: none;
+  }
+
+  /* Shrinkable, and truncating rather than wrapping. */
+  .header-left {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+  .brand-full {
+    display: none;
+  }
+  .brand-short {
+    display: inline;
+  }
+  .subtitle {
+    display: none;
+  }
+
+  .header-right {
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+
+  /* ── Navigation, relocated ───────────────────────────────────────────── */
+  .header-center {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 200;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    /* Clears the iPhone home indicator; resolves to 0 everywhere else. */
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .main-tabs {
+    display: flex;
+    width: 100%;
+    gap: 0;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .main-tab {
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    height: var(--bottom-nav-height);
+    padding: 6px 2px;
+    border-radius: 0;
+    font-size: 10px;
+    /* The glyph carries the meaning at this size; the label is a caption under it. */
+    line-height: 1.1;
+  }
+  .main-tab .bi {
+    font-size: 19px;
+    /* `bi-lead` is a horizontal gap, and the icon now sits above its label. */
+    margin-inline-end: 0;
+  }
+  .main-tab-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /*
+   * A filled pill reads as a button in a bottom bar, not as "you are here". Colour
+   * plus a top rule is the convention, and it survives being only 19px of glyph.
+   */
+  .main-tab.active {
+    background: transparent;
+    color: var(--accent);
+    box-shadow: inset 0 2px 0 0 var(--accent);
+  }
+  .main-tab:hover {
+    background: transparent;
+  }
+
+  /* Content must not end underneath the bar. */
+  .tab-content,
+  .dashboard-grid,
+  main {
+    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0) + 8px);
+  }
+
+  /* ── Cards may be narrower than their contents ───────────────────────── */
+
+  /*
+   * `1fr` is shorthand for `minmax(auto, 1fr)`, and that `auto` floor is the item's
+   * MIN-CONTENT width — so a card holding a non-wrapping row of buttons pushed its
+   * own track to 405px inside a 390px viewport, and the existing
+   * `grid-template-columns: 1fr !important` was powerless to stop it. `minmax(0, 1fr)`
+   * removes the floor; `min-width: 0` does the same job for flex children.
+   */
+  .dashboard-main,
+  .dashboard-sidebar {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .card {
+    min-width: 0;
+  }
+
+  /*
+   * …and with the floor gone, the rows that used to set it have to wrap rather than
+   * be clipped. These are the card headers whose action buttons no longer fit beside
+   * the title once the targets are thumb-sized.
+   */
+  .card-header,
+  .camera-header-actions,
+  .gcode-preview-actions,
+  .files-header,
+  .log-header,
+  .list-controls {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  /* Media keeps its aspect ratio inside whatever width is left. */
+  .camera-wrap,
+  .camera-img,
+  .gcode-preview-wrap {
+    max-width: 100%;
+  }
+}
+
+/*
+ * Touch targets, keyed on the POINTER rather than the width.
+ *
+ * The existing rules did this at `max-width: 800px`, which is the wrong question: a
+ * tablet in landscape is 1024px wide and still driven by a thumb, while a 700px
+ * desktop window is still a mouse. 44px is the WCAG 2.5.5 / iOS HIG minimum, and the
+ * audit that prompted this found 99 of 110 controls under it.
+ */
+@media (pointer: coarse) {
+  /*
+   * Every control, not a hand-kept list of classes. The first version of this rule
+   * named seven selectors and still left 40 controls under the minimum — the compact
+   * clusters need it most (chart ranges were 15px tall, list sort buttons 25px, log
+   * tabs 22px), and they are exactly the ones a class list forgets.
+   */
+  button,
+  .btn,
+  .btn-sm,
+  [role="button"],
+  select,
+  input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="color"]) {
+    min-height: 44px;
+  }
+  .btn-icon {
+    min-width: 44px;
+  }
+
+  /* A range input's thumb is the target; the track itself stays slim. */
+  input[type="range"] {
+    height: 44px;
+  }
+
+  /*
+   * The chart range picker needs the sizing to be *visible*, not just present.
+   *
+   * These were 15px tall and styled as bare text with a coloured pill on the active
+   * one. Giving them a 44px hit area alone made that pill a tall blue block floating
+   * beside three unstyled words. Making the whole row a segmented control is what the
+   * touch size implies, so the group reads as four buttons rather than one button and
+   * some text.
+   */
+  .chart-time-selector {
+    gap: 4px;
+    align-items: center;
+  }
+  .chart-time-btn {
+    padding: 0 12px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+  /*
+   * `--bg-surface`, not `--bg-input`: the latter is #ffffff in the light theme, which
+   * is exactly the card it sits on, so the pills were invisible. `--bg-surface` is the
+   * recessed-on-a-card token and reads in both themes (#f0f1f6 / #232435).
+   */
+  .chart-time-btn:not(.active) {
+    background: var(--bg-surface);
+  }
 }

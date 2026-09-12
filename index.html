@@ -38,16 +38,25 @@
 <body>
   <header id="app-header">
     <div class="header-left">
-      <h1>Elegoo CC2 web frontend</h1>
+      <!--
+        Two spellings of the same name. The full one does not fit a phone header —
+        it wrapped to three lines at 390px — and CSS cannot shorten a text node, so
+        both are in the DOM and the breakpoint picks one. aria-label carries the real
+        name either way, which is why both spans are aria-hidden.
+      -->
+      <h1 class="brand" aria-label="Elegoo CC2 web frontend">
+        <span class="brand-full" aria-hidden="true">Elegoo CC2 web frontend</span>
+        <span class="brand-short" aria-hidden="true">CC2</span>
+      </h1>
       <span id="printer-name" class="subtitle"></span>
     </div>
     <div class="header-center">
       <nav class="main-tabs" id="main-tabs">
-        <button class="main-tab active" data-tab="dashboard"><i class="bi bi-printer bi-lead" aria-hidden="true"></i> Dashboard</button>
-        <button class="main-tab" data-tab="tools"><i class="bi bi-calculator bi-lead" aria-hidden="true"></i> Tools</button>
-        <button class="main-tab" data-tab="settings"><i class="bi bi-gear bi-lead" aria-hidden="true"></i> Settings</button>
-        <button class="main-tab" data-tab="debug"><i class="bi bi-bug bi-lead" aria-hidden="true"></i> Debug</button>
-        <button class="main-tab" data-tab="help"><i class="bi bi-question-circle bi-lead" aria-hidden="true"></i> Help</button>
+        <button class="main-tab active" data-tab="dashboard"><i class="bi bi-printer bi-lead" aria-hidden="true"></i><span class="main-tab-label">Dashboard</span></button>
+        <button class="main-tab" data-tab="tools"><i class="bi bi-calculator bi-lead" aria-hidden="true"></i><span class="main-tab-label">Tools</span></button>
+        <button class="main-tab" data-tab="settings"><i class="bi bi-gear bi-lead" aria-hidden="true"></i><span class="main-tab-label">Settings</span></button>
+        <button class="main-tab" data-tab="debug"><i class="bi bi-bug bi-lead" aria-hidden="true"></i><span class="main-tab-label">Debug</span></button>
+        <button class="main-tab" data-tab="help"><i class="bi bi-question-circle bi-lead" aria-hidden="true"></i><span class="main-tab-label">Help</span></button>
       </nav>
     </div>
     <div class="header-right">
