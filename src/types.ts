@@ -288,6 +288,24 @@ export interface VersionStampish {
   version?: string | null;
 }
 
+/**
+ * The rest of the stamp, for the About panel.
+ *
+ * Split from `VersionStampish` rather than merged into it because the formatter above
+ * genuinely needs only those two fields, and widening its input would let a caller pass
+ * a stamp it cannot format. Same structural trick: `BuildInfo` in
+ * `src/server/build-info.ts` satisfies this by shape, and the browser half cannot
+ * import it.
+ */
+export interface BuildStampish extends VersionStampish {
+  /** Full commit sha, or null on an unstamped deploy. */
+  commit?: string | null;
+  /** First seven characters of the same sha. */
+  shortCommit?: string | null;
+  /** ISO-8601 timestamp written when the deploy was installed. */
+  installedAt?: string | null;
+}
+
 /** `1.2.3`, `1.2.3-rc.1` — a leading `v` having already been stripped. */
 const SEMVER_PREFIX = /^\d+\.\d+\.\d+/;
 

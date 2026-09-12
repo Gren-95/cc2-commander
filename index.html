@@ -55,8 +55,7 @@
         <button class="main-tab active" data-tab="dashboard"><i class="bi bi-printer bi-lead" aria-hidden="true"></i><span class="main-tab-label">Dashboard</span></button>
         <button class="main-tab" data-tab="tools"><i class="bi bi-calculator bi-lead" aria-hidden="true"></i><span class="main-tab-label">Tools</span></button>
         <button class="main-tab" data-tab="settings"><i class="bi bi-gear bi-lead" aria-hidden="true"></i><span class="main-tab-label">Settings</span></button>
-        <button class="main-tab" data-tab="debug"><i class="bi bi-bug bi-lead" aria-hidden="true"></i><span class="main-tab-label">Debug</span></button>
-        <button class="main-tab" data-tab="help"><i class="bi bi-question-circle bi-lead" aria-hidden="true"></i><span class="main-tab-label">Help</span></button>
+        <button class="main-tab" data-tab="help"><i class="bi bi-info-circle bi-lead" aria-hidden="true"></i><span class="main-tab-label">About</span></button>
       </nav>
     </div>
     <div class="header-right">
@@ -644,59 +643,73 @@
     </div>
 
     <!-- Debug tab -->
-    <div id="debug-tab-content" class="settings-page hidden">
-      <div class="settings-page-inner" style="max-width: 1400px">
-        <h2 class="settings-page-title"><i class="bi bi-bug bi-lead" aria-hidden="true"></i> Debug Panel</h2>
-        <div class="debug-panel">
-          <div class="debug-controls">
-            <input type="text" id="debug-filter" placeholder="Filter fields..." class="log-filter-input">
-            <button class="btn btn-sm" id="debug-log-toggle"><i class="bi bi-play-fill bi-lead" aria-hidden="true"></i> Start Logging</button>
-            <select id="debug-log-timeout" class="log-select">
-              <option value="1">Auto-stop: 1m</option>
-              <option value="5" selected>Auto-stop: 5m</option>
-              <option value="15">Auto-stop: 15m</option>
-              <option value="30">Auto-stop: 30m</option>
-              <option value="60">Auto-stop: 60m</option>
-            </select>
-            <span id="debug-logging-badge" class="log-paused-badge hidden">LOGGING</span>
-            <button class="btn btn-sm btn-ghost" id="debug-export-state" title="Export current state as JSON"><i class="bi bi-box-arrow-up bi-lead" aria-hidden="true"></i> State</button>
-            <button class="btn btn-sm btn-ghost" id="debug-export-log" title="Export change log as JSON"><i class="bi bi-download bi-lead" aria-hidden="true"></i> Changes</button>
-            <button class="btn btn-sm btn-ghost" id="debug-clear-log"><i class="bi bi-trash bi-lead" aria-hidden="true"></i> Clear</button>
-          </div>
-          <div class="debug-watched">
-            <span class="debug-watched-label">Watched:</span>
-            <div id="debug-watched-list" class="debug-watched-list">
-              <span class="debug-empty-inline">Click <i class="bi bi-circle bi-lead" aria-hidden="true"></i> on any value to watch it</span>
-            </div>
-          </div>
-          <div class="debug-actions" style="display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--border);">
-            <span style="font-size: 12px; color: var(--text-muted); align-self: center;">Video Stream:</span>
-            <button class="btn btn-sm" id="debug-videostream-sdcp" title="Send CmdVideoStreamControl Enable=1 via SDCP WebSocket (port 3030) — matches official app"><i class="bi bi-arrow-right bi-lead" aria-hidden="true"></i> SDCP Enable</button>
-            <button class="btn btn-sm" id="debug-videostream-mqtt" title="Send method 1054 (CTRL_LIVE_STREAM) Enable=1 via MQTT"><i class="bi bi-arrow-right bi-lead" aria-hidden="true"></i> MQTT 1054</button>
-            <span id="debug-videostream-result" style="font-size: 12px; color: var(--text-muted); align-self: center;"></span>
-          </div>
-          <div class="debug-split">
-            <div class="debug-state-section">
-              <h3>Live State <span class="debug-hint">(<i class="bi bi-circle bi-lead" aria-hidden="true"></i> = watch, <i class="bi bi-caret-right-fill bi-lead" aria-hidden="true"></i> = expand)</span></h3>
-              <div id="debug-state-tree" class="debug-state-tree"></div>
-            </div>
-            <div class="debug-log-section">
-              <h3>Change Log <span id="debug-log-count" class="debug-log-count">0 changes</span></h3>
-              <label class="log-autoscroll-label">
-                <input type="checkbox" id="debug-log-autoscroll" checked> Auto-scroll
-              </label>
-              <div id="debug-change-log" class="debug-change-log"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!--
+      About / Help / Debug, merged (was three ideas across two tabs).
 
-    <!-- Help tab -->
+      "About this project" leads, because the build actually running is the first thing
+      anyone needs when reporting a bug and it used to be buried one row deep inside the
+      service-status dropdown. Help and Debug sit below it as sub-tabs rather than
+      stacked: the API reference is long, and burying a live debugging tool under it
+      would make the tool unusable.
+    -->
     <div id="help-tab-content" class="settings-page hidden">
-      <div class="settings-page-inner" style="max-width: 1000px">
-        <h2 class="settings-page-title"><i class="bi bi-question-circle bi-lead" aria-hidden="true"></i> Help &amp; API Reference</h2>
-        <div id="help-content"></div>
+      <div class="settings-page-inner" style="max-width: 1400px">
+        <h2 class="settings-page-title"><i class="bi bi-info-circle bi-lead" aria-hidden="true"></i> About this project</h2>
+        <div id="about-card" class="about-card"></div>
+
+        <nav class="subtab-strip" id="help-subtabs" aria-label="Help and debug sections">
+          <button class="subtab active" data-subtab="help" aria-selected="true"><i class="bi bi-question-circle bi-lead" aria-hidden="true"></i>Help &amp; API</button>
+          <button class="subtab" data-subtab="debug" aria-selected="false"><i class="bi bi-bug bi-lead" aria-hidden="true"></i>Debug</button>
+        </nav>
+
+        <section id="help-subtab-help">
+          <div id="help-content"></div>
+        </section>
+
+        <section id="help-subtab-debug" class="hidden">
+          <div class="debug-panel">
+            <div class="debug-controls">
+              <input type="text" id="debug-filter" placeholder="Filter fields..." class="log-filter-input">
+              <button class="btn btn-sm" id="debug-log-toggle"><i class="bi bi-play-fill bi-lead" aria-hidden="true"></i> Start Logging</button>
+              <select id="debug-log-timeout" class="log-select">
+                <option value="1">Auto-stop: 1m</option>
+                <option value="5" selected>Auto-stop: 5m</option>
+                <option value="15">Auto-stop: 15m</option>
+                <option value="30">Auto-stop: 30m</option>
+                <option value="60">Auto-stop: 60m</option>
+              </select>
+              <span id="debug-logging-badge" class="log-paused-badge hidden">LOGGING</span>
+              <button class="btn btn-sm btn-ghost" id="debug-export-state" title="Export current state as JSON"><i class="bi bi-box-arrow-up bi-lead" aria-hidden="true"></i> State</button>
+              <button class="btn btn-sm btn-ghost" id="debug-export-log" title="Export change log as JSON"><i class="bi bi-download bi-lead" aria-hidden="true"></i> Changes</button>
+              <button class="btn btn-sm btn-ghost" id="debug-clear-log"><i class="bi bi-trash bi-lead" aria-hidden="true"></i> Clear</button>
+            </div>
+            <div class="debug-watched">
+              <span class="debug-watched-label">Watched:</span>
+              <div id="debug-watched-list" class="debug-watched-list">
+                <span class="debug-empty-inline">Click <i class="bi bi-circle bi-lead" aria-hidden="true"></i> on any value to watch it</span>
+              </div>
+            </div>
+            <div class="debug-actions" style="display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--border);">
+              <span style="font-size: 12px; color: var(--text-muted); align-self: center;">Video Stream:</span>
+              <button class="btn btn-sm" id="debug-videostream-sdcp" title="Send CmdVideoStreamControl Enable=1 via SDCP WebSocket (port 3030) — matches official app"><i class="bi bi-arrow-right bi-lead" aria-hidden="true"></i> SDCP Enable</button>
+              <button class="btn btn-sm" id="debug-videostream-mqtt" title="Send method 1054 (CTRL_LIVE_STREAM) Enable=1 via MQTT"><i class="bi bi-arrow-right bi-lead" aria-hidden="true"></i> MQTT 1054</button>
+              <span id="debug-videostream-result" style="font-size: 12px; color: var(--text-muted); align-self: center;"></span>
+            </div>
+            <div class="debug-split">
+              <div class="debug-state-section">
+                <h3>Live State <span class="debug-hint">(<i class="bi bi-circle bi-lead" aria-hidden="true"></i> = watch, <i class="bi bi-caret-right-fill bi-lead" aria-hidden="true"></i> = expand)</span></h3>
+                <div id="debug-state-tree" class="debug-state-tree"></div>
+              </div>
+              <div class="debug-log-section">
+                <h3>Change Log <span id="debug-log-count" class="debug-log-count">0 changes</span></h3>
+                <label class="log-autoscroll-label">
+                  <input type="checkbox" id="debug-log-autoscroll" checked> Auto-scroll
+                </label>
+                <div id="debug-change-log" class="debug-change-log"></div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </main>

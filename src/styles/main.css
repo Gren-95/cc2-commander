@@ -4603,3 +4603,114 @@ body {
     background: var(--bg-surface);
   }
 }
+
+/* ═══ About panel + Help/Debug sub-tabs ══════════════════════════════════
+ *
+ * Debug and Help used to be two main tabs. They are one now, with "which build is
+ * actually running" at the top — production runs from /opt/elegooweb, which is not a
+ * checkout, so that stamp is the only answer to "which commit is this?" and it used to
+ * be one row inside a dropdown nobody opens.
+ */
+
+.about-card {
+  margin-bottom: 20px;
+}
+.about-summary {
+  margin: 0 0 14px;
+  max-width: 70ch;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.about-build {
+  display: inline-block;
+  min-width: 260px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+}
+/* An unstamped build is a real state, not an error — flagged, not alarming. */
+.about-build-unstamped {
+  border-color: rgba(234, 179, 8, 0.45);
+}
+.about-build-title {
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.about-row {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 13px;
+}
+.about-label {
+  color: var(--text-muted);
+}
+.about-value {
+  color: var(--text-primary);
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+.about-links {
+  margin: 14px 0 0;
+  font-size: 13px;
+}
+.about-links a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.about-links a:hover {
+  text-decoration: underline;
+}
+
+/*
+ * The API reference tables are wider than a phone. Measured at 390px: the widest is
+ * 408px, and its parent clipped it at `overflow-x: visible` — so the right-hand column
+ * of a reference table was simply unreachable, with no scrollbar to suggest otherwise.
+ *
+ * The section scrolls rather than the table being squeezed: these are method/path/
+ * description rows, and reflowing them into a narrow column makes them harder to scan
+ * than swiping does.
+ */
+@media (max-width: 700px) {
+  .help-section {
+    overflow-x: auto;
+  }
+}
+
+/* ── Sub-tabs ──────────────────────────────────────────────────────────── */
+
+.subtab-strip {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.subtab {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.subtab:hover {
+  color: var(--text-primary);
+}
+/* Underline rather than a filled pill: this sits on a page, not in a toolbar. */
+.subtab.active {
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+}

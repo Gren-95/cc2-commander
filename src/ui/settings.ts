@@ -6,6 +6,8 @@ import { type CardLayout, CARD_NAMES, defaultCardLayout, normaliseCardLayout } f
 import { toast } from './toast';
 import { renderSpoolCalc } from './spool-calc';
 import { renderHelp } from './help';
+import { renderAbout } from './about';
+import type { BuildStampish } from '../types';
 import { getThemeChoice, setThemeChoice, isThemeChoice } from './theme';
 import { playAlert } from './alert-sound';
 import { refreshTimestamps } from './relative-time';
@@ -107,27 +109,65 @@ export function openSettings(): void {
 }
 
 /** Switch between main tabs (dashboard / settings / tools / help / debug) */
+/** Which section of the merged About page is showing. */
+export type HelpSubtab = 'help' | 'debug';
+
+let subtabsBound = false;
+
+/**
+ * Show one section of the About page.
+ *
+ * Debug used to be a main tab of its own. It is a sub-tab here because it belongs with
+ * Help — both answer "what is this thing doing?" — but it must not be *stacked under*
+ * Help, whose API reference runs to several screens.
+ */
+export function switchHelpSubtab(sub: HelpSubtab): void {
+  for (const btn of document.querySelectorAll('.subtab')) {
+    const el = btn as HTMLElement;
+    const on = el.dataset.subtab === sub;
+    el.classList.toggle('active', on);
+    el.setAttribute('aria-selected', String(on));
+  }
+  document.getElementById('help-subtab-help')?.classList.toggle('hidden', sub !== 'help');
+  document.getElementById('help-subtab-debug')?.classList.toggle('hidden', sub !== 'debug');
+}
+
+function bindHelpSubtabs(): void {
+  if (subtabsBound) return;
+  subtabsBound = true;
+  for (const btn of document.querySelectorAll('.subtab')) {
+    btn.addEventListener('click', () => {
+      switchHelpSubtab(((btn as HTMLElement).dataset.subtab as HelpSubtab) ?? 'help');
+    });
+  }
+}
+
 export function switchToTab(tab: 'dashboard' | 'settings' | 'tools' | 'help' | 'debug'): void {
   const connectDialog = document.getElementById('connect-dialog');
   const dashboard = document.getElementById('dashboard');
   const settingsPage = document.getElementById('settings-tab-content');
   const toolsPage = document.getElementById('tools-tab-content');
   const helpPage = document.getElementById('help-tab-content');
-  const debugPage = document.getElementById('debug-tab-content');
   const tabs = document.querySelectorAll('.main-tab');
 
   if (!dashboard || !settingsPage) return;
 
+  /*
+   * `debug` is no longer a tab of its own — it is a section of the About page. It stays
+   * in the union so `switchToTab('debug')` keeps working and lands where a caller
+   * expects: the About page, opened on Debug.
+   */
+  const mainTab = tab === 'debug' ? 'help' : tab;
+
   tabs.forEach((t) => {
     const el = t as HTMLElement;
-    el.classList.toggle('active', el.dataset.tab === tab);
+    el.classList.toggle('active', el.dataset.tab === mainTab);
   });
 
   // Hide all pages first
   settingsPage.classList.add('hidden');
   toolsPage?.classList.add('hidden');
   helpPage?.classList.add('hidden');
-  debugPage?.classList.add('hidden');
   dashboard.classList.add('hidden');
   connectDialog?.classList.add('hidden');
 
@@ -144,12 +184,25 @@ export function switchToTab(tab: 'dashboard' | 'settings' | 'tools' | 'help' | '
   } else if (tab === 'tools') {
     toolsPage?.classList.remove('hidden');
     renderSpoolCalc();
-  } else if (tab === 'help') {
+  } else if (tab === 'help' || tab === 'debug') {
     helpPage?.classList.remove('hidden');
+    bindHelpSubtabs();
+    renderAbout(lastBuildStamp);
     renderHelp();
-  } else if (tab === 'debug') {
-    debugPage?.classList.remove('hidden');
+    switchHelpSubtab(tab === 'debug' ? 'debug' : 'help');
   }
+}
+
+/**
+ * The last stamp the service reported, kept so the About panel can be drawn on tab
+ * open rather than only when a broadcast happens to arrive.
+ */
+let lastBuildStamp: BuildStampish | null = null;
+
+/** Called from the service-status renderer on every `service_status` broadcast. */
+export function setBuildStamp(stamp: BuildStampish | null | undefined): void {
+  lastBuildStamp = stamp ?? null;
+  renderAbout(lastBuildStamp);
 }
 
 /** Render settings content into the settings page (called on tab switch) */

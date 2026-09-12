@@ -757,12 +757,9 @@ window.addEventListener('unhandledrejection', (e) => {
 // Tab navigation
 document.querySelectorAll('.main-tab').forEach((btn) => {
   btn.addEventListener('click', () => {
-    const tab = (btn as HTMLElement).dataset.tab as
-      | 'dashboard'
-      | 'settings'
-      | 'tools'
-      | 'help'
-      | 'debug';
+    // No 'debug' here any more — it is a section of the About page, not a tab.
+    // `switchToTab` still accepts it, for callers that deep-link to the debug view.
+    const tab = (btn as HTMLElement).dataset.tab as 'dashboard' | 'settings' | 'tools' | 'help';
     switchToTab(tab);
   });
 });
