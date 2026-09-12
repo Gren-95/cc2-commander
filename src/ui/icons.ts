@@ -87,6 +87,7 @@ export const ICONS = {
   printing: 'arrow-repeat',
   printerOk: 'printer-fill',
   printerOff: 'plug',
+  showAll: 'grid-3x3-gap',
 
   // ── Status ──
   ok: 'check-circle-fill',

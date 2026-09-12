@@ -27,6 +27,12 @@ export interface UISettings {
   alertVolume: number;
   /** Show log timestamps as "2m ago" rather than a clock (ELEG-45). Off by default. */
   relativeTimestamps: boolean;
+  /**
+   * Which dashboard card the mobile focus rail is showing, or `all` for the scrolling
+   * dashboard. Only consulted below the phone breakpoint; a desktop session neither
+   * reads nor writes it, so switching between a phone and a laptop does not fight.
+   */
+  mobileFocus: string;
 }
 
 const defaults: UISettings = {
@@ -46,6 +52,9 @@ const defaults: UISettings = {
   // Absolute by default: it is what you need when correlating with journalctl, the
   // printer's display or someone else's screenshot (ELEG-45).
   relativeTimestamps: false,
+  // The first visible card, resolved at runtime — see `resolveFocus`. Stored empty so
+  // a fresh phone focuses whatever is at the top of the user's own layout.
+  mobileFocus: '',
 };
 
 let cached: UISettings | null = null;

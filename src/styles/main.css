@@ -66,6 +66,14 @@
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", "Consolas", monospace;
   --header-height: 52px;
+  /*
+   * The phone bottom-nav bar. Referenced from the markup (the nav's own height, the
+   * grid's bottom padding, the focus rail's max-height) and defined here because a
+   * `var()` with no declaration silently voids the whole `calc()` it sits in — which
+   * is exactly what happened when the Tailwind conversion dropped the second `:root`
+   * block this used to live in, leaving the grid with no clearance under the bar.
+   */
+  --bottom-nav-height: 58px;
 
   /*
    * Canvas chart palette (ELEG-34).

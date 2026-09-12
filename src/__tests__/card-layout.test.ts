@@ -11,12 +11,16 @@
 import { describe, expect, it } from 'vitest';
 import {
   ALL_CARD_IDS,
+  CARD_ICONS,
   CARD_NAMES,
   type CardLayout,
   DEFAULT_ORDER,
   defaultCardLayout,
   defaultWidthFor,
+  FOCUS_ALL,
+  focusableCards,
   normaliseCardLayout,
+  resolveFocus,
   widthOf,
 } from '../ui/card-layout';
 
@@ -173,6 +177,61 @@ describe('CARD_NAMES', () => {
   it('names every card that can appear in the settings list', () => {
     for (const id of ALL_CARD_IDS) {
       expect(CARD_NAMES[id], `${id} has no display name`).toBeTruthy();
+    }
+  });
+});
+
+/**
+ * The mobile focus rail's decisions.
+ *
+ * Pure half only — the rail itself is DOM. What is worth pinning here is the stale-
+ * choice handling: a focused card can be hidden in Settings or removed from the app
+ * between sessions, and honouring a stale id would show an empty dashboard on a phone
+ * with no obvious way out.
+ */
+describe('focus rail', () => {
+  const layout = (over: Partial<CardLayout> = {}): CardLayout => ({
+    ...defaultCardLayout(),
+    ...over,
+  });
+
+  it('offers every card that is not hidden, in layout order', () => {
+    const l = layout({ hidden: ['temps-card'] });
+    expect(focusableCards(l)).toEqual(l.order.filter((id) => id !== 'temps-card'));
+  });
+
+  it('focuses the first visible card when nothing is saved', () => {
+    const l = layout();
+    expect(resolveFocus(l, null)).toBe(l.order[0]);
+  });
+
+  it('honours a saved card that is still visible', () => {
+    expect(resolveFocus(layout(), 'camera-card')).toBe('camera-card');
+  });
+
+  it('falls back when the saved card has since been hidden', () => {
+    const l = layout({ hidden: ['camera-card'] });
+    expect(resolveFocus(l, 'camera-card')).toBe(l.order[0]);
+  });
+
+  it('falls back when the saved card no longer exists', () => {
+    const l = layout();
+    expect(resolveFocus(l, 'a-card-from-a-newer-build')).toBe(l.order[0]);
+  });
+
+  it('passes FOCUS_ALL through — it is the way back to the scrolling dashboard', () => {
+    expect(resolveFocus(layout(), FOCUS_ALL)).toBe(FOCUS_ALL);
+    // …even when every card is hidden, which would otherwise have nothing to fall to.
+    expect(resolveFocus(layout({ hidden: [...ALL_CARD_IDS] }), FOCUS_ALL)).toBe(FOCUS_ALL);
+  });
+
+  it('reports FOCUS_ALL when every card is hidden and no choice was saved', () => {
+    expect(resolveFocus(layout({ hidden: [...ALL_CARD_IDS] }), null)).toBe(FOCUS_ALL);
+  });
+
+  it('has a glyph for every card, or the rail renders a blank button', () => {
+    for (const id of ALL_CARD_IDS) {
+      expect(CARD_ICONS[id], `${id} has no rail icon`).toBeTruthy();
     }
   });
 });

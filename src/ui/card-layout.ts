@@ -17,7 +17,7 @@
  * `normaliseCardLayout`.
  */
 
-import { icon } from './icons';
+import { type IconName, icon } from './icons';
 
 /**
  * How much of the grid a card takes.
@@ -138,6 +138,88 @@ export const CARD_NAMES: Record<string, string> = {
   'timelapse-card': `${icon('timelapse')} Timelapse`,
   'log-card': `${icon('mqttLog')} MQTT Log`,
 };
+
+/**
+ * One glyph per card, for the mobile focus rail — where there is no room for a label.
+ *
+ * Separate from `CARD_NAMES` because that is an HTML fragment (icon **and** text) meant
+ * for the settings list; the rail needs the icon's NAME so it can size and colour it
+ * itself. Keep the two in step: a card added to one belongs in the other.
+ */
+export const CARD_ICONS: Record<string, IconName> = {
+  'print-status-bar': 'print',
+  'temps-card': 'temperature',
+  'canvas-card': 'canvas',
+  'camera-card': 'camera',
+  'ai-card': 'ai',
+  'event-log-card': 'eventLog',
+  'gcode-preview-card': 'gcode',
+  'toolhead-card': 'toolhead',
+  'fans-card': 'fans',
+  'speed-flow-card': 'speed',
+  'files-card': 'files',
+  'print-history-card': 'history',
+  'print-reports-card': 'reports',
+  'timelapse-card': 'timelapse',
+  'log-card': 'mqttLog',
+};
+
+/**
+ * A hue per card, for the mobile focus rail.
+ *
+ * Fifteen identical grey buttons are a memory test — the rail is used by reaching for
+ * a position, and colour is what makes that reachable without reading fifteen
+ * tooltips. Each card keeps its hue wherever it sits in the order.
+ *
+ * Chosen at a single saturation and lightness so they read as one set rather than a
+ * ransom note, and so each stays legible on both themes: the rail tints the button at
+ * low alpha when idle and fills it solid when focused, and a mid-lightness hue has
+ * enough contrast either way. Related cards share a family — the two logs are both
+ * violet, the print-history/reports pair both teal — so the rail groups by eye.
+ */
+export const CARD_ACCENTS: Record<string, string> = {
+  'print-status-bar': '#3b82f6', // blue — the job itself
+  'temps-card': '#ef4444', // red — heat
+  'canvas-card': '#f97316', // orange — filament
+  'fans-card': '#06b6d4', // cyan — air
+  'toolhead-card': '#8b5cf6', // violet — motion
+  'speed-flow-card': '#eab308', // amber — rate
+  'camera-card': '#ec4899', // pink — vision
+  'gcode-preview-card': '#22c55e', // green — geometry
+  'files-card': '#0ea5e9', // sky — storage
+  'print-history-card': '#14b8a6', // teal — records
+  'print-reports-card': '#10b981', // emerald — records
+  'timelapse-card': '#a855f7', // purple — media
+  'ai-card': '#f43f5e', // rose — analysis
+  'event-log-card': '#6366f1', // indigo — logs
+  'log-card': '#7c3aed', // violet — logs
+};
+
+/** Shown when every card is visible at once, i.e. the scrolling dashboard. */
+export const FOCUS_ALL = 'all';
+
+/** The cards a user can actually focus: layout order, minus the hidden ones. */
+export function focusableCards(layout: CardLayout): string[] {
+  return layout.order.filter((id) => !layout.hidden.includes(id));
+}
+
+/**
+ * Which card the focus rail should show.
+ *
+ * A saved choice can go stale — the card may have been hidden in Settings since, or
+ * removed from the app entirely — and silently showing an empty dashboard would look
+ * like a bug. So a stale choice falls back to the first visible card rather than being
+ * honoured or cleared.
+ *
+ * `FOCUS_ALL` always passes through: it cannot go stale, and it is the escape hatch
+ * back to the scrolling dashboard.
+ */
+export function resolveFocus(layout: CardLayout, saved: string | null | undefined): string {
+  if (saved === FOCUS_ALL) return FOCUS_ALL;
+  const focusable = focusableCards(layout);
+  if (saved && focusable.includes(saved)) return saved;
+  return focusable[0] ?? FOCUS_ALL;
+}
 
 /** A fresh copy of the shipped layout. Fresh, because callers mutate what they get. */
 export function defaultCardLayout(): CardLayout {

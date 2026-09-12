@@ -18,6 +18,7 @@ import { toast } from './toast';
 import { renderSpoolCalc } from './spool-calc';
 import { renderHelp } from './help';
 import { renderAbout } from './about';
+import { isCardVisible, renderFocusRail, watchBreakpoint } from './mobile-focus';
 import type { BuildStampish } from '../types';
 import { getThemeChoice, setThemeChoice, isThemeChoice } from './theme';
 import { playAlert } from './alert-sound';
@@ -65,6 +66,10 @@ export function applyCardLayout(): void {
   const grid = document.getElementById('dashboard-grid');
   if (!grid) return;
 
+  // Re-run this whole pass when the viewport crosses the phone breakpoint, so a rotate
+  // cannot leave a focus applied with no rail to undo it. Idempotent.
+  watchBreakpoint(applyCardLayout);
+
   // Backfilling a newly added card used to happen here, on the in-memory copy only —
   // so the settings panel, which re-reads from storage, never saw it. It is part of
   // `normaliseCardLayout` now, which both paths go through (ELEG-44).
@@ -75,10 +80,17 @@ export function applyCardLayout(): void {
     // appendChild on an element already in the grid MOVES it, so iterating the saved
     // order is all the reordering there is.
     grid.appendChild(card);
-    card.style.display = currentLayout.hidden.includes(id) ? 'none' : '';
+    card.style.display = isCardVisible(currentLayout, id) ? '' : 'none';
     toggleState(card, 'collapsed', currentLayout.collapsed.includes(id));
     applyCardWidth(card, widthOf(currentLayout, id));
   }
+
+  /*
+   * The rail is part of the layout, not decoration: it lists the same cards in the
+   * same order and has to be redrawn whenever either changes. Drawing it here means
+   * one call site keeps the grid and the rail in step.
+   */
+  renderFocusRail(currentLayout, activeTab === 'dashboard');
 
   // Bind collapse toggle on card headers (idempotent via data attribute)
   for (const child of [...grid.children] as HTMLElement[]) {
@@ -164,6 +176,9 @@ function bindHelpSubtabs(): void {
   }
 }
 
+/** Which main tab is showing. The focus rail belongs to the dashboard alone. */
+let activeTab: 'dashboard' | 'settings' | 'tools' | 'help' | 'debug' = 'dashboard';
+
 export function switchToTab(tab: 'dashboard' | 'settings' | 'tools' | 'help' | 'debug'): void {
   const connectDialog = document.getElementById('connect-dialog');
   const dashboard = document.getElementById('dashboard');
@@ -180,6 +195,9 @@ export function switchToTab(tab: 'dashboard' | 'settings' | 'tools' | 'help' | '
    * expects: the About page, opened on Debug.
    */
   const mainTab = tab === 'debug' ? 'help' : tab;
+  activeTab = tab;
+  // Hide the rail immediately on the way out; `applyCardLayout` brings it back.
+  renderFocusRail(currentLayout, tab === 'dashboard');
 
   tabs.forEach((t) => {
     const el = t as HTMLElement;

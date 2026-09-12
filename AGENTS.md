@@ -186,6 +186,17 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   `classList.contains` and the delegated click handlers still look for `main-tab`,
   `file-item`, `settings-card-visible` and ~107 others; those are hooks now, carrying
   no styling. Removing one breaks behaviour silently.
+- **The phone dashboard shows ONE card at a time.** Below 700px a vertical rail down
+  the right edge (`ui/mobile-focus.ts`) focuses a single card; `All` restores the
+  scrolling dashboard. Two consequences for anything that touches the dashboard:
+
+  - **`applyCardLayout` owns visibility, and it asks `isCardVisible`.** Do not set
+    `card.style.display` anywhere else — a layout change and a focus change would
+    silently undo each other.
+  - **A card needs an entry in `CARD_ICONS` and `CARD_ACCENTS`** as well as
+    `CARD_NAMES`, or its rail button renders blank or uncoloured. The layout tests
+    assert all three.
+
 - **A list view's controls go in a *static sibling* of the list, never inside it.**
   Every list card re-renders wholesale on a WebSocket update — the render function
   assigns `container.innerHTML`. Anything interactive built inside that container is
