@@ -270,6 +270,30 @@ export async function hashPassword(password: string): Promise<string> {
  * Returns false rather than throwing on a malformed hash: a typo in `AUTH_PASSWORD_HASH`
  * must fail closed (nobody logs in) rather than open.
  */
+/**
+ * Does this look like a hash `verifyPassword` could ever accept?
+ *
+ * Exists because the failure it catches is silent and total. `scrypt` hashes are
+ * `scrypt$N$r$p$salt$key`, and **Bun expands `$VAR` when it loads `.env` — inside single
+ * quotes and double quotes alike.** An unescaped hash therefore arrives as the literal
+ * "scrypt", every login answers 401, and nothing anywhere says why. Verified: `A=scrypt$65536$8$1$x`,
+ * the same single-quoted, and the same double-quoted all load as "scrypt"; only `\$`
+ * survives.
+ *
+ * A shape check at startup turns that into one line in the log.
+ */
+export function isWellFormedHash(hash: string): boolean {
+  const parts = hash.split('$');
+  if (parts.length !== 6) return false;
+  const [scheme, n, r, p, salt, key] = parts;
+  return (
+    scheme === 'scrypt' &&
+    [n, r, p].every((v) => Number.isFinite(Number(v)) && Number(v) > 0) &&
+    salt.length > 0 &&
+    key.length > 0
+  );
+}
+
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   if (!hash) return false;
   try {

@@ -24,6 +24,7 @@ import {
   clearedSessionCookie,
   hashPassword,
   isSecureRequest,
+  isWellFormedHash,
   readApiKey,
   readCookie,
   secretsMatch,
@@ -283,5 +284,42 @@ describe('public paths', () => {
     expect(isPublicPath('/api/health?verbose=1')).toBe(true);
     expect(isPublicPath('/api/status?x=/api/health')).toBe(false);
     expect(pathOf('/api/health?a=b#c')).toBe('/api/health');
+  });
+});
+
+describe('isWellFormedHash', () => {
+  // The failure this catches is silent and total: Bun expands $VAR when it loads .env —
+  // inside single AND double quotes — so an unescaped scrypt hash arrives as the bare
+  // word "scrypt", every login answers 401, and nothing says why.
+  const good = 'scrypt$65536$8$1$2DjPAhXY6f-n6wjU1Js3fw$fAaCQgdd2GMtegGYHbvcupGIyurl';
+
+  it('accepts a hash as `auth:secret` prints it', () => {
+    expect(isWellFormedHash(good)).toBe(true);
+  });
+
+  it('rejects what .env expansion leaves behind', () => {
+    // `scrypt$65536$8$1$salt$key` with every $-segment eaten.
+    expect(isWellFormedHash('scrypt')).toBe(false);
+    expect(isWellFormedHash('scrypt-n6wjU1Js3fw')).toBe(false);
+  });
+
+  it('rejects a hash missing any field', () => {
+    expect(isWellFormedHash('scrypt$65536$8$1$salt')).toBe(false);
+    expect(isWellFormedHash('scrypt$65536$8$1$salt$key$extra')).toBe(false);
+  });
+
+  it('rejects another scheme, and an empty salt or key', () => {
+    expect(isWellFormedHash('argon2$65536$8$1$salt$key')).toBe(false);
+    expect(isWellFormedHash('scrypt$65536$8$1$$key')).toBe(false);
+    expect(isWellFormedHash('scrypt$65536$8$1$salt$')).toBe(false);
+  });
+
+  it('rejects non-numeric or zero cost parameters', () => {
+    expect(isWellFormedHash('scrypt$N$8$1$salt$key')).toBe(false);
+    expect(isWellFormedHash('scrypt$0$8$1$salt$key')).toBe(false);
+  });
+
+  it('is false for an empty string, which is simply "not configured"', () => {
+    expect(isWellFormedHash('')).toBe(false);
   });
 });

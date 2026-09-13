@@ -31,6 +31,7 @@ import { createMoonrakerRouter } from './moonraker-compat.js';
 import { MoonrakerServer } from './moonraker-server.js';
 import { TelegramIntegration } from './telegram.js';
 import { StatePersistence } from './state-persistence.js';
+import { isWellFormedHash } from './auth.js';
 import { DryerService } from './dryer.js';
 import { HomeAssistantService } from './home-assistant.js';
 import { PrintReportCollector } from './print-report-collector.js';
@@ -69,6 +70,20 @@ log.info(
 log.info(`Service: http://0.0.0.0:${config.servicePort}`);
 log.info(`Camera:  ${config.cameraEnabled ? config.cameraUrl : 'disabled'}`);
 log.info(`Data:    ${config.dataDir}`);
+// A hash that cannot parse means nobody can ever log in, and the only symptom is a 401
+// with no explanation — see `isWellFormedHash` for the `.env` expansion that causes it.
+if (
+  config.auth.enabled &&
+  config.auth.passwordHash &&
+  !isWellFormedHash(config.auth.passwordHash)
+) {
+  log.error(
+    'AUTH_PASSWORD_HASH is malformed — every login will fail with "Invalid credentials". ' +
+      'Bun expands $VAR when it reads .env, including inside quotes, so each $ in the hash ' +
+      'must be backslash-escaped: AUTH_PASSWORD_HASH=scrypt\\$65536\\$8\\$1\\$… ' +
+      'Re-run `bun run auth:secret` and paste the line exactly as printed.',
+  );
+}
 if (config.homeAssistant.enabled) {
   // The URL, never the token.
   log.info(

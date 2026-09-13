@@ -90,8 +90,13 @@ if (password !== again) {
 const hash = await hashPassword(password);
 
 console.log('\nAdd these to .env (which is gitignored — never commit them):\n');
-console.log(`AUTH_PASSWORD_HASH='${hash}'`);
+console.log(`AUTH_PASSWORD_HASH=${hash.replaceAll('$', String.raw`\$`)}`);
 console.log(`AUTH_API_KEY=${mintApiKey()}`);
 console.log(`
-The hash is quoted because it contains '$', which a shell would expand.
-Restart the service for either to take effect.`);
+Each '$' in the hash is BACKSLASH-ESCAPED, and it has to be. Bun loads .env itself and
+expands $VAR inside single quotes and double quotes alike — verified: A=scrypt$65536$8$1$x,
+'…' and "…" all arrive as "scrypt". Only \\$ survives. scrypt's format is
+scrypt$N$r$p$salt$hash, so an unescaped hash always loses everything after "scrypt" and
+every login answers 401 with nothing to say why.
+
+Paste the line exactly as printed. Restart the service for either to take effect.`);
