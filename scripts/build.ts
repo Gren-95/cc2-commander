@@ -125,7 +125,16 @@ async function buildHtml(js: string, css: string): Promise<void> {
 }
 
 const t0 = performance.now();
-await rm(DIST, { recursive: true, force: true });
+// Empty dist/, rather than remove and recreate it.
+//
+// `rm(DIST)` fails with EBUSY when dist/ is a mount point, which it is whenever the
+// build runs in a container with a volume mounted there — you cannot unlink a mounted
+// directory. Clearing the contents leaves the mount alone and is otherwise identical:
+// what matters is that no file from a previous build survives into this one.
+await mkdir(DIST, { recursive: true });
+for (const entry of await readdir(DIST)) {
+  await rm(join(DIST, entry), { recursive: true, force: true });
+}
 await mkdir(ASSETS, { recursive: true });
 
 const [js, css] = [await buildJs(), await buildCss()];

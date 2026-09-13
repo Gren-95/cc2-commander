@@ -1,0 +1,60 @@
+# ── Development image ──────────────────────────────────────────────────────────
+#
+# SEPARATE FROM `Dockerfile`, deliberately. That one is the published production
+# image and `publish.yml` builds it on every push to main; a multi-stage target
+# added there would become the default `docker build .` target if it ever ended up
+# last in the file, and would ship dev dependencies and a browser to users.
+#
+# What this exists for: keeping node_modules, dist, data, the Playwright browsers
+# and the test output OFF the host. The source is bind-mounted so an editor still
+# edits real files; everything generated is a named volume — see
+# docker-compose.dev.yml.
+#
+# Same Bun patch as the production image and the workflows. Four places name a Bun
+# version: two FROM lines in Dockerfile, this one, ci.yml and audit.yml.
+FROM oven/bun:1.4.2-slim
+
+WORKDIR /app
+
+# Fonts for the camera overlay, as in the production image: the slim base ships
+# none at all, so librsvg renders every glyph in `/api/stream/overlay` as tofu.
+#
+# The rest is what Chromium needs. `playwright install --with-deps` would fetch
+# these itself, but doing it here puts them in a cached layer instead of on every
+# rebuild.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      fonts-dejavu-core fontconfig ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && fc-cache -f
+
+# Browsers live outside /app so the bind mount cannot shadow them, and in a volume
+# so they survive a rebuild. scripts/gates.sh already honours this variable when it
+# decides whether the browser gate can run.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
+# Dev dependencies included — this image runs the gates, not just the service.
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile \
+ && bunx playwright install --with-deps chromium
+
+# Create every directory a named volume will be mounted on, owned by uid 1000.
+#
+# This is what makes the volumes writable by a container running as the host user.
+# Docker seeds an EMPTY named volume from the image's contents and ownership at that
+# path — so a directory that exists here owned by 1000 produces a volume owned by 1000,
+# while a path that does not exist in the image produces one owned by root, which a
+# non-root container then cannot write. That was the second thing to go wrong here:
+# `EACCES: permission denied, mkdir '/app/dist/assets'`.
+#
+# uid 1000 is the image's own `bun` user and the usual first human account on Linux, so
+# these normally coincide. If `id -u` says otherwise, pass UID/GID to compose — the
+# volumes then need recreating with `down -v`, because seeding only happens once.
+RUN mkdir -p /app/dist /app/data /app/test-results /app/playwright-report \
+ && chown -R 1000:1000 /app /ms-playwright
+
+# Nothing else is COPYed: the working tree arrives as a bind mount at run time, so
+# an edit on the host is visible immediately with no rebuild.
+
+EXPOSE 8088 7125
+CMD ["bun", "src/server/index.ts"]

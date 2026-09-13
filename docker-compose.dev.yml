@@ -1,0 +1,67 @@
+# Development in a container, so the host keeps none of the generated weight.
+#
+#   docker compose -f docker-compose.dev.yml up -d --build
+#   docker compose -f docker-compose.dev.yml exec dev bun run gates
+#
+# WHAT STAYS ON THE HOST: the source, and nothing else. The bind mount below is the
+# working tree, so an editor edits real files and git sees them normally.
+#
+# WHAT MOVES INTO VOLUMES: every generated directory, each one overlaid ON TOP of the
+# bind mount at the same path. That is the whole trick — a named volume mounted at
+# `/app/node_modules` hides whatever the bind mount has there (including nothing), so
+# the container gets its own and the host directory is never created.
+#
+#     node_modules   552 MB
+#     Playwright     1.3 GB   ← the largest, and it is not even in the project: it
+#                               lives in ~/.cache/ms-playwright on a host install
+#     data             7 MB   gcode cache, dryer session, debug captures
+#     dist             2 MB   rebuilt by `bun run build`
+#     test-results, playwright-report
+#
+# ONE REAL COST: with node_modules only inside the container, an editor's TypeScript
+# server on the host has no types — no autocomplete, no go-to-definition, and every
+# import underlined. Fix it by running the editor in the container too (VS Code Dev
+# Containers, or JetBrains remote), which is the point of `.devcontainer` if you want
+# one. There is no way to have both an empty host and a host language server.
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: cc2-dev
+    # Match the host user so files the container writes into the bind mount — bun.lock
+    # after an install, anything a script emits — are not left owned by root.
+    user: "${UID:-1000}:${GID:-1000}"
+    ports:
+      - "8088:8088" # Web UI + API + WebSocket
+      - "7125:7125" # Moonraker compatibility API
+    environment:
+      PRINTER_IP: "${PRINTER_IP:-192.168.0.146}"
+      # Absolute, and inside the volume. The default is ./data, which would resolve to
+      # the bind mount and put the gcode cache back on the host.
+      DATA_DIR: /app/data
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      # Playwright reuses a running server unless CI is set; in here it should always
+      # start its own harness on :5199.
+      CI: "1"
+    volumes:
+      - .:/app
+      # Each of these hides the bind mount at that path.
+      - node_modules:/app/node_modules
+      - dist:/app/dist
+      - data:/app/data
+      - test-results:/app/test-results
+      - playwright-report:/app/playwright-report
+      - playwright-browsers:/ms-playwright
+    # `bun run dev` rebuilds and restarts on change; the service alone is the quieter
+    # option when you are only editing the server.
+    command: ["bun", "scripts/dev.ts"]
+
+volumes:
+  node_modules:
+  dist:
+  data:
+  test-results:
+  playwright-report:
+  playwright-browsers:
