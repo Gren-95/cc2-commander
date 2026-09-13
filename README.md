@@ -92,13 +92,12 @@ Everything then appears under `./elegoo-data` — `reports/`, `gcode-cache/`, `l
 
 ### Docker Compose
 
-There is a `docker-compose.yml` in the repo root — copy it, set `PRINTER_IP`, and
-`docker compose up -d`. It also carries the development service behind a profile
-(`--profile dev`), which is why a bare `up` starts only the dashboard.
+**No checkout? Use this.** It pulls the published image, so there is nothing to build.
+Save it as `docker-compose.yml`, set `PRINTER_IP`, then `docker compose up -d`:
 
-The snippet below is the same thing inline, if you would rather write your own:
-
-Save this as `docker-compose.yml`, set `PRINTER_IP`, then `docker compose up -d`:
+> The `docker-compose.yml` in this repository is deliberately different: it **builds**
+> from the checkout rather than pulling. If you have the source, building what is in
+> front of you is the thing that cannot be stale. Same file otherwise.
 
 ```yaml
 services:
@@ -205,11 +204,24 @@ AUTH_PASSWORD_HASH=scrypt\$65536\$8\$1\$…   # every $ BACKSLASH-ESCAPED — se
 AUTH_PASSWORD=your-password                  # hashed at startup, never stored
 ```
 
-**Escape every `$` in the hash.** Bun loads `.env` itself and expands `$VAR` — inside
-single quotes and double quotes alike. An scrypt hash is `scrypt$N$r$p$salt$key`, so an
-unescaped one arrives as the bare word `scrypt`, and every login answers 401 with nothing
-saying why. `auth:secret` prints it already escaped; paste that line as-is. The service
-also checks the shape at startup and logs an error naming this if it looks wrong.
+**In a container, prefer `AUTH_PASSWORD`.** An scrypt hash contains `$`, and the two
+things that read `.env` disagree about it:
+
+| reads `.env` | `scrypt\$65536\$…` becomes | so a hash must be |
+| --- | --- | --- |
+| **Bun** (bare metal, `bun run dev`) | `scrypt$65536$…` — unescaped | escaped |
+| **Docker** (`env_file:` in compose) | `scrypt\$65536\$…` — literal | **not** escaped |
+
+One file cannot satisfy both. An unescaped hash read by Bun collapses to the bare word
+`scrypt`; an escaped one read by Docker keeps its backslashes. Either way every login
+answers 401 and nothing says why — which looks exactly like a forgotten password.
+
+A password has no `$`, so `AUTH_PASSWORD` survives both parsers unchanged. It is hashed
+at startup and never stored. Use the hash when the service reads `.env` directly rather
+than through Docker, and paste the line `auth:secret` prints as-is.
+
+The service checks the hash shape at startup and logs an error naming whichever direction
+it went wrong.
 
 `AUTH_SECRET` signs session tokens so they are still valid after a restart — without it,
 every deploy signs every browser out. Rotating the secret is how you sign out everywhere;

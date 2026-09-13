@@ -25,10 +25,20 @@
 # one. There is no way to have both an empty host and a host language server.
 
 services:
-  # What you actually run. Pulls the published image; uncomment `build` to make it here.
+  # The service, built from this checkout.
+  #
+  # `build`, not `image`: if you have the repo you have the source, and building what is
+  # in front of you is the thing that cannot be stale. The published image is for people
+  # who do NOT have a checkout — that form is in README.md, and it is the same file with
+  # `image: ghcr.io/gren-95/cc2-commander:latest` in place of these two lines.
+  #
+  # No `target`, so this is the last stage of the Dockerfile — the production image, the
+  # same one `publish.yml` builds.
   cc2-commander:
-    image: ghcr.io/gren-95/cc2-commander:latest
-    # build: { context: ., dockerfile: Dockerfile }
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cc2-commander:local
     container_name: cc2-commander
     restart: unless-stopped
     ports:

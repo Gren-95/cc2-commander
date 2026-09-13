@@ -319,6 +319,13 @@ describe('isWellFormedHash', () => {
     expect(isWellFormedHash('scrypt$0$8$1$salt$key')).toBe(false);
   });
 
+  it('rejects a hash still carrying its escaping', () => {
+    // What Docker's `env_file:` hands over when the file was escaped for Bun: Docker
+    // does not unescape, so the backslashes arrive literally and the hash is not the one
+    // that was generated. One .env cannot satisfy both parsers.
+    expect(isWellFormedHash(String.raw`scrypt\$65536\$8\$1\$salt\$key`)).toBe(false);
+  });
+
   it('is false for an empty string, which is simply "not configured"', () => {
     expect(isWellFormedHash('')).toBe(false);
   });

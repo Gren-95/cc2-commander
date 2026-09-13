@@ -411,6 +411,11 @@ export async function initAuth(
  * A shape check at startup turns that into one line in the log.
  */
 export function isWellFormedHash(hash: string): boolean {
+  // A backslash means the escaping survived into the value, which happens when Docker's
+  // `env_file:` reads the same `.env` that Bun needs escaped — Docker does not unescape.
+  // The two parsers cannot both be satisfied by one file; this at least says which way
+  // it went wrong.
+  if (hash.includes('\\')) return false;
   const parts = hash.split('$');
   if (parts.length !== 6) return false;
   const [scheme, n, r, p, salt, key] = parts;

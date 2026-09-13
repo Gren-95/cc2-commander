@@ -96,7 +96,10 @@ if (
 ) {
   log.error(
     'AUTH_PASSWORD_HASH is malformed — every login will fail with "Invalid credentials". ' +
-      'Bun expands $VAR when it reads .env, including inside quotes, so each $ in the hash ' +
+      'Two parsers read that file and they disagree: Bun expands $VAR (so each $ needs a ' +
+      "backslash) while Docker's env_file does not unescape (so a backslash arrives " +
+      'literally). If the service runs in a container reading .env through env_file, use ' +
+      'AUTH_PASSWORD instead — a password has no $ and survives both. Otherwise each $ in the hash ' +
       'must be backslash-escaped: AUTH_PASSWORD_HASH=scrypt\\$65536\\$8\\$1\\$… ' +
       'Re-run `bun run auth:secret` and paste the line exactly as printed.',
   );
