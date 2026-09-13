@@ -186,6 +186,35 @@ function startDrawTimer(): void {
   }, 100);
 }
 
+/**
+ * Collapse or restore a chart that has nothing to plot.
+ *
+ * Hides the canvas and the range chips beside it, and shows a single quiet line in
+ * their place. Everything is found relative to the canvas rather than by id, so a new
+ * chart gets this behaviour by being a chart — there is no list to keep in step.
+ */
+function setChartEmpty(canvasId: string, empty: boolean): void {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+
+  canvas.classList.toggle('hidden', empty);
+  // The range chips steer a chart that is not being shown, so they go with it.
+  for (const chip of document.querySelectorAll(`.chart-time-btn[data-chart="${canvasId}"]`)) {
+    chip.parentElement?.classList.toggle('hidden', empty);
+  }
+
+  const placeholderId = `${canvasId}-empty`;
+  let placeholder = document.getElementById(placeholderId);
+  if (empty && !placeholder) {
+    placeholder = document.createElement('div');
+    placeholder.id = placeholderId;
+    placeholder.className = 'px-1 py-3 text-center text-xs text-fg-muted';
+    placeholder.textContent = 'No data yet';
+    canvas.parentElement?.insertBefore(placeholder, canvas);
+  }
+  placeholder?.classList.toggle('hidden', !empty);
+}
+
 function drawChart(config: ChartConfig): void {
   const pal = chartPalette();
   if (!store) return;
@@ -223,6 +252,18 @@ function drawChart(config: ChartConfig): void {
     const s = store.getSeries(key);
     if (s) allSeries.push(s);
   }
+
+  // A chart with nothing in it is the single biggest source of clutter on this
+  // dashboard: four of them reserve ~160px each and draw an empty grid with axis
+  // labels, which reads as "broken" rather than "waiting". Measured on a dashboard with
+  // no printer connected, charts were 18% of all card height and every one was blank.
+  //
+  // So an empty chart collapses instead. `setChartEmpty` hides the canvas and its range
+  // chips and shows one line of text; the moment a point arrives it comes back, with no
+  // other code needing to know.
+  const hasData = allSeries.some((s) => s.data.some((pt) => pt.t >= tMin));
+  setChartEmpty(config.canvasId, !hasData);
+  if (!hasData) return;
 
   // Y-axis range
   let yMin = config.yMin ?? Infinity;

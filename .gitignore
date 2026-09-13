@@ -19,5 +19,5 @@ data/
 .claude/scheduled_tasks.json
 
 # Playwright
-/test-results/
+test-results/
 /playwright-report/

@@ -301,7 +301,7 @@
               <button id="camera-expand-btn" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Toggle large view"><i class="bi bi-arrows-angle-expand bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Expand</button>
             </div>
           </div>
-          <div class="relative bg-[#000] rounded-chip overflow-hidden min-h-50 max-[700px]:max-w-full" id="camera-wrap" title="Click to enlarge">
+          <div class="camera-off relative bg-[#000] rounded-chip overflow-hidden [&:not(.camera-off)]:min-h-50 max-[700px]:max-w-full" id="camera-wrap" title="Click to enlarge">
             <img id="camera-feed" alt="Camera off" class="w-full block cursor-pointer max-[700px]:max-w-full [#camera-card.camera-expanded_&]:max-h-[60vh] [#camera-card.camera-expanded_&]:object-contain hidden">
             <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 py-8 text-center text-xs text-fg-muted [&>i]:text-2xl [&>i]:opacity-40" id="camera-overlay"><i class="bi bi-camera-video-off" aria-hidden="true"></i><span id="camera-overlay-text">Camera not available</span></div>
           </div>
@@ -360,7 +360,7 @@
           </div>
           <div class="relative max-[700px]:max-w-full">
             <canvas id="gcode-preview-canvas" class="w-full h-[350px] block rounded-[4px]"></canvas>
-            <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 py-8 text-center text-xs text-fg-muted [&>i]:text-2xl [&>i]:opacity-40" id="gcode-preview-empty"><i class="bi bi-box" aria-hidden="true"></i>No G-code loaded</div>
+            <div class="flex flex-col items-center justify-center gap-2 px-4 py-8 text-center text-xs text-fg-muted [&>i]:text-2xl [&>i]:opacity-40" id="gcode-preview-empty"><i class="bi bi-box" aria-hidden="true"></i>No G-code loaded</div>
             <div id="gcode-preview-status" class="absolute top-2 left-2 text-[11px] text-fg-soft bg-[rgba(0,_0,_0,_0.5)] [padding:2px_8px] rounded-[4px] pointer-events-none empty:hidden"></div>
           </div>
           <div class="[padding:4px_0]">

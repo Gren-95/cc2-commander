@@ -155,6 +155,12 @@ function onOrbitChange(): void {
  */
 function setPreviewEmpty(empty: boolean): void {
   $('gcode-preview-empty')?.classList.toggle('hidden', !empty);
+  // The canvas reserves 350px — the tallest single element on the dashboard — and with
+  // nothing loaded that is 350px of nothing behind a one-line message. Collapsing it
+  // rather than overlaying the message is most of the difference between the card
+  // looking "empty" and looking "broken".
+  $('gcode-preview-canvas')?.classList.toggle('hidden', empty);
+  $('gcode-layer-slider')?.parentElement?.classList.toggle('hidden', empty);
 }
 
 export function renderGcodePreview(state: PrinterState): void {
@@ -352,6 +358,11 @@ function shortName(path: string): string {
 
 /** Bind control event handlers — call once at startup */
 export function bindGcodePreviewControls(): void {
+  // `preview` starts null without ever being ASSIGNED null, so none of the call sites
+  // below fire on a fresh load and the card opened showing an empty 350px canvas with
+  // the placeholder stacked under it — taller than before the placeholder existed.
+  setPreviewEmpty(true);
+
   // Layer slider
   const slider = $('gcode-layer-slider') as HTMLInputElement | null;
   if (slider) {

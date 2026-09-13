@@ -139,9 +139,13 @@ function updateCamera(hasCamera: boolean, _printerIp: string): void {
     }
     overlay.classList.add('hidden');
     img.classList.remove('hidden');
+    $('camera-wrap')?.classList.remove('camera-off');
   } else {
     img.classList.add('hidden');
     overlay.classList.remove('hidden');
+    // Drops the 200px min-height so the card is the size of its message, not of the
+    // video it is not showing.
+    $('camera-wrap')?.classList.add('camera-off');
     // Only the text node — `overlay.textContent = …` would take the icon with it.
     $('camera-overlay-text').textContent = 'Camera not connected';
   }
