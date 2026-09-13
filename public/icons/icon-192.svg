@@ -1,18 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none">
   <defs>
-    <linearGradient id="eyecc192100" x1=".3" y1="0" x2=".7" y2="1">
+    <linearGradient id="dropcc192100" x1=".3" y1="0" x2=".7" y2="1">
       <stop offset="0" stop-color="#8ec0ff"/><stop offset="1" stop-color="#2563eb"/>
     </linearGradient>
-    <linearGradient id="bedcc192100" x1=".3" y1="0" x2=".7" y2="1">
-      <stop offset="0" stop-color="#fdd36b"/><stop offset="1" stop-color="#e8940a"/>
-    </linearGradient>
   </defs>
-  <rect width="192" height="192" rx="46" fill="#0f1117"/>
-  <path d="M28.0 83.0q68.0 -26.0 136.0 0 -68.0 23.0 -136.0 0z" fill="#1e293b"/>
-  <ellipse cx="70.0" cy="83.0" rx="18.0" ry="16.0" fill="url(#eyecc192100)"/>
-  <ellipse cx="122.0" cy="83.0" rx="18.0" ry="16.0" fill="url(#eyecc192100)"/>
-  <ellipse cx="64.0" cy="76.0" rx="6.0" ry="4.0" fill="#fff" opacity=".55"/>
-  <ellipse cx="116.0" cy="76.0" rx="6.0" ry="4.0" fill="#fff" opacity=".55"/>
-  <path d="M68.0 129.0q28.0 -7.0 56.0 0 3.0 9.0 0 12.0 -28.0 7.0 -56.0 0 -3.0 -3.0 0 -12.0z" fill="url(#bedcc192100)"/>
-  <rect x="74.0" y="131.0" width="28.0" height="4.0" rx="2.0" fill="#fff" opacity=".38"/>
+  <rect width="192" height="192" rx="46" fill="#ffffff"/>
+  <path d="M96.0 28.0c23.0 31.0 42.0 48.0 42.0 71.0a42.0 42.0 0 0 1 -84.0 0c0 -23.0 19.0 -40.0 42.0 -71.0z" fill="url(#dropcc192100)"/>
+  <ellipse cx="78.0" cy="104.0" rx="8.0" ry="12.0" fill="#fff" opacity=".30" transform="rotate(-18 78.0 104.0)"/>
+  <circle cx="81.0" cy="96.0" r="7.0" fill="#0f1117"/>
+  <circle cx="111.0" cy="96.0" r="7.0" fill="#0f1117"/>
+  <rect x="84.0" y="118.0" width="24.0" height="7.0" rx="3.5" fill="#0f1117" opacity=".85"/>
 </svg>
