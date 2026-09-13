@@ -93,3 +93,53 @@ worth keeping.
 
 `sharp` stays regardless — `rest-api.ts` imports it directly for the camera snapshot
 path, so it is a real dependency rather than something transformers dragged in.
+
+## The exact pins, and why `three` is eight versions behind
+
+Two entries in `package.json` carry an exact version rather than a range, and they are
+not oversights:
+
+| pinned | at | why |
+| --- | --- | --- |
+| `three` | `0.178.0` | `gcode-preview@3.0.0-alpha.4` depends on `three` at **exactly** `0.178.0`, not a range. |
+| `@types/three` | `0.178.1` | Follows `three`. Types ahead of the runtime describe a library that is not installed. |
+
+Raising `three` does not upgrade anything. It installs a **second** copy, nested under
+`node_modules/gcode-preview/`, because that exact dependency can no longer be satisfied
+by the hoisted one. Two copies of three.js in one page means two sets of classes: an
+`Object3D` built by the library fails an `instanceof Object3D` check against ours, and
+the scene objects stop interoperating. `src/ui/gcode-preview.ts` imports `three`
+directly and hands objects to and from the library, so it is exactly the boundary that
+breaks.
+
+Nothing catches this. It type-checks, it builds, and the preview fails at runtime.
+
+So `bun outdated` will keep reporting `three` as many versions behind, and that is the
+expected state. Verify with:
+
+```bash
+bun why three
+```
+
+One version heading with both requirers under it is the healthy state:
+
+```
+three@0.178.0
+  ├─ cc2-commander (requires 0.178.0)
+  └─ gcode-preview@3.0.0-alpha.4 (requires 0.178.0)
+```
+
+Two version headings means the split above has happened. `bun pm ls | grep three` is not
+the check: `@types/three` matches it too, so it reports two lines when all is well.
+
+**Delete both pins when `gcode-preview` widens its own dependency**, and not before.
+`three` and `@types/three` move together, to whatever version `gcode-preview` then
+allows.
+
+## Deliberately not taken
+
+`pdfkit` sits at `^0.19.1` with `0.20.2` available. On a `0.x` package a minor bump is
+where breaking changes live, it is used only by `src/server/print-report-pdf.ts`, and
+there is no advisory forcing the issue. Verifying it means generating a report from a
+finished print and looking at the PDF, so it waits for a print rather than riding along
+with a routine update.

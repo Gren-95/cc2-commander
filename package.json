@@ -1,6 +1,6 @@
 {
   "name": "cc2-commander",
-  "description": "Self-hosted web dashboard for the Elegoo Centauri Carbon 2 (CC2) \u2014 live status, camera, print control, file management, filament dryer, and Moonraker/OctoPrint compatibility.",
+  "description": "Self-hosted web dashboard for the Elegoo Centauri Carbon 2 (CC2): live status, camera, print control, file management, filament dryer, and Moonraker/OctoPrint compatibility.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Gren-95/cc2-commander.git"
@@ -36,22 +36,22 @@
     "screenshots": "bun scripts/screenshots.ts"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.9",
+    "@biomejs/biome": "^2.5.13",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/cli": "^4.3.3",
     "@types/bun": "^1.4.2",
     "@types/pdfkit": "^0.17.6",
     "@types/three": "0.178.1",
     "@types/ws": "^8.18.1",
-    "knip": "^6.34.0",
-    "simple-git-hooks": "^2.11.1",
+    "knip": "^6.35.1",
+    "simple-git-hooks": "^2.14.0",
     "tailwindcss": "4.3.3",
     "typescript": "^7.0.2"
   },
   "dependencies": {
     "bootstrap-icons": "^1.13.1",
     "gcode-preview": "3.0.0-alpha.4",
-    "grammy": "^1.45.1",
+    "grammy": "^1.46.0",
     "mqtt": "^5.15.2",
     "pdfkit": "^0.19.1",
     "sharp": "^0.35.4",
