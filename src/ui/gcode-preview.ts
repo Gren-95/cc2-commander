@@ -15,6 +15,7 @@ import type { Object3D } from 'three';
 import type { PrinterState } from '../printer-state';
 import { $, fetchTimeout } from './helpers';
 import { chartPalette } from './chart-palette';
+import { onThemeChange } from './theme';
 
 /** Internal fields of WebGLPreview we need to access to stop the animate loop */
 interface WebGLPreviewInternals {
@@ -39,6 +40,43 @@ let lastFilamentColor = '';
 let cachedColorMap: Array<{ t: number; color: string }> = [];
 
 // CC2 Centauri Carbon 2 build volume (mm)
+/**
+ * Tube shading, and why the numbers are small.
+ *
+ * The library's tube shader is:
+ *
+ *     finalColor = min(uColor * (diff + ambient) * brightness, 1.0)
+ *
+ * with `diff` the Lambert term scaled by `directional`. Its defaults — ambient 0.4,
+ * directional 1.3, brightness 1.3 — put the lit side of a saturated blue at
+ * 0.95 * 1.7 * 1.3 ≈ 2.1, which **clamps**. So does most of the mid-tone. Everything
+ * above the clamp renders as the same pixel, which is precisely why a benchy came out as
+ * a flat silhouette: the shading existed and was then thrown away by `min`.
+ *
+ * The instinct — turn the lights up — makes it worse, and measurably so: at ambient 0
+ * with directional 4.0 the render is pixel-identical, because even more of the surface
+ * clamps.
+ *
+ * So these are chosen to land the BRIGHTEST point just under 1.0 and let everything else
+ * fall below it. For the blue channel at 0.95:
+ *
+ *     0.95 * (0.8 + 0.25) * 1.0 ≈ 1.0   lit side, just short of clamping
+ *     0.95 * (0.0 + 0.25) * 1.0 ≈ 0.24  fully shaded side
+ *
+ * — a 4:1 range across the model instead of one flat value.
+ */
+const AMBIENT = 0.35;
+const DIRECTIONAL = 1.0;
+/**
+ * A post-multiplier, so it trades highlight headroom for overall level.
+ *
+ * 1.1 puts the lit side of this blue near the top of the range while leaving the shaded
+ * side around a quarter of it. The brightest facets clamp on the BLUE channel only —
+ * red and green still vary there — so those read as a highlight rather than as the flat
+ * plateau the library's 1.3 produced across the whole model.
+ */
+const BRIGHTNESS = 1.1;
+
 const BUILD_VOLUME = { x: 256, y: 256, z: 256, smallGrid: false };
 
 /** Create the nozzle cone mesh with outline and add it to the scene */
@@ -236,16 +274,64 @@ function initPreview(colorMap?: Array<{ t: number; color: string }>): WebGLPrevi
     lastSegmentColor: pal.gcodeLastSegment,
     travelColor: pal.gcodeTravel,
     buildVolume: BUILD_VOLUME,
+    /*
+     * Tubes, not lines. `renderTubes: false` drew every extrusion as a flat 2px line in
+     * one colour, so a model came out as a silhouette — a benchy was a blue blob you
+     * could not read as a boat, because nothing in the image varied with the surface
+     * angle. Tubes are real geometry, and the library lights them, so the shape reads.
+     */
+    renderTubes: true,
+    // The nozzle and layer height this printer actually uses, so a tube is the size of
+    // the bead it represents rather than a guess.
+    extrusionWidth: 0.42,
+    lineHeight: 0.2,
     lineWidth: 2,
     renderExtrusion: true,
     renderTravel: false,
-    renderTubes: false,
-    // Camera from front-right elevated — matches webcam perspective
-    initialCameraPosition: [200, 350, 200],
+    // Front-right and above, matching the webcam's view, but much closer than the old
+    // [200,350,200]: that framed the whole 256mm plate, leaving a 60mm benchy as a
+    // thumbnail in the middle of an empty grid. Orbit still reaches the far corners.
+    initialCameraPosition: [95, 120, 95],
   });
+
+  /*
+   * Contrast comes from the ratio between these two, not from either alone.
+   *
+   * The library's defaults light tubes almost flatly. Pulling ambient down and the
+   * directional up is what makes a curve read as a curve: the lit side separates from
+   * the shaded side instead of both landing on the same blue.
+   */
+  // Deliberately NOT set here — see `applyShading`.
 
   lastEndLayer = -1;
   return p;
+}
+
+/**
+ * Push the shading values into the materials, after the geometry exists.
+ *
+ * Setting them on the instance before rendering does nothing, which cost an hour to
+ * pin down. The library builds each tube material through a factory that is **cached by
+ * colour at module scope**:
+ *
+ *     function makeMaterial(color, ambient, directional, brightness) {
+ *       if (cache[color]) return cache[color];   // <- the arguments are ignored
+ *       ...
+ *     }
+ *
+ * so whichever instance first renders a given colour fixes that colour's uniforms for
+ * the lifetime of the page, and every later instance silently inherits them. Measured:
+ * the instance reported ambient 0.25 while all 58 of its materials held the library's
+ * 0.4.
+ *
+ * The instance setters, however, write straight into `materials[].uniforms`. So the
+ * values have to be applied *after* the geometry is built rather than before — which is
+ * this function, called at every point that finishes rendering.
+ */
+function applyShading(p: WebGLPreview): void {
+  p.ambientLight = AMBIENT;
+  p.directionalLight = DIRECTIONAL;
+  p.brightness = BRIGHTNESS;
 }
 
 /** Load gcode file from the server download proxy */
@@ -292,6 +378,7 @@ export async function loadGcode(filename: string, source = 'local'): Promise<voi
 
     // Process gcode (v3 is async)
     await preview.processGCode(gcode);
+    applyShading(preview);
 
     // Stop the library's built-in 60fps animate loop — it calls WebGL render()
     // every frame, leaking ~23 MB/s. We render on-demand instead.
@@ -358,6 +445,8 @@ function shortName(path: string): string {
 
 /** Bind control event handlers — call once at startup */
 export function bindGcodePreviewControls(): void {
+  onThemeChange(refreshGcodePreviewTheme);
+
   // `preview` starts null without ever being ASSIGNED null, so none of the call sites
   // below fire on a fresh load and the card opened showing an empty 350px canvas with
   // the placeholder stacked under it — taller than before the placeholder existed.
@@ -435,6 +524,7 @@ export function bindGcodePreviewControls(): void {
         setPreviewEmpty(false);
         if (!preview) return;
         await preview.processGCode(gcode);
+        applyShading(preview);
         loadedFile = file.name;
         const slider = $('gcode-layer-slider') as HTMLInputElement | null;
         if (slider) {
@@ -460,6 +550,27 @@ export function bindGcodePreviewControls(): void {
 }
 
 /** Dispose the preview (if navigating away, cleanup) */
+/**
+ * Re-colour a live preview after a theme change.
+ *
+ * The four colours are read from the chart palette once, at construction, and baked into
+ * WebGL state — so flipping the theme used to leave the model sitting on the old
+ * background until the page reloaded. `ui/theme.ts` calls this for the same reason it
+ * calls `invalidateChartPalette`: a canvas cannot re-read a stylesheet by itself.
+ *
+ * Colours only. Rebuilding the preview would mean re-parsing the whole file, which for
+ * the 3.2 MB benchy this was tested against is several seconds of nothing.
+ */
+export function refreshGcodePreviewTheme(): void {
+  if (!preview) return;
+  const pal = chartPalette();
+  preview.backgroundColor = pal.gcodeBg;
+  preview.travelColor = pal.gcodeTravel;
+  preview.topLayerColor = pal.gcodeTopLayer;
+  if (!Array.isArray(preview.extrusionColor)) preview.extrusionColor = pal.gcodeExtrusion;
+  preview.render();
+}
+
 export function disposeGcodePreview(): void {
   if (preview) {
     try {

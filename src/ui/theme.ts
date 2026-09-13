@@ -55,6 +55,22 @@ function apply(resolved: ResolvedTheme): void {
   // theme change that skipped this would leave every canvas on the old palette until
   // the page reloaded — the half-themed dashboard ELEG-34 exists to avoid.
   invalidateChartPalette();
+  for (const listener of listeners) listener();
+}
+
+/**
+ * Anything else that caches a colour and cannot re-read the stylesheet by itself.
+ *
+ * A registry rather than a direct call, because the one caller is the WebGL g-code
+ * preview: importing it here would drag `three` and the whole 3D module into every unit
+ * test that touches a theme helper, which is how `chart-palette.test.ts` came to fail
+ * with `localStorage is not defined`. The dependency points the other way now — the
+ * heavy module registers itself, and this file stays small enough to import anywhere.
+ */
+const listeners = new Set<() => void>();
+
+export function onThemeChange(listener: () => void): void {
+  listeners.add(listener);
 }
 
 /** Persist a choice and apply it immediately. */
