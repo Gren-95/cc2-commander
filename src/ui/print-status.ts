@@ -1,4 +1,5 @@
 import { setDryerPrinting, setDryerTemps } from './dryer-panel';
+import { applyBusyGuard } from './busy-guard';
 import { positionSegmented } from './segmented';
 import { toggleState } from './state-classes';
 import { icon, iconOnly, iconText } from './icons';
@@ -178,6 +179,9 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   // The dryer refuses to start mid-print: it would hold the bed at a fixed temperature
   // for hours. This is the one place that already knows, so it is the one that tells.
   setDryerPrinting(isPrinting);
+  // Motion and maintenance need an IDLE printer, not merely one that is not printing:
+  // homing, levelling, a self-check and a firmware update are all equally busy.
+  applyBusyGuard(machineStatus?.status);
   const isPaused = machineStatus?.sub_status === 2502 || machineStatus?.sub_status === 2505;
   const statusName = STATUS_NAMES[machineStatus?.status] ?? 'Unknown';
   const subStatusName = SUB_STATUS_NAMES[machineStatus?.sub_status] ?? '';

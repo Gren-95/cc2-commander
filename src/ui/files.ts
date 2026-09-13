@@ -22,6 +22,7 @@ import {
   setFileDir,
   setFileSource,
 } from './file-browsing';
+import { reapplyBusyGuard } from './busy-guard';
 import { positionSegmented } from './segmented';
 import { EMPTY } from './design';
 import { icon, iconSolo } from './icons';
@@ -348,7 +349,7 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
     // and Delete are the two that a phone needs, so they are the two the row carries.
     const actions = isFolder
       ? ''
-      : `<button class="file-print-btn ${ROW_BTN}" title="Print ${escapeAttr(file.filename)}" aria-label="Print ${escapeAttr(file.filename)}">${iconSolo('play')}</button>
+      : `<button data-requires-idle class="file-print-btn ${ROW_BTN}" title="Print ${escapeAttr(file.filename)}" aria-label="Print ${escapeAttr(file.filename)}">${iconSolo('play')}</button>
          <button class="file-delete-btn ${ROW_BTN_BAD}" title="Delete ${escapeAttr(file.filename)}" aria-label="Delete ${escapeAttr(file.filename)}">${iconSolo('trash')}</button>`;
 
     html += `
@@ -366,6 +367,8 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
 
   container.innerHTML = html;
   ensureFileDelegation(container);
+  // Fresh markup comes back enabled; re-apply what the dashboard last knew.
+  reapplyBusyGuard();
 
   // Lend the popover this render's state, sender and listing.
   bindPopover(

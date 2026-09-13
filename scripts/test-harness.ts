@@ -31,6 +31,7 @@ const EXPOSED = {
   canvas: 'src/ui/canvas.ts',
   files: 'src/ui/files.ts',
   fileBrowsing: 'src/ui/file-browsing.ts',
+  busyGuard: 'src/ui/busy-guard.ts',
 };
 
 async function bundle(): Promise<string> {

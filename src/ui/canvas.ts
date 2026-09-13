@@ -1,3 +1,4 @@
+import { reapplyBusyGuard } from './busy-guard';
 import { iconSolo } from './icons';
 import { EMPTY, SWITCH_KNOB, SWITCH_TRACK } from './design';
 import type { CanvasTray } from '../types';
@@ -53,10 +54,10 @@ export function spoolTile(unitId: number, tray: CanvasTray, isActive: boolean): 
        </span>`;
 
   const action = isActive
-    ? `<button type="button" class="spool-unload-btn ${SLOT_ACTION}" data-canvas-id="${unitId}" data-tray-id="${tray.tray_id}" title="Unload this spool" aria-label="Unload spool ${tray.tray_id + 1}">${iconSolo('filamentUnload')}</button>`
+    ? `<button type="button" data-requires-idle class="spool-unload-btn ${SLOT_ACTION}" data-canvas-id="${unitId}" data-tray-id="${tray.tray_id}" title="Unload this spool" aria-label="Unload spool ${tray.tray_id + 1}">${iconSolo('filamentUnload')}</button>`
     : isEmpty
       ? ''
-      : `<button type="button" class="spool-load-btn ${SLOT_ACTION}" data-canvas-id="${unitId}" data-tray-id="${tray.tray_id}" title="Load this spool" aria-label="Load spool ${tray.tray_id + 1}">${iconSolo('filamentLoad')}</button>`;
+      : `<button type="button" data-requires-idle class="spool-load-btn ${SLOT_ACTION}" data-canvas-id="${unitId}" data-tray-id="${tray.tray_id}" title="Load this spool" aria-label="Load spool ${tray.tray_id + 1}">${iconSolo('filamentLoad')}</button>`;
 
   return `<div class="${stateClass} flex min-w-0 items-center gap-2 rounded-lg border border-line bg-surface p-2 [&.spool-active]:border-accent">
     <button type="button" class="canvas-spool-slot flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-left"
@@ -143,6 +144,8 @@ export function renderCanvas(state: PrinterState): void {
   </label>`;
 
   container.innerHTML = html;
+  // Fresh markup comes back enabled; re-apply what the dashboard last knew.
+  reapplyBusyGuard();
 
   // Bind delegated event listeners once on the container
   if (!canvasDelegationBound) {
