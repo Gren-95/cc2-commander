@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it } from 'bun:test';
-import { reorder, widthForColumns } from '../ui/dashboard-edit';
+import { reorder, widthForColumns } from '../ui/card-layout';
 
 const ORDER = ['a', 'b', 'c', 'd', 'e'];
 

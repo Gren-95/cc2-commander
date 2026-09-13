@@ -144,6 +144,19 @@ export const CARD_NAMES: Record<string, string> = {
  * for the settings list; the rail needs the icon's NAME so it can size and colour it
  * itself. Keep the two in step: a card added to one belongs in the other.
  */
+/**
+ * The card's name as plain text.
+ *
+ * `CARD_NAMES` values are **HTML** — each is an `<i>` glyph followed by the words — so
+ * they are safe to drop into an element's contents and actively unsafe anywhere else.
+ * Interpolated into `title="…"` or `aria-label="…"` the tag closes the attribute and the
+ * rest of the markup lands on screen as text, which is exactly what edit mode's first
+ * build did: every card grew a stray `label="Remove` beside it.
+ */
+export function cardNameText(id: string): string {
+  return (CARD_NAMES[id] ?? id).replace(/<[^>]*>/g, '').trim();
+}
+
 export const CARD_ICONS: Record<string, IconName> = {
   'print-status-bar': 'print',
   'temps-card': 'temperature',
@@ -311,6 +324,46 @@ export function normaliseCardLayout(parsed: unknown): CardLayout {
 }
 
 /** The width to render a card at, whatever the stored layout does or does not say. */
+/** How wide each width bucket is, as a fraction of the 12-column grid. */
+const WIDTH_COLUMNS: Record<CardWidth, number> = { compact: 3, wide: 6, full: 12 };
+
+/**
+ * Move `moved` so it sits before `target` in the order.
+ *
+ * Pure, and here rather than in `dashboard-edit.ts` so both edit interfaces can reach
+ * it without importing each other. The index arithmetic of "remove then insert" is
+ * off-by-one in one direction only — removing an earlier element shifts the target
+ * index down — and that is exactly the kind of bug that looks like a flaky drag.
+ */
+export function reorder(order: string[], moved: string, target: string): string[] {
+  if (moved === target) return [...order];
+  const next = order.filter((id) => id !== moved);
+  const at = next.indexOf(target);
+  if (at === -1) return [...order];
+  next.splice(at, 0, moved);
+  return next;
+}
+
+/**
+ * The width bucket closest to a dragged pixel width.
+ *
+ * Snapping rather than free resize keeps the saved layout in the three named buckets
+ * the rest of the app already understands — `compact` is a quarter of a wide desktop
+ * and a half of a laptop, so a stored pixel width would be wrong at every other size.
+ */
+export function widthForColumns(columns: number): CardWidth {
+  let best: CardWidth = 'compact';
+  let bestDelta = Number.POSITIVE_INFINITY;
+  for (const w of CARD_WIDTHS) {
+    const delta = Math.abs(WIDTH_COLUMNS[w] - columns);
+    if (delta < bestDelta) {
+      bestDelta = delta;
+      best = w;
+    }
+  }
+  return best;
+}
+
 export function widthOf(layout: CardLayout, id: string): CardWidth {
   return layout.width[id] ?? defaultWidthFor(id);
 }

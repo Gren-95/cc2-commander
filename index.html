@@ -126,7 +126,21 @@
         a wide one at the top. Order and width are separate choices now, both set in
         Settings, and the cards flow in a single responsive grid. See card-layout.ts.
       -->
-      <div id="dashboard-edit-tray" class="hidden flex flex-wrap items-center gap-2 [margin:0_12px_8px] shrink-0 max-[700px]:hidden"></div>
+      <!--
+        Edit-mode chrome. All three are `hidden` until edit mode opens, and only one of
+        the last two is ever shown: the picker panel on a desktop, the reorder list on a
+        phone. See ui/dashboard-edit.ts for why those are different interfaces rather
+        than one responsive one.
+      -->
+      <div id="dashboard-edit-bar" class="hidden flex items-center gap-2 [margin:0_12px_8px] shrink-0 rounded-xl border border-accent bg-accent-dim [padding:8px_12px]">
+        <i class="bi bi-grid-1x2 bi-lead [margin-inline-end:0.4em] text-accent" aria-hidden="true"></i>
+        <span class="text-sm font-medium text-fg">Editing layout</span>
+        <span class="text-xs text-fg-muted max-[700px]:hidden">Drag to move · drag a corner to resize · × to remove</span>
+        <button id="btn-edit-cancel" class="ml-auto inline-flex items-center justify-center rounded-lg border border-line bg-surface [padding:4px_12px] text-xs font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover hover:text-fg">Cancel</button>
+        <button id="btn-edit-done" class="inline-flex items-center justify-center rounded-lg border-0 bg-accent [padding:4px_12px] text-xs font-medium text-white cursor-pointer transition-colors hover:bg-accent-light">Done</button>
+      </div>
+      <aside id="dashboard-edit-panel" class="hidden fixed left-0 z-30 w-56 overflow-y-auto border-r border-line bg-surface p-3 [top:var(--header-height)] [bottom:0] max-[700px]:hidden"></aside>
+      <div id="dashboard-edit-list" class="hidden flex-1 min-h-0 overflow-y-auto [padding:0_12px] min-[701px]:hidden max-[700px]:[padding-bottom:calc(var(--bottom-nav-height)_+_env(safe-area-inset-bottom,_0)_+_8px)]"></div>
       <div class="grid grid-cols-[minmax(0,_1fr)] min-[701px]:grid-cols-[repeat(12,_minmax(0,_1fr))] content-start items-start [gap:10px] flex-1 min-h-0 p-3 overflow-y-auto max-[700px]:gap-2 max-[700px]:p-2 max-[480px]:[padding:6px] max-[700px]:[padding-bottom:calc(var(--bottom-nav-height)_+_env(safe-area-inset-bottom,_0)_+_8px)]" id="dashboard-grid">
           <!-- Print status (compact, in sidebar) -->
           <div id="print-status-bar" class="card bg-raised rounded-xl border border-transparent p-5 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted flex flex-col gap-3">
