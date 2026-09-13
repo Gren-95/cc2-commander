@@ -87,6 +87,22 @@ export function parseDeepLink(search: string, available: (group: string) => stri
 }
 
 /**
+ * Put a subtab in the address bar, if it is the one on screen.
+ *
+ * `switchSubtab` runs for a group whenever its parent tab is opened — including to
+ * restore a remembered panel — so writing unconditionally would let the About page's
+ * group rewrite the URL while you are looking at Tools. The active tab is read from the
+ * DOM rather than imported from `settings.ts`, which keeps this module importing nothing
+ * and therefore incapable of closing a cycle.
+ */
+export function updateDeepLinkSubtab(group: string, subtab: string): void {
+  const active = document.querySelector('.main-tab.active') as HTMLElement | null;
+  const tab = active?.dataset.tab;
+  if (!tab || SUBTAB_GROUP[tab as Tab] !== group) return;
+  updateDeepLink(tab, subtab);
+}
+
+/**
  * Put the current view in the address bar.
  *
  * `replaceState`, never `pushState`: clicking between tabs is navigation within one

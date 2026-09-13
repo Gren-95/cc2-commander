@@ -33,6 +33,7 @@ const EXPOSED = {
   fileBrowsing: 'src/ui/file-browsing.ts',
   busyGuard: 'src/ui/busy-guard.ts',
   fileActions: 'src/ui/file-actions.ts',
+  deepLink: 'src/ui/deep-link.ts',
 };
 
 async function bundle(): Promise<string> {

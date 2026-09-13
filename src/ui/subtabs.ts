@@ -17,6 +17,7 @@
  * beyond matching names.
  */
 
+import { updateDeepLinkSubtab } from './deep-link';
 import { toggleState } from './state-classes';
 import { loadUISettings, saveUISettings } from './ui-settings';
 
@@ -59,6 +60,9 @@ export function switchSubtab(group: string, name: string): void {
 
   const saved = { ...loadUISettings().subtabs, [group]: target };
   saveUISettings({ subtabs: saved });
+  // The address bar was only written when a MAIN tab changed, so clicking between
+  // subtabs left the URL showing whichever panel was remembered when the tab opened.
+  updateDeepLinkSubtab(group, target);
   listeners.get(group)?.(target);
 }
 
