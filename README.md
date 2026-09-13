@@ -92,15 +92,48 @@ Everything then appears under `./elegoo-data` — `reports/`, `gcode-cache/`, `l
 
 ### Docker Compose
 
-Copy the example file and edit your printer IP:
+Save this as `docker-compose.yml`, set `PRINTER_IP`, then `docker compose up -d`:
 
-```bash
-cp contrib/docker-compose.example.yml docker-compose.yml
-# Edit PRINTER_IP in docker-compose.yml
-docker compose up -d
+```yaml
+services:
+  cc2-commander:
+    image: ghcr.io/gren-95/cc2-commander:latest
+    # build: .  # Uncomment to build locally instead of pulling
+    container_name: cc2-commander
+    restart: unless-stopped
+    ports:
+      - "8088:8088"   # Web UI + API + WebSocket
+      - "7125:7125"   # Moonraker compatibility API
+    environment:
+      # ── Required ──────────────────────────────────────
+      PRINTER_IP: "192.168.1.150"
+
+      # ── Optional: Printer ─────────────────────────────
+      # PRINTER_PASSWORD: "123456"       # Access code (default: 123456)
+      # SERVICE_PORT: "8088"             # Web UI port (default: 8088)
+      # MOONRAKER_PORT: "7125"           # Moonraker compat port (default: 7125)
+      # CAMERA_ENABLED: "true"           # Camera proxy (default: true)
+      # CAMERA_URL: ""                   # Override (default: http://<PRINTER_IP>:8080)
+
+      # ── Optional: Telegram notifications ──────────────
+      # TELEGRAM_BOT_TOKEN: ""
+      # TELEGRAM_CHAT_ID: ""
+      # PROGRESS_INTERVAL: "25"          # Notify every N% (default: 25)
+
+      # ── Optional: Data persistence ────────────────────
+      # DATA_DIR: "./data"               # Data directory (default: ./data)
+
+    volumes:
+      # One host path for everything, so the data is easy to get at. A named volume
+      # (`elegoo-data:/app/data`, declared under a top-level `volumes:`) works too.
+      #
+      # Mount the DIRECTORY, never the individual files inside it — see the warning
+      # above for what binding `state.json` directly does.
+      - ./elegoo-data:/app/data
 ```
 
-See [`contrib/docker-compose.example.yml`](contrib/docker-compose.example.yml) for all available environment variables (Telegram, camera, etc.).
+Every variable the service reads is in the [Environment Variables](#environment-variables)
+table below; the commented lines above are the ones worth knowing about first.
 
 ### Image tags
 

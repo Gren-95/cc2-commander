@@ -126,8 +126,8 @@ mkdir -p "$INSTALL_DIR/data"
 # the repository, while the state that must survive an upgrade lives at the install root
 # beside them —
 #
-#   $INSTALL_DIR/.env           the only copy of PRINTER_PASSWORD, TELEGRAM_BOT_TOKEN,
-#                               AI_VLM_API_KEY. No backup anywhere.
+#   $INSTALL_DIR/.env           the only copy of PRINTER_PASSWORD and
+#                               TELEGRAM_BOT_TOKEN. No backup anywhere.
 #   $INSTALL_DIR/data/          persisted runtime state (DATA_DIR), created above
 #   $INSTALL_DIR/node_modules/  installed deps, not present in the source tree
 #
@@ -209,7 +209,7 @@ fi
 # Create .env if it doesn't already exist (preserve existing config on upgrades)
 #
 # `umask 077` around the redirect, not a chmod after it: the file is the only copy of
-# PRINTER_PASSWORD, TELEGRAM_BOT_TOKEN and AI_VLM_API_KEY, and a chmod afterwards leaves a
+# PRINTER_PASSWORD and TELEGRAM_BOT_TOKEN, and a chmod afterwards leaves a
 # window — however short — where it exists world-readable. Create it right instead.
 if [[ ! -f "$INSTALL_DIR/.env" ]]; then
     log_info "Creating default .env configuration..."
@@ -219,8 +219,11 @@ if [[ ! -f "$INSTALL_DIR/.env" ]]; then
 # Elegoo Web — Service Configuration
 # See README.md for all available options
 
-# Printer connection
-PRINTER_IP=172.20.100.236
+# Printer connection — PRINTER_IP is required and the service refuses to start
+# without it, which is deliberate (ELEG-73). A placeholder here rather than a real
+# address: this file is committed to a public repo, and a default pointing at some
+# address on the installer's own LAN is how ELEG-72 happened.
+PRINTER_IP=
 PRINTER_PASSWORD=123456
 
 # Service port (web UI + API)
@@ -228,7 +231,7 @@ SERVICE_PORT=${SERVICE_PORT}
 
 # Camera (auto-detected from printer IP if not set)
 # CAMERA_ENABLED=true
-# CAMERA_URL=http://172.20.100.236:8080
+# CAMERA_URL=http://<PRINTER_IP>:8080
 
 # Telegram notifications (optional)
 # TELEGRAM_BOT_TOKEN=
@@ -237,17 +240,6 @@ SERVICE_PORT=${SERVICE_PORT}
 
 # Data persistence directory
 DATA_DIR=/opt/elegooweb/data
-
-# AI monitoring (optional)
-# AI_ENABLED=false
-# AI_VLM_ENABLED=true
-# AI_VLM_API_KEY=
-# AI_VLM_PROVIDER=ollama
-# AI_VLM_BASE_URL=http://localhost:11434
-# AI_VLM_MODEL=llava
-# AI_LOCAL_ENABLED=true
-# AI_LOCAL_MODEL=Xenova/siglip-base-patch16-224
-# AI_INTERVAL=60
 EOF
     )
     log_info "  Edit $INSTALL_DIR/.env to configure your printer IP and options"

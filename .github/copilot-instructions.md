@@ -18,5 +18,5 @@ Two notes for anyone tempted to grow this file back:
   it rather than sanitise it — sanitising is a process that fails silently once.
 - The printer's `elegoo`/`123456` login is a **published vendor default**, documented as
   such in the README and in `AGENTS.md`, not a secret. Real credentials —
-  `PRINTER_PASSWORD`, `TELEGRAM_BOT_TOKEN`, `AI_VLM_API_KEY` — come from the environment
+  `PRINTER_PASSWORD` and `TELEGRAM_BOT_TOKEN` — come from the environment
   at runtime and are never committed.

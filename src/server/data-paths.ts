@@ -10,9 +10,9 @@
  * **That was invisible because the default makes them coincide.** `DATA_DIR` defaults to
  * `./data`, so `$CWD/data` is the same directory — on metal (`WorkingDirectory=
  * /opt/elegooweb`) and in the container (`WORKDIR /app`) alike. It only diverges when
- * `DATA_DIR` points elsewhere, which `README.md` and `contrib/docker-compose.example.yml` both
- * document as supported. Then those two write somewhere nobody mounted or backs up: in a
- * container, into an unmounted layer that is discarded on every recreate.
+ * `DATA_DIR` points elsewhere, which `README.md` documents as supported. Then those two
+ * write somewhere nobody mounted or backs up: in a container, into an unmounted layer
+ * that is discarded on every recreate.
  *
  * This module exists rather than threading `config` through the call sites because the
  * consumers are functions like `ensureCacheDir()`, `getCachedGcode(fileName)` and the

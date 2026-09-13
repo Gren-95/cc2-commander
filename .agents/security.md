@@ -115,9 +115,8 @@ get this right.
   `logger.ts` writes to `${DATA_DIR}/logs`; a `TELEGRAM_BOT_TOKEN` in a debug line is a
   credential on disk and, given the above, a credential behind an unauthenticated
   endpoint.
-- **Committed files carry placeholders only** — `.env.example`,
-  `contrib/docker-compose.example.yml`, `contrib/install.sh`'s generated default `.env`, any
-  fixture. This repo is **public**: a committed secret is published, and rotating it is
+- **Committed files carry placeholders only** — `.env.example`, the compose snippet in
+  `README.md`, `contrib/install.sh`'s generated default `.env`, any fixture. This repo is **public**: a committed secret is published, and rotating it is
   the only remedy.
 - **There are two `.env` files** on a host that runs the service locally: the
   checkout's and production's. Neither is in git; see

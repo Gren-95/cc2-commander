@@ -141,9 +141,8 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   the life of the repo **because the default makes the two coincide**: `DATA_DIR`
   defaults to `./data`, so `$CWD/data` is the same directory on metal
   (`WorkingDirectory=/opt/elegooweb`) and in the container (`WORKDIR /app`). It only
-  diverges for someone who sets `DATA_DIR` elsewhere — which `README.md` and
-  `contrib/docker-compose.example.yml` document as supported — and then the writes land in a
-  directory nobody mounted or backs up.
+  diverges for someone who sets `DATA_DIR` elsewhere — which `README.md` documents as
+  supported — and then the writes land in a directory nobody mounted or backs up.
 
   That is a shape worth recognising on its own: **a hardcoded value that happens to equal
   a default is untested by every environment you have.** Grep for `process.cwd()` before
@@ -287,11 +286,11 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   **The public path list is exact, never a prefix** — a prefix match on `/api/health`
   would open `/api/health-anything`, and `src/__tests__/auth.test.ts` asserts it.
 
-- **Secrets stay server-side and out of git.** `PRINTER_PASSWORD`,
-  `TELEGRAM_BOT_TOKEN`, `AI_VLM_API_KEY` are read from the environment
+- **Secrets stay server-side and out of git.** `PRINTER_PASSWORD` and
+  `TELEGRAM_BOT_TOKEN` are read from the environment
   (`.env`, which is gitignored) at runtime — never hardcoded, never returned to the
-  browser, never logged, and **placeholders only** in `.env.example`,
-  `contrib/docker-compose.example.yml` and anything else committed. Mirrors the org
+  browser, never logged, and **placeholders only** in `.env.example`, the compose
+  snippet in `README.md` and anything else committed. Mirrors the org
   data-protection policy: no real credentials or PII in committed files, issue
   comments, or outbound requests. (The vendor default `elegoo`/`123456` in the README
   is documentation of a published protocol default, not a secret.)
@@ -494,7 +493,6 @@ checkout.
 | Shared state + events | `src/server/state-store.ts` |
 | REST API + camera proxy | `src/server/rest-api.ts` |
 | Moonraker / OctoPrint compat | `src/server/{moonraker-compat,moonraker-server,octoprint-compat}.ts` |
-| AI print monitor | `src/server/ai-monitor.ts` |
 | Telegram bot | `src/server/telegram.ts`, `src/server/allowlist.ts` |
 | Config / env parsing | `src/server/config.ts` |
 | Frontend entry | `src/main.ts`, `index.html` |
