@@ -190,6 +190,24 @@ All persistent data lives under `/app/data` inside the container:
 | 8088 | HTTP/WS | Web UI, REST API, WebSocket, camera proxy, MCP |
 | 7125 | HTTP/WS | Moonraker compatibility API (for Mainsail/Fluidd/KlipperScreen) |
 
+## Local AI monitoring is an opt-in install
+
+`AI_LOCAL_ENABLED` runs a CLIP model over camera frames to spot print failures. The
+package behind it is **not installed by default**:
+
+```bash
+bun run ai:install     # bun add @huggingface/transformers
+```
+
+It pulls `onnxruntime-node`, which ships ~800MB of prebuilt binaries covering every
+platform and accelerator it supports — a 302MB CUDA provider, plus win32 and darwin
+builds. On any one machine most of that cannot run, so it is not something to download
+for a feature you may not use. A clean install is 404MB without it.
+
+Turning `AI_LOCAL_ENABLED=true` on without installing it is safe: the service logs one
+warning naming the command and carries on. Everything else — VLM analysis via
+`AI_VLM_ENABLED`, motion detection, the camera, alerts — works without it.
+
 ## Authentication
 
 The service ships with **no authentication**: every endpoint — including printer control

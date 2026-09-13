@@ -245,6 +245,48 @@ type CLIPClassifier = (
   labels: string[],
 ) => Promise<Array<{ label: string; score: number }>>;
 
+/** The package name, and the one command that installs it. */
+const TRANSFORMERS = '@huggingface/transformers';
+export const LOCAL_AI_INSTALL_HINT = `bun add ${TRANSFORMERS}`;
+
+/**
+ * The slice of transformers.js this file uses — three env flags and `pipeline`.
+ *
+ * Declared locally because the package is **not installed by default**: it pulls
+ * `onnxruntime-node`, which ships ~513 MB of prebuilt binaries for every platform and
+ * accelerator it supports, and roughly 90% of that cannot run on any one host (a 302 MB
+ * CUDA provider, plus win32 and darwin binaries). Local AI monitoring is opt-in, so the
+ * download is too.
+ *
+ * The consequence is that TypeScript cannot see the real types, and must not try: a bare
+ * `import('@huggingface/transformers')` is resolved at compile time and fails the
+ * typecheck on any checkout that has not installed it.
+ */
+interface TransformersModule {
+  pipeline: (
+    task: string,
+    model: string,
+    options: { dtype: string; device: string },
+  ) => Promise<unknown>;
+  env: { useBrowserCache: boolean; allowLocalModels: boolean; cacheDir: string };
+}
+
+/**
+ * Load transformers.js, or say plainly that it is not installed.
+ *
+ * The specifier goes through a variable so the import stays opaque to the compiler —
+ * with it written inline, `tsc` resolves it and the build breaks without the optional
+ * package. `/* @vite-ignore *\/`-style pragmas are not needed; a non-literal specifier
+ * is enough for both TypeScript and Bun's bundler.
+ */
+async function loadTransformers(): Promise<TransformersModule | null> {
+  try {
+    return (await import(TRANSFORMERS)) as TransformersModule;
+  } catch {
+    return null;
+  }
+}
+
 class LocalAnalyzer {
   private classifier: CLIPClassifier | null = null;
   private loading = false;
@@ -267,8 +309,14 @@ class LocalAnalyzer {
       log.info(`Loading model ${this.model}...`);
       const start = Date.now();
 
-      // Dynamic import to avoid loading transformers.js at module level
-      const { pipeline, env } = await import('@huggingface/transformers');
+      const transformers = await loadTransformers();
+      if (!transformers) {
+        // Silent: `start()` already warned once, with the install command. Repeating it
+        // per frame would bury the log. `loading` stays true so this is not retried —
+        // no amount of retrying installs a package.
+        return;
+      }
+      const { pipeline, env } = transformers;
 
       // Configure for Node.js server usage
       env.useBrowserCache = false;
@@ -817,6 +865,22 @@ export class AIMonitor extends EventEmitter {
       `VLM: ${this.config.aiVlmEnabled ? `${this.config.aiVlmModel} @ ${this.config.aiVlmBaseUrl} (${this.config.aiVlmProvider})` : 'disabled'}`,
     );
     log.info(`Local: ${this.config.aiLocalEnabled ? this.config.aiLocalModel : 'disabled'}`);
+
+    // Say it at startup, not on the first camera frame. `initialize()` is lazy, so
+    // without this an operator who turned local AI on would see "Local: <model>" here,
+    // conclude it was working, and only find out when a frame arrived — which on a
+    // printer that is offline or has no camera is never.
+    if (this.config.aiLocalEnabled) {
+      void loadTransformers().then((mod) => {
+        if (!mod) {
+          log.warn(
+            `${TRANSFORMERS} is not installed, so local analysis will not run. ` +
+              `Install it with \`${LOCAL_AI_INSTALL_HINT}\` (~800MB — it pulls ` +
+              'onnxruntime), or set AI_LOCAL_ENABLED=false to turn local analysis off.',
+          );
+        }
+      });
+    }
     log.info(
       `Interval: ${this.config.aiIntervalSec}s, Alert threshold: ${this.config.aiAlertThreshold}`,
     );

@@ -80,9 +80,20 @@ So ~90% of it cannot run here: the host is Intel Iris Xe with no `nvidia-smi` an
 `libcuda`. It is **also in every container image**, because the Dockerfile's
 `bun install --frozen-lockfile --production` installs the same tree.
 
-It is disk, not runtime cost, and it is a transitive dep — there is no supported flag to
-ask for a subset. The three ways out, in order of how much they give up: leave it; prune
-the unusable binaries in a postinstall step (and accept that `bun install` restores
-them); or set `AI_LOCAL_ENABLED=false` and drop `@huggingface/transformers`, which loses
-local AI monitoring and takes ~530 MB with it. `sharp` stays either way — `rest-api.ts`
-imports it directly for the camera snapshot path.
+**Resolved: the package is no longer a dependency.** `bun run ai:install` adds it when
+someone wants local analysis, and a clean install is **404 MB instead of 1.2 GB**.
+
+Two things make that safe, and both are easy to get wrong:
+
+1. **The import specifier goes through a variable.** Written inline,
+   `await import('@huggingface/transformers')` is resolved by `tsc` at compile time and
+   fails the typecheck on any checkout that has not installed it — measured, TS2307. The
+   slice of the API this repo uses is declared locally as `TransformersModule` instead.
+2. **The absence is reported at startup, not on first use.** `initialize()` is lazy, so
+   without a probe in `start()` an operator who set `AI_LOCAL_ENABLED=true` would see
+   `Local: <model>` in the log, conclude it was working, and find out only when a camera
+   frame arrived — which on an offline printer is never. It now warns once, names the
+   command, and does not repeat per frame.
+
+`sharp` stays either way — `rest-api.ts` imports it directly for the camera snapshot
+path, so it is a real dependency rather than something transformers dragged in.
