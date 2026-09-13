@@ -34,6 +34,7 @@ import {
 } from '../dryer-core';
 import { escapeAttr, escapeHtml, fetchTimeout } from './helpers';
 import { icon } from './icons';
+import { type Sample, samplesSince, sparklineGeometry } from './sparkline';
 import { toast } from './toast';
 
 let client: CommandSender | null = null;
@@ -72,12 +73,25 @@ let roomHumidity: number | null = null;
 /** The sensor's own name and when it last changed, for the label and the staleness. */
 let humidityName = '';
 let humidityChangedAt = '';
+let humidityHistory: Sample[] = [];
 
-export function setDryerHumidity(value: number | null, name = '', changedAt = ''): void {
+export function setDryerHumidity(
+  value: number | null,
+  name = '',
+  changedAt = '',
+  history: Sample[] = [],
+): void {
   const had = roomHumidity !== null;
+  const traceGrew = history.length !== humidityHistory.length;
   roomHumidity = value;
   humidityName = name;
   humidityChangedAt = changedAt;
+  humidityHistory = history;
+
+  // A new sample redraws the trace, which the in-place patch below cannot do. Only
+  // while a session runs: that is the only view with a chart, and it re-renders every
+  // second anyway, so returning here costs nothing.
+  if (traceGrew && session) return;
 
   // Patch the two spans in place rather than re-rendering.
   //
@@ -305,6 +319,48 @@ function idleView(): string {
  * shouting about is a target of 0 while a session runs: that is the failure the
  * keepalive exists to undo, visible in the ~30s before it does.
  */
+/**
+ * The humidity trace for this session.
+ *
+ * Moisture leaving filament has to go somewhere, and in a closed chamber it goes into
+ * the air — so a session that is doing something shows humidity RISING first and then
+ * settling back as it vents. A flat line from the start means the filament was already
+ * dry, or nothing is reaching the sensor. The number alone cannot tell those apart.
+ *
+ * Nothing is drawn until there are two samples, which at one a minute means the first
+ * couple of minutes of a session show the readout without a chart rather than a chart
+ * with one dot in it.
+ */
+function humidityTrace(session: DryerSession): string {
+  const samples = samplesSince(humidityHistory, session.startedAt);
+  const g = sparklineGeometry(samples, 280, 44);
+  if (!g) return '';
+
+  const span = Math.round((samples[samples.length - 1].t - samples[0].t) / 60_000);
+  const delta = g.last - g.first;
+  // Two decimal places would imply a precision these sensors do not have.
+  const trend =
+    Math.abs(delta) < 0.5 ? 'flat' : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} % since start`;
+
+  return `
+      <div class="flex flex-col gap-1 [padding:10px_12px] rounded-chip bg-input">
+        <div class="flex items-baseline justify-between gap-2">
+          <span class="text-[11px] text-fg-muted">Humidity over this session</span>
+          <span class="text-[11px] text-fg-muted">${escapeHtml(trend)} · ${span} min</span>
+        </div>
+        <svg viewBox="0 0 280 44" preserveAspectRatio="none" class="w-full h-11" role="img"
+             aria-label="Humidity from ${g.first.toFixed(1)} to ${g.last.toFixed(1)} percent over ${span} minutes">
+          <path d="${g.area}" fill="var(--color-accent)" opacity="0.12"></path>
+          <path d="${g.path}" fill="none" stroke="var(--color-accent)" stroke-width="1.5"
+                stroke-linejoin="round" stroke-linecap="round"></path>
+        </svg>
+        <div class="flex justify-between text-[10px] text-fg-muted">
+          <span>${g.min.toFixed(1)} % low</span>
+          <span>${g.max.toFixed(1)} % high</span>
+        </div>
+      </div>`;
+}
+
 function tempsView(session: DryerSession): string {
   const cell = (label: string, value: string, extra = '', title = '') =>
     `<div class="flex flex-col gap-0.5"${title ? ` title="${escapeAttr(title)}"` : ''}>
@@ -353,7 +409,8 @@ function tempsView(session: DryerSession): string {
         ${cell('Chamber', deg(temps.chamber))}
         ${cell('Nozzle', deg(temps.nozzle))}
         ${humidityCell}
-      </div>`;
+      </div>
+      ${humidityTrace(session)}`;
 }
 
 function runningView(session: DryerSession, now: number): string {

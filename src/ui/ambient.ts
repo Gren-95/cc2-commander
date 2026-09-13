@@ -13,6 +13,7 @@
  */
 
 import { setDryerHumidity } from './dryer-panel';
+import type { Sample } from './sparkline';
 import { $, escapeHtml, fetchTimeout } from './helpers';
 import { icon } from './icons';
 
@@ -69,6 +70,7 @@ export function renderAmbient(state: Record<string, unknown>): void {
     reachable && humidity ? humidity.value : null,
     humidity?.name ?? '',
     humidity?.changedAt ?? '',
+    Array.isArray(state.humidityHistory) ? (state.humidityHistory as Sample[]) : [],
   );
 
   const row = document.getElementById('ambient-row');

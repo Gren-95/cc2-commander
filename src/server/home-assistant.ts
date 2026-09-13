@@ -35,6 +35,15 @@ const log = getLogger('HomeAssistant');
  */
 const POLL_MS = 60_000;
 
+/**
+ * How many humidity samples to keep: twelve hours at one a minute.
+ *
+ * Long enough for any drying session — the panel caps a session at 12h — and small
+ * enough that shipping the whole array to each client on every poll stays trivial
+ * (720 points is about 18KB of JSON).
+ */
+const HISTORY_MAX = 720;
+
 /** A request that hangs must not wedge the poll loop behind it. */
 const TIMEOUT_MS = 5_000;
 
@@ -50,12 +59,27 @@ export interface HaReading {
   changedAt: string;
 }
 
+/** One humidity sample: when it was taken, and what it read. */
+export interface HaSample {
+  t: number;
+  v: number;
+}
+
 export interface HaState {
   configured: boolean;
   reachable: boolean;
   readings: HaReading[];
   lastError: string | null;
   lastPolledAt: number | null;
+  /**
+   * Recent humidity, oldest first.
+   *
+   * Kept here rather than in the browser because a drying session runs for hours and a
+   * page reload would otherwise start the trace again from nothing — the same reason
+   * the session itself is owned by the service. It is in memory only: a service restart
+   * loses the curve but not the session, which is the right way round.
+   */
+  humidityHistory: HaSample[];
 }
 
 /** The half of an entity payload this cares about. */
@@ -121,6 +145,7 @@ export function parseEntityList(raw: string): string[] {
 export class HomeAssistantService extends EventEmitter {
   private timer: ReturnType<typeof setInterval> | null = null;
   private state: HaState;
+  private humidityHistory: HaSample[] = [];
 
   constructor(
     private readonly baseUrl: string,
@@ -134,6 +159,7 @@ export class HomeAssistantService extends EventEmitter {
       readings: [],
       lastError: null,
       lastPolledAt: null,
+      humidityHistory: [],
     };
   }
 
@@ -198,12 +224,27 @@ export class HomeAssistantService extends EventEmitter {
       );
       const readings = settled.filter((r): r is HaReading => r !== null);
       const wasReachable = this.state.reachable;
+
+      // Record humidity against OUR clock, not Home Assistant's `last_changed`. A
+      // sensor that has gone quiet keeps reporting the same `last_changed` forever, and
+      // sampling on that would draw a flat line that looks like a stable reading rather
+      // than an absent one. Timestamping the poll makes a dead sensor draw a flat line
+      // that the staleness label explains.
+      const humidity = readings.find((r) => r.deviceClass === 'humidity');
+      if (humidity) {
+        this.humidityHistory.push({ t: Date.now(), v: humidity.value });
+        if (this.humidityHistory.length > HISTORY_MAX) {
+          this.humidityHistory = this.humidityHistory.slice(-HISTORY_MAX);
+        }
+      }
+
       this.state = {
         configured: true,
         reachable: readings.length > 0,
         readings,
         lastError: readings.length > 0 ? null : 'No entity returned a usable value',
         lastPolledAt: Date.now(),
+        humidityHistory: this.humidityHistory,
       };
       if (!wasReachable && this.state.reachable) {
         log.info(`Connected — ${readings.map((r) => `${r.name} ${r.value}${r.unit}`).join(', ')}`);
