@@ -30,6 +30,7 @@ const EXPOSED = {
   stateClasses: 'src/ui/state-classes.ts',
   canvas: 'src/ui/canvas.ts',
   files: 'src/ui/files.ts',
+  fileBrowsing: 'src/ui/file-browsing.ts',
 };
 
 async function bundle(): Promise<string> {

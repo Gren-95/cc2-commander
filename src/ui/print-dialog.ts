@@ -22,7 +22,7 @@ import {
   THUMBNAIL_CLASS,
 } from './helpers';
 import { toast } from './toast';
-import { currentFileSource } from './files';
+import { currentFileSource } from './file-browsing';
 
 /** Format bytes to human-readable size */
 function formatSize(bytes: number): string {

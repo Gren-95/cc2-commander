@@ -29,12 +29,14 @@ async function runDelete(
     };
     const original = window.confirm;
     window.confirm = () => o.accept;
-    const T = (globalThis as unknown as { T: { files: Record<string, Function> } }).T;
+    const T = (globalThis as unknown as {
+      T: { files: Record<string, Function>; fileBrowsing: Record<string, Function> };
+    }).T;
     const filename = o.filename ?? 'benchy.gcode';
     const dir = o.dir ?? '/';
     const result = T.files.confirmDeleteFile(
       filename,
-      T.files.filePathFor(filename, dir),
+      T.fileBrowsing.filePathFor(filename, dir),
       o.source ?? 'local',
       dir,
       client,
@@ -99,11 +101,13 @@ test.describe('filePathFor', () => {
   }) => {
     expect(
       await page.evaluate(() => {
-        const T = (globalThis as unknown as { T: { files: Record<string, Function> } }).T;
+        const T = (globalThis as unknown as {
+      T: { files: Record<string, Function>; fileBrowsing: Record<string, Function> };
+    }).T;
         return [
-          T.files.filePathFor('a.gcode', '/'),
-          T.files.filePathFor('a.gcode', '/models'),
-          T.files.filePathFor('a.gcode', '/models/old'),
+          T.fileBrowsing.filePathFor('a.gcode', '/'),
+          T.fileBrowsing.filePathFor('a.gcode', '/models'),
+          T.fileBrowsing.filePathFor('a.gcode', '/models/old'),
         ];
       }),
     ).toEqual(['a.gcode', 'models/a.gcode', 'models/old/a.gcode']);

@@ -9,13 +9,9 @@ import { bindControls, onCommandResponse } from './ui/controls';
 import { bindDebugPanel, renderDebugPanel, trackStateChanges } from './ui/debug-panel';
 import { applyDryerState, handleDryerFinished, setDryerClient } from './ui/dryer-panel';
 import { handleEventLog, loadEventLogHistory } from './ui/event-log';
-import {
-  bindFileControls,
-  currentFileDir,
-  currentFileSource,
-  handleInlineThumbnail,
-  renderFiles,
-} from './ui/files';
+import { currentFileDir, currentFileSource } from './ui/file-browsing';
+import { handleInlineThumbnail } from './ui/file-thumbnails';
+import { bindFileControls, renderFiles } from './ui/files';
 import { bindGcodePreviewControls, renderGcodePreview } from './ui/gcode-preview';
 import { fetchTimeout } from './ui/helpers';
 import { renderLayerTimeChart } from './ui/layer-chart';
