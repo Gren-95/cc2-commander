@@ -173,9 +173,12 @@ Either way the habit stands: **read which step failed before attributing a red c
 your branch or dismissing it. What has changed is the prior — a red check is now evidence
 about your change rather than background noise.
 
-One thing that did **not** change: the install step takes **~9 minutes** on a cold cache,
-because `onlyBuiltDependencies` lets `onnxruntime-node`, `sharp`, `protobufjs` and
-`esbuild` run native build scripts. A long-running install is not a hang.
+The install step used to take **~9 minutes** on a cold cache, because
+`trustedDependencies` let `onnxruntime-node`, `sharp`, `protobufjs` and `esbuild` run
+native build scripts. Removing `@huggingface/transformers` took the first and third of
+those out of the tree entirely; `sharp` and `esbuild` still build natively, so a
+multi-minute install is still not a hang — just a much shorter one. Re-time it before
+quoting a number.
 
 ## CI works here, unlike in the private siblings
 

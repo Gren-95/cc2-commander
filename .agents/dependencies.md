@@ -23,9 +23,7 @@ install.
 | override | why |
 | --- | --- |
 | `undici` | advisory floor; reached through several parents |
-| `hono`, `@hono/node-server`, `qs`, `body-parser`, `fast-uri`, `ip-address` | all reached through `@modelcontextprotocol/sdk` → express/ajv. The SDK's own declared ranges already permit these versions; only the lockfile was stale. |
-| `adm-zip`, `protobufjs` | `@huggingface/transformers` → `onnxruntime-{node,web}`. These two **do** cross their parent's declared range (onnxruntime-node wants `adm-zip ^0.5.16`), so they are the only entries upstream has not itself blessed. Reached solely through the dynamic import in `src/server/ai-monitor.ts`, i.e. only when `AI_PROVIDER` selects the local CLIP path — which no test covers. Verified by importing the package. |
-| `sharp` | also a **direct** dependency here at 0.35.x, and that copy was never affected; the advisory is against the second, older copy transformers pulled in beside it. The floor collapses the two into one, which also halves the native binary payload. |
+| `sharp` | a **direct** dependency at 0.35.x, for the camera snapshot path in `rest-api.ts`. The floor predates the transformers removal, which is when the second, older copy of `sharp` it pulled in alongside disappeared. Re-check whether this line is still needed. |
 
 When a direct dependency's own range catches up, **delete the line** rather than leaving
 a floor nobody can date. Check with `bun why <pkg>`.
@@ -42,8 +40,7 @@ reports the package is not in the lockfile at all.
 
 `trustedDependencies` is Bun's equivalent of pnpm's `onlyBuiltDependencies`: the
 allowlist of packages permitted to run install scripts. It holds the native builds
-(`sharp`, `onnxruntime-node`, `protobufjs`) plus `@biomejs/biome` and
-`simple-git-hooks`. Adding a name here lets that package execute arbitrary code at
+(`sharp`, `esbuild`) plus `@biomejs/biome` and `simple-git-hooks`. Adding a name here lets that package execute arbitrary code at
 install time — do not add one without a reason.
 
 ## Advisories are reported, never gated
@@ -65,10 +62,10 @@ published something destroys "a red check on your branch is yours".
 - **`concurrently`** — ran vite and the service side by side. `bun run dev` is one
   process now, so it went with Vite.
 
-## The 513 MB nobody chose
+## The 513 MB nobody chose, and why making it optional was not enough
 
-`@huggingface/transformers` pulls `onnxruntime-node`, which ships prebuilt binaries for
-every platform and accelerator it supports. Measured on this checkout:
+`@huggingface/transformers` pulled `onnxruntime-node`, which ships prebuilt binaries for
+every platform and accelerator it supports. Measured on this checkout before removal:
 
 | | |
 | --- | --- |
@@ -76,24 +73,23 @@ every platform and accelerator it supports. Measured on this checkout:
 | `bin/napi-v6/win32` + `darwin` | **159 MB** — platforms this never runs on |
 | `linux/x64/libonnxruntime.so.1` | 34 MB — the part that actually executes |
 
-So ~90% of it cannot run here: the host is Intel Iris Xe with no `nvidia-smi` and no
-`libcuda`. It is **also in every container image**, because the Dockerfile's
+~90% of it could not run here: the host is Intel Iris Xe with no `nvidia-smi` and no
+`libcuda`. It was **also in every container image**, because the Dockerfile's
 `bun install --frozen-lockfile --production` installs the same tree.
 
-**Resolved: the package is no longer a dependency.** `bun run ai:install` adds it when
-someone wants local analysis, and a clean install is **404 MB instead of 1.2 GB**.
+The first fix was to make it opt-in — a dynamic import through a variable specifier, a
+`bun run ai:install` script, and a startup probe that warned when it was missing. That
+took a clean install from 1.2 GB to 404 MB and was the right call at the time.
 
-Two things make that safe, and both are easy to get wrong:
+**It is now removed outright**, along with the `LocalAnalyzer`, the nine CLIP label
+strings, the label-config file and its `/api/config/ai-labels` endpoint, and the
+classification chart. The lesson worth keeping is the one the opt-in step postponed:
+*making an expensive thing optional is not the same as deciding whether it earns its
+keep.* Once someone asked what it actually bought — zero-shot classification of a dim
+enclosure webcam against hand-tuned sentences, on a printer that does its own failure
+detection — the answer was "not much", and the cheaper of the two remaining paths
+(`sharp` frame-diffing, which catches the stall a still image cannot show) was the one
+worth keeping.
 
-1. **The import specifier goes through a variable.** Written inline,
-   `await import('@huggingface/transformers')` is resolved by `tsc` at compile time and
-   fails the typecheck on any checkout that has not installed it — measured, TS2307. The
-   slice of the API this repo uses is declared locally as `TransformersModule` instead.
-2. **The absence is reported at startup, not on first use.** `initialize()` is lazy, so
-   without a probe in `start()` an operator who set `AI_LOCAL_ENABLED=true` would see
-   `Local: <model>` in the log, conclude it was working, and find out only when a camera
-   frame arrived — which on an offline printer is never. It now warns once, names the
-   command, and does not repeat per frame.
-
-`sharp` stays either way — `rest-api.ts` imports it directly for the camera snapshot
+`sharp` stays regardless — `rest-api.ts` imports it directly for the camera snapshot
 path, so it is a real dependency rather than something transformers dragged in.

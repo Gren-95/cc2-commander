@@ -32,11 +32,10 @@ export interface ChartPoint {
 const CHART_MAX_POINTS = 300_000; // ~83 hours at 1 sample/sec (safety valve)
 const CHART_SAMPLE_MS = 1000;
 
-/** AI chart data point — motion + classification scores */
+/** AI chart data point — frame-to-frame motion, as a percentage. */
 export interface AIChartPoint {
   t: number;
   motion: number;
-  scores: Record<string, number>;
 }
 
 const AI_CHART_MAX_POINTS = 300_000; // safety valve matching chart data

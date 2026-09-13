@@ -1,14 +1,18 @@
 /**
  * AI Print Monitor — analyzes camera frames during prints to detect failures.
  *
- * Two analysis backends:
- *   1. VLM (Vision Language Model) — OpenAI-compatible API (OpenAI, Ollama, etc.)
- *   2. Local — CLIP zero-shot image classification via @huggingface/transformers
- *              (runs on CPU, no GPU or external API needed)
+ * Two analysis paths, neither of which carries a dependency:
+ *   1. Motion — frame-to-frame pixel diff via sharp, always on. This is what catches a
+ *      stalled print, which a still image cannot show.
+ *   2. VLM (Vision Language Model) — an OpenAI-compatible API (Ollama, OpenAI), opt-in
+ *      via AI_VLM_ENABLED and off by default.
  *
- * Also includes:
- *   - Motion detection (frame-to-frame pixel diff via sharp)
- *   - Classification score tracking (CLIP labels → 5 chart groups)
+ * A third backend used to sit here: local CLIP/SigLIP zero-shot classification through
+ * @huggingface/transformers. It was removed because the arithmetic never worked out —
+ * ~530 MB of node_modules (onnxruntime ships prebuilt binaries for every platform and
+ * accelerator, ~90% of which cannot run on any one host) plus a 149 MB model download,
+ * to score a dim enclosure webcam against nine hand-tuned sentences. The printer does
+ * its own failure detection, and did it better.
  *
  * Results are stored in a ring buffer and exposed via events.
  * Consecutive warnings trigger alerts sent to Telegram and WS clients.
@@ -35,16 +39,12 @@ export interface AIIssue {
 
 export interface AIAnalysis {
   timestamp: number;
-  source: 'vlm' | 'local' | 'motion';
+  source: 'vlm' | 'motion';
   status: 'ok' | 'warning' | 'critical';
   confidence: number;
   issues: AIIssue[];
   description: string;
   durationMs: number;
-  /** Per-group classification scores (0-100) for charting */
-  classificationScores?: Record<string, number>;
-  /** Raw per-label scores from zero-shot classification (0-1) */
-  labelScores?: Array<{ label: string; score: number }>;
 }
 
 export interface AIAlert {
@@ -59,106 +59,6 @@ export interface AIAlert {
 export interface AIChartData {
   t: number;
   motion: number; // 0-100 percentage
-  scores: Record<string, number>; // group name → 0-100
-}
-
-// ---- Classification Groups (for charting) ----
-
-const CLASSIFICATION_GROUPS = [
-  'Print in Progress',
-  'Spaghetti/Failure',
-  'Empty Bed',
-  'Paused/Stopped',
-  'Other',
-] as const;
-
-type ClassificationGroup = (typeof CLASSIFICATION_GROUPS)[number];
-
-/** Map a CLIP label to one of the 5 chart groups (fallback for configs without group field) */
-function categorizeLabel(label: string): ClassificationGroup {
-  const l = label.toLowerCase();
-  if (
-    l.includes('actively printing') ||
-    l.includes('being extruded') ||
-    l.includes('starting layers')
-  )
-    return 'Print in Progress';
-  if (
-    l.includes('spaghetti') ||
-    l.includes('tangled') ||
-    l.includes('disaster') ||
-    l.includes('layer shift') ||
-    l.includes('warping') ||
-    l.includes('stringing') ||
-    l.includes('strings') ||
-    l.includes('blob') ||
-    l.includes('fell off') ||
-    l.includes('unstuck')
-  )
-    return 'Spaghetti/Failure';
-  if (l.includes('empty') && l.includes('bed')) return 'Empty Bed';
-  return 'Other';
-}
-
-// ---- CLIP Labels (zero-shot classification) ----
-
-/** Descriptive labels for CLIP zero-shot classification.
- *  NOTE: 'print_stalled' / 'paused nozzle' was removed — CLIP cannot determine
- *  motion or stalling from a single image. Stall detection now uses the motion
- *  detector (consecutive low-motion frames while printing). */
-const DEFAULT_CLIP_LABELS: readonly string[] = [
-  'inside an enclosed 3D printer, a solid plastic object with clean uniform horizontal layer lines sits on a dark textured build plate, the metal printhead gantry is above it, normal successful print in progress',
-  'inside an enclosed 3D printer, loose tangled curly strands of plastic filament scattered randomly across the dark textured build plate, no solid object present, failed spaghetti print',
-  'inside an enclosed 3D printer, a messy pile of thin plastic noodles and loops dragged across the dark bed by the printhead, filament not sticking, print failure in progress',
-  'inside an enclosed 3D printer, a knocked over or tilted plastic object lying on its side on the dark textured build plate, the part has detached and fallen from where it was printing',
-  'inside an enclosed 3D printer, thin wispy cobweb-like strings of plastic hanging between parts of a 3D printed object on the dark build plate, stringing defect',
-  'inside an enclosed 3D printer, a 3D printed object on the dark build plate with visibly misaligned layers, the top portion is shifted sideways relative to the bottom, layer shift defect',
-  'inside an enclosed 3D printer, the corners or edges of a flat printed part are curling upward and lifting off the dark textured build plate, warping defect',
-  'inside an enclosed 3D printer, a shapeless irregular mass of melted plastic has accumulated around the nozzle and hotend, no layer structure visible, the blob is engulfing the printhead',
-  'inside an enclosed 3D printer, the dark textured build plate is completely empty with nothing on it, no printed objects and no filament visible, just the bare bed surface',
-] as const;
-
-/** Map CLIP label indices to issue types and severity */
-const DEFAULT_LABEL_ISSUE_MAP: Record<number, { type: string; severity: 'warning' | 'critical' }> =
-  {
-    1: { type: 'spaghetti', severity: 'critical' },
-    2: { type: 'spaghetti', severity: 'critical' },
-    3: { type: 'bed_adhesion', severity: 'critical' },
-    4: { type: 'stringing', severity: 'warning' },
-    5: { type: 'layer_shift', severity: 'critical' },
-    6: { type: 'warping', severity: 'warning' },
-    7: { type: 'blob', severity: 'critical' },
-    8: { type: 'empty_bed', severity: 'critical' },
-  };
-
-const DEFAULT_WARN_THRESHOLD = 0.25;
-const DEFAULT_CRIT_THRESHOLD = 0.4;
-
-// ---- AI Label Configuration (persisted to disk) ----
-
-export interface AILabelConfig {
-  label: string;
-  issueType: string;
-  severity: 'ok' | 'warning' | 'critical';
-  warnThreshold: number;
-  critThreshold: number;
-  /** Chart group for classification display */
-  group: ClassificationGroup;
-}
-
-/** Build default label configs from hardcoded values */
-function buildDefaultLabelConfigs(): AILabelConfig[] {
-  return DEFAULT_CLIP_LABELS.map((label, idx) => {
-    const mapping = DEFAULT_LABEL_ISSUE_MAP[idx];
-    return {
-      label,
-      issueType: mapping?.type ?? 'ok',
-      severity: mapping?.severity ?? 'ok',
-      warnThreshold: mapping ? DEFAULT_WARN_THRESHOLD : 1,
-      critThreshold: mapping ? DEFAULT_CRIT_THRESHOLD : 1,
-      group: categorizeLabel(label),
-    };
-  });
 }
 
 /** Threshold for motion % below which the printer is considered "not moving" */
@@ -237,210 +137,6 @@ If everything looks normal, return status "ok" with an empty issues array.
 Be conservative — only flag issues you're confident about. Minor cosmetic issues are "warning", print-threatening issues are "critical".`;
 
 const VLM_USER_PROMPT = 'Analyze this 3D print camera image for print quality issues:';
-
-// ---- Local CLIP Analyzer ----
-
-type CLIPClassifier = (
-  image: Blob,
-  labels: string[],
-) => Promise<Array<{ label: string; score: number }>>;
-
-/** The package name, and the one command that installs it. */
-const TRANSFORMERS = '@huggingface/transformers';
-export const LOCAL_AI_INSTALL_HINT = `bun add ${TRANSFORMERS}`;
-
-/**
- * The slice of transformers.js this file uses — three env flags and `pipeline`.
- *
- * Declared locally because the package is **not installed by default**: it pulls
- * `onnxruntime-node`, which ships ~513 MB of prebuilt binaries for every platform and
- * accelerator it supports, and roughly 90% of that cannot run on any one host (a 302 MB
- * CUDA provider, plus win32 and darwin binaries). Local AI monitoring is opt-in, so the
- * download is too.
- *
- * The consequence is that TypeScript cannot see the real types, and must not try: a bare
- * `import('@huggingface/transformers')` is resolved at compile time and fails the
- * typecheck on any checkout that has not installed it.
- */
-interface TransformersModule {
-  pipeline: (
-    task: string,
-    model: string,
-    options: { dtype: string; device: string },
-  ) => Promise<unknown>;
-  env: { useBrowserCache: boolean; allowLocalModels: boolean; cacheDir: string };
-}
-
-/**
- * Load transformers.js, or say plainly that it is not installed.
- *
- * The specifier goes through a variable so the import stays opaque to the compiler —
- * with it written inline, `tsc` resolves it and the build breaks without the optional
- * package. `/* @vite-ignore *\/`-style pragmas are not needed; a non-literal specifier
- * is enough for both TypeScript and Bun's bundler.
- */
-async function loadTransformers(): Promise<TransformersModule | null> {
-  try {
-    return (await import(TRANSFORMERS)) as TransformersModule;
-  } catch {
-    return null;
-  }
-}
-
-class LocalAnalyzer {
-  private classifier: CLIPClassifier | null = null;
-  private loading = false;
-  private _ready = false;
-  private model: string;
-
-  constructor(model: string) {
-    this.model = model;
-  }
-
-  get ready(): boolean {
-    return this._ready;
-  }
-
-  async initialize(): Promise<void> {
-    if (this._ready || this.loading) return;
-    this.loading = true;
-
-    try {
-      log.info(`Loading model ${this.model}...`);
-      const start = Date.now();
-
-      const transformers = await loadTransformers();
-      if (!transformers) {
-        // Silent: `start()` already warned once, with the install command. Repeating it
-        // per frame would bury the log. `loading` stays true so this is not retried —
-        // no amount of retrying installs a package.
-        return;
-      }
-      const { pipeline, env } = transformers;
-
-      // Configure for Node.js server usage
-      env.useBrowserCache = false;
-      env.allowLocalModels = true;
-      env.cacheDir = '.cache/models';
-
-      this.classifier = (await pipeline('zero-shot-image-classification', this.model, {
-        dtype: 'q8',
-        device: 'cpu',
-      })) as unknown as CLIPClassifier;
-
-      this._ready = true;
-      log.info(`Model loaded in ${Date.now() - start}ms`);
-    } catch (err) {
-      log.error('Failed to load model:', (err as Error).message);
-      this.loading = false;
-    }
-  }
-
-  async analyze(jpeg: Buffer, labelConfigs: AILabelConfig[]): Promise<AIAnalysis> {
-    const start = Date.now();
-
-    if (!this.classifier) {
-      return {
-        timestamp: start,
-        source: 'local',
-        status: 'ok',
-        confidence: 0,
-        issues: [],
-        description: 'CLIP model not loaded yet',
-        durationMs: Date.now() - start,
-      };
-    }
-
-    try {
-      const labels = labelConfigs.map((c) => c.label);
-      const blob = new Blob([new Uint8Array(jpeg)], { type: 'image/jpeg' });
-      const rawResults = await this.classifier(blob, labels);
-
-      // SigLIP uses per-label sigmoid scores (each 0-1 independently).
-      // Normalize to a relative distribution (like CLIP softmax) so that
-      // existing thresholds (15%, 30%) remain meaningful.
-      const sumRaw = rawResults.reduce((s, r) => s + r.score, 0);
-      const results =
-        sumRaw > 0
-          ? rawResults.map((r) => ({ label: r.label, score: r.score / sumRaw }))
-          : rawResults;
-
-      // Results are sorted by score descending
-      const top = results[0];
-
-      const issues: AIIssue[] = [];
-      let status: 'ok' | 'warning' | 'critical' = 'ok';
-
-      // Build classification group scores for charting
-      const groupScores: Record<string, number> = {};
-      for (const g of CLASSIFICATION_GROUPS) groupScores[g] = 0;
-
-      // Find the best "ok" label score — defects must exceed this to trigger.
-      // This prevents false positives when CLIP spreads residual probability
-      // across defect labels while the top match is clearly a normal print.
-      const bestOkScore = results.reduce((max, r) => {
-        const idx = labels.indexOf(r.label);
-        const c = idx >= 0 ? labelConfigs[idx] : undefined;
-        return c?.severity === 'ok' && r.score > max ? r.score : max;
-      }, 0);
-
-      // Check all results for issue labels above confidence threshold
-      for (const r of results) {
-        const cfgIdx = labels.indexOf(r.label);
-        const cfg = cfgIdx >= 0 ? labelConfigs[cfgIdx] : undefined;
-
-        // Accumulate into chart groups — use configured group, fallback to keyword matching
-        const group = cfg?.group ?? categorizeLabel(r.label);
-        groupScores[group] = (groupScores[group] || 0) + r.score * 100;
-
-        // Defect must exceed both its configured threshold AND the best "ok" label score
-        if (cfg && cfg.severity !== 'ok' && r.score > cfg.warnThreshold && r.score > bestOkScore) {
-          issues.push({
-            type: cfg.issueType,
-            description: r.label,
-            confidence: r.score,
-          });
-          if (cfg.severity === 'critical' && r.score > cfg.critThreshold) {
-            status = 'critical';
-          } else if (status !== 'critical') {
-            status = 'warning';
-          }
-        }
-      }
-
-      // Short description from top result
-      const topLabel = top.label.length > 60 ? top.label.slice(0, 57) + '...' : top.label;
-
-      return {
-        timestamp: start,
-        source: 'local',
-        status,
-        confidence: top.score,
-        issues,
-        description: `${topLabel} (${Math.round(top.score * 100)}%)`,
-        durationMs: Date.now() - start,
-        classificationScores: groupScores,
-        labelScores: results.map((r) => ({ label: r.label, score: r.score })),
-      };
-    } catch (err) {
-      const msg = (err as Error).message;
-      log.warn(`Analysis failed: ${msg}`);
-      return {
-        timestamp: start,
-        source: 'local',
-        status: 'ok',
-        confidence: 0,
-        issues: [],
-        description: `Local model error: ${msg.slice(0, 100)}`,
-        durationMs: Date.now() - start,
-      };
-    }
-  }
-
-  reset(): void {
-    // CLIP is stateless per-frame, nothing to reset
-  }
-}
 
 // ---- VLM Analyzer ----
 
@@ -568,7 +264,6 @@ const MAX_HISTORY = 100;
 
 export class AIMonitor extends EventEmitter {
   private analysisHistory: AIAnalysis[] = [];
-  private localAnalyzer: LocalAnalyzer;
   private motionDetector = new MotionDetector();
   private timer: ReturnType<typeof setInterval> | null = null;
   private isPrinting = false;
@@ -576,16 +271,12 @@ export class AIMonitor extends EventEmitter {
   private consecutiveLowMotion = 0;
   private lastAlertTime = 0;
   private _running = false;
-  private labelConfigs: AILabelConfig[] = buildDefaultLabelConfigs();
-  private labelConfigPath: string;
 
   constructor(
     private store: StateStore,
     private config: ServiceConfig,
   ) {
     super();
-    this.localAnalyzer = new LocalAnalyzer(config.aiLocalModel);
-    this.labelConfigPath = join(config.dataDir, 'ai-labels.json');
 
     // Listen for print state changes
     store.on('print_event', (event: PrintEvent) => {
@@ -602,7 +293,6 @@ export class AIMonitor extends EventEmitter {
     this.isPrinting = true;
     this.consecutiveWarnings = 0;
     this.consecutiveLowMotion = 0;
-    this.localAnalyzer.reset();
     this.motionDetector.reset();
     this.startAnalysisLoop();
   }
@@ -646,7 +336,7 @@ export class AIMonitor extends EventEmitter {
       return;
     }
 
-    // Motion detection (always runs, even if CLIP/VLM disabled)
+    // Motion detection — always, and the only path that runs without configuration.
     const motion = await this.motionDetector.detect(snapshot);
 
     // Track consecutive low-motion frames for stall detection
@@ -660,11 +350,6 @@ export class AIMonitor extends EventEmitter {
 
     // Run enabled analyzers in parallel
     const promises: Promise<AIAnalysis>[] = [];
-
-    if (this.config.aiLocalEnabled) {
-      // Local CLIP is now async
-      promises.push(this.localAnalyzer.analyze(snapshot, this.labelConfigs));
-    }
 
     if (this.config.aiVlmEnabled && (this.config.aiVlmApiKey || this.config.aiVlmBaseUrl)) {
       promises.push(analyzeWithVlm(snapshot, this.config));
@@ -714,22 +399,9 @@ export class AIMonitor extends EventEmitter {
       log.info(`motion: ⚠️ ${stallResult.description}`);
     }
 
-    // Emit chart data (motion + classification scores)
-    const classScores: Record<string, number> = {};
-    for (const g of CLASSIFICATION_GROUPS) classScores[g] = 0;
-    // Use local CLIP scores if available, otherwise leave at 0
-    const localResult = results.find((r) => r.source === 'local');
-    if (localResult?.classificationScores) {
-      Object.assign(classScores, localResult.classificationScores);
-    }
-    // Add stall score to Paused/Stopped chart group based on motion detection
-    if (this.consecutiveLowMotion >= MOTION_STALL_COUNT) {
-      classScores['Paused/Stopped'] = Math.min(100, this.consecutiveLowMotion * 20);
-    }
     const chartData: AIChartData = {
       t: Date.now(),
       motion: Math.round(motion * 100) / 100,
-      scores: classScores,
     };
     this.emit('ai_chart_data', chartData);
 
@@ -799,9 +471,6 @@ export class AIMonitor extends EventEmitter {
       vlmModel: this.config.aiVlmModel,
       vlmProvider: this.config.aiVlmProvider,
       vlmBaseUrl: this.config.aiVlmBaseUrl,
-      localEnabled: this.config.aiLocalEnabled,
-      localModel: this.config.aiLocalModel,
-      localReady: this.localAnalyzer.ready,
       intervalSec: this.config.aiIntervalSec,
       alertThreshold: this.config.aiAlertThreshold,
       alertCooldownSec: this.config.aiAlertCooldownSec,
@@ -810,90 +479,15 @@ export class AIMonitor extends EventEmitter {
     };
   }
 
-  /** Get current label configs */
-  getLabelConfigs(): AILabelConfig[] {
-    return this.labelConfigs;
-  }
-
-  /** Update label configs and persist to disk */
-  async setLabelConfigs(configs: AILabelConfig[]): Promise<void> {
-    this.labelConfigs = configs;
-    await this.saveLabelConfigs();
-  }
-
-  /** Reset label configs to defaults */
-  async resetLabelConfigs(): Promise<void> {
-    this.labelConfigs = buildDefaultLabelConfigs();
-    await this.saveLabelConfigs();
-  }
-
-  /** Load label configs from disk (called during start) */
-  async loadLabelConfigs(): Promise<void> {
-    try {
-      const raw = await readFile(this.labelConfigPath, 'utf-8');
-      const parsed = JSON.parse(raw) as AILabelConfig[];
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        // Migrate old configs without group field
-        for (const lc of parsed) {
-          if (!lc.group) {
-            lc.group = categorizeLabel(lc.label);
-          }
-        }
-        this.labelConfigs = parsed;
-        log.info(`Loaded ${parsed.length} label configs from ${this.labelConfigPath}`);
-      }
-    } catch {
-      // File doesn't exist — use defaults
-      log.info('No saved label configs found, using defaults');
-    }
-  }
-
-  private async saveLabelConfigs(): Promise<void> {
-    try {
-      await mkdir(dirname(this.labelConfigPath), { recursive: true });
-      await writeFile(this.labelConfigPath, JSON.stringify(this.labelConfigs, null, 2), 'utf-8');
-      log.info(`Label configs saved to ${this.labelConfigPath}`);
-    } catch (err) {
-      log.error('Failed to save label configs:', (err as Error).message);
-    }
-  }
-
   async start(): Promise<void> {
     this._running = true;
     log.info('Monitor started');
     log.info(
       `VLM: ${this.config.aiVlmEnabled ? `${this.config.aiVlmModel} @ ${this.config.aiVlmBaseUrl} (${this.config.aiVlmProvider})` : 'disabled'}`,
     );
-    log.info(`Local: ${this.config.aiLocalEnabled ? this.config.aiLocalModel : 'disabled'}`);
-
-    // Say it at startup, not on the first camera frame. `initialize()` is lazy, so
-    // without this an operator who turned local AI on would see "Local: <model>" here,
-    // conclude it was working, and only find out when a frame arrived — which on a
-    // printer that is offline or has no camera is never.
-    if (this.config.aiLocalEnabled) {
-      void loadTransformers().then((mod) => {
-        if (!mod) {
-          log.warn(
-            `${TRANSFORMERS} is not installed, so local analysis will not run. ` +
-              `Install it with \`${LOCAL_AI_INSTALL_HINT}\` (~800MB — it pulls ` +
-              'onnxruntime), or set AI_LOCAL_ENABLED=false to turn local analysis off.',
-          );
-        }
-      });
-    }
     log.info(
       `Interval: ${this.config.aiIntervalSec}s, Alert threshold: ${this.config.aiAlertThreshold}`,
     );
-
-    // Load persisted label configs
-    await this.loadLabelConfigs();
-
-    // Pre-load CLIP model in background (takes a few seconds on first run)
-    if (this.config.aiLocalEnabled) {
-      this.localAnalyzer.initialize().catch((err) => {
-        log.error('Failed to initialize CLIP:', (err as Error).message);
-      });
-    }
 
     // If printer is already printing when we start, begin monitoring
     const ms = this.store.status?.machine_status?.status;

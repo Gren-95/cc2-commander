@@ -2,7 +2,7 @@
  * Where the service writes, derived from one place (ELEG-70).
  *
  * Most of the service already builds its paths from `config.dataDir` — reports,
- * `state.json`, `moonraker-db.json`, `printer-sn.json`, `ai-labels.json`, and the logs
+ * `state.json`, `moonraker-db.json`, `printer-sn.json`, and the logs
  * via `initLogger(config.dataDir)`. Two did not: the gcode cache was
  * `join(process.cwd(), 'data', 'gcode-cache')` and the debug-capture endpoint used the
  * relative `join('data', 'logs', …)`.

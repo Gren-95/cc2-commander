@@ -87,12 +87,6 @@ chartStore.defineSeries('fan_case', 'Case', '#ffa726');
 
 // AI chart series — motion detection
 chartStore.defineSeries('ai_motion', 'Motion', '#58a6ff');
-// AI chart series — classification groups
-chartStore.defineSeries('ai_printing', 'Print in Progress', '#3fb950');
-chartStore.defineSeries('ai_failure', 'Spaghetti/Failure', '#f85149');
-chartStore.defineSeries('ai_empty', 'Empty Bed', '#8b949e');
-chartStore.defineSeries('ai_paused', 'Paused/Stopped', '#f0883e');
-chartStore.defineSeries('ai_other', 'Other', '#a371f7');
 
 // Speed & flow chart series
 chartStore.defineSeries('extrusion_rate', 'Extrusion', '#4fc3f7');
@@ -120,14 +114,6 @@ registerChart({
   yMin: 0,
   yMax: 30,
   unit: '%',
-});
-
-registerChart({
-  canvasId: 'chart-ai-class',
-  seriesKeys: ['ai_printing', 'ai_failure', 'ai_empty', 'ai_paused', 'ai_other'],
-  yMin: 0,
-  yMax: 100,
-  unit: '',
 });
 
 registerChart({
@@ -455,23 +441,9 @@ function connectToService(): void {
       }
       // Load AI chart history from service
       if (initData.aiChartHistory && Array.isArray(initData.aiChartHistory)) {
-        const aiPoints = initData.aiChartHistory as Array<{
-          t: number;
-          motion: number;
-          scores: Record<string, number>;
-        }>;
+        const aiPoints = initData.aiChartHistory as Array<{ t: number; motion: number }>;
         // Convert AI chart points into the generic chart format for loadHistory merge
-        const converted = aiPoints.map((p) => ({
-          t: p.t,
-          values: {
-            ai_motion: p.motion,
-            ai_printing: p.scores['Print in Progress'] ?? 0,
-            ai_failure: p.scores['Spaghetti/Failure'] ?? 0,
-            ai_empty: p.scores['Empty Bed'] ?? 0,
-            ai_paused: p.scores['Paused/Stopped'] ?? 0,
-            ai_other: p.scores['Other'] ?? 0,
-          },
-        }));
+        const converted = aiPoints.map((p) => ({ t: p.t, values: { ai_motion: p.motion } }));
         // Push into existing series without clearing (chart history already loaded above)
         for (const point of converted) {
           chartStore.pushPoint(point.t, point.values);
@@ -667,15 +639,8 @@ function connectToService(): void {
     onAIAlert(data) {
       handleAIAlert(data);
     },
-    onAIChartData(t, motion, scores) {
-      chartStore.pushPoint(t, {
-        ai_motion: motion,
-        ai_printing: scores['Print in Progress'] ?? 0,
-        ai_failure: scores['Spaghetti/Failure'] ?? 0,
-        ai_empty: scores['Empty Bed'] ?? 0,
-        ai_paused: scores['Paused/Stopped'] ?? 0,
-        ai_other: scores['Other'] ?? 0,
-      });
+    onAIChartData(t, motion) {
+      chartStore.pushPoint(t, { ai_motion: motion });
     },
     onEventLog(entry) {
       handleEventLog(entry);

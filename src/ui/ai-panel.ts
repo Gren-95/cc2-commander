@@ -12,13 +12,12 @@ interface AIIssue {
 
 interface AIAnalysis {
   timestamp: number;
-  source: 'vlm' | 'local' | 'motion';
+  source: 'vlm' | 'motion';
   status: 'ok' | 'warning' | 'critical';
   confidence: number;
   issues: AIIssue[];
   description: string;
   durationMs: number;
-  labelScores?: Array<{ label: string; score: number }>;
 }
 
 interface AIAlert {
@@ -47,13 +46,12 @@ export function updateAIStatus(status: string, config?: Record<string, unknown> 
 export function handleAIAnalysis(data: Record<string, unknown>): void {
   const analysis: AIAnalysis = {
     timestamp: (data.timestamp as number) || Date.now(),
-    source: (data.source as 'vlm' | 'local' | 'motion') || 'vlm',
+    source: (data.source as 'vlm' | 'motion') || 'motion',
     status: (data.status as 'ok' | 'warning' | 'critical') || 'ok',
     confidence: (data.confidence as number) || 0,
     issues: (data.issues as AIIssue[]) || [],
     description: (data.description as string) || '',
     durationMs: (data.durationMs as number) || 0,
-    labelScores: (data.labelScores as Array<{ label: string; score: number }>) || undefined,
   };
 
   analysisHistory.unshift(analysis);
@@ -105,28 +103,6 @@ function timeAgo(ts: number): string {
   return `${Math.floor(sec / 3600)}h ago`;
 }
 
-function renderLabelScores(
-  scores: Array<{ label: string; score: number }> | undefined,
-  source: string,
-): string {
-  if (!scores || scores.length === 0) return '';
-  // Sort by score descending
-  const sorted = [...scores].sort((a, b) => b.score - a.score);
-  const rows = sorted
-    .map((s) => {
-      const pct = Math.round(s.score * 100);
-      const barColor =
-        pct > 30 ? 'var(--warning)' : pct > 15 ? 'var(--accent)' : 'var(--text-muted)';
-      return `<div class="flex items-start [gap:6px] relative text-[0.7rem] min-h-[18px] [padding:2px_0]">
-      <div class="absolute left-0 top-0 h-full rounded-[2px] opacity-[0.25] min-w-[2px]" style="width:${Math.max(2, pct)}%;background:${barColor}"></div>
-      <span class="w-8 shrink-0 text-right [font-variant-numeric:tabular-nums] text-[var(--text)] z-[1]">${pct}%</span>
-      <span class="text-fg-muted z-[1] [word-break:break-word]">${escapeHtml(s.label)}</span>
-    </div>`;
-    })
-    .join('');
-  return `<details class="[margin-top:6px] [&_summary]:text-[0.75rem] [&_summary]:text-fg-muted [&_summary]:cursor-pointer [&_summary]:select-none" data-label-source="${source}"><summary>Label scores (${sorted.length})</summary><div class="flex flex-col [gap:3px] mt-1">${rows}</div></details>`;
-}
-
 function renderAnalysisCard(a: AIAnalysis): string {
   const issues =
     a.issues.length > 0
@@ -149,7 +125,6 @@ function renderAnalysisCard(a: AIAnalysis): string {
       </div>
       <div class="text-[0.85rem] text-[var(--text)] mb-1">${escapeHtml(a.description)}</div>
       <div class="flex flex-wrap gap-1">${issues}</div>
-      ${renderLabelScores(a.labelScores, a.source)}
     </div>
   `;
 }
@@ -273,9 +248,9 @@ function renderConfigInfo(): string {
     ? `<span class="text-[#4caf50] font-semibold">${icon('check')} VLM</span> <span class="text-fg-muted text-[0.75rem]">${escapeHtml(String(aiConfig.vlmModel))} @ ${escapeHtml(String(aiConfig.vlmBaseUrl))}</span>`
     : `<span class="text-fg-muted">${icon('cross')} VLM disabled</span>`;
 
-  const local = aiConfig.localEnabled
-    ? `<span class="text-[#4caf50] font-semibold">${icon('check')} CLIP</span> <span class="text-fg-muted text-[0.75rem]">${escapeHtml(String(aiConfig.localModel))}${aiConfig.localReady ? '' : ' (loading...)'}</span>`
-    : `<span class="text-fg-muted">${icon('cross')} Local CLIP disabled</span>`;
+  // Motion detection has no configuration and no failure mode worth reporting — it is
+  // sharp diffing two frames — so it is stated rather than conditioned.
+  const motion = `<span class="text-[#4caf50] font-semibold">${icon('check')} Motion</span> <span class="text-fg-muted text-[0.75rem]">frame-to-frame pixel diff</span>`;
 
   const interval = `every ${aiConfig.intervalSec}s`;
   const threshold = `alert after ${aiConfig.alertThreshold} warnings`;
@@ -286,8 +261,8 @@ function renderConfigInfo(): string {
 
   return `
     <div class="[padding:8px_10px] bg-input rounded-chip text-[0.8rem] flex flex-col gap-1">
+      <div class="flex items-center [gap:6px] flex-wrap">${motion}</div>
       <div class="flex items-center [gap:6px] flex-wrap">${vlm}</div>
-      <div class="flex items-center [gap:6px] flex-wrap">${local}</div>
       <div class="flex items-center [gap:6px] flex-wrap">${icon('duration')} ${interval} · ${threshold}</div>
       ${stats}
     </div>

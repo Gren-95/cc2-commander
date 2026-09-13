@@ -63,10 +63,13 @@ describe('AI defaults', () => {
     expect(loadConfig().aiVlmBaseUrl).toContain('11434');
   });
 
-  it('keeps the local CLIP analyzer opt-out rather than opt-in', () => {
-    // Deliberately unchanged: the local model runs in-process and sends nothing
-    // anywhere, so defaulting it on is not the same decision as the VLM.
-    expect(loadConfig().aiLocalEnabled).toBe(true);
+  it('has no local-analyzer knobs left to configure', () => {
+    // The CLIP backend was removed along with @huggingface/transformers. A stale
+    // AI_LOCAL_ENABLED in someone's .env must be inert rather than resurrect a key
+    // nothing reads — this asserts the config surface, not the env.
+    const config = loadConfig() as unknown as Record<string, unknown>;
+    expect(config.aiLocalEnabled).toBeUndefined();
+    expect(config.aiLocalModel).toBeUndefined();
   });
 });
 

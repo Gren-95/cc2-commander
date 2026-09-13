@@ -13,7 +13,7 @@ A self-hosted web dashboard for **Elegoo Centauri Carbon 2 (CC2)** FDM printers.
 - **Printer control**: Temperature presets, fans, speed mode, LED toggle, XY/Z movement, emergency stop
 - **Print management**: File browser with thumbnails/popovers, start dialog, pause/resume/stop, USB support
 - **Zone detection**: Server-side toolhead zone tracking (print area, cutter, purge) for AI/event suppression
-- **AI print monitoring**: Motion-based stall detection, SigLIP zero-shot classification, VLM analysis, zone-aware suppression, customizable labels
+- **AI print monitoring**: Motion-based stall detection, zone-aware suppression, and optional VLM analysis
 - **Telegram notifications**: Print events, progress updates, camera snapshots, AI alerts
 - **MQTT Log**: Real-time structured log with diff view, method filtering, pinning
 - **Debug panel**: Live state tree with change tracking, watched paths, export
@@ -124,17 +124,6 @@ docker run -d -p 8088:8088 -p 7125:7125 -e PRINTER_IP=192.168.1.150 ghcr.io/gren
 A locally built image reports its version as `unknown`, which is expected: the stamp is
 supplied by the publish workflow, not by `docker build`.
 
-### If you enable local AI (`AI_LOCAL_ENABLED`)
-
-Mount a volume at **`/app/.cache`** as well. The CLIP model cache lives there, not under
-`/app/data`, because transformers.js resolves its cache path relative to the working
-directory. Without that volume the model is re-downloaded every time the container is
-recreated — about 200 MB and roughly 95 seconds here, and a good deal slower on a Pi.
-
-```bash
--v elegoo-model-cache:/app/.cache
-```
-
 ### Environment Variables
 
 | Variable | Default | Description |
@@ -164,8 +153,6 @@ recreated — about 200 MB and roughly 95 seconds here, and a good deal slower o
 | `AI_VLM_API_KEY` | — | API key for OpenAI VLM provider |
 | `AI_VLM_BASE_URL` | `http://localhost:11434` | VLM API endpoint (ollama's default port) |
 | `AI_VLM_MODEL` | `llava` | VLM model name |
-| `AI_LOCAL_ENABLED` | `true` | Enable local SigLIP zero-shot classification |
-| `AI_LOCAL_MODEL` | `Xenova/siglip-base-patch16-224` | Local classification model |
 | `AI_INTERVAL` | `60` | Seconds between AI analysis |
 | `AI_ALERT_THRESHOLD` | `3` | Consecutive alerts before notification |
 | `AI_ALERT_COOLDOWN` | `300` | Seconds between alert notifications |
@@ -188,24 +175,6 @@ All persistent data lives under `/app/data` inside the container:
 |------|----------|---------|
 | 8088 | HTTP/WS | Web UI, REST API, WebSocket, camera proxy |
 | 7125 | HTTP/WS | Moonraker compatibility API (for Mainsail/Fluidd/KlipperScreen) |
-
-## Local AI monitoring is an opt-in install
-
-`AI_LOCAL_ENABLED` runs a CLIP model over camera frames to spot print failures. The
-package behind it is **not installed by default**:
-
-```bash
-bun run ai:install     # bun add @huggingface/transformers
-```
-
-It pulls `onnxruntime-node`, which ships ~800MB of prebuilt binaries covering every
-platform and accelerator it supports — a 302MB CUDA provider, plus win32 and darwin
-builds. On any one machine most of that cannot run, so it is not something to download
-for a feature you may not use. A clean install is 404MB without it.
-
-Turning `AI_LOCAL_ENABLED=true` on without installing it is safe: the service logs one
-warning naming the command and carries on. Everything else — VLM analysis via
-`AI_VLM_ENABLED`, motion detection, the camera, alerts — works without it.
 
 ## Authentication
 
@@ -334,7 +303,7 @@ src/
 │   ├── logger.ts            # Winston structured logging with rotation
 │   ├── telegram.ts          # Telegram bot notifications
 │   ├── allowlist.ts         # Who may talk to the Telegram bot
-│   ├── ai-monitor.ts        # AI print monitoring (SigLIP + VLM + motion)
+│   ├── ai-monitor.ts        # AI print monitoring (motion + optional VLM)
 │   ├── moonraker-compat.ts  # Moonraker API compatibility
 │   ├── moonraker-server.ts  # Moonraker standalone server (:7125)
 │   ├── octoprint-compat.ts  # OctoPrint API compatibility
@@ -413,13 +382,13 @@ Used to suppress false AI stall alerts and filament runout events during Canvas 
 
 ## AI Print Monitoring
 
-Enable with `AI_ENABLED=true`. Three detection backends run in parallel:
+Enable with `AI_ENABLED=true`. Two detection paths, neither of which adds a dependency:
 
-**SigLIP zero-shot classification** (`AI_LOCAL_ENABLED`): Runs the `Xenova/siglip-base-patch16-224` model locally via `@huggingface/transformers`. Classifies camera frames against configurable text labels (spaghetti, bed adhesion, stringing, layer shift, warping, blob, empty bed, etc.). SigLIP uses per-label sigmoid scores (each 0–1 independently), normalized to a relative distribution for threshold comparison. Labels are customizable via Settings UI or `GET/POST/DELETE /api/config/ai-labels`.
+**Motion-based stall detection** (always on): Computes frame-to-frame pixel diff (160×120 grayscale via sharp). If motion drops below 0.5% for 3 consecutive frames while printing, injects a `print_stalled` issue. This is the one thing a still image cannot show, which is why it is the path that stayed.
 
-**Motion-based stall detection**: Computes frame-to-frame pixel diff (160×120 grayscale via sharp). If motion drops below 0.5% for 3 consecutive frames while printing, injects a `print_stalled` issue.
+**VLM analysis** (`AI_VLM_ENABLED`, off by default): Sends camera snapshots to an external vision-language model (Ollama or OpenAI-compatible API), which can describe what it sees: `under_extrusion`, `nozzle_clog`, `print_stalled`. Note this sends camera frames off the machine — to your own Ollama host, or to OpenAI if you point it there.
 
-**VLM analysis** (`AI_VLM_ENABLED`, off by default): Sends camera snapshots to an external vision-language model (Ollama or OpenAI-compatible API). Can detect issues SigLIP cannot: `under_extrusion`, `nozzle_clog`, `print_stalled`.
+A third backend used to sit here: local CLIP/SigLIP zero-shot classification through `@huggingface/transformers`. It was removed. The cost was ~530 MB of `node_modules` (onnxruntime ships prebuilt binaries for every platform and accelerator, most of which cannot run on any one host) plus a ~150 MB model download, and what it bought was nine hand-tuned sentences scored against a dim enclosure webcam. The printer's own failure detection does the same job better.
 
 **Zone-aware filtering**: Analysis only runs when `sub_status === 2075` (Printing) AND `zones.current === 'print_area'`. Skipped during heating, filament changes, and when the toolhead is in the cutter/purge area.
 

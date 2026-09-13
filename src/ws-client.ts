@@ -31,8 +31,8 @@ export interface WsClientOptions {
   onAIAnalysis?: (data: Record<string, unknown>) => void;
   /** Called with AI alerts (threshold reached) */
   onAIAlert?: (data: Record<string, unknown>) => void;
-  /** Called with AI chart data (motion + classification scores) */
-  onAIChartData?: (t: number, motion: number, scores: Record<string, number>) => void;
+  /** Called with AI chart data (frame-to-frame motion, as a percentage) */
+  onAIChartData?: (t: number, motion: number) => void;
   /** Called with event log entries */
   onEventLog?: (entry: { ts: number; event: Record<string, unknown> }) => void;
   /** Called when server records a new layer time */
@@ -182,9 +182,8 @@ export class WsClient {
       case 'ai_chart_data': {
         const t = msg.t as number;
         const motion = msg.motion as number;
-        const scores = msg.scores as Record<string, number>;
-        if (t && scores) {
-          this.opts.onAIChartData?.(t, motion ?? 0, scores);
+        if (t) {
+          this.opts.onAIChartData?.(t, motion ?? 0);
         }
         break;
       }

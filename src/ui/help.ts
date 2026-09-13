@@ -45,9 +45,6 @@ export function renderHelp(): void {
       <tr><td>POST</td><td>/api/files/upload</td><td>Upload file to printer (multipart, ?source=local|u-disk)</td></tr>
       <tr><td>GET</td><td>/api/config/telegram</td><td>Telegram bot config</td></tr>
       <tr><td>POST</td><td>/api/config/telegram</td><td>Update Telegram progress interval</td></tr>
-      <tr><td>GET</td><td>/api/config/ai-labels</td><td>AI label configurations</td></tr>
-      <tr><td>POST</td><td>/api/config/ai-labels</td><td>Update AI label configs</td></tr>
-      <tr><td>DELETE</td><td>/api/config/ai-labels</td><td>Reset AI labels to defaults</td></tr>
       <tr><td>POST</td><td>/api/debug/capture</td><td>Start MQTT capture ({duration: 10-60})</td></tr>
       <tr><td>GET</td><td>/api/debug/captures</td><td>List MQTT capture files</td></tr>
       <tr><td>GET</td><td>/api/debug/captures/:file</td><td>Download capture file</td></tr>

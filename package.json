@@ -8,7 +8,6 @@
     "pre-commit": "bunx biome check --staged --write --no-errors-on-unmatched"
   },
   "scripts": {
-    "ai:install": "bun add @huggingface/transformers",
     "auth:secret": "bun scripts/auth-secret.ts",
     "build": "tsc && bun scripts/build.ts",
     "check": "biome check --write",

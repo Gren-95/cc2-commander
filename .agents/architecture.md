@@ -135,8 +135,8 @@ cache is why the preview loads at all mid-print.
 above must tolerate them being `null`:
 
 - **Telegram** (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`)
-- **AI print monitoring** (`ai-monitor.ts`) — motion detection, a local SigLIP
-  zero-shot classifier via `@huggingface/transformers`, and optionally a remote VLM
+- **AI print monitoring** (`ai-monitor.ts`) — motion detection via `sharp`, and
+  optionally a remote VLM
   (OpenAI-compatible or Ollama). Emits `analysis`, `alert` and `ai_chart_data`, which
   `index.ts` forwards to the WebSocket, the store and Telegram.
 - **Camera** (`CAMERA_ENABLED`) — a single upstream MJPEG connection fanned out to all

@@ -315,7 +315,7 @@
           <div id="ai-panel">
             <div class="text-fg-muted text-[0.85rem] [padding:8px_0]">AI monitoring disabled or not started</div>
           </div>
-          <div class="grid grid-cols-[1fr_1fr] gap-3 mt-3 max-[700px]:grid-cols-[1fr]">
+          <div class="grid grid-cols-[1fr] gap-3 mt-3">
             <div class="mt-0 border-t0 pt-0">
               <h4 class="text-xs font-medium text-fg-muted mb-1.5">Motion detection</h4>
               <div class="flex [gap:2px] mb-1 justify-end pointer-coarse:gap-1 pointer-coarse:items-center">
@@ -325,16 +325,6 @@
                 <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-ai-motion" data-window="3600">1h</button>
               </div>
               <canvas id="chart-ai-motion" class="w-full h-40 block"></canvas>
-            </div>
-            <div class="mt-0 border-t0 pt-0">
-              <h4 class="text-xs font-medium text-fg-muted mb-1.5">AI classification</h4>
-              <div class="flex [gap:2px] mb-1 justify-end pointer-coarse:gap-1 pointer-coarse:items-center">
-                <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-ai-class" data-window="60">1m</button>
-                <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5 active bg-accent text-white border-accent" data-chart="chart-ai-class" data-window="300">5m</button>
-                <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-ai-class" data-window="900">15m</button>
-                <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-ai-class" data-window="3600">1h</button>
-              </div>
-              <canvas id="chart-ai-class" class="w-full h-40 block"></canvas>
             </div>
           </div>
         </div>

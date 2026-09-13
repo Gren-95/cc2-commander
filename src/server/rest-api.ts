@@ -23,7 +23,7 @@ import { PassThrough } from 'stream';
 import sharp from 'sharp';
 import type { StateStore } from './state-store.js';
 import type { ServiceConfig } from './config.js';
-import type { AIMonitor, AILabelConfig } from './ai-monitor.js';
+import type { AIMonitor } from './ai-monitor.js';
 import type { PrintReportCollector } from './print-report-collector.js';
 import type { MqttBridge } from './mqtt-bridge.js';
 import { generateReportPDF } from './print-report-pdf.js';
@@ -857,120 +857,6 @@ export function createRestRouter(
             res.end(JSON.stringify({ error: 'Invalid JSON' }));
           }
         });
-        return;
-      }
-    }
-
-    // AI label config — GET (read) POST (update) DELETE (reset to defaults)
-    if (url === '/api/config/ai-labels') {
-      if (req.method === 'GET') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            labels: aiMonitor?.getLabelConfigs() ?? [],
-            enabled: config.aiEnabled && config.aiLocalEnabled,
-          }),
-        );
-        return;
-      }
-      if (req.method === 'POST') {
-        if (!aiMonitor) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'AI monitor not enabled' }));
-          return;
-        }
-        let body = '';
-        req.on('data', (chunk: Buffer) => {
-          body += chunk.toString();
-        });
-        req.on('end', () => {
-          try {
-            const data = JSON.parse(body) as { labels?: AILabelConfig[] };
-            if (!Array.isArray(data.labels) || data.labels.length === 0) {
-              res.writeHead(400, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'labels must be a non-empty array' }));
-              return;
-            }
-            // Validate each label config
-            for (const lc of data.labels) {
-              if (!lc.label || typeof lc.label !== 'string') {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Each label must have a non-empty label string' }));
-                return;
-              }
-              if (!['ok', 'warning', 'critical'].includes(lc.severity)) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: `Invalid severity: ${lc.severity}` }));
-                return;
-              }
-              if (
-                typeof lc.warnThreshold !== 'number' ||
-                lc.warnThreshold < 0 ||
-                lc.warnThreshold > 1
-              ) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'warnThreshold must be 0-1' }));
-                return;
-              }
-              if (
-                typeof lc.critThreshold !== 'number' ||
-                lc.critThreshold < 0 ||
-                lc.critThreshold > 1
-              ) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'critThreshold must be 0-1' }));
-                return;
-              }
-              // Validate group if provided; default to 'Other' if missing
-              const validGroups = [
-                'Print in Progress',
-                'Spaghetti/Failure',
-                'Empty Bed',
-                'Paused/Stopped',
-                'Other',
-              ];
-              if (lc.group && !validGroups.includes(lc.group)) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: `Invalid group: ${lc.group}` }));
-                return;
-              }
-              if (!lc.group) {
-                lc.group = 'Other';
-              }
-            }
-            aiMonitor
-              .setLabelConfigs(data.labels)
-              .then(() => {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ ok: true }));
-              })
-              .catch(() => {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Failed to save' }));
-              });
-          } catch {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Invalid JSON' }));
-          }
-        });
-        return;
-      }
-      if (req.method === 'DELETE') {
-        if (!aiMonitor) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'AI monitor not enabled' }));
-          return;
-        }
-        aiMonitor
-          .resetLabelConfigs()
-          .then(() => {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ ok: true, labels: aiMonitor.getLabelConfigs() }));
-          })
-          .catch(() => {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Failed to reset' }));
-          });
         return;
       }
     }

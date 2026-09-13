@@ -58,8 +58,8 @@ COPY src ./src
 
 # NOTE: no `COPY data/…` here. `data/` is the runtime DATA_DIR (and is gitignored), so
 # it does not exist in a clean clone — that COPY was the second reason this image could
-# not be built from a fresh checkout. `ai-labels.json` needs no seeding: the AI monitor
-# falls back to `buildDefaultLabelConfigs()` and writes the file into DATA_DIR itself.
+# not be built from a fresh checkout. Nothing under it needs seeding: every consumer
+# creates what it needs in DATA_DIR on first write.
 
 # The deploy stamp, the same shape contrib/install.sh writes on metal (ELEG-10) and the
 # same one the UI renders as x.y.z+aa (ELEG-48). Without it a container reports

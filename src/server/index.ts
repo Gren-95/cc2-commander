@@ -73,7 +73,7 @@ if (config.telegramEnabled) {
 }
 if (config.aiEnabled) {
   log.info(
-    `AI:       enabled (VLM: ${config.aiVlmEnabled ? config.aiVlmModel : 'off'}, Local: ${config.aiLocalEnabled ? 'on' : 'off'})`,
+    `AI:       enabled (motion detection, VLM: ${config.aiVlmEnabled ? config.aiVlmModel : 'off'})`,
   );
 }
 log.info(`Moonraker: http://0.0.0.0:${config.moonrakerPort}`);
@@ -230,12 +230,9 @@ if (aiMonitor) {
     }
   });
 
-  aiMonitor.on(
-    'ai_chart_data',
-    (data: { t: number; motion: number; scores: Record<string, number> }) => {
-      store.pushAIChartData(data);
-    },
-  );
+  aiMonitor.on('ai_chart_data', (data: { t: number; motion: number }) => {
+    store.pushAIChartData(data);
+  });
 }
 
 let server: ReturnType<typeof Bun.serve> | null = null;

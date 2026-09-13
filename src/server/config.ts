@@ -56,8 +56,6 @@ export interface ServiceConfig {
   aiVlmApiKey: string;
   aiVlmBaseUrl: string;
   aiVlmModel: string;
-  aiLocalEnabled: boolean;
-  aiLocalModel: string;
   aiIntervalSec: number;
   aiAlertThreshold: number;
   aiAlertCooldownSec: number;
@@ -191,8 +189,6 @@ export function loadConfig(): ServiceConfig {
     // listens on 11434 rather than the 3000 that was hardcoded.
     aiVlmBaseUrl: env('AI_VLM_BASE_URL', 'http://localhost:11434'),
     aiVlmModel: env('AI_VLM_MODEL', 'llava'),
-    aiLocalEnabled: env('AI_LOCAL_ENABLED', 'true') !== 'false',
-    aiLocalModel: env('AI_LOCAL_MODEL', 'Xenova/siglip-base-patch16-224'),
     aiIntervalSec: parseInt(env('AI_INTERVAL', '60'), 10) || 60,
     aiAlertThreshold: parseInt(env('AI_ALERT_THRESHOLD', '3'), 10) || 3,
     aiAlertCooldownSec: parseInt(env('AI_ALERT_COOLDOWN', '300'), 10) || 300,
