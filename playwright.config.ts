@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 /**
  * Browser tests.
  *
@@ -24,7 +25,15 @@ export default defineConfig({
   fullyParallel: false,
   workers: process.env.CI ? 2 : undefined,
   forbidOnly: !!process.env.CI,
-  reporter: process.env.CI ? [['github'], ['list']] : [['list']],
+  // Written outside the project when those directories exist — the dev container mounts
+  // volumes at `/test-results` and `/playwright-report` precisely so a test run leaves
+  // nothing in the checkout. Falls back to the defaults everywhere else.
+  outputDir: existsSync('/test-results') ? '/test-results/run' : undefined,
+  reporter: process.env.CI
+    ? [['github'], ['list']]
+    : existsSync('/playwright-report')
+      ? [['list'], ['html', { outputFolder: '/playwright-report/html', open: 'never' }]]
+      : [['list']],
   use: {
     baseURL: 'http://127.0.0.1:5199',
     trace: 'retain-on-failure',

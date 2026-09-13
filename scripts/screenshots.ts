@@ -21,6 +21,7 @@
  * needs a printer is a gate that fails on every machine that does not have one.
  */
 
+import { existsSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { chromium, type Page } from 'playwright';
@@ -54,7 +55,7 @@ const flag = (name: string, fallback = '') => {
 const has = (name: string) => args.includes(`--${name}`);
 
 const BASE = flag('url', 'http://localhost:8088').replace(/\/+$/, '');
-const OUT = flag('out', 'screenshots');
+const OUT = flag('out', existsSync('/test-results') ? '/test-results/screenshots' : 'screenshots');
 const ONLY_VIEWPORT = flag('viewport');
 const ONLY_VIEW = flag('view').replace('/', '-');
 

@@ -353,6 +353,18 @@ the bind mount — `node_modules`, `dist`, `data`, `test-results`, `playwright-r
 the browsers at `/ms-playwright` — so the container has its own and the host directory is
 never written to.
 
+Only `dist/` and `node_modules/` appear in the checkout, as empty 4KB mount points —
+Bun resolves one and the server serves the other from `/app`, so those two cannot live
+anywhere else. Everything else the container generates (`data`, the Playwright output,
+screenshots) is mounted OUTSIDE `/app`, because a volume mounted inside the bind-mounted
+project needs a host directory to mount onto, and that directory reappears however often
+you delete it.
+
+**Do not delete the two mount points while the container is running.** Removing the
+directory a volume is mounted on detaches the mount: the container then sees an empty
+`node_modules`, and anything it writes goes through to the host. `docker compose
+--profile dev up -d --force-recreate` puts it right.
+
 **The catch, and it is a real one:** with `node_modules` only inside the container, your
 editor's TypeScript server has no types — no autocomplete, no go-to-definition, every
 import underlined. The fix is to run the editor in the container too (VS Code Dev

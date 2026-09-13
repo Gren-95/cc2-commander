@@ -72,8 +72,8 @@ RUN bun install --frozen-lockfile \
 # uid 1000 is the image's own `bun` user and the usual first human account on Linux, so
 # these normally coincide. If `id -u` says otherwise, pass UID/GID to compose — the
 # volumes then need recreating with `down -v`, because seeding only happens once.
-RUN mkdir -p /app/dist /app/data /app/test-results /app/playwright-report \
- && chown -R 1000:1000 /app /ms-playwright
+RUN mkdir -p /app/dist /data /test-results /playwright-report \
+ && chown -R 1000:1000 /app /data /test-results /playwright-report /ms-playwright
 
 # Nothing else is COPYed: the working tree arrives as a bind mount at run time, so
 # an edit on the host is visible immediately with no rebuild.

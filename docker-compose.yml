@@ -69,7 +69,10 @@ services:
       PRINTER_IP: "${PRINTER_IP:-192.168.0.146}"
       # Absolute, and inside the volume. The default is ./data, which would resolve to
       # the bind mount and put the gcode cache back on the host.
-      DATA_DIR: /app/data
+      # OUTSIDE /app on purpose. A volume mounted inside the bind-mounted project
+      # needs a host directory to mount onto, which is why an empty `data/` kept
+      # reappearing in the checkout. Nothing requires this path to be in /app.
+      DATA_DIR: /data
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
       # Playwright reuses a running server unless CI is set; in here it should always
       # start its own harness on :5199.
@@ -79,9 +82,9 @@ services:
       # Each of these hides the bind mount at that path.
       - node_modules:/app/node_modules
       - dist:/app/dist
-      - data:/app/data
-      - test-results:/app/test-results
-      - playwright-report:/app/playwright-report
+      - data:/data
+      - test-results:/test-results
+      - playwright-report:/playwright-report
       - playwright-browsers:/ms-playwright
     # `bun run dev` rebuilds and restarts on change; the service alone is the quieter
     # option when you are only editing the server.
