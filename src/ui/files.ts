@@ -171,6 +171,57 @@ function parseFilamentFromName(filename: string): { types: string[]; count: numb
   return { types: [...new Set(found)], count: found.length };
 }
 
+/** An icon-only action on a file row. Three of them have to fit beside a filename. */
+const ROW_BTN = [
+  'inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg',
+  'border border-line bg-card text-fg-soft cursor-pointer',
+  'transition-colors hover:bg-hover hover:text-fg hover:border-fg-muted',
+].join(' ');
+
+/** The same, for the one that destroys something. */
+const ROW_BTN_BAD = [
+  'inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg',
+  'border border-line bg-card text-fg-muted cursor-pointer',
+  'transition-colors hover:bg-bad hover:text-white hover:border-bad',
+].join(' ');
+
+/** The path 1044 listed a file under, which is what 1047 and 1045 both want. */
+export function filePathFor(filename: string, dir: string): string {
+  return dir === '/' ? filename : `${dir.replace(/^\//, '')}/${filename}`;
+}
+
+/**
+ * Delete a file from the printer, behind a confirmation.
+ *
+ * **Native `confirm`, deliberately.** A filename comes off the printer's own filesystem
+ * and is shown back here; a native dialog renders plain text, so a name crafted to look
+ * like markup is inert in it by construction. It is also what the emergency stop already
+ * uses, for the same reason. The trade is that it cannot be styled, and a destructive,
+ * irreversible action is the place to accept that.
+ *
+ * Returns whether the delete was actually sent, so a caller can leave its own UI alone
+ * when the user backs out.
+ */
+export function confirmDeleteFile(
+  filename: string,
+  fullPath: string,
+  source: string,
+  dir: string,
+  client: CommandSender | null,
+): boolean {
+  if (!confirm(`Delete ${filename}?\n\nThis permanently removes it from the printer.`)) {
+    return false;
+  }
+  client?.sendCommand(1047, { storage_media: source, file_path: [fullPath] });
+  // 1047 answers, but pushes no new listing — so ask for one, and for the disk figures
+  // the capacity bar reads, or the row stays on screen and the bar stays wrong.
+  setTimeout(() => {
+    client?.sendCommand(1044, { storage_media: source, dir, offset: 0, limit: 200 });
+    client?.sendCommand(1048, { storage_media: source });
+  }, 500);
+  return true;
+}
+
 function showFilePopover(file: FileEntry, anchor: HTMLElement): void {
   closeFilePopover();
   const fullPath =
@@ -252,18 +303,7 @@ function showFilePopover(file: FileEntry, anchor: HTMLElement): void {
   });
   el.querySelector('.file-popover-delete')?.addEventListener('click', () => {
     closeFilePopover();
-    if (confirm(`Delete ${file.filename}?`)) {
-      _popoverClient?.sendCommand(1047, { storage_media: currentSource, file_path: [fullPath] });
-      setTimeout(() => {
-        _popoverClient?.sendCommand(1044, {
-          storage_media: currentSource,
-          dir: currentDir,
-          offset: 0,
-          limit: 200,
-        });
-        _popoverClient?.sendCommand(1048, { storage_media: currentSource });
-      }, 500);
-    }
+    confirmDeleteFile(file.filename, fullPath, currentSource, currentDir, _popoverClient);
   });
 
   // Position relative to anchor
@@ -322,7 +362,7 @@ function ensureFileDelegation(container: HTMLElement): void {
       const target = e.target as HTMLElement;
       const item = target.closest('.file-item[data-type="file"]') as HTMLElement | null;
       if (!item) return;
-      if (target.closest('.file-print-btn')) return;
+      if (target.closest('.file-actions')) return;
       const fn = item.dataset.filename;
       if (!fn) return;
       const file = _fileMap.get(fn);
@@ -377,6 +417,40 @@ function ensureFileDelegation(container: HTMLElement): void {
           currentDir === '/' ? filename : currentDir.replace(/^\//, '') + '/' + filename;
         requestPrintDialog(filename, fullPath, _popoverClient, _lastState);
       }
+      return;
+    }
+
+    // Download button
+    const downloadBtn = target.closest('.file-download-btn') as HTMLElement | null;
+    if (downloadBtn) {
+      e.stopPropagation();
+      const filename = (downloadBtn.closest('.file-item') as HTMLElement)?.dataset.filename;
+      if (!filename) return;
+      const source = currentSource === 'u-disk' ? 'u-disk' : 'local';
+      const a = document.createElement('a');
+      a.href = `/api/files/download?file=${encodeURIComponent(filePathFor(filename, currentDir))}&source=${encodeURIComponent(source)}`;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      return;
+    }
+
+    // Delete button. The popover had the only delete, and the popover opens on hover —
+    // so on a touchscreen there was no way to reach it at all.
+    const deleteBtn = target.closest('.file-delete-btn') as HTMLElement | null;
+    if (deleteBtn) {
+      e.stopPropagation();
+      const filename = (deleteBtn.closest('.file-item') as HTMLElement)?.dataset.filename;
+      if (!filename) return;
+      closeFilePopover();
+      confirmDeleteFile(
+        filename,
+        filePathFor(filename, currentDir),
+        currentSource,
+        currentDir,
+        _popoverClient,
+      );
       return;
     }
 
@@ -601,20 +675,25 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
       iconHtml = icon('file');
     }
 
+    // One block, not two stacked rows. The name used to sit on its own line above a
+    // second row holding the thumbnail, so a file was visually separated from its own
+    // preview and every row was twice as tall as it needed to be.
+    const actions = isFolder
+      ? ''
+      : `<button class="file-print-btn ${ROW_BTN}" title="Print ${escapeAttr(file.filename)}" aria-label="Print ${escapeAttr(file.filename)}">${iconSolo('play')}</button>
+         <button class="file-download-btn ${ROW_BTN}" title="Download ${escapeAttr(file.filename)}" aria-label="Download ${escapeAttr(file.filename)}">${iconSolo('download')}</button>
+         <button class="file-delete-btn ${ROW_BTN_BAD}" title="Delete ${escapeAttr(file.filename)}" aria-label="Delete ${escapeAttr(file.filename)}">${iconSolo('trash')}</button>`;
+
     html += `
-      <div class="file-item flex flex-col gap-1 p-2 bg-surface rounded-chip [transition:background_0.15s] max-[800px]:[padding:10px] max-[800px]:[gap:10px] hover:bg-hover [&[data-type="file"]]:cursor-default ${isFolder ? 'file-item-folder cursor-pointer hover:bg-[color-mix(in_srgb,_var(--accent)_15%,_transparent)]' : ''}" data-filename="${escapeAttr(file.filename)}" data-type="${isFolder ? 'folder' : 'file'}">
-        <div class="flex items-center min-w-0">
-          <span class="text-[13px] font-medium overflow-hidden text-ellipsis whitespace-nowrap min-w-0" title="${escapeAttr(file.filename)}">${escapeHtml(file.filename)}</span>${cacheMarker}
-        </div>
-        <div class="flex items-center [gap:10px]">
-          <div class="file-icon text-[20px] w-10 h-10 flex items-center justify-center shrink-0">${iconHtml}</div>
-          <div class="flex-1 min-w-0">
-            <div class="text-[11px] text-fg-muted">${meta}</div>
+      <div class="file-item flex items-center gap-2.5 p-2 rounded-chip bg-surface transition-colors hover:bg-hover min-w-0 ${isFolder ? 'file-item-folder cursor-pointer' : ''}" data-filename="${escapeAttr(file.filename)}" data-type="${isFolder ? 'folder' : 'file'}">
+        <div class="file-icon flex h-10 w-10 shrink-0 items-center justify-center text-[20px]">${iconHtml}</div>
+        <div class="min-w-0 flex-1">
+          <div class="flex min-w-0 items-center">
+            <span class="truncate text-[13px] font-medium" title="${escapeAttr(file.filename)}">${escapeHtml(file.filename)}</span>${cacheMarker}
           </div>
-          <div class="file-actions flex gap-1 shrink-0 max-[800px]:[gap:6px]">
-            ${isFolder ? '' : `<button class="file-print-btn inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Print" aria-label="Print">${iconSolo('play')}</button>`}
-          </div>
+          <div class="truncate text-[11px] text-fg-muted">${meta}</div>
         </div>
+        <div class="file-actions flex shrink-0 items-center gap-1">${actions}</div>
       </div>`;
   }
 

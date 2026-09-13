@@ -29,6 +29,7 @@ const EXPOSED = {
   stepper: 'src/ui/stepper.ts',
   stateClasses: 'src/ui/state-classes.ts',
   canvas: 'src/ui/canvas.ts',
+  files: 'src/ui/files.ts',
 };
 
 async function bundle(): Promise<string> {
