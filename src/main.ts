@@ -1,4 +1,4 @@
-import { iconText } from './ui/icons';
+import { iconSolo } from './ui/icons';
 import { WsClient } from './ws-client';
 import { PrinterState } from './printer-state';
 import { LogStore } from './log-store';
@@ -29,7 +29,12 @@ import {
   setHistoryClient,
 } from './ui/print-history';
 import { bindReportControls, renderReports } from './ui/print-reports';
-import { renderDashboard, renderHeader, toggleCameraOverlay } from './ui/print-status';
+import {
+  renderDashboard,
+  renderHeader,
+  setCameraOverlay,
+  syncCameraOverlayControl,
+} from './ui/print-status';
 import {
   type PrinterLink,
   renderSystemInfo,
@@ -226,14 +231,19 @@ function showDashboard(): void {
       releaseCameraTrap = null;
     };
 
-    cameraWrap.addEventListener('click', () => {
-      if (!cameraFeed.src || cameraFeed.alt === 'Camera off') return;
+    const openModal = () => {
+      // `hidden` is what `updateCamera` actually toggles. The guard used to read
+      // `alt === 'Camera off'` — the alt text was never changed off its placeholder,
+      // so every enlarge, from the feed and from the button, returned here silently.
+      if (!cameraFeed.src || cameraFeed.classList.contains('hidden')) return;
       cameraModalImg.src = cameraFeed.src;
       cameraModal.classList.remove('hidden');
       // Created after `.hidden` is removed: the trap reads the focusable children, and
       // this repo's `.hidden` class is one of the things it treats as not focusable.
       releaseCameraTrap = createFocusTrap(cameraModal, { onEscape: closeModal });
-    });
+    };
+
+    cameraWrap.addEventListener('click', openModal);
 
     $('camera-modal-close').addEventListener('click', (e) => {
       e.stopPropagation();
@@ -241,22 +251,19 @@ function showDashboard(): void {
     });
     cameraModal.addEventListener('click', closeModal);
 
-    // Camera expand toggle
-    const cameraCard = $('camera-card');
-    const expandBtn = $('camera-expand-btn');
-    expandBtn.addEventListener('click', (e) => {
+    // The header button and the feed itself both open the large view. The button used
+    // to toggle a `camera-expanded` class that raised the img to 60vh — inside a grid
+    // cell whose width it could not change, so the feed grew only when the card was
+    // already nearly that tall. The modal is the large view; there is one of them now.
+    $('camera-expand-btn').addEventListener('click', (e) => {
       e.stopPropagation();
-      const expanded = cameraCard.classList.toggle('camera-expanded');
-      if (expanded) iconText(expandBtn, 'collapse', 'Collapse');
-      else iconText(expandBtn, 'expand', 'Expand');
+      openModal();
     });
 
-    // Camera overlay toggle
-    const overlayBtn = $('camera-overlay-btn');
-    overlayBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleCameraOverlay();
-    });
+    // Camera overlay switch
+    const overlayBox = $('camera-overlay-btn') as HTMLInputElement;
+    overlayBox.addEventListener('change', () => setCameraOverlay(overlayBox.checked));
+    syncCameraOverlayControl();
 
     // Camera snapshot download with retry (max 3 attempts, exponential backoff)
     const snapshotBtn = $('camera-snapshot-btn') as HTMLButtonElement;
@@ -264,12 +271,12 @@ function showDashboard(): void {
       e.stopPropagation();
       if (snapshotBtn.disabled) return;
       snapshotBtn.disabled = true;
-      iconText(snapshotBtn, 'pending', '...');
+      snapshotBtn.innerHTML = iconSolo('pending');
       try {
         let res: Response | undefined;
         for (let attempt = 0; attempt < 3; attempt++) {
           if (attempt > 0) {
-            iconText(snapshotBtn, 'pending', `retry ${attempt}...`);
+            snapshotBtn.title = `Retrying (${attempt})`;
             await new Promise((r) => setTimeout(r, 1000 * 2 ** (attempt - 1)));
           }
           try {
@@ -296,7 +303,8 @@ function showDashboard(): void {
         toast('Snapshot failed', 'error');
       } finally {
         snapshotBtn.disabled = false;
-        iconText(snapshotBtn, 'snapshot', 'Snapshot');
+        snapshotBtn.innerHTML = iconSolo('snapshot');
+        snapshotBtn.title = 'Save a snapshot';
       }
     });
   }

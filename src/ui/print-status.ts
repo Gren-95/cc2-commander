@@ -1,7 +1,7 @@
 import { setDryerPrinting, setDryerTemps } from './dryer-panel';
 import { positionSegmented } from './segmented';
 import { toggleState } from './state-classes';
-import { icon, iconOnly, iconSolo, iconText } from './icons';
+import { icon, iconOnly, iconText } from './icons';
 import type { PrinterState } from '../printer-state';
 import type { CommandSender } from '../ws-client';
 import {
@@ -110,46 +110,58 @@ function getCameraStreamUrl(): string {
   return overlayEnabled ? '/api/stream/overlay' : '/api/stream';
 }
 
-export function toggleCameraOverlay(): void {
-  overlayEnabled = !overlayEnabled;
+/**
+ * Point the feed at the plain or the annotated stream.
+ *
+ * The control is a switch now rather than a button, so this reads the checkbox instead
+ * of flipping a boolean of its own — two sources of truth for one setting is how the
+ * label and the stream came to disagree after a reload.
+ */
+export function setCameraOverlay(on: boolean): void {
+  overlayEnabled = on;
   saveUISettings({ cameraOverlay: overlayEnabled });
+
+  const box = $('camera-overlay-btn') as HTMLInputElement | null;
+  if (box) box.checked = overlayEnabled;
+
   const img = $('camera-feed') as HTMLImageElement;
-  const btn = $('camera-overlay-btn');
-  if (img && !img.classList.contains('hidden')) {
-    img.src = getCameraStreamUrl();
-  }
-  // Also update modal img if visible
+  if (img && !img.classList.contains('hidden')) img.src = getCameraStreamUrl();
+
   const modalImg = $('camera-modal-img') as HTMLImageElement;
-  if (modalImg && modalImg.src) {
-    modalImg.src = getCameraStreamUrl();
-  }
-  if (btn) {
-    toggleState(btn, 'active', overlayEnabled);
-    // Two glyphs when active (chart + tick), so `iconText` is not enough — but the
-    // label is a literal, so innerHTML is safe here.
-    btn.innerHTML = overlayEnabled
-      ? `${icon('overlay')} Overlay ${iconSolo('check')}`
-      : `${icon('overlay')} Overlay`;
-  }
+  if (modalImg?.src) modalImg.src = getCameraStreamUrl();
+}
+
+/** Put the switch where the stored setting says, at load. */
+export function syncCameraOverlayControl(): void {
+  const box = $('camera-overlay-btn') as HTMLInputElement | null;
+  if (box) box.checked = overlayEnabled;
 }
 
 function updateCamera(hasCamera: boolean, _printerIp: string): void {
   const img = $('camera-feed') as HTMLImageElement;
   const overlay = $('camera-overlay');
 
+  // Snapshot and enlarge both need a frame to work on, so they follow the feed.
+  for (const id of ['camera-snapshot-btn', 'camera-expand-btn']) {
+    const btn = $(id) as HTMLButtonElement | null;
+    if (btn) btn.disabled = !hasCamera;
+  }
+
   if (hasCamera) {
     const src = getCameraStreamUrl();
     if (!img.src.endsWith(new URL(src, location.href).pathname)) {
       img.src = src;
     }
+    img.alt = 'Live camera feed';
     overlay.classList.add('hidden');
     img.classList.remove('hidden');
     $('camera-wrap')?.classList.remove('camera-off');
   } else {
     img.classList.add('hidden');
+    img.alt = 'Camera off';
     overlay.classList.remove('hidden');
-    // Drops the 200px min-height so the card is the size of its message, not of the
-    // video it is not showing.
+    // Drops the aspect ratio so the card is the size of its message, not of the video
+    // it is not showing.
     $('camera-wrap')?.classList.add('camera-off');
     // Only the text node — `overlay.textContent = …` would take the icon with it.
     $('camera-overlay-text').textContent = 'Camera not connected';
