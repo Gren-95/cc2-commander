@@ -24,6 +24,63 @@ RUN bun install --frozen-lockfile
 COPY . .
 RUN bun run build
 
+# ── Development stage ──────────────────────────────────────
+#
+# `docker build --target dev .`, or the `dev` service in docker-compose.yml.
+#
+# BEFORE the production stage on purpose: a `docker build` with no `--target` resolves to
+# the LAST stage in the file, and that has to stay the production image — `publish.yml`
+# builds this file with no target on every push to main, and a dev stage arriving last
+# would ship dev dependencies and a browser to everyone pulling `:latest`.
+#
+# Unreferenced stages are not built, so its presence costs a production build nothing.
+FROM oven/bun:1.4.2-slim AS dev
+
+WORKDIR /app
+
+# Fonts for the camera overlay, as in the production image: the slim base ships
+# none at all, so librsvg renders every glyph in `/api/stream/overlay` as tofu.
+#
+# The rest is what Chromium needs. `playwright install --with-deps` would fetch
+# these itself, but doing it here puts them in a cached layer instead of on every
+# rebuild.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      fonts-dejavu-core fontconfig ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && fc-cache -f
+
+# Browsers live outside /app so the bind mount cannot shadow them, and in a volume
+# so they survive a rebuild. scripts/gates.sh already honours this variable when it
+# decides whether the browser gate can run.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
+# Dev dependencies included — this image runs the gates, not just the service.
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile \
+ && bunx playwright install --with-deps chromium
+
+# Create every directory a named volume will be mounted on, owned by uid 1000.
+#
+# This is what makes the volumes writable by a container running as the host user.
+# Docker seeds an EMPTY named volume from the image's contents and ownership at that
+# path — so a directory that exists here owned by 1000 produces a volume owned by 1000,
+# while a path that does not exist in the image produces one owned by root, which a
+# non-root container then cannot write. That was the second thing to go wrong here:
+# `EACCES: permission denied, mkdir '/app/dist/assets'`.
+#
+# uid 1000 is the image's own `bun` user and the usual first human account on Linux, so
+# these normally coincide. If `id -u` says otherwise, pass UID/GID to compose — the
+# volumes then need recreating with `down -v`, because seeding only happens once.
+RUN mkdir -p /app/dist /app/data /app/test-results /app/playwright-report \
+ && chown -R 1000:1000 /app /ms-playwright
+
+# Nothing else is COPYed: the working tree arrives as a bind mount at run time, so
+# an edit on the host is visible immediately with no rebuild.
+
+EXPOSE 8088 7125
+CMD ["bun", "src/server/index.ts"]
+
 # ── Production stage ──────────────────────────────────────
 FROM oven/bun:1.4.2-slim
 

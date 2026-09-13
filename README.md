@@ -92,6 +92,12 @@ Everything then appears under `./elegoo-data` — `reports/`, `gcode-cache/`, `l
 
 ### Docker Compose
 
+There is a `docker-compose.yml` in the repo root — copy it, set `PRINTER_IP`, and
+`docker compose up -d`. It also carries the development service behind a profile
+(`--profile dev`), which is why a bare `up` starts only the dashboard.
+
+The snippet below is the same thing inline, if you would rather write your own:
+
 Save this as `docker-compose.yml`, set `PRINTER_IP`, then `docker compose up -d`:
 
 ```yaml
@@ -320,13 +326,13 @@ This is a **dev-server** setting: `vite build` ignores it, and production never 
 in `~/.cache/ms-playwright` — outside the project entirely. Add `dist/`, the runtime
 `data/` and the test output and a checkout costs about 1.9 GB of host disk.
 
-`docker-compose.dev.yml` keeps all of it in Docker volumes instead. Only the source stays
+The `dev` service in `docker-compose.yml` keeps all of it in Docker volumes instead. Only the source stays
 on the host, bind-mounted, so an editor edits real files and git behaves normally:
 
 ```bash
-docker compose -f docker-compose.dev.yml up -d --build     # first run pulls a browser
-docker compose -f docker-compose.dev.yml exec dev bun run gates
-docker compose -f docker-compose.dev.yml logs -f
+docker compose --profile dev up -d --build     # first run pulls a browser
+docker compose exec dev bun run gates
+docker compose logs -f dev
 ```
 
 The service comes up on `http://localhost:8088` exactly as `bun run dev` does, rebuilding

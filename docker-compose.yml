@@ -1,7 +1,7 @@
-# Development in a container, so the host keeps none of the generated weight.
+# One compose file: the service you run, and the one you develop in.
 #
-#   docker compose -f docker-compose.dev.yml up -d --build
-#   docker compose -f docker-compose.dev.yml exec dev bun run gates
+#   docker compose --profile dev up -d --build
+#   docker compose exec dev bun run gates
 #
 # WHAT STAYS ON THE HOST: the source, and nothing else. The bind mount below is the
 # working tree, so an editor edits real files and git sees them normally.
@@ -25,11 +25,30 @@
 # one. There is no way to have both an empty host and a host language server.
 
 services:
+  # What you actually run. Pulls the published image; uncomment `build` to make it here.
+  cc2-commander:
+    image: ghcr.io/gren-95/cc2-commander:latest
+    # build: { context: ., dockerfile: Dockerfile }
+    container_name: cc2-commander
+    restart: unless-stopped
+    ports:
+      - "8088:8088" # Web UI + API + WebSocket
+      - "7125:7125" # Moonraker compatibility API
+    env_file: [.env]
+    volumes:
+      # One host path, so the data is easy to get at. Mount the DIRECTORY, never the
+      # files inside it.
+      - ./elegoo-data:/app/data
+
+  # Development. `docker compose --profile dev up -d --build`
+
   dev:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
+      target: dev
     container_name: cc2-dev
+    profiles: [dev]
     # Match the host user so files the container writes into the bind mount — bun.lock
     # after an install, anything a script emits — are not left owned by root.
     user: "${UID:-1000}:${GID:-1000}"
