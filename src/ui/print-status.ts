@@ -206,7 +206,10 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     $('print-filename').textContent = ps.filename;
     $('print-filename').title = ps.filename;
   } else {
-    $('print-filename').textContent = statusName + (subStatusName ? ` — ${subStatusName}` : '');
+    // The badge underneath already carries the status and its sub-status. Repeating it
+    // here rendered "Idle" twice, one line above the other.
+    $('print-filename').textContent = 'No active print';
+    $('print-filename').removeAttribute('title');
   }
 
   // Status badge — always show both status and sub-status
@@ -274,7 +277,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     }
   }
   const progressText = $('print-progress-text');
-  progressText.textContent = isPrinting || isPaused ? `${progress}%` : '';
+  progressText.textContent = isPrinting || isPaused ? `${progress}%` : '--%';
   const progressBar = $('print-progress-bar') as HTMLElement;
   progressBar.style.width = `${progress}%`;
   toggleState(progressBar, 'active', isPrinting && !isPaused);
@@ -369,6 +372,14 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   } else {
     $('print-eta').textContent = '--';
   }
+
+  // The print-only blocks. Everything in them reads "--" without a print, and there are
+  // nine such fields — so an idle printer's most prominent card was a grid of dashes
+  // with `0 of ??` set in the largest type on it. It gets one honest line instead.
+  const running = isPrinting || isPaused;
+  $('print-progress-block').classList.toggle('hidden', !running);
+  $('print-detail-grid').classList.toggle('hidden', !running);
+  $('print-idle-note').classList.toggle('hidden', running);
 
   // Print action buttons
   $('btn-pause').classList.toggle('hidden', !isPrinting || isPaused);
