@@ -24,6 +24,7 @@ const EXPOSED = {
   about: 'src/ui/about.ts',
   uiSettings: 'src/ui/ui-settings.ts',
   storageMigration: 'src/ui/storage-migration.ts',
+  dryerPanel: 'src/ui/dryer-panel.ts',
 };
 
 async function bundle(): Promise<string> {

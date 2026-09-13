@@ -1,4 +1,4 @@
-import { setDryerPrinting } from './dryer-panel';
+import { setDryerBedTarget, setDryerPrinting } from './dryer-panel';
 import { toggleState } from './state-classes';
 import { icon, iconOnly, iconSolo, iconText } from './icons';
 import type { PrinterState } from '../printer-state';
@@ -388,6 +388,9 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
 
   const bed = s.heater_bed;
   if (bed) {
+    // The dryer's keepalive compares this against its session target, so it can say
+    // when something else cleared the bed rather than only silently putting it back.
+    setDryerBedTarget(bed.target);
     $('temp-bed').textContent = bed.temperature.toFixed(2);
     $('temp-bed-target').textContent = Math.round(bed.target).toString();
     const bedPct = bed.target > 0 ? Math.min(100, (bed.temperature / bed.target) * 100) : 0;
