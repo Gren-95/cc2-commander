@@ -2,7 +2,6 @@
 
 import { toggleState } from './state-classes';
 import { readMigrated } from './storage-migration';
-import { icon, iconSolo } from './icons';
 import { $, fetchTimeout } from './helpers';
 import {
   CARD_WIDTHS,

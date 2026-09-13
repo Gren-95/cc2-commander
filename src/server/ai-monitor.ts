@@ -19,8 +19,6 @@
  */
 
 import { EventEmitter } from 'events';
-import { readFile, writeFile, mkdir } from 'fs/promises';
-import { join, dirname } from 'path';
 import type { ServiceConfig } from './config.js';
 import type { StateStore, PrintEvent } from './state-store.js';
 import { getSnapshot } from './rest-api.js';

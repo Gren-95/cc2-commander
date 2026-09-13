@@ -23,7 +23,6 @@ import { PassThrough } from 'stream';
 import sharp from 'sharp';
 import type { StateStore } from './state-store.js';
 import type { ServiceConfig } from './config.js';
-import type { AIMonitor } from './ai-monitor.js';
 import type { PrintReportCollector } from './print-report-collector.js';
 import type { MqttBridge } from './mqtt-bridge.js';
 import { generateReportPDF } from './print-report-pdf.js';
@@ -666,7 +665,6 @@ let _bridge: MqttBridge | null = null;
 export function createRestRouter(
   store: StateStore,
   config: ServiceConfig,
-  aiMonitor?: AIMonitor | null,
   reportCollector?: PrintReportCollector | null,
   bridge?: MqttBridge | null,
   /**

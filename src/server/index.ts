@@ -122,7 +122,6 @@ const reportCollector = new PrintReportCollector(store, config);
 const restHandler = createRestRouter(
   store,
   config,
-  aiMonitor,
   reportCollector,
   bridge,
   (req) => authGate.authenticate(req).ok,
