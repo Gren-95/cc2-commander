@@ -7,7 +7,7 @@
   <rect width="512" height="512" rx="123" fill="#ffffff"/>
   <path d="M256.0 74.7c61.3 82.7 112.0 128.0 112.0 189.3a112.0 112.0 0 0 1 -224.0 0c0 -61.3 50.7 -106.7 112.0 -189.3z" fill="url(#dropcc512100)"/>
   <ellipse cx="208.0" cy="277.3" rx="21.3" ry="32.0" fill="#fff" opacity=".30" transform="rotate(-18 208.0 277.3)"/>
-  <circle cx="216.0" cy="256.0" r="18.7" fill="#0f1117"/>
-  <circle cx="296.0" cy="256.0" r="18.7" fill="#0f1117"/>
-  <rect x="224.0" y="314.7" width="64.0" height="18.7" rx="9.3" fill="#0f1117" opacity=".85"/>
+  <circle cx="216.0" cy="250.7" r="18.7" fill="#0f1117"/>
+  <circle cx="296.0" cy="250.7" r="18.7" fill="#0f1117"/>
+  <path d="M224.0 309.3q32.0 29.3 64.0 0" stroke="#0f1117" stroke-width="18.7" stroke-linecap="round" fill="none" opacity=".85"/>
 </svg>
