@@ -4,10 +4,10 @@
       <stop offset="0" stop-color="#8ec0ff"/><stop offset="1" stop-color="#2563eb"/>
     </linearGradient>
   </defs>
-  <rect width="192" height="192" rx="46" fill="#ffffff"/>
-  <path d="M96.0 28.0c23.0 31.0 42.0 48.0 42.0 71.0a42.0 42.0 0 0 1 -84.0 0c0 -23.0 19.0 -40.0 42.0 -71.0z" fill="url(#dropcc192100)"/>
-  <ellipse cx="78.0" cy="104.0" rx="8.0" ry="12.0" fill="#fff" opacity=".30" transform="rotate(-18 78.0 104.0)"/>
-  <circle cx="81.0" cy="94.0" r="7.0" fill="#0f1117"/>
-  <circle cx="111.0" cy="94.0" r="7.0" fill="#0f1117"/>
-  <path d="M84.0 116.0q12.0 11.0 24.0 0" stroke="#0f1117" stroke-width="7.0" stroke-linecap="round" fill="none" opacity=".85"/>
+  <rect width="192" height="192" rx="46" fill="#0f1117"/>
+  <path d="M96.0 19.8c28.8 38.8 52.5 60.0 52.5 88.8a52.5 52.5 0 0 1 -105.0 0c0 -28.8 23.8 -50.0 52.5 -88.8z" fill="url(#dropcc192100)"/>
+  <ellipse cx="73.5" cy="114.8" rx="10.0" ry="15.0" fill="#fff" opacity=".30" transform="rotate(-18 73.5 114.8)"/>
+  <circle cx="77.2" cy="102.2" r="8.8" fill="#0f1117"/>
+  <circle cx="114.8" cy="102.2" r="8.8" fill="#0f1117"/>
+  <path d="M81.0 129.8q15.0 13.8 30.0 0" stroke="#0f1117" stroke-width="8.8" stroke-linecap="round" fill="none" opacity=".85"/>
 </svg>
