@@ -1,7 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none">
-  <rect width="192" height="192" rx="42" fill="#0f1117"/>
-  <rect x="24.0" y="70.0" width="144.0" height="26.0" rx="13.0" fill="#1e293b"/>
-  <circle cx="70.0" cy="83.0" r="14.0" fill="#3b82f6"/>
-  <circle cx="122.0" cy="83.0" r="14.0" fill="#3b82f6"/>
-  <rect x="62.0" y="132.0" width="68.0" height="12.0" rx="6.0" fill="#f59e0b"/>
+  <defs>
+    <linearGradient id="eyecc192100" x1=".3" y1="0" x2=".7" y2="1">
+      <stop offset="0" stop-color="#8ec0ff"/><stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="bedcc192100" x1=".3" y1="0" x2=".7" y2="1">
+      <stop offset="0" stop-color="#fdd36b"/><stop offset="1" stop-color="#e8940a"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="46" fill="#0f1117"/>
+  <path d="M28.0 83.0q68.0 -26.0 136.0 0 -68.0 23.0 -136.0 0z" fill="#1e293b"/>
+  <ellipse cx="70.0" cy="83.0" rx="18.0" ry="16.0" fill="url(#eyecc192100)"/>
+  <ellipse cx="122.0" cy="83.0" rx="18.0" ry="16.0" fill="url(#eyecc192100)"/>
+  <ellipse cx="64.0" cy="76.0" rx="6.0" ry="4.0" fill="#fff" opacity=".55"/>
+  <ellipse cx="116.0" cy="76.0" rx="6.0" ry="4.0" fill="#fff" opacity=".55"/>
+  <path d="M68.0 129.0q28.0 -7.0 56.0 0 3.0 9.0 0 12.0 -28.0 7.0 -56.0 0 -3.0 -3.0 0 -12.0z" fill="url(#bedcc192100)"/>
+  <rect x="74.0" y="131.0" width="28.0" height="4.0" rx="2.0" fill="#fff" opacity=".38"/>
 </svg>
