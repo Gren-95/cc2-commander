@@ -1,7 +1,7 @@
 {
   "name": "cc2-commander",
   "description": "Self-hosted web dashboard for the Elegoo Centauri Carbon 2 (CC2) \u2014 live status, camera, print control, file management, filament dryer, and Moonraker/OctoPrint compatibility.",
-  "version": "0.2.1",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "simple-git-hooks": {
