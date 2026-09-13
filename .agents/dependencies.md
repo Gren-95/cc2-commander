@@ -52,3 +52,37 @@ install time — do not add one without a reason.
 `.github/workflows/audit.yml` and `.agents/gates.md` for the argument: the gate set is
 otherwise deterministic and offline, and a gate that can go red because a third party
 published something destroys "a red check on your branch is yours".
+
+## What was removed, and why it is worth knowing
+
+- **`dotenv`** — `config.ts` opened with `import 'dotenv/config'`, which had been a no-op
+  since the Bun conversion: Bun loads `.env`, `.env.local` and `.env.<NODE_ENV>` before
+  any user code runs. All three deployment paths were already covered without it — dev
+  and Docker by Bun itself, production by systemd's
+  `EnvironmentFile=/opt/elegooweb/.env`. The shape to recognise: **a dependency that a
+  runtime change made redundant stays in `package.json` looking load-bearing**, because
+  nothing fails when it is present.
+- **`concurrently`** — ran vite and the service side by side. `bun run dev` is one
+  process now, so it went with Vite.
+
+## The 513 MB nobody chose
+
+`@huggingface/transformers` pulls `onnxruntime-node`, which ships prebuilt binaries for
+every platform and accelerator it supports. Measured on this checkout:
+
+| | |
+| --- | --- |
+| `libonnxruntime_providers_cuda.so` | **302 MB** — needs an NVIDIA GPU and CUDA |
+| `bin/napi-v6/win32` + `darwin` | **159 MB** — platforms this never runs on |
+| `linux/x64/libonnxruntime.so.1` | 34 MB — the part that actually executes |
+
+So ~90% of it cannot run here: the host is Intel Iris Xe with no `nvidia-smi` and no
+`libcuda`. It is **also in every container image**, because the Dockerfile's
+`bun install --frozen-lockfile --production` installs the same tree.
+
+It is disk, not runtime cost, and it is a transitive dep — there is no supported flag to
+ask for a subset. The three ways out, in order of how much they give up: leave it; prune
+the unusable binaries in a postinstall step (and accept that `bun install` restores
+them); or set `AI_LOCAL_ENABLED=false` and drop `@huggingface/transformers`, which loses
+local AI monitoring and takes ~530 MB with it. `sharp` stays either way — `rest-api.ts`
+imports it directly for the camera snapshot path.

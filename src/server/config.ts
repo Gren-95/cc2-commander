@@ -1,4 +1,7 @@
-import 'dotenv/config';
+// No dotenv: Bun loads `.env` (and `.env.local`, `.env.<NODE_ENV>`) before any user code
+// runs, so the import was a no-op that still pulled a package. This service has required
+// Bun as its runtime since the Node/pnpm/tsx removal, so there is no path where the
+// variables would go unloaded.
 import { parseAllowedChatIds } from './allowlist.js';
 import { type CorsPolicy, parseCorsPolicy } from './cors.js';
 
