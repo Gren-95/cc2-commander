@@ -31,7 +31,13 @@
  *                    in the background.
  */
 
-const CACHE = 'elegoo-web-v2';
+/*
+ * Bumping this name is how a stale cache is evicted: `activate` deletes every cache
+ * whose name is not this one. The rename from `elegoo-web-v2` therefore does two jobs —
+ * it finishes the project rename, and it purges the assets every existing client has
+ * accumulated under `cacheFirst`, which never evicts an entry on its own.
+ */
+const CACHE = 'cc2-commander-v1';
 
 /** Fetched by hand at install; everything else arrives as it is requested. */
 const SEED = ['/manifest.json'];

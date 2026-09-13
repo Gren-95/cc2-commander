@@ -1,5 +1,6 @@
 /** Lightweight canvas-based live line chart — no dependencies */
 
+import { positionSegmented } from './segmented';
 import { toggleState } from './state-classes';
 import { icon } from './icons';
 import type { ChartStore, Series } from '../chart-store';
@@ -84,10 +85,12 @@ function bindTimeWindowButtons(): void {
         config.window = seconds;
         saveChartWindow(canvasId, seconds);
       }
-      // Update active state for this chart's buttons
-      const parent = el.parentElement;
-      parent?.querySelectorAll('.chart-time-btn').forEach((b) => toggleState(b, 'active', false));
+      // Update active state for this chart's buttons. `parentElement` is the segmented
+      // track, which is also what the sliding fill is positioned inside.
+      const track = el.closest<HTMLElement>('.segmented');
+      track?.querySelectorAll('.chart-time-btn').forEach((b) => toggleState(b, 'active', false));
       toggleState(el, 'active', true);
+      if (track) positionSegmented(track);
     });
   });
 
@@ -102,6 +105,8 @@ function bindTimeWindowButtons(): void {
         const el = b as HTMLElement;
         toggleState(b, 'active', parseInt(el.dataset.window!) === saved);
       });
+      const track = (btns[0] as HTMLElement | undefined)?.closest<HTMLElement>('.segmented');
+      if (track) positionSegmented(track);
     }
   }
 }
@@ -198,9 +203,10 @@ function setChartEmpty(canvasId: string, empty: boolean): void {
   if (!canvas) return;
 
   canvas.classList.toggle('hidden', empty);
-  // The range chips steer a chart that is not being shown, so they go with it.
+  // The range picker steers a chart that is not being shown, so it goes with it — the
+  // whole labelled row, not just the track, or a stray "Range" label is left behind.
   for (const chip of document.querySelectorAll(`.chart-time-btn[data-chart="${canvasId}"]`)) {
-    chip.parentElement?.classList.toggle('hidden', empty);
+    chip.closest('.segmented')?.parentElement?.classList.toggle('hidden', empty);
   }
 
   const placeholderId = `${canvasId}-empty`;

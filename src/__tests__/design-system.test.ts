@@ -73,7 +73,7 @@ describe('design tokens', () => {
 
 describe('state deltas', () => {
   /** The pickers built on SEGMENTED_BTN rather than CHIP. */
-  const SEGMENTED_BASES = ['dist-btn', 'speed-btn'];
+  const SEGMENTED_BASES = ['dist-btn', 'speed-btn', 'chart-time-btn'];
 
   it('every chip picker shares one delta', () => {
     const deltas = new Set(
@@ -107,7 +107,7 @@ describe('state deltas', () => {
     // segmented delta against CHIP would pass while leaving `bg-surface` and `text-white`
     // on the same element in the app.
     for (const [base, token] of [
-      ['chart-time-btn', CHIP],
+      ['temp-preset-btn', CHIP],
       ['dist-btn', SEGMENTED_BTN],
     ] as const) {
       const delta = STATE_UTILITIES.active[base];

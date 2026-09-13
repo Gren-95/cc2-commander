@@ -289,12 +289,11 @@
             <button class="temp-preset-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-nozzle="0" data-bed="0">Cool<i class="bi bi-snow bi-trail [margin-inline-start:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i></button>
           </div>
           <div class="mt-3 border-t border-line pt-2">
-            <div class="flex [gap:2px] mb-1 justify-end pointer-coarse:gap-1 pointer-coarse:items-center">
-              <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-temps" data-window="60">1m</button>
-              <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5 active bg-accent text-white border-accent" data-chart="chart-temps" data-window="300">5m</button>
-              <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-temps" data-window="900">15m</button>
-              <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-temps" data-window="3600">1h</button>
-            </div>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2 justify-end mb-1"><span class="text-xs text-fg-muted mr-auto">Range</span><div class="segmented relative inline-flex items-center rounded-full bg-input ring-1 ring-line p-0.5"><div class="segmented-fill pointer-events-none absolute inset-y-0.5 left-0 rounded-full bg-accent [transition:transform_180ms_ease,width_180ms_ease] motion-reduce:[transition:none]"></div>
+              <button class="chart-time-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-temps" data-window="60">1m</button>
+              <button class="chart-time-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5 active text-white" data-chart="chart-temps" data-window="300">5m</button>
+              <button class="chart-time-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-temps" data-window="900">15m</button>
+              <button class="chart-time-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-temps" data-window="3600">1h</button></div></div>
             <canvas id="chart-temps" class="w-full h-40 block"></canvas>
           </div>
         </div>
@@ -482,56 +481,42 @@
 
           <div class="border-t border-line-soft my-3"></div>
 
-          <div class="flex flex-wrap items-center gap-1.5 justify-end">
-              <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-fans" data-window="60">1m</button>
-              <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5 active bg-accent text-white" data-chart="chart-fans" data-window="300">5m</button>
-              <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-fans" data-window="900">15m</button>
-              <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-fans" data-window="3600">1h</button>
-          </div>
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-2 justify-end mb-1"><span class="text-xs text-fg-muted mr-auto">Range</span><div class="segmented relative inline-flex items-center rounded-full bg-input ring-1 ring-line p-0.5"><div class="segmented-fill pointer-events-none absolute inset-y-0.5 left-0 rounded-full bg-accent [transition:transform_180ms_ease,width_180ms_ease] motion-reduce:[transition:none]"></div>
+              <button class="chart-time-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-fans" data-window="60">1m</button>
+              <button class="chart-time-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5 active text-white" data-chart="chart-fans" data-window="300">5m</button>
+              <button class="chart-time-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-fans" data-window="900">15m</button>
+              <button class="chart-time-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-fans" data-window="3600">1h</button></div></div>
           <canvas id="chart-fans" class="mt-2 w-full flex-1 min-h-[160px]"></canvas>
         </div>
 
         <!-- Speed & Flow -->
         <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="speed-flow-card">
           <h3><i class="bi bi-speedometer2" aria-hidden="true"></i>Speed &amp; flow</h3>
-          <div class="grid grid-cols-2 gap-x-4 gap-y-4">
+          <div class="grid grid-cols-2 gap-x-4 gap-y-3 @min-[560px]:grid-cols-4">
             <div class="min-w-0">
-              <div class="text-xs text-fg-muted">Speed</div>
-              <div class="flex items-baseline gap-1.5 mt-1">
-                <span class="font-mono text-2xl font-semibold tabular-nums leading-none text-fg truncate" id="live-speed">--</span>
-                <span class="text-xs text-fg-muted font-normal">mm/min</span>
-              </div>
+              <div class="text-xs text-fg-muted truncate">Speed</div>
+              <div class="font-mono text-base tabular-nums leading-none text-fg-soft mt-1 truncate"><span id="live-speed">--</span> <span class="text-[10px] text-fg-muted">mm/min</span></div>
             </div>
             <div class="min-w-0">
-              <div class="text-xs text-fg-muted">Extrusion</div>
-              <div class="flex items-baseline gap-1.5 mt-1">
-                <span class="font-mono text-2xl font-semibold tabular-nums leading-none text-fg truncate" id="live-extrusion">--</span>
-                <span class="text-xs text-fg-muted font-normal">mm/s</span>
-              </div>
+              <div class="text-xs text-fg-muted truncate">Extrusion</div>
+              <div class="font-mono text-base tabular-nums leading-none text-fg-soft mt-1 truncate"><span id="live-extrusion">--</span> <span class="text-[10px] text-fg-muted">mm/s</span></div>
             </div>
             <div class="min-w-0">
-              <div class="text-xs text-fg-muted">Flow</div>
-              <div class="flex items-baseline gap-1.5 mt-1">
-                <span class="font-mono text-2xl font-semibold tabular-nums leading-none text-fg truncate" id="live-flow">--</span>
-                <span class="text-xs text-fg-muted font-normal">mm³/s</span>
-              </div>
+              <div class="text-xs text-fg-muted truncate">Flow</div>
+              <div class="font-mono text-base tabular-nums leading-none text-fg-soft mt-1 truncate"><span id="live-flow">--</span> <span class="text-[10px] text-fg-muted">mm³/s</span></div>
             </div>
             <div class="min-w-0">
-              <div class="text-xs text-fg-muted">Mass</div>
-              <div class="flex items-baseline gap-1.5 mt-1">
-                <span class="font-mono text-2xl font-semibold tabular-nums leading-none text-fg truncate" id="live-mass-flow">--</span>
-                <span class="text-xs text-fg-muted font-normal">mg/s</span>
-              </div>
+              <div class="text-xs text-fg-muted truncate">Mass</div>
+              <div class="font-mono text-base tabular-nums leading-none text-fg-soft mt-1 truncate"><span id="live-mass-flow">--</span> <span class="text-[10px] text-fg-muted">mg/s</span></div>
             </div>
           </div>
           <div id="filament-usage-display" class="mt-3 empty:hidden"></div>
           <div class="border-t border-line-soft my-3"></div>
-          <div class="flex flex-wrap items-center gap-1.5 justify-end">
-            <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-speed" data-window="60">1m</button>
-            <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5 active bg-accent text-white border-accent" data-chart="chart-speed" data-window="300">5m</button>
-            <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-speed" data-window="900">15m</button>
-            <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-speed" data-window="3600">1h</button>
-          </div>
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-2 justify-end mb-1"><span class="text-xs text-fg-muted mr-auto">Range</span><div class="segmented relative inline-flex items-center rounded-full bg-input ring-1 ring-line p-0.5"><div class="segmented-fill pointer-events-none absolute inset-y-0.5 left-0 rounded-full bg-accent [transition:transform_180ms_ease,width_180ms_ease] motion-reduce:[transition:none]"></div>
+            <button class="chart-time-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-speed" data-window="60">1m</button>
+            <button class="chart-time-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5 active text-white" data-chart="chart-speed" data-window="300">5m</button>
+            <button class="chart-time-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-speed" data-window="900">15m</button>
+            <button class="chart-time-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-speed" data-window="3600">1h</button></div></div>
           <canvas id="chart-speed" class="mt-2 w-full flex-1 min-h-[160px]"></canvas>
         </div>
 

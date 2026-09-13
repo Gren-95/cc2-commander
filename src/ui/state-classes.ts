@@ -60,7 +60,7 @@ const SEGMENT_ACTIVE: StateDelta = {
 
 export const STATE_UTILITIES: Record<string, Record<string, StateDelta>> = {
   active: {
-    'chart-time-btn': CHIP_ACTIVE,
+    'chart-time-btn': SEGMENT_ACTIVE,
     'dist-btn': SEGMENT_ACTIVE,
     'file-source-tab': CHIP_ACTIVE,
     'list-sort-btn': CHIP_ACTIVE,
