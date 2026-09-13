@@ -21,3 +21,6 @@ data/
 # Playwright
 test-results/
 /playwright-report/
+
+# Output of `bun run screenshots` — pictures for a person, not an artefact.
+screenshots/

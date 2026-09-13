@@ -1,5 +1,7 @@
 /** Settings panel — persistent card layout + Telegram config */
 
+import { updateDeepLink } from './deep-link';
+import { savedSubtab } from './subtabs';
 import { toggleState } from './state-classes';
 import { readMigrated } from './storage-migration';
 import { $, fetchTimeout } from './helpers';
@@ -199,6 +201,9 @@ export function switchToTab(tab: 'dashboard' | 'settings' | 'tools' | 'help' | '
    */
   const mainTab = tab === 'debug' ? 'help' : tab;
   activeTab = tab;
+  // Keep the address bar showing where you are, so the view can be linked and survives
+  // a reload. Replaced rather than pushed — see ui/deep-link.ts.
+  updateDeepLink(mainTab, savedSubtab(mainTab === 'help' ? 'help' : mainTab));
   // Hide the rail immediately on the way out; `applyCardLayout` brings it back.
   renderFocusRail(currentLayout, tab === 'dashboard');
 

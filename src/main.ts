@@ -10,6 +10,8 @@ import { bindDebugPanel, renderDebugPanel, trackStateChanges } from './ui/debug-
 import { applyDryerState, handleDryerFinished, setDryerClient } from './ui/dryer-panel';
 import { handleEventLog, loadEventLogHistory } from './ui/event-log';
 import { initAmbient, renderAmbient } from './ui/ambient';
+import { parseDeepLink } from './ui/deep-link';
+import { subtabNames, switchSubtab } from './ui/subtabs';
 import { currentFileDir, currentFileSource } from './ui/file-browsing';
 import { handleInlineThumbnail } from './ui/file-thumbnails';
 import { bindFileControls, renderFiles } from './ui/files';
@@ -752,6 +754,14 @@ async function boot(): Promise<void> {
 initDashboardEdit();
 initSegmented();
 void initAmbient();
+
+// Open whatever `?tab=` and `?subtab=` ask for. Read ONCE, at startup: the URL is an
+// address, not a channel the app watches — see ui/deep-link.ts.
+{
+  const link = parseDeepLink(location.search, subtabNames);
+  if (link.tab) switchToTab(link.tab);
+  if (link.group && link.subtab) switchSubtab(link.group, link.subtab);
+}
 initSteppers();
 
 void boot();

@@ -167,7 +167,7 @@
               the selector instead of by cascade luck.
             -->
             <div id="print-progress-block" class="hidden not-[.hidden]:flex flex-col gap-2">
-              <div class="flex items-end justify-between gap-3">
+              <div class="flex flex-col gap-2 @min-[380px]:flex-row @min-[380px]:items-end @min-[380px]:justify-between @min-[380px]:gap-3">
                 <div class="min-w-0">
                   <div class="text-xs text-fg-muted">Remaining</div>
                   <div class="font-mono text-3xl font-semibold tabular-nums leading-none text-fg mt-1 truncate" id="print-remaining">--</div>
@@ -229,10 +229,10 @@
           <div class="flex flex-col gap-4">
 
             <div class="flex flex-col gap-2">
-              <div class="flex items-end justify-between gap-3">
+              <div class="flex flex-col gap-2 @min-[380px]:flex-row @min-[380px]:items-end @min-[380px]:justify-between @min-[380px]:gap-3">
                 <div class="min-w-0">
                   <div class="text-xs text-fg-muted">Nozzle</div>
-                  <div class="flex items-baseline gap-1.5 mt-1">
+                  <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 mt-1">
                     <span class="font-mono text-2xl font-semibold tabular-nums leading-none text-fg" id="temp-nozzle">--</span>
                     <span class="text-xs text-fg-muted font-normal">°C</span>
                     <span class="text-xs text-fg-muted font-normal">of</span>
@@ -240,7 +240,7 @@
                     <span class="text-xs text-fg-muted font-normal">°C</span>
                   </div>
                 </div>
-                <div class="flex items-center gap-1.5 shrink-0">
+                <div class="flex items-center gap-1.5 shrink-0 @max-[379px]:w-full">
                   <input type="number" id="set-nozzle-temp" class="rounded-lg border border-line bg-input px-2.5 py-1.5 text-xs text-fg tabular-nums focus:outline-none focus:border-accent w-16" placeholder="210" min="0" max="300" step="5">
                   <button id="btn-set-nozzle" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed">Set</button>
                   <button id="btn-off-nozzle" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed">Off</button>
@@ -252,10 +252,10 @@
             </div>
 
             <div class="flex flex-col gap-2">
-              <div class="flex items-end justify-between gap-3">
+              <div class="flex flex-col gap-2 @min-[380px]:flex-row @min-[380px]:items-end @min-[380px]:justify-between @min-[380px]:gap-3">
                 <div class="min-w-0">
                   <div class="text-xs text-fg-muted">Bed</div>
-                  <div class="flex items-baseline gap-1.5 mt-1">
+                  <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 mt-1">
                     <span class="font-mono text-2xl font-semibold tabular-nums leading-none text-fg" id="temp-bed">--</span>
                     <span class="text-xs text-fg-muted font-normal">°C</span>
                     <span class="text-xs text-fg-muted font-normal">of</span>
@@ -263,7 +263,7 @@
                     <span class="text-xs text-fg-muted font-normal">°C</span>
                   </div>
                 </div>
-                <div class="flex items-center gap-1.5 shrink-0">
+                <div class="flex items-center gap-1.5 shrink-0 @max-[379px]:w-full">
                   <input type="number" id="set-bed-temp" class="rounded-lg border border-line bg-input px-2.5 py-1.5 text-xs text-fg tabular-nums focus:outline-none focus:border-accent w-16" placeholder="60" min="0" max="120" step="5">
                   <button id="btn-set-bed" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed">Set</button>
                   <button id="btn-off-bed" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed">Off</button>
@@ -276,7 +276,7 @@
             <div class="flex items-end justify-between gap-3">
               <div>
                 <div class="text-xs text-fg-muted">Chamber</div>
-                <div class="flex items-baseline gap-1.5 mt-1">
+                <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 mt-1">
                   <span class="font-mono text-2xl font-semibold tabular-nums leading-none text-fg" id="temp-chamber">--</span>
                   <span class="text-xs text-fg-muted font-normal">°C</span>
                 </div>

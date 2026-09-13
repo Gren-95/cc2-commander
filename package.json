@@ -26,7 +26,8 @@
     "service:check": "tsc --project tsconfig.server.json",
     "test": "bun test src/__tests__ src/server/__tests__",
     "test:browser": "playwright test",
-    "test:watch": "bun test --watch src/__tests__ src/server/__tests__"
+    "test:watch": "bun test --watch src/__tests__ src/server/__tests__",
+    "screenshots": "bun scripts/screenshots.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.9",
