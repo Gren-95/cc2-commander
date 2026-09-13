@@ -11,5 +11,5 @@
   <circle cx="306.0" cy="272.7" r="23.3" fill="#0f1117"/>
   <circle cx="213.3" cy="265.3" r="8.7" fill="#fff" opacity=".62"/>
   <circle cx="313.3" cy="265.3" r="8.7" fill="#fff" opacity=".62"/>
-  <path d="M216.0 349.3q40.0 11.7 80.0 0" stroke="#0f1117" stroke-width="23.3" stroke-linecap="round" fill="none" opacity=".85"/>
+  <path d="M206.0 349.3q50.0 28.3 100.0 0" stroke="#0f1117" stroke-width="23.3" stroke-linecap="round" fill="none" opacity=".85"/>
 </svg>
