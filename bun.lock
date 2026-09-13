@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "elegoo-web",
+      "name": "cc2-commander",
       "dependencies": {
         "bootstrap-icons": "^1.13.1",
         "gcode-preview": "3.0.0-alpha.4",

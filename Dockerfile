@@ -84,7 +84,8 @@ CMD ["bun", "src/server/index.ts"]
 # ── Production stage ──────────────────────────────────────
 FROM oven/bun:1.4.2-slim
 
-LABEL org.opencontainers.image.source=https://github.com/runnane/elegoo-web
+LABEL org.opencontainers.image.source=https://github.com/Gren-95/cc2-commander
+LABEL org.opencontainers.image.title="CC2 Commander"
 LABEL org.opencontainers.image.description="Web frontend and service for the Elegoo Centauri Carbon 2 printer"
 LABEL org.opencontainers.image.licenses=MIT
 

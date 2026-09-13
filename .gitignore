@@ -9,10 +9,9 @@ data/
 .cache/
 
 # Claude Code — per-machine state only.
-# .mcp.json, AGENTS.md, CLAUDE.md and .agents/ ARE committed: they are the shared
-# agent instructions for this repo (see AGENTS.md). .claude/commands/ used to be
-# too, but ELEG-81 moved those to the runnane/agent-userspace bundle, so .claude/
-# now holds nothing but the per-machine files listed below.
+# CLAUDE.md IS committed: it is the agent instruction file for this repo, with the
+# topic detail in docs/. AGENTS.md, .agents/ and .mcp.json were folded into it and
+# deleted. .claude/ now holds nothing but the per-machine files listed below.
 .claude/worktrees/
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
