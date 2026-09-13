@@ -11,6 +11,7 @@
  *   bun scripts/screenshots.ts --view tools/dryer   one view
  *   bun scripts/screenshots.ts --cards              each dashboard card on its own
  *   bun scripts/screenshots.ts --url http://host:8088 --out ./shots
+ *   bun scripts/screenshots.ts --password hunter2           when auth is on
  *
  * Navigation goes through `?tab=`/`?subtab=`, not by clicking: a deep link lands on the
  * view in one load, with no guessing about when a click has finished. That is half the
@@ -24,7 +25,7 @@
 import { existsSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { chromium, type Page } from 'playwright';
+import { type Browser, type BrowserContext, type Page, chromium } from 'playwright';
 
 /** Sizes worth checking, and why each one. */
 const VIEWPORTS = {
@@ -87,6 +88,64 @@ async function settle(page: Page): Promise<void> {
     });
   // Charts animate in and the segmented fills measure themselves a frame late.
   await page.waitForTimeout(1200);
+
+  // Toasts are transient overlays that sit on top of whatever the shot is of, and the
+  // connect toast names the printer's serial — which is not something to publish in a
+  // README. Clearing them is right for every screenshot, not just the documented ones.
+  await page.evaluate(
+    `(() => {
+      const c = document.getElementById('toast-container');
+      if (c) c.innerHTML = '';
+    })()`,
+  );
+}
+
+/**
+ * Sign in once, and hand every later context the resulting cookie.
+ *
+ * Without this the script photographs the login card — correctly, and uselessly — for
+ * every view and every viewport, because `AUTH_PASSWORD` turns the whole app into one
+ * overlay. That is exactly what it did between auth landing and this function existing.
+ *
+ * The password comes from `--password` or `AUTH_PASSWORD`, which is already in the
+ * environment of the dev container this usually runs in. Returning `undefined` is the
+ * no-auth case, not a failure: a service with auth off shows the dashboard immediately
+ * and needs no cookie.
+ */
+type StorageState = Awaited<ReturnType<BrowserContext['storageState']>>;
+
+async function signIn(browser: Browser): Promise<StorageState | undefined> {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
+
+  const field = page.locator('input[type="password"]').first();
+  // A visible password field is the only reliable "auth is on" signal: /api/health
+  // answers the same whether or not a password is set.
+  if (!(await field.isVisible().catch(() => false))) {
+    await context.close();
+    return undefined;
+  }
+
+  const password = flag('password', process.env.AUTH_PASSWORD ?? '');
+  if (!password) {
+    await context.close();
+    throw new Error(
+      'This service wants a password. Pass --password <pw>, or set AUTH_PASSWORD.',
+    );
+  }
+
+  await field.fill(password);
+  await page.locator('button:has-text("Sign in")').first().click();
+  // The field is hidden rather than removed, so waiting for it to disappear from the
+  // DOM waits forever — which is how the login page ended up in the screenshots.
+  await field.waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => {
+    throw new Error('Sign-in did not take — wrong password, or the service refused it.');
+  });
+
+  const state = await context.storageState();
+  await context.close();
+  return state;
 }
 
 async function main(): Promise<void> {
@@ -100,15 +159,18 @@ async function main(): Promise<void> {
   if (!views.length) throw new Error(`Unknown view. Try: ${VIEWS.map((v) => v.name).join(', ')}`);
 
   const browser = await chromium.launch();
+  const storageState = await signIn(browser);
   let count = 0;
 
   for (const [vpName, vp] of viewports) {
     const dir = join(OUT, vpName);
     await mkdir(dir, { recursive: true });
-    const page = await browser.newPage({
+    const context = await browser.newContext({
       viewport: { width: vp.width, height: vp.height },
       deviceScaleFactor: 2, // legible when someone opens the PNG at 100%
+      storageState,
     });
+    const page = await context.newPage();
 
     for (const view of views) {
       await page.goto(`${BASE}/${view.query}`, { waitUntil: 'domcontentloaded' });
@@ -142,7 +204,7 @@ async function main(): Promise<void> {
         }
       }
     }
-    await page.close();
+    await context.close();
   }
 
   await browser.close();

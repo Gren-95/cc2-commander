@@ -140,3 +140,62 @@ above must tolerate them being `null`:
 - **Camera** (`CAMERA_ENABLED`) — a single upstream MJPEG connection fanned out to all
   viewers by `rest-api.ts`. Same principle as the MQTT bridge: one connection to the
   device, N consumers. Don't add a second reader.
+
+## Project Structure
+
+```
+src/
+├── main.ts              # Entry point, WsClient, render loop, sidebar resize
+├── ws-client.ts         # WebSocket client (connects to service, not printer)
+├── types.ts             # CC2 protocol types, status codes, zone detection
+├── printer-state.ts     # Browser-side state with delta merge + zones
+├── log-store.ts         # Ring buffer (500 entries) for MQTT log
+├── chart-store.ts       # Ring-buffer time-series store for charts
+├── server/
+│   ├── index.ts             # Service entry point
+│   ├── mqtt-bridge.ts       # Singleton MQTT connection to printer
+│   ├── state-store.ts       # Centralized state, event detection, zone tracking
+│   ├── ws-transport.ts      # WebSocket server for browsers
+│   ├── rest-api.ts          # REST API, MJPEG fan-out proxy, Prometheus
+│   ├── config.ts            # Environment-based configuration (.env)
+│   ├── logger.ts            # Winston structured logging with rotation
+│   ├── telegram.ts          # Telegram bot notifications
+│   ├── allowlist.ts         # Who may talk to the Telegram bot
+│   ├── moonraker-compat.ts  # Moonraker API compatibility
+│   ├── moonraker-server.ts  # Moonraker standalone server (:7125)
+│   ├── octoprint-compat.ts  # OctoPrint API compatibility
+│   ├── state-persistence.ts # Persist/restore state across restarts
+│   ├── print-report-collector.ts  # Collect print data for reports
+│   └── print-report-pdf.ts       # PDF report generation
+├── ui/
+│   ├── dashboard.ts       # Re-export barrel for all UI modules
+│   ├── helpers.ts         # Shared DOM/formatting utilities
+│   ├── print-status.ts    # Print status sidebar card
+│   ├── service-status.ts  # Header badge + dropdown (service health + system info)
+│   ├── canvas.ts          # Canvas/AMS spool visualization
+│   ├── files.ts           # File browser with popovers
+│   ├── controls.ts        # Control event handlers
+│   ├── charts.ts          # Canvas 2D live charts with zoom/pan
+│   ├── gcode-preview.ts   # 3D gcode toolpath (Three.js)
+│   ├── log.ts             # MQTT log panel
+│   ├── log-methods.ts     # MQTT method ID labels and filtering
+│   ├── structured-log.ts  # Structured log with diff/pin/filter
+│   ├── system-info.ts     # System information display component
+│   ├── debug-panel.ts     # Live state tree, change tracking, export
+│   ├── settings.ts        # Card layout + tab management
+│   ├── event-log.ts       # Print event log
+│   ├── print-history.ts   # Print history
+│   ├── print-reports.ts   # PDF print reports
+│   ├── print-dialog.ts    # Print start confirmation dialog
+│   ├── maintenance.ts     # Self-check, auto-level, vibration, PID
+│   ├── timelapse.ts       # Timelapse viewer
+│   ├── layer-chart.ts     # Layer time chart
+│   ├── filament-editor.ts # Canvas filament editor
+│   ├── spool-calc.ts      # Spool calculator
+│   ├── toast.ts           # Toast notifications
+│   ├── help.ts            # Help tab / API docs
+│   └── ui-settings.ts    # UI preference persistence
+└── styles/
+    └── main.css           # Dark theme, two-panel layout, responsive
+```
+
