@@ -165,12 +165,12 @@ function compactPayload(entry: LogEntry): string {
     return `${interesting.slice(0, 3).join(', ')} +${interesting.length - 3} more`;
   }
 
-  // For responses, show error_code
+  // For responses, show error_code. **Plain text only** — see `summaryGlyph`.
   if (classifyEntry(entry) === 'response') {
     const result = raw.result as Record<string, unknown> | undefined;
     if (result?.error_code !== undefined) {
       const code = result.error_code as number;
-      return code === 0 ? `${icon('ok')} OK` : `${icon('error')} Error ${code}`;
+      return code === 0 ? 'OK' : `Error ${code}`;
     }
   }
 
@@ -178,6 +178,24 @@ function compactPayload(entry: LogEntry): string {
   // guard, not a layout decision. A megabyte payload across hundreds of log rows is a
   // performance problem no stylesheet can solve, and the row expands to show it in full.
   return entry.payload.slice(0, 200);
+}
+
+/**
+ * The glyph for the summary column, or ''.
+ *
+ * Kept out of `compactPayload` because that value goes through `highlightMatch`, which
+ * escapes so the search term can be wrapped in `<mark>` safely. An `<i>` tag fed into it
+ * comes out as the literal text `<i class="bi bi-check-circle-fill …">` on screen — which
+ * is exactly what every OK response in the log rendered as. The rule the repo already
+ * states for `iconText` applies to any escaping boundary, not only `textContent`:
+ * **an icon is markup, so it cannot travel inside a value that will be escaped.**
+ */
+function summaryGlyph(entry: LogEntry): string {
+  if (classifyEntry(entry) !== 'response') return '';
+  const raw = entry.raw as Record<string, unknown>;
+  const result = raw?.result as Record<string, unknown> | undefined;
+  if (result?.error_code === undefined) return '';
+  return result.error_code === 0 ? `${icon('ok')}` : `${icon('error')}`;
 }
 
 function renderSlogRow(e: LogEntry, prevStatusRaw: unknown): string {
@@ -197,7 +215,7 @@ function renderSlogRow(e: LogEntry, prevStatusRaw: unknown): string {
   row += `<span class="font-bold min-w-[14px] text-center [.slog-sent_&]:text-accent-light [.slog-recv_&]:text-ok">${e.direction === 'sent' ? icon('sent') : icon('received')}</span>`;
   row += `<span class="text-accent min-w-30 whitespace-nowrap font-semibold">${highlightMatch(method)}</span>`;
   row += `<span class="text-warn min-w-20 whitespace-nowrap">${highlightMatch(shortTopic(e.topic))}</span>`;
-  row += `<span class="text-fg-soft overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0">${highlightMatch(summary)}</span>`;
+  row += `<span class="text-fg-soft overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0">${summaryGlyph(e)}${highlightMatch(summary)}</span>`;
   row += `<button class="slog-pin-btn bg-transparent border-0 cursor-pointer text-[10px] opacity-[0.3] [transition:opacity_0.15s] [padding:0_2px] shrink-0 hover:opacity-[0.7] ${isPinned ? 'pinned' : ''}" data-pin-ts="${e.timestamp}" title="${isPinned ? 'Unpin' : 'Pin'}" aria-label="${isPinned ? 'Unpin' : 'Pin'}">${isPinned ? iconSolo('pinned') : iconSolo('pin')}</button>`;
   row += `<span class="text-fg-muted shrink-0 w-[14px] text-center">${isExpanded ? iconSolo('expanded') : iconSolo('collapsed')}</span>`;
   row += `</div>`;
