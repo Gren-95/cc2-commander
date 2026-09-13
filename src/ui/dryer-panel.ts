@@ -58,15 +58,29 @@ const KEEPALIVE_MS = 30_000;
 let client: CommandSender | null = null;
 let printing = false;
 let ticker: ReturnType<typeof setInterval> | null = null;
-/** The bed target the printer last reported, or null before the first status. */
-let reportedBedTarget: number | null = null;
+/**
+ * What the printer last reported, or nulls before the first status arrives.
+ *
+ * The panel used to show only a countdown, which said nothing about whether the bed was
+ * actually hot — the one fact that decides whether the filament is drying at all. The
+ * keepalive needs `bedTarget` anyway to tell a correction from a no-op, so the rest
+ * comes along at no cost and is worth showing.
+ */
+export interface DryerTemps {
+  bed: number | null;
+  bedTarget: number | null;
+  chamber: number | null;
+  nozzle: number | null;
+}
+
+let temps: DryerTemps = { bed: null, bedTarget: null, chamber: null, nozzle: null };
 let lastKeepaliveAt = 0;
 /** Set when a keepalive found the target had been cleared, for the running view. */
 let lastCorrectionAt: number | null = null;
 
 /** Fed from `print-status.ts` on every status render, like `setDryerPrinting`. */
-export function setDryerBedTarget(target: number): void {
-  reportedBedTarget = target;
+export function setDryerTemps(next: DryerTemps): void {
+  temps = next;
 }
 
 export function setDryerClient(c: CommandSender): void {
@@ -120,12 +134,13 @@ function keepAlive(session: DryerSession): void {
   if (!client) return;
 
   lastKeepaliveAt = now;
-  const drifted = reportedBedTarget !== null && Math.round(reportedBedTarget) !== session.tempC;
+  const reported = temps.bedTarget;
+  const drifted = reported !== null && Math.round(reported) !== session.tempC;
   setBed(session.tempC);
   if (drifted) {
     lastCorrectionAt = now;
     toast(
-      `Bed target had dropped to ${Math.round(reportedBedTarget ?? 0)} °C — drying resumed at ${session.tempC} °C`,
+      `Bed target had dropped to ${Math.round(reported ?? 0)} °C — drying resumed at ${session.tempC} °C`,
       'warning',
     );
   }
@@ -201,6 +216,53 @@ function idleView(): string {
     </div>`;
 }
 
+/**
+ * The live temperatures, with the plate first and stated against its target.
+ *
+ * "3h 37m left" is not evidence that anything is drying — the bed can be cold, off, or
+ * still climbing, and the countdown reads identically in all three cases. The plate row
+ * therefore carries a *state* rather than only a number, and the one state worth
+ * shouting about is a target of 0 while a session runs: that is the failure the
+ * keepalive exists to undo, visible in the ~30s before it does.
+ */
+function tempsView(session: DryerSession): string {
+  const cell = (label: string, value: string, extra = '') =>
+    `<div class="flex flex-col gap-0.5">
+       <span class="text-[11px] text-fg-muted">${label}</span>
+       <span class="font-mono text-[15px] text-fg">${value}</span>
+       ${extra}
+     </div>`;
+
+  const deg = (v: number | null) => (v === null ? '––' : `${v.toFixed(1)} °C`);
+
+  let plateState = '';
+  if (temps.bed !== null && temps.bedTarget !== null) {
+    if (Math.round(temps.bedTarget) === 0) {
+      plateState = `<span class="text-[11px] font-semibold text-bad">heater off — restoring</span>`;
+    } else if (Math.abs(temps.bed - temps.bedTarget) <= 2) {
+      plateState = `<span class="text-[11px] font-semibold text-ok">at temperature</span>`;
+    } else if (temps.bed < temps.bedTarget) {
+      plateState = `<span class="text-[11px] text-warn">heating</span>`;
+    } else {
+      plateState = `<span class="text-[11px] text-fg-muted">cooling</span>`;
+    }
+  }
+
+  const plateValue =
+    temps.bedTarget === null
+      ? deg(temps.bed)
+      : `${deg(temps.bed)} <span class="text-[12px] text-fg-muted">of ${Math.round(
+          temps.bedTarget,
+        )} °C</span>`;
+
+  return `
+      <div class="flex flex-wrap gap-6 [padding:10px_12px] rounded-chip bg-input">
+        ${cell(`Plate — drying at ${session.tempC} °C`, plateValue, plateState)}
+        ${cell('Chamber', deg(temps.chamber))}
+        ${cell('Nozzle', deg(temps.nozzle))}
+      </div>`;
+}
+
 function runningView(session: DryerSession, now: number): string {
   const p = progressOf(session, now);
   const pct = Math.round(p.fraction * 100);
@@ -230,6 +292,8 @@ function runningView(session: DryerSession, now: number): string {
             : ''
         }
       </div>
+
+      ${tempsView(session)}
 
       ${
         p.rotationsDue > 0

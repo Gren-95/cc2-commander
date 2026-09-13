@@ -75,6 +75,20 @@ async function advance(page: Page, ms: number): Promise<void> {
   await page.waitForTimeout(1200);
 }
 
+/** Push a status frame in, the way `print-status.ts` does on every render. */
+async function reportTemps(
+  page: Page,
+  t: { bed: number; bedTarget: number; chamber: number; nozzle: number },
+): Promise<void> {
+  await page.evaluate((next) => {
+    (
+      window as never as {
+        T: { dryerPanel: { setDryerTemps: (n: unknown) => void } };
+      }
+    ).T.dryerPanel.setDryerTemps(next);
+  }, t);
+}
+
 const sent = (page: Page) => page.evaluate(() => (window as never as { __sent: Sent[] }).__sent);
 
 test.beforeEach(async ({ page }) => {
@@ -141,14 +155,51 @@ test.describe('the dryer keepalive', () => {
   }) => {
     await startSession(page);
     // The printer reports a target of 0 — something turned the bed off.
-    await page.evaluate(() => {
-      (window as never as { T: { dryerPanel: { setDryerBedTarget: (n: number) => void } } })
-        .T.dryerPanel.setDryerBedTarget(0);
-    });
+    await reportTemps(page, { bed: 44, bedTarget: 0, chamber: 24, nozzle: 27 });
     await advance(page, KEEPALIVE_MS + 1000);
 
     expect((await sent(page))[0]).toEqual({ method: 1028, params: { heater_bed: 45 } });
     expect(await page.textContent('#dryer-content')).toContain('Last correction');
+  });
+
+  test('shows the plate against its target, plus chamber and nozzle', async ({ page }) => {
+    await startSession(page);
+    await reportTemps(page, { bed: 44.6, bedTarget: 45, chamber: 24.2, nozzle: 27.4 });
+    await page.evaluate(() => {
+      (window as never as { T: { dryerPanel: { renderDryer: () => void } } })
+        .T.dryerPanel.renderDryer();
+    });
+
+    const text = (await page.textContent('#dryer-content')) ?? '';
+    expect(text).toContain('44.6 °C');
+    expect(text).toContain('of 45 °C');
+    expect(text).toContain('24.2 °C');
+    expect(text).toContain('27.4 °C');
+    // Within 2° counts as arrived, which is what the bar on the dashboard uses.
+    expect(text).toContain('at temperature');
+  });
+
+  test('calls out a cleared heater in the readout, not only in a toast', async ({
+    page,
+  }) => {
+    // The ~30 seconds between something turning the bed off and the keepalive undoing
+    // it. A countdown alone reads identically whether the bed is hot or stone cold, so
+    // this is the state worth saying out loud.
+    await startSession(page);
+    await reportTemps(page, { bed: 41, bedTarget: 0, chamber: 24, nozzle: 27 });
+    await page.evaluate(() => {
+      (window as never as { T: { dryerPanel: { renderDryer: () => void } } })
+        .T.dryerPanel.renderDryer();
+    });
+    expect(await page.textContent('#dryer-content')).toContain('heater off');
+  });
+
+  test('renders dashes rather than zeroes before the first status arrives', async ({
+    page,
+  }) => {
+    // A cold-looking 0.0 °C on a bed that is actually at 45 is worse than saying nothing.
+    await startSession(page);
+    expect(await page.textContent('#dryer-content')).toContain('––');
   });
 
   test('sends nothing at all when no session is running', async ({ page }) => {

@@ -1,4 +1,4 @@
-import { setDryerBedTarget, setDryerPrinting } from './dryer-panel';
+import { setDryerPrinting, setDryerTemps } from './dryer-panel';
 import { toggleState } from './state-classes';
 import { icon, iconOnly, iconSolo, iconText } from './icons';
 import type { PrinterState } from '../printer-state';
@@ -388,9 +388,6 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
 
   const bed = s.heater_bed;
   if (bed) {
-    // The dryer's keepalive compares this against its session target, so it can say
-    // when something else cleared the bed rather than only silently putting it back.
-    setDryerBedTarget(bed.target);
     $('temp-bed').textContent = bed.temperature.toFixed(2);
     $('temp-bed-target').textContent = Math.round(bed.target).toString();
     const bedPct = bed.target > 0 ? Math.min(100, (bed.temperature / bed.target) * 100) : 0;
@@ -399,6 +396,16 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     toggleState(bedBar, 'heating', bed.temperature < bed.target - 2 && bed.target > 0);
     toggleState(bedBar, 'at-target', Math.abs(bed.temperature - bed.target) <= 2 && bed.target > 0);
   }
+
+  // One call, after all three are read, so the dryer panel never renders a mix of this
+  // status and the last one. Its keepalive compares `bedTarget` against the session to
+  // tell a correction from a no-op, and the running view shows the rest.
+  setDryerTemps({
+    bed: bed?.temperature ?? null,
+    bedTarget: bed?.target ?? null,
+    chamber: s.ztemperature_sensor?.temperature ?? null,
+    nozzle: ext?.temperature ?? null,
+  });
 
   const chamber = s.ztemperature_sensor;
   if (chamber) {
