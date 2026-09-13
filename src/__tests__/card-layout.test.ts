@@ -61,6 +61,7 @@ describe('normaliseCardLayout', () => {
 
   it('preserves hidden, collapsed and per-card widths', () => {
     const layout = normaliseCardLayout({
+      v: 2,
       order: [...DEFAULT_ORDER],
       hidden: ['files-card'],
       collapsed: ['temps-card'],
@@ -69,6 +70,32 @@ describe('normaliseCardLayout', () => {
     expect(layout.hidden).toEqual(['files-card']);
     expect(layout.collapsed).toEqual(['temps-card']);
     expect(layout.width['camera-card']).toBe('full');
+  });
+
+  it('drops the widths of a layout saved before they were uniform', () => {
+    // Widths used to be assigned by card identity — the old sidebar six were quarters,
+    // two log cards full width, the rest halves — which is why a fresh dashboard looked
+    // arbitrary. A layout with no version has those dropped once so the uniform default
+    // applies; everything a person actually chose is kept.
+    const layout = normaliseCardLayout({
+      order: [...DEFAULT_ORDER],
+      hidden: ['files-card'],
+      collapsed: ['temps-card'],
+      width: { 'camera-card': 'full', 'log-card': 'full' },
+    });
+    expect(layout.width['camera-card']).toBe(defaultWidthFor('camera-card'));
+    expect(layout.width['log-card']).toBe(defaultWidthFor('log-card'));
+    expect(layout.hidden).toEqual(['files-card']);
+    expect(layout.collapsed).toEqual(['temps-card']);
+  });
+
+  it('stamps the version, so the width reset happens exactly once', () => {
+    const first = normaliseCardLayout({ width: { 'camera-card': 'full' } });
+    expect(first.v).toBe(2);
+    // Feeding the result back in is what a save-then-load does. A resize made after the
+    // reset must survive it.
+    const resized = { ...first, width: { ...first.width, 'camera-card': 'full' as const } };
+    expect(normaliseCardLayout(resized).width['camera-card']).toBe('full');
   });
 
   it('drops an unrecognised width instead of rendering an unknown class', () => {
@@ -136,16 +163,15 @@ describe('migrating older saved layouts', () => {
     expect(layout.collapsed).toEqual(['fans-card']);
   });
 
-  it('gives migrated sidebar cards the narrow width they used to have', () => {
-    // The two-panel format never stored widths. Defaulting everything to `wide` would
-    // double the width of five cards on first load after the upgrade.
+  it('gives every migrated card the same width, wherever it came from', () => {
+    // The two-panel format never stored widths, and which panel a card sat in no longer
+    // decides anything: position and width are independent, and the width is uniform.
     const layout = normaliseCardLayout({
       sidebar: ['temps-card', 'fans-card'],
       main: ['camera-card'],
     });
-    expect(layout.width['temps-card']).toBe('compact');
-    expect(layout.width['fans-card']).toBe('compact');
-    expect(layout.width['camera-card']).not.toBe('compact');
+    const widths = new Set(layout.order.map((id) => layout.width[id]));
+    expect([...widths]).toEqual([defaultWidthFor('temps-card')]);
   });
 
   it('handles a two-panel layout that only ever had one panel', () => {
@@ -158,8 +184,10 @@ describe('migrating older saved layouts', () => {
 describe('widthOf', () => {
   it('falls back to the card default when the layout does not say', () => {
     const layout: CardLayout = { order: [], hidden: [], collapsed: [], width: {} };
+    // One default for every card, rather than a table of exceptions by identity.
     expect(widthOf(layout, 'temps-card')).toBe('compact');
-    expect(widthOf(layout, 'log-card')).toBe('full');
+    expect(widthOf(layout, 'log-card')).toBe('compact');
+    expect(widthOf(layout, 'camera-card')).toBe('compact');
   });
 
   it('prefers what the layout says', () => {

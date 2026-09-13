@@ -42,9 +42,24 @@ export interface CardLayout {
   order: string[];
   hidden: string[];
   collapsed: string[];
-  /** Width per card. Missing entries fall back to `DEFAULT_WIDTHS`. */
+  /** Width per card. Missing entries fall back to `defaultWidthFor`. */
   width: Record<string, CardWidth>;
+  /** Schema version; see `LAYOUT_VERSION`. Absent on anything saved before widths
+   *  became uniform. */
+  v?: number;
 }
+
+/**
+ * Bumped when a stored layout needs rewriting rather than merely reading.
+ *
+ * 2: widths became uniform. Cards used to default to three different spans by identity —
+ * the old sidebar six were quarters, two log cards were full width, everything else a
+ * half — which made a fresh dashboard look arbitrary rather than designed: at 1600px
+ * that is 387px, 783px and 1576px cards in the same grid. A layout from before this
+ * has its widths dropped once, so the uniform default applies; anything resized after
+ * the reset is kept.
+ */
+const LAYOUT_VERSION = 2;
 
 /**
  * The shipped order.
@@ -77,21 +92,15 @@ export const DEFAULT_ORDER = [
 export const ALL_CARD_IDS = [...DEFAULT_ORDER];
 
 /**
- * The cards that used to live in the narrow sidebar. Kept as a named set because it is
- * what decides a sensible default width, both for the shipped layout and when migrating
- * a two-panel layout that never recorded widths.
+ * The width every card gets unless it has been resized.
+ *
+ * One bucket, not three. `compact` is a quarter above 1500px, a third from 1101, a half
+ * from 701 and full width below — so the grid is regular at every breakpoint instead of
+ * only at the one it was tuned for. Cards that genuinely want the room (the MQTT log,
+ * the event log) can still be widened in edit mode; the point is that the *default* is
+ * uniform rather than a table of exceptions nobody can predict.
  */
-const WAS_SIDEBAR = new Set([
-  'print-status-bar',
-  'temps-card',
-  'canvas-card',
-  'fans-card',
-  'toolhead-card',
-  'speed-flow-card',
-]);
-
-/** Cards that earn the whole row: long lists and wide tables. */
-const WANTS_FULL = new Set(['log-card', 'event-log-card']);
+const UNIFORM_WIDTH: CardWidth = 'compact';
 
 /**
  * The grid span each width means, mobile-first.
@@ -113,10 +122,8 @@ export const CARD_WIDTH_UTILITIES: Record<CardWidth, string> = {
   full: 'col-[span_12]',
 };
 
-export function defaultWidthFor(id: string): CardWidth {
-  if (WAS_SIDEBAR.has(id)) return 'compact';
-  if (WANTS_FULL.has(id)) return 'full';
-  return 'wide';
+export function defaultWidthFor(_id: string): CardWidth {
+  return UNIFORM_WIDTH;
 }
 
 /** Display names for cards, as **HTML fragments** — each carries a Bootstrap Icon. */
@@ -237,6 +244,7 @@ export function defaultCardLayout(): CardLayout {
     hidden: [],
     collapsed: [],
     width: Object.fromEntries(DEFAULT_ORDER.map((id) => [id, defaultWidthFor(id)])),
+    v: LAYOUT_VERSION,
   };
 }
 
@@ -294,11 +302,18 @@ export function normaliseCardLayout(parsed: unknown): CardLayout {
     ? [...(sidebar ?? []), ...(main ?? [])]
     : (stringArray(fields.order) ?? [...DEFAULT_ORDER]);
 
+  // A layout from before widths were uniform keeps its order, its hidden set and its
+  // collapsed set — only the widths go, because those were assigned by card identity
+  // rather than chosen by anyone. Resizing after the reset is recorded normally and
+  // survives, since the version is stamped below.
+  const stale = fields.v !== LAYOUT_VERSION;
+
   const layout: CardLayout = {
     order,
     hidden: stringArray(fields.hidden) ?? [],
     collapsed: stringArray(fields.collapsed) ?? [],
-    width: widthMap(fields.width),
+    width: stale ? {} : widthMap(fields.width),
+    v: LAYOUT_VERSION,
   };
 
   const seen = new Set<string>();
@@ -314,8 +329,7 @@ export function normaliseCardLayout(parsed: unknown): CardLayout {
     seen.add(id);
   }
 
-  // A migrated two-panel layout has no widths of its own; give the old sidebar cards
-  // the narrow one so the dashboard does not silently double in width.
+  // Anything without a width of its own takes the uniform default.
   for (const id of layout.order) {
     if (!layout.width[id]) layout.width[id] = defaultWidthFor(id);
   }
