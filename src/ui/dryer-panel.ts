@@ -32,7 +32,7 @@ import {
   progressOf,
   sessionFromPreset,
 } from '../dryer-core';
-import { escapeHtml, fetchTimeout } from './helpers';
+import { escapeAttr, escapeHtml, fetchTimeout } from './helpers';
 import { icon } from './icons';
 import { toast } from './toast';
 
@@ -69,10 +69,15 @@ let temps: DryerTemps = { bed: null, bedTarget: null, chamber: null, nozzle: nul
  * nothing rather than a dash — an install without it should see no trace.
  */
 let roomHumidity: number | null = null;
+/** The sensor's own name and when it last changed, for the label and the staleness. */
+let humidityName = '';
+let humidityChangedAt = '';
 
-export function setDryerHumidity(value: number | null): void {
+export function setDryerHumidity(value: number | null, name = '', changedAt = ''): void {
   const had = roomHumidity !== null;
   roomHumidity = value;
+  humidityName = name;
+  humidityChangedAt = changedAt;
 
   // Patch the two spans in place rather than re-rendering.
   //
@@ -91,6 +96,11 @@ export function setDryerHumidity(value: number | null): void {
     }
     for (const el of document.querySelectorAll<HTMLElement>('.dryer-humidity-advice')) {
       el.textContent = humidityAdvice(value);
+    }
+    for (const el of document.querySelectorAll<HTMLElement>('.dryer-humidity-age')) {
+      const age = readingAge(humidityChangedAt);
+      el.textContent = age;
+      el.classList.toggle('hidden', age === '');
     }
     return;
   }
@@ -172,15 +182,39 @@ function humidityTone(value: number): string {
   return 'text-ok';
 }
 
-/** One line of plain advice, or nothing when the room is already dry. */
+/**
+ * One line of plain advice for the band.
+ *
+ * Deliberately says nothing about WHERE the sensor is. It was written for one in a
+ * room, and then the sensor moved into the printer — at which point "damp room" was
+ * simply false. The configuration names an entity and nothing else, so the panel cannot
+ * know, and the honest copy is about the air the number describes rather than a place.
+ */
 function humidityAdvice(value: number): string {
   if (value >= 60) {
-    return 'Damp room — a dried spool will take moisture back on within a day out here.';
+    return 'Damp air — filament left in it takes moisture back on within a day.';
   }
   if (value >= 40) {
-    return 'Middling — keep dried filament in a sealed box rather than on the shelf.';
+    return 'Middling — dried filament wants a sealed box, not open air.';
   }
-  return 'Dry enough to store filament out of a box.';
+  return 'Dry — filament keeps in this without a box.';
+}
+
+/**
+ * How stale a reading is, in words, or '' while it is fresh.
+ *
+ * Worth showing because a battery sensor goes quiet in two ways that look identical on
+ * a dashboard: nothing has changed, or nothing is being heard. Putting one inside a
+ * printer makes the second much more likely — an enclosure is a metal box, and Zigbee
+ * and BLE both struggle to get out of one. A number that has not moved for an hour
+ * beside a 45 °C bed is a disconnected sensor, and without an age it reads as a fact.
+ */
+function readingAge(changedAt: string): string {
+  if (!changedAt) return '';
+  const ms = Date.now() - new Date(changedAt).getTime();
+  if (!Number.isFinite(ms) || ms < 5 * 60_000) return '';
+  const mins = Math.round(ms / 60_000);
+  return mins < 90 ? `${mins} min ago` : `${Math.round(mins / 60)} h ago`;
 }
 
 function presetOptions(selected: string): string {
@@ -246,8 +280,9 @@ function idleView(): string {
         roomHumidity === null
           ? ''
           : `<div class="flex flex-wrap items-baseline gap-x-2 gap-y-1 [padding:8px_10px] rounded-chip bg-input">
-               <span class="text-[11px] text-fg-muted">Room humidity</span>
+               <span class="text-[11px] text-fg-muted" title="${escapeAttr(humidityName)}">Humidity</span>
                <span class="dryer-humidity-value font-mono text-[15px] ${humidityTone(roomHumidity)}">${roomHumidity.toFixed(1)} %</span>
+               <span class="dryer-humidity-age text-[11px] text-warn ${readingAge(humidityChangedAt) ? '' : 'hidden'}">${readingAge(humidityChangedAt)}</span>
                <span class="dryer-humidity-advice text-[12px] text-fg-muted">${humidityAdvice(roomHumidity)}</span>
              </div>`
       }
@@ -271,8 +306,8 @@ function idleView(): string {
  * keepalive exists to undo, visible in the ~30s before it does.
  */
 function tempsView(session: DryerSession): string {
-  const cell = (label: string, value: string, extra = '') =>
-    `<div class="flex flex-col gap-0.5">
+  const cell = (label: string, value: string, extra = '', title = '') =>
+    `<div class="flex flex-col gap-0.5"${title ? ` title="${escapeAttr(title)}"` : ''}>
        <span class="text-[11px] text-fg-muted">${label}</span>
        <span class="font-mono text-[15px] text-fg">${value}</span>
        ${extra}
@@ -306,9 +341,10 @@ function tempsView(session: DryerSession): string {
     roomHumidity === null
       ? ''
       : cell(
-          'Room humidity',
+          'Humidity',
           `<span class="dryer-humidity-value ${humidityTone(roomHumidity)}">${roomHumidity.toFixed(1)} %</span>`,
-          `<span class="text-[11px] text-fg-muted">measures the room, not the spool</span>`,
+          `<span class="dryer-humidity-age text-[11px] text-warn ${readingAge(humidityChangedAt) ? '' : 'hidden'}">${readingAge(humidityChangedAt)}</span>`,
+          humidityName,
         );
 
   return `

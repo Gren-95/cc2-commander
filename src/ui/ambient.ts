@@ -22,6 +22,8 @@ interface Reading {
   value: number;
   unit: string;
   deviceClass: string;
+  /** When Home Assistant last saw it change — not when we read it. */
+  changedAt: string;
 }
 
 /** Humidity gets a water glyph, temperature a thermometer, anything else a plain dot. */
@@ -40,6 +42,15 @@ function glyphFor(deviceClass: string): string {
  * control input, so they are deliberately coarse — and the accent is not used, because
  * on this dashboard the accent means "this control is engaged".
  */
+/** How long since Home Assistant saw this change, once that is worth saying. */
+function readingAge(changedAt: string): string {
+  if (!changedAt) return '';
+  const ms = Date.now() - new Date(changedAt).getTime();
+  if (!Number.isFinite(ms) || ms < 5 * 60_000) return '';
+  const mins = Math.round(ms / 60_000);
+  return mins < 90 ? `${mins} min ago` : `${Math.round(mins / 60)} h ago`;
+}
+
 function humidityTone(value: number): string {
   if (value >= 60) return 'text-bad';
   if (value >= 40) return 'text-warn';
@@ -54,7 +65,11 @@ export function renderAmbient(state: Record<string, unknown>): void {
   // payload's shape. Null when there is none, so the panel shows nothing rather than a
   // stale number from before Home Assistant went away.
   const humidity = readings.find((r) => r.deviceClass === 'humidity');
-  setDryerHumidity(reachable && humidity ? humidity.value : null);
+  setDryerHumidity(
+    reachable && humidity ? humidity.value : null,
+    humidity?.name ?? '',
+    humidity?.changedAt ?? '',
+  );
 
   const row = document.getElementById('ambient-row');
   if (!row) return;
@@ -80,6 +95,11 @@ export function renderAmbient(state: Record<string, unknown>): void {
   row.innerHTML = readings
     .map((r) => {
       const tone = r.deviceClass === 'humidity' ? humidityTone(r.value) : 'text-fg';
+      // A battery sensor goes quiet in two ways that look the same on a dashboard:
+      // nothing changed, or nothing is being heard. Putting one inside a printer makes
+      // the second much likelier — an enclosure is a metal box, and Zigbee and BLE both
+      // struggle to get out of one. Without an age, a stale number reads as a fact.
+      const stale = readingAge(r.changedAt);
       // `value` is a number from the service's own parse, and `unit`/`name` come from
       // Home Assistant — user-set strings, so both are escaped.
       return `<div class="flex min-w-0 items-center gap-1.5" title="${escapeHtml(r.name)}">
@@ -87,6 +107,7 @@ export function renderAmbient(state: Record<string, unknown>): void {
         <span class="font-mono text-sm tabular-nums ${tone}">${r.value}</span>
         <span class="text-[11px] text-fg-muted">${escapeHtml(r.unit)}</span>
         <span class="min-w-0 truncate text-[11px] text-fg-muted">${escapeHtml(r.name)}</span>
+        ${stale ? `<span class="shrink-0 text-[11px] text-warn">${stale}</span>` : ''}
       </div>`;
     })
     .join('');
