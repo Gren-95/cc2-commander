@@ -148,6 +148,12 @@ recreated — about 200 MB and roughly 95 seconds here, and a good deal slower o
 | `CAMERA_ENABLED` | `true` | Enable camera MJPEG proxy |
 | `CAMERA_URL` | `http://<PRINTER_IP>:8080` | Override camera URL |
 | `CORS_ALLOWED_ORIGINS` | — (same-origin) | Comma-separated origins allowed to make cross-origin requests to `/api/*`, `/mcp`, `/moonraker/*`, `/octoprint/*` and `:7125`. Unset means **no cross-origin access**. `*` restores the old allow-everything behaviour |
+| `AUTH_PASSWORD_HASH` | — | Password hash for the dashboard login. Generate with `bun run auth:secret`. **With no password set, every endpoint answers without credentials** |
+| `AUTH_PASSWORD` | — | Plaintext alternative, hashed at startup. Prefer the hash |
+| `AUTH_API_KEY` | — | Shared secret for clients that cannot hold a cookie (`/mcp`, Moonraker, OctoPrint, slicers). Sent as `X-Api-Key` or `Authorization: Bearer` |
+| `AUTH_SESSION_HOURS` | `720` | Absolute session lifetime |
+| `AUTH_IDLE_HOURS` | `168` | How long a session survives unused |
+| `AUTH_ENABLED` | — | `false` keeps auth off even with a password set |
 | `TELEGRAM_BOT_TOKEN` | — | Telegram bot token (enables notifications) |
 | `TELEGRAM_CHAT_ID` | — | Telegram chat ID — where notifications are **sent** |
 | `TELEGRAM_ALLOWED_CHAT_IDS` | `TELEGRAM_CHAT_ID` | Comma-separated numeric sender ids permitted to **issue** bot commands. Anyone else is ignored silently |
@@ -183,6 +189,45 @@ All persistent data lives under `/app/data` inside the container:
 |------|----------|---------|
 | 8088 | HTTP/WS | Web UI, REST API, WebSocket, camera proxy, MCP |
 | 7125 | HTTP/WS | Moonraker compatibility API (for Mainsail/Fluidd/KlipperScreen) |
+
+## Authentication
+
+The service ships with **no authentication**: every endpoint — including printer control
+and the camera — answers any request that reaches the port. That is fine on a trusted LAN
+and not fine anywhere else, so if the port is reachable from outside, set a password:
+
+```bash
+bun run auth:secret        # prompts for a password, prints both values
+# paste AUTH_PASSWORD_HASH and AUTH_API_KEY into .env, then restart
+```
+
+Two credentials, because there are two kinds of client:
+
+| | credential | used by |
+| --- | --- | --- |
+| Browser | session cookie from the login form | the dashboard |
+| Machine | `AUTH_API_KEY` in a header | `/mcp`, Moonraker (Mainsail, Fluidd), OctoPrint (slicers) |
+
+A slicer cannot log in and hold a cookie, and a browser should not carry a bearer token in
+JavaScript, so each gets the mechanism native to it. Machine clients send either header:
+
+```
+X-Api-Key: <AUTH_API_KEY>
+Authorization: Bearer <AUTH_API_KEY>
+```
+
+**Configuring a password changes what existing clients need.** Mainsail, Fluidd,
+OrcaSlicer and anything talking to `:7125` or `/octoprint` will get `401` until the key is
+set in their config. That is the point, but it is worth doing deliberately rather than
+discovering mid-print.
+
+What stays reachable without credentials: the static app shell, the login routes, and
+`/api/health` — which reports liveness but withholds the printer serial and the build
+commit until the caller is known.
+
+Sessions live in memory only, so a restart signs you out. That is deliberate: a session
+token on disk is a credential at rest in the same `DATA_DIR` this service serves reports
+and camera stills from.
 
 ## Prerequisites
 

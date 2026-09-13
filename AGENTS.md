@@ -264,6 +264,19 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   renamed, or given a new parameter without the doc edit in the same commit is drift
   in the only place agents look. Same for `README.md`'s environment-variable table
   when `src/server/config.ts` gains a key.
+- **Auth is one gate, applied once.** `src/server/auth.ts` holds the decisions (password
+  hashing, sessions, throttling, constant-time key compare); `src/server/auth-gate.ts`
+  holds the HTTP policy and the `/api/auth/*` routes. It is wired in **three** places —
+  `nodeRouter` in `index.ts`, the `/ws` upgrade beside it, and the `:7125` listener, which
+  takes the gate as a constructor argument because it is a separate server and is the one
+  that gets missed. A new endpoint is protected by existing; do not add a per-route check.
+
+  Two properties are load-bearing. **Auth is off until a password is configured** — the
+  service is already deployed, so a default-on with nothing to check against is a lockout;
+  an unconfigured service logs a warning naming the open control surface instead.
+  **The public path list is exact, never a prefix** — a prefix match on `/api/health`
+  would open `/api/health-anything`, and `src/__tests__/auth.test.ts` asserts it.
+
 - **Secrets stay server-side and out of git.** `PRINTER_PASSWORD`,
   `TELEGRAM_BOT_TOKEN`, `AI_VLM_API_KEY` are read from the environment
   (`.env`, which is gitignored) at runtime — never hardcoded, never returned to the

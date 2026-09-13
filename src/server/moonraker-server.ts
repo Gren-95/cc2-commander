@@ -11,6 +11,7 @@
 import { request as httpRequest, type IncomingMessage, type ServerResponse } from 'http';
 import type { ServerWebSocket, WebSocketHandler } from 'bun';
 import { runNodeHandler } from './node-compat.js';
+import type { AuthGate } from './auth-gate.js';
 
 /** A Moonraker JSON-RPC client socket. Bun owns it; `ClientState` hangs off the map. */
 type MoonrakerSocket = ServerWebSocket<{ readonly connectionId: number }>;
@@ -266,6 +267,12 @@ export class MoonrakerServer {
     private store: StateStore,
     private bridge: MqttBridge,
     private config: ServiceConfig,
+    /**
+     * The same gate the main server uses. This port is the one `.agents/security.md`
+     * calls the cautionary example — it carries the full control surface in Moonraker's
+     * vocabulary on a separate listener, so anything applied only in index.ts misses it.
+     */
+    private auth: AuthGate,
   ) {
     this.db = new MoonrakerDatabase(config.dataDir);
     // OctoPrint compat (Moonraker's octoprint_compat module). Allows OrcaSlicer,
@@ -318,6 +325,23 @@ export class MoonrakerServer {
     },
   };
 
+  /**
+   * Whether a request to this port may proceed.
+   *
+   * Built from the `Request` rather than a Node shim because the upgrade path never
+   * creates one — and the upgrade is the half that matters most here, since the
+   * JSON-RPC socket carries the same commands the HTTP routes do.
+   */
+  private authorized(request: Request): boolean {
+    return this.auth.authenticate({
+      headers: {
+        cookie: request.headers.get('cookie') ?? undefined,
+        'x-api-key': request.headers.get('x-api-key') ?? undefined,
+        authorization: request.headers.get('authorization') ?? undefined,
+      },
+    }).ok;
+  }
+
   start(): void {
     void this.db.load().then(() => this.seedDefaultWebcam());
 
@@ -331,6 +355,15 @@ export class MoonrakerServer {
         // Fluidd and Mainsail connect to /websocket; KlipperScreen and others use /
         // or /klippy. The old server accepted the upgrade on every path, so this does
         // too — the discriminator is the Upgrade header, not the path.
+        // Mainsail and Fluidd run in a browser and send the session cookie; a native
+        // client sends the API key. Either satisfies the gate.
+        if (!this.authorized(request)) {
+          return new Response(JSON.stringify({ error: 'Authentication required' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+
         if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
           const data = { connectionId: nextConnectionId++ };
           if (self.upgrade(request, { data })) return undefined;

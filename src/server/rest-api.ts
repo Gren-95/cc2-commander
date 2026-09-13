@@ -669,6 +669,12 @@ export function createRestRouter(
   aiMonitor?: AIMonitor | null,
   reportCollector?: PrintReportCollector | null,
   bridge?: MqttBridge | null,
+  /**
+   * Whether this caller is known. Only `/api/health` asks, because it is the one route
+   * that answers without credentials — a predicate rather than the gate itself so this
+   * file keeps knowing nothing about sessions or keys.
+   */
+  isAuthenticated: (req: IncomingMessage) => boolean = () => true,
 ) {
   overlayStore = store;
   if (bridge) _bridge = bridge;
@@ -691,6 +697,7 @@ export function createRestRouter(
     }
 
     if (url === '/api/health') {
+      const known = isAuthenticated(req);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(
         JSON.stringify({
@@ -708,11 +715,14 @@ export function createRestRouter(
           mqttPhase: _bridge?.phase ?? 'disconnected',
           mqttRegisterAttempts: _bridge?.registerAttempts ?? 0,
           mqttMessage: mqttPhaseMessage(_bridge?.phase ?? 'disconnected'),
-          printerSn: _bridge?.serialNumber || null,
+          // Liveness is public; identity is not. The serial names one specific machine
+          // and the build names the commit running — neither is needed to answer "is it
+          // up?", which is all an unauthenticated caller is asking.
+          printerSn: known ? _bridge?.serialNumber || null : null,
           clients: 0, // filled in by ws-transport if needed
           // Which commit is serving this. All-null on an unstamped deploy or a dev
           // run; cached, because this endpoint is polled.
-          build: getBuildInfo(),
+          build: known ? getBuildInfo() : null,
         }),
       );
       return;

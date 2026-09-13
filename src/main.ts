@@ -58,6 +58,14 @@ import {
 } from './ui/dashboard';
 import { renderLog, bindLogControls } from './ui/log';
 import { installThumbnailFallback } from './ui/helpers';
+import {
+  type AuthState,
+  fetchAuthState,
+  installUnauthorizedHandler,
+  login,
+  logout,
+  renderSignIn,
+} from './ui/auth';
 import { initTheme } from './ui/theme';
 import { maybeAlertForEvent } from './ui/alert-sound';
 import { startTimestampTicker } from './ui/relative-time';
@@ -717,10 +725,80 @@ function connectToService(): void {
   });
 }
 
-// Connect button handler — now connects to the local service
-$('connect-btn').addEventListener('click', () => {
+/**
+ * Sign in, then connect.
+ *
+ * The two are one action from the user's side — the button says "Sign in" and the
+ * dashboard appears — but they are separate over the wire: a password buys a session
+ * cookie, and the WebSocket upgrade then carries that cookie like any same-origin
+ * request. A service with no password configured skips straight to the connect.
+ */
+let authState: AuthState = { required: false, authenticated: true };
+
+async function signInThenConnect(): Promise<void> {
+  const button = $('connect-btn') as HTMLButtonElement;
+  const errorEl = $('connect-error');
+  errorEl.textContent = '';
+
+  if (authState.required && !authState.authenticated) {
+    const field = $('auth-password') as HTMLInputElement;
+    const password = field.value;
+    if (!password) {
+      errorEl.textContent = 'Enter the service password.';
+      return;
+    }
+    button.disabled = true;
+    button.textContent = 'Signing in…';
+    const outcome = await login(password);
+    button.disabled = false;
+    button.textContent = 'Sign in';
+    if (!outcome.ok) {
+      errorEl.textContent = outcome.message;
+      field.select();
+      return;
+    }
+    // Never leave the password in a field that survives in the DOM.
+    field.value = '';
+    authState = { ...authState, authenticated: true };
+    $('btn-sign-out')?.classList.remove('hidden');
+  }
+
   connectToService();
+}
+
+$('connect-btn').addEventListener('click', () => {
+  void signInThenConnect();
 });
+
+// Enter submits, because a single password field that needs a mouse is a small insult.
+$('auth-password')?.addEventListener('keydown', (event) => {
+  if ((event as KeyboardEvent).key === 'Enter') void signInThenConnect();
+});
+
+$('btn-sign-out')?.addEventListener('click', () => {
+  void logout().then(() => location.reload());
+});
+
+/**
+ * Decide, before anything else runs, whether to show the dashboard or the sign-in card.
+ *
+ * A session that is already valid connects with no interaction, so the common case —
+ * reopening the tab — looks exactly as it did before auth existed.
+ */
+async function boot(): Promise<void> {
+  installUnauthorizedHandler();
+  authState = await fetchAuthState();
+  // Only when there is a session to end: on the sign-in card it would be a button
+  // that signs you out of nothing.
+  $('btn-sign-out')?.classList.toggle('hidden', !(authState.required && authState.authenticated));
+  if (authState.authenticated) {
+    connectToService();
+    return;
+  }
+  renderSignIn(authState);
+}
+
+void boot();
 
 // A corrupt or truncated thumbnail otherwise renders as the browser's broken-image
 // icon. One delegated listener covers every thumbnail, including the ones built as
@@ -735,8 +813,8 @@ initTheme();
 // unaffected. A no-op while the setting is off.
 startTimestampTicker();
 
-// Auto-connect on page load
-connectToService();
+// Auto-connect is now `boot()` above: it asks whether a password is required before
+// opening a socket that would only be refused.
 
 // Ship uncaught client errors to server for logging
 function reportClientError(

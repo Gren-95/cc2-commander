@@ -25,6 +25,8 @@ import { StateStore } from './state-store.js';
 import { WebSocketTransport } from './ws-transport.js';
 import { createRestRouter, precacheGcode } from './rest-api.js';
 import { handleMcpRequest } from './mcp-server.js';
+import { SessionStore, hashPassword } from './auth.js';
+import { AuthGate } from './auth-gate.js';
 import { createOctoPrintRouter } from './octoprint-compat.js';
 import { createMoonrakerRouter } from './moonraker-compat.js';
 import { MoonrakerServer } from './moonraker-server.js';
@@ -76,6 +78,17 @@ if (config.aiEnabled) {
   );
 }
 log.info(`Moonraker: http://0.0.0.0:${config.moonrakerPort}`);
+if (config.auth.enabled) {
+  log.info(`Auth:    enabled (API key ${config.auth.apiKey ? 'set' : 'NOT set'})`);
+} else {
+  // Loud, and specific about what is reachable. A quiet "auth: off" is how a service
+  // ends up on the public internet with `emergency_stop` open to anyone who finds it.
+  log.warn(
+    'Auth:    DISABLED — every endpoint answers without credentials, including ' +
+      'printer control (set_temperature, move, start_print, emergency_stop) and the ' +
+      'camera. Set AUTH_PASSWORD or AUTH_PASSWORD_HASH in .env to require a login.',
+  );
+}
 
 // --- State Store (shared state for all consumers) ---
 const store = new StateStore(bridge, config.progressInterval);
@@ -107,18 +120,56 @@ if (config.aiEnabled) {
 const reportCollector = new PrintReportCollector(store, config);
 
 // --- HTTP Server ---
-const restHandler = createRestRouter(store, config, aiMonitor, reportCollector, bridge);
+const restHandler = createRestRouter(
+  store,
+  config,
+  aiMonitor,
+  reportCollector,
+  bridge,
+  (req) => authGate.authenticate(req).ok,
+);
 const octoPrintHandler = createOctoPrintRouter(store, bridge, config);
 const moonrakerHandler = createMoonrakerRouter(store, bridge, config);
-const moonrakerServer = new MoonrakerServer(store, bridge, config);
 
 /**
  * The non-static, non-WebSocket half of the service, unchanged from when this was an
  * `http.createServer` callback — one `res` threaded through the whole chain, so the
  * CORS headers each branch applies still survive a fall-through to the next router.
  */
+/**
+ * Single-user auth. Built before the router because every branch below consults it.
+ *
+ * `AUTH_PASSWORD` is hashed here rather than in `loadConfig` because hashing is async
+ * and config loading is not — argon2 is deliberately slow, which is the point of it.
+ */
+const sessions = new SessionStore(config.auth);
+if (config.auth.enabled && !config.auth.passwordHash) {
+  config.auth.passwordHash = await hashPassword(process.env.AUTH_PASSWORD ?? '');
+}
+const authGate = new AuthGate(config.auth, sessions);
+
+// Expired entries are only dropped when something touches them, so nothing reclaims the
+// memory of a session or a throttled address that is never seen again.
+setInterval(
+  () => {
+    sessions.prune();
+    authGate.throttle.prune();
+  },
+  60 * 60 * 1000,
+).unref();
+
+const moonrakerServer = new MoonrakerServer(store, bridge, config, authGate);
+
 const nodeRouter: NodeHandler = (req, res) => {
   const url = req.url || '';
+
+  // Auth first, for every surface at once. Putting it here rather than in each of
+  // /mcp, /octoprint, /moonraker and rest-api is the whole point: `.agents/security.md`
+  // records that the CORS fix had to be applied five times and the :7125 server was
+  // nearly missed. A new endpoint is protected by existing, not by remembering.
+  if (authGate.handle(req, res)) return;
+  if (!authGate.require(req, res)) return;
+
   if (url === '/mcp' || url.startsWith('/mcp?')) {
     // CORS for MCP endpoint — same-origin unless CORS_ALLOWED_ORIGINS says otherwise
     applyCors(
@@ -248,6 +299,16 @@ async function start(): Promise<void> {
       const { pathname } = new URL(request.url);
 
       if (pathname === '/ws') {
+        // The upgrade carries the session cookie like any same-origin request. Refusing
+        // here rather than after the handshake means an unauthenticated client never
+        // reaches the command frames at all.
+        if (
+          !authGate.allowsUpgrade({
+            headers: { cookie: request.headers.get('cookie') ?? undefined },
+          })
+        ) {
+          return new Response('Authentication required', { status: 401 });
+        }
         if (self.upgrade(request, { data: wsTransport.upgradeData() })) return undefined;
         return new Response('Expected a WebSocket upgrade', { status: 426 });
       }

@@ -33,7 +33,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "check": "biome check --write",
-    "prepare": "command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1 && simple-git-hooks >/dev/null 2>&1 || true"
+    "prepare": "command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1 && simple-git-hooks >/dev/null 2>&1 || true",
+    "auth:secret": "bun scripts/auth-secret.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.9",

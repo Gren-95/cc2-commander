@@ -2,12 +2,25 @@
 
 Start from the accurate statement, because every design decision here follows from it:
 
-> **The service has no authentication.** Not a password, not an API key, not a session.
-> Every REST endpoint, the WebSocket, `/mcp`, the Moonraker layer and the OctoPrint
-> layer answer any request that reaches the port.
+> **The service has no authentication *until one is configured*.** With no
+> `AUTH_PASSWORD_HASH` (or `AUTH_PASSWORD`) set, every REST endpoint, the WebSocket,
+> `/mcp`, the Moonraker layer and the OctoPrint layer answer any request that reaches
+> the port — and the service says so in a warning at every startup.
 
-That is not a bug report, it is the current design — the service was written for a
-trusted LAN. It becomes a serious problem the moment the port is reachable from
+Single-user auth exists now (`src/server/auth.ts`, `src/server/auth-gate.ts`): a password
+login that mints a session cookie for the browser, and `AUTH_API_KEY` for clients that
+cannot hold one. It is **off by default and that is deliberate**, because the service is
+already deployed: defaulting it on with nothing to check against is either a lockout or a
+refusal to start. The table below therefore describes an *unconfigured* service, which is
+still the shipped default.
+
+The gate is applied once, in `nodeRouter`, plus the `/ws` upgrade and the `:7125`
+listener — three places, not five, and a new endpoint is protected by existing rather than
+by someone remembering. The `:7125` server takes the gate as a constructor argument for
+exactly the reason this document gives below for CORS: it is a separate listener and is
+the one that gets missed.
+
+The original design was for a trusted LAN. It becomes a serious problem the moment the port is reachable from
 somewhere else, and **whether it is, is decided outside this repo** (a proxy or tunnel
 configured in the `~/ansible` repo; the specifics for a given deployment belong in the
 tracker, not in this public repository).
@@ -54,6 +67,10 @@ Three things make this sharper than a typical "no auth" note:
    a fixed `apikey: 'elegoo-cc2-compat'` and the Moonraker layer answers
    `access.get_api_key` — so a client shows "connected, authenticated" while nothing was
    ever checked. Do not read those endpoints as evidence that an auth path exists.
+
+   With `AUTH_API_KEY` set, those layers *are* checked — but by the gate in front of them,
+   not by those endpoints, which still return their fixed strings. They remain decoration;
+   the real key never appears in a response.
 
 **Rule:** never add an endpoint on the assumption that only the LAN can reach it, and
 never add one that widens the write surface without saying so on the issue. Adding an

@@ -4,6 +4,21 @@ Model Context Protocol server for AI agent integration with Elegoo Centauri Carb
 
 **Endpoint**: `POST /mcp` (StreamableHTTP transport with session management)
 
+## Authentication
+
+If the service has `AUTH_API_KEY` set, every `/mcp` request needs it. Send either header:
+
+```
+X-Api-Key: <AUTH_API_KEY>
+Authorization: Bearer <AUTH_API_KEY>
+```
+
+Without it the endpoint answers `401` with
+`{"error":"Authentication required","code":"AUTH_REQUIRED"}`. With no password configured
+on the service, `/mcp` answers unauthenticated — which matters here more than on most
+endpoints, because the tools below include `set_temperature`, `move`, `home`,
+`start_print`, `stop_print` and `emergency_stop`. See **Authentication** in `README.md`.
+
 ## Connection
 
 The MCP server uses [StreamableHTTP](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http) transport:

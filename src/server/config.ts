@@ -13,6 +13,15 @@ export interface ServiceConfig {
    */
   printerSn: string;
 
+  // Authentication (single user; see src/server/auth.ts)
+  auth: {
+    enabled: boolean;
+    passwordHash: string;
+    apiKey: string;
+    absoluteTtlMs: number;
+    idleTtlMs: number;
+  };
+
   // Service
   servicePort: number;
 
@@ -61,6 +70,42 @@ function validatePort(value: number, name: string): void {
   if (!Number.isFinite(value) || value < 1 || value > 65535) {
     throw new Error(`Invalid ${name}: ${value} (must be 1-65535)`);
   }
+}
+
+const HOURS = 60 * 60 * 1000;
+
+/**
+ * Single-user auth settings.
+ *
+ * Enabled only when a password is configured, and there is no way around that: the
+ * service is already deployed, so defaulting it on with nothing to check against is
+ * either a lockout or a refusal to start. `index.ts` logs a warning naming the open
+ * control surface when this comes back disabled.
+ *
+ * `AUTH_PASSWORD_HASH` is the supported form. `AUTH_PASSWORD` exists because asking
+ * someone to run a hashing command before they can turn on a login is how a security
+ * feature ends up switched off — it is hashed at startup and never stored, but it is a
+ * plaintext credential in a file, so it warns and points at the generator.
+ */
+function loadAuthConfig(): ServiceConfig['auth'] {
+  const hash = env('AUTH_PASSWORD_HASH', '').trim();
+  const plain = env('AUTH_PASSWORD', '').trim();
+  const explicitlyOff = env('AUTH_ENABLED', '').trim().toLowerCase() === 'false';
+
+  const absoluteHours = parseInt(env('AUTH_SESSION_HOURS', '720'), 10) || 720;
+  const idleHours = parseInt(env('AUTH_IDLE_HOURS', '168'), 10) || 168;
+
+  return {
+    // `passwordHash` is filled in by initAuth() when only AUTH_PASSWORD was given —
+    // hashing is async and config loading is not.
+    enabled: !explicitlyOff && Boolean(hash || plain),
+    passwordHash: hash,
+    apiKey: env('AUTH_API_KEY', '').trim(),
+    absoluteTtlMs: absoluteHours * HOURS,
+    // An idle timeout longer than the absolute cap is a typo, not a policy; the cap wins
+    // either way, so clamping here keeps the two from disagreeing in the logs.
+    idleTtlMs: Math.min(idleHours, absoluteHours) * HOURS,
+  };
 }
 
 export function loadConfig(): ServiceConfig {
@@ -112,6 +157,7 @@ export function loadConfig(): ServiceConfig {
   }
 
   return {
+    auth: loadAuthConfig(),
     printerIp,
     printerPassword: env('PRINTER_PASSWORD', '123456'),
     printerSn: env('PRINTER_SN', '').trim(),
