@@ -268,8 +268,8 @@ Production runs on this same machine (see [deployment.md](deployment.md)), and i
 **both** service ports:
 
 ```
-LISTEN 0.0.0.0:8088      elegooweb.service   (SERVICE_PORT)
-LISTEN 0.0.0.0:7125      elegooweb.service   (MOONRAKER_PORT)
+LISTEN 0.0.0.0:8088      cc2-commander   (SERVICE_PORT)
+LISTEN 0.0.0.0:7125      cc2-commander   (MOONRAKER_PORT)
 ```
 
 So `bun run dev` / `bun run dev:service` with default config **fails to bind**, and if you
@@ -326,8 +326,8 @@ because nothing answered is worse than no check.
   nothing asserts they agree. Renaming a message `type` on one side is silent.
 - **The compatibility layers against a real client.** Mainsail/Fluidd/KlipperScreen
   compatibility is only ever proven by pointing one of them at `:7125`.
-- **Anything about the deployed service.** The gates run in the checkout;
-  `/opt/elegooweb` is a different tree.
+- **Anything about the deployed service.** The gates run in the checkout; the running
+  container is a different tree, built from a different commit.
 
 When you close an issue, state what you actually ran and what it can and cannot prove.
 "`bun run gates` green" is true and weak here; "gates green, and I read the state-merge

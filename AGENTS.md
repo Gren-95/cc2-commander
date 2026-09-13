@@ -140,7 +140,7 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   debug-capture endpoints did exactly that until ELEG-70, and it survived unnoticed for
   the life of the repo **because the default makes the two coincide**: `DATA_DIR`
   defaults to `./data`, so `$CWD/data` is the same directory on metal
-  (`WorkingDirectory=/opt/elegooweb`) and in the container (`WORKDIR /app`). It only
+  in the container (`WORKDIR /app`) and in a checkout alike. It only
   diverges for someone who sets `DATA_DIR` elsewhere — which `README.md` documents as
   supported — and then the writes land in a directory nobody mounted or backs up.
 
@@ -338,9 +338,9 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   starts a `BACKLOG`/`TODO` ancestor; a parent whose every non-`CANCELLED` child is
   `DONE` becomes `DONE`), so don't hand-maintain an epic's status.
 - **`IN_PRODUCTION` is real here, and merging is not it.** ELEG has
-  `tracksProduction` on because production is a *separate step*: the service runs
-  from **`/opt/elegooweb`**, which is **not a git checkout**, under systemd as user
-  `elegooweb`. A merged PR changes nothing that is running. See
+  `tracksProduction` on because production is a *separate step*: the service runs as a
+  **container** from `ghcr.io/gren-95/cc2-commander`, which is **not a git checkout**,
+  and nothing pulls it for you. A merged PR changes nothing that is running. See
   [`.agents/deployment.md`](.agents/deployment.md) — and note that performing the
   deploy is operator work.
 - **An issue is either repo work or operator work — never both.** Repo work is done
@@ -358,7 +358,7 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
 
   | Action | Who runs it |
   | --- | --- |
-  | shell on this host, `systemctl`, reading `/opt/elegooweb`, `journalctl` | **them** — give exact commands, ask for output |
+  | shell on this host, `docker compose pull`/`up`/`restart`, reading container logs | **them** — give exact commands, ask for output |
   | a printer command (temps, motion, print start/stop, emergency stop) | **them**, at or near the machine |
 
   And the distinction that decides most of these: **stopping something is not the same
@@ -372,8 +372,8 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   in the 2026-08-08 pass turned out to be over-scoped:
 
   - **ELEG-68** ("confirm the deploy stamp") — `curl localhost:8088/api/health` is on
-    the *reads are fine and encouraged* list two rules above; only `sudo cat
-    /opt/elegooweb/build-info.json` needs privilege. Running the read answered all of
+    the *reads are fine and encouraged* list two rules above; only reading the stamp
+    file inside the deployment needed privilege. Running the read answered all of
     it but one line — and answered it *better*, because `/api/health` also reported
     `mqttPhase: null`, which corroborated the stamp's claim from **behaviour** rather
     than trusting the file's own say-so.
@@ -501,15 +501,14 @@ checkout.
 | Tests (logic, `bun test`) | `src/__tests__/**`, `src/server/__tests__/**` |
 | Tests (browser, Playwright) | `tests/browser/**` |
 | Frontend build / dev loop | `scripts/build.ts`, `scripts/dev.ts` |
-| systemd unit + installer | `contrib/` |
 | Roadmap | the **ELEG tracker** — there is no roadmap file |
 
 ## Deep dives
 
 - [.agents/architecture.md](.agents/architecture.md) — the fan-out, the two HTTP
   servers, state flow, and which layer a change belongs in.
-- [.agents/deployment.md](.agents/deployment.md) — `/opt/elegooweb`, the systemd unit,
-  the cloudflare tunnel, and what `IN_PRODUCTION` means here.
+- [.agents/deployment.md](.agents/deployment.md) — the published container, the deploy
+  stamp, the exposure posture, and what `IN_PRODUCTION` means here.
 - [.agents/testing.md](.agents/testing.md) — what the suite actually covers (very
   little), how to probe safely against a live printer, and what nothing checks.
 - [.agents/security.md](.agents/security.md) — the exposure posture, the

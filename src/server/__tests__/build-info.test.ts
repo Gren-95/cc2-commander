@@ -126,8 +126,8 @@ describe('readBuildInfo', () => {
   });
 
   it('resolves the default path to the install root, not the cwd', () => {
-    // The service reads this from `/opt/elegooweb/build-info.json`, outside src/ so a
-    // delete-consistent copy of src/ cannot reach it (ELEG-11). Anchoring on the module
+    // The service reads this from the app root's `build-info.json`, outside src/ so
+    // nothing that replaces src/ alone can reach it (ELEG-11). Anchoring on the module
     // location rather than process.cwd() is the load-bearing part.
     const root = join(import.meta.dirname, '..', '..', '..');
     expect(BUILD_INFO_PATH).toBe(join(root, 'build-info.json'));

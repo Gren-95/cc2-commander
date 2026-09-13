@@ -49,9 +49,9 @@ A request to 8088 is answered by exactly one of these, checked in this order:
    `createReadStream` per request, with its own MIME table) was deleted from
    `rest-api.ts`.
 
-   The table is built **once**. A `vite build` while the service is running is not
-   picked up until it restarts — which is already how production works, since
-   `contrib/install.sh` rsyncs and then restarts the unit.
+   The table is built **once**. A rebuild while the service is running is not picked
+   up until it restarts — which is already how production works, since a deploy there
+   replaces the container rather than editing files under a running process.
 
 2. **`/ws`** — upgraded in `fetch()` to Bun's native WebSocket server, handled by
    `ws-transport.ts`. Note it does *not* use `server.publish()` for broadcast; see the

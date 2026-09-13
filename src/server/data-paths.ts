@@ -8,8 +8,8 @@
  * relative `join('data', 'logs', …)`.
  *
  * **That was invisible because the default makes them coincide.** `DATA_DIR` defaults to
- * `./data`, so `$CWD/data` is the same directory — on metal (`WorkingDirectory=
- * /opt/elegooweb`) and in the container (`WORKDIR /app`) alike. It only diverges when
+ * `./data`, so `$CWD/data` is the same directory — in a checkout and in the container
+ * (`WORKDIR /app`) alike. It only diverges when
  * `DATA_DIR` points elsewhere, which `README.md` documents as supported. Then those two
  * write somewhere nobody mounted or backs up: in a container, into an unmounted layer
  * that is discarded on every recreate.

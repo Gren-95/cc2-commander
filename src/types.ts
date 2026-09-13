@@ -329,8 +329,8 @@ function versionFromTag(tag: string): string | null {
  *
  * **Adapted rather than copied, because the two repos run different `describe` flags.**
  * RCP uses `--long`, which always yields `<tag>-<n>-g<sha>` — deliberately, so there is
- * one shape to parse. `contrib/install.sh` here runs `--tags --always --dirty`, which
- * yields four:
+ * one shape to parse. `.github/workflows/publish.yml` here runs
+ * `--tags --always --dirty`, which yields four:
  *
  * | `describe` | Result | Why |
  * | --- | --- | --- |

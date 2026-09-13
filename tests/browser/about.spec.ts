@@ -2,7 +2,7 @@
  * The About panel — which build is running, and what it is talking to.
  *
  * Worth testing rather than eyeballing because the interesting case is the one that is
- * invisible in development: an UNSTAMPED deploy. Production runs from /opt/elegooweb,
+ * invisible in development: an UNSTAMPED deploy. Production runs as a container,
  * which is not a git checkout, so this panel is the only answer to "which commit is
  * this?" — and the failure mode to avoid is it confidently showing something wrong.
  * ELEG-48: a version you cannot trust is worse than none.

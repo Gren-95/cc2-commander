@@ -249,8 +249,8 @@ describe('formatBuildVersion — x.y.z+aa, the way RCP renders it (ELEG-48)', ()
   });
 
   it('records a dirty install, which RCP never sees', () => {
-    // contrib/install.sh runs `describe --tags --always --dirty`; RCP uses `--long`.
-    // Installed from a modified checkout is worth surfacing, and `+58.dirty` is still
+    // publish.yml runs `describe --tags --always --dirty`; RCP uses `--long`.
+    // Built from a modified checkout is worth surfacing, and `+58.dirty` is still
     // valid semver build metadata.
     expect(formatBuildVersion({ describe: 'v0.2.1-58-g5b00442-dirty' })).toBe('0.2.1+58.dirty');
     expect(formatBuildVersion({ describe: 'v0.3.0-dirty' })).toBe('0.3.0+dirty');

@@ -1,99 +1,42 @@
 # Deployment — and why `MERGED` is not `IN_PRODUCTION`
 
-Production for this repo runs **on the same machine you develop on**. That is the single
-most important thing on this page: your checkout and `/opt/elegooweb` (the live service)
-are different trees that can silently disagree.
+**This fork deploys as a container.** A merged commit changes nothing that is running
+until an image is built, pushed and pulled. That gap is the whole reason this page
+exists.
 
 ## What is actually running
 
 | | |
 | --- | --- |
-| unit | `elegooweb.service` (`/etc/systemd/system/elegooweb.service`, `enabled`) |
-| user | `elegooweb` (system user, no home, no shell) |
-| working dir | **`/opt/elegooweb` — not a git checkout.** `git -C /opt/elegooweb status` fails |
-| exec | `<abs path to bun> src/server/index.ts` — the **TypeScript is run directly**, so `src/**` in that directory *is* the production code. The path is substituted into the unit by `contrib/install.sh` (`@BUN@`), because systemd does not search `$PATH` and bun installs to different places. |
-| env | `EnvironmentFile=/opt/elegooweb/.env` (separate from the checkout's `.env`) |
+| image | `ghcr.io/gren-95/cc2-commander:latest` (or a pinned `x.y.z`) |
+| built by | `.github/workflows/publish.yml`, on a push to `main` or a `v*` tag |
+| exec | `bun src/server/index.ts` — the **TypeScript is run directly**, so there is no compiled backend artefact to go stale |
+| config | the compose file's `environment:` block, not a `.env` in your checkout |
+| state | whatever is mounted at `/app/data` (`DATA_DIR`) |
 | ports | `SERVICE_PORT` 8088 (web + API + `/ws`), `MOONRAKER_PORT` 7125 |
-| hardening | `NoNewPrivileges`, `ProtectSystem=strict`, `ProtectHome=true`, `PrivateTmp`, `ReadWritePaths=/opt/elegooweb`, `UMask=0027` |
-| restart | `Restart=always`, `RestartSec=5` |
-| modes | `750` on the tree, **`600` on `.env`**, `750` on `data/`, `640` on the root-level files — set by the installer, not inherited |
+| stamp | `build-info.json`, written into the image as its last layer from `BUILD_*` args |
 
-**The modes are stated by the installer on every run, deliberately.** They were `777` for
-a long time, which meant any local account could read `PRINTER_PASSWORD`,
-`TELEGRAM_BOT_TOKEN`, and — because the service runs the TypeScript
-directly — could drop a file into `src/server/` and have it executed as `elegooweb` on the
-next restart. Nothing corrected it, because `cp` onto an existing file keeps that file's
-mode and no line in the installer had ever expressed an intended one (ELEG-20). If you add
-a file to the install root, give it a mode there too.
+**The running container is not a git checkout**, which is why the stamp exists at all:
+there is no git metadata inside the image to ask. `src/server/build-info.ts` reads that
+file back and `/api/health` serves it, so "is my change live?" is one HTTP request
+rather than a guess.
 
-Because the service runs the TypeScript directly, **there is no build step for the
-backend** — copying a `.ts` file into `/opt/elegooweb/src/server/` and restarting is a
-deploy. The frontend *does* need `vite build`, and the service serves the resulting
-`dist/` (with SPA fallback) from that same directory.
+An unstamped image reports `unknown` rather than lying. That is what a local
+`docker build` produces — the `BUILD_*` args come from the publish workflow — and it is
+honest, but it means a locally built image cannot answer the version question.
 
-There is also a Docker path (`ghcr.io/gren-95/cc2-commander`, `Dockerfile`, and the
-compose snippet in `README.md`) — it is real and released, but it is **not** what runs
-here. Don't reason about this host's behaviour from the compose snippet.
+## What used to be here
 
-## How a deploy happens
+A systemd installer: `contrib/install.sh` deployed an rsync copy to `/opt/elegooweb` and
+ran it under `elegooweb.service`. It is gone, along with `contrib/` itself, because this
+fork ships a container and the systemd path was never used here. `git log` has it.
 
-`contrib/install.sh` (`sudo bun run service:install`) is the mechanism: it creates the
-user and the directory, then **`rsync -a --delete`** of `src/`, `dist/` and `public/`
-(one directory at a time) plus a plain copy of `package.json`, `bun.lock` and the
-tsconfigs, writes the build stamp, `bun install --production`,
-`chown -R elegooweb:elegooweb`, install the unit, `systemctl enable` + restart. It
-preserves an existing `.env`, and **requires `rsync`** — it exits rather than falling
-back to a copy that cannot delete.
-
-**`/opt/elegooweb` never gets devDependencies.** The install there is `--prod` and only
-`--prod`; if the source tree has no `dist/`, the installer builds it in the *checkout*
-(dropping to `$SUDO_USER`, so root does not leave artefacts in your working tree) and
-rsyncs the result. It used to run a full `bun install` + `bun run build` inside
-`/opt/elegooweb` on first install, which put the dev toolchain (then vite, vitest, typescript, release-it)
-into production and left every later `--prod` run pruning them back out — the source of
-the `Failed to create bin … ENOENT` warnings that made a healthy deploy read as broken
-(ELEG-19). The runbook below builds before installing anyway, so that path was only ever
-reached on a first install.
-
-Three consequences that have already produced a real artefact:
-
-1. **The copy is delete-consistent, but only from the next install onwards.** It used to
-   be `cp -r`, which never deletes, so a file removed from git stayed in production
-   forever. `src/`, `dist/` and `public/` are now `rsync -a --delete`, **scoped one
-   directory at a time** — never a sweep over `$INSTALL_DIR`, because `.env`, `data/` and
-   `node_modules/` live at the install root beside them and must survive. The
-   `--exclude`s in the installer are a second layer, not the defence.
-
-   What that backlog looks like today, from a dry run against the live directory:
-   `/opt/elegooweb/src/ui/bed-mesh.ts` (deleted from the repo by `a8157a9`) plus **24
-   orphaned hashed bundles in `dist/assets/`**, one pair per build ever deployed. All
-   unreferenced, so harmless — but the same mechanism would just as happily keep serving
-   a retired route or a module something still imports. Until an install actually runs
-   they are all still there, so **verify a removal with `ls`, not with the git diff.**
-2. **The deployed tree still has no git metadata — but it does carry a stamp.** The
-   installer writes `/opt/elegooweb/build-info.json` (commit, short commit,
-   `git describe`, `package.json` version, install timestamp) and the service reports it
-   from `/api/health` as `build`, read once at startup. So "is this change live?" is now
-   one request, answered at the receiver:
-   ```bash
-   curl -s localhost:8088/api/health | jq .build
-   # {"commit":"a8157a9…","shortCommit":"a8157a9","describe":"v1.4.0-3-ga8157a9",…}
-   ```
-   **All-null `build` means unstamped, not broken** — a `bun run dev` run, or a deploy made
-   before ELEG-10 landed. Nothing else distinguishes the two; the first stamped install
-   is what fixes that. The old hand-diff still works and is the only check that catches a
-   *stale* file rather than an old one:
-   ```bash
-   diff -rq --exclude=node_modules --exclude=data --exclude=.env --exclude=dist \
-     "$PWD/src" /opt/elegooweb/src
-   ```
-   The stamp lives at the install root, deliberately outside `src/`, `dist/` and
-   `public/`, so a delete-consistent copy of those directories cannot remove it.
-3. **`.env` divergence is invisible.** The production `.env` is a *different file* from
-   the one you test with, and the installer only ever creates it. A new
-   `config.ts` key therefore defaults silently in production until someone adds it
-   there — which makes "add the key to `/opt/elegooweb/.env`" part of the deploy, not
-   an afterthought.
+Consequences worth knowing if you read older commits or ELEG issues: `/opt/elegooweb`,
+`rsync --delete`, `sudo bun run service:install` and file-mode rules (ELEG-19, ELEG-20)
+all describe a mechanism that no longer exists. Two of their lessons generalise and are
+worth keeping in mind anywhere: **`cp` onto an existing file keeps that file's mode**,
+so a copy never fixes permissions; and **a successful copy is not a successful deploy**,
+which is the rule the verification below is built on.
 
 ## Exposure is decided outside this repo
 
@@ -120,51 +63,34 @@ network position, not code.
 
 ## Operator commands
 
-These are the ones worth pasting into an `OPERATOR:` issue. All of them are for a
-human on this host; an agent may read (`status`, `journalctl`, `diff`) but does not
-restart the service or copy files into `/opt`.
+An agent may read (`ps`, `logs`, `curl`) but does not pull images or restart the
+service. These are the ones worth pasting into an `OPERATOR:` issue.
 
 ```bash
 # what is running, and since when
-systemctl status elegooweb --no-pager
-journalctl -u elegooweb -n 100 --no-pager        # or: bun run service:logs
+docker compose ps
+docker compose logs -n 100                 # startup banner: build, printer, ports, Telegram
 
-# is production the same code as the checkout?
-diff -rq --exclude=node_modules --exclude=data --exclude=.env --exclude=dist \
-  "$PWD/src" /opt/elegooweb/src
+# deploy: pull the new image and recreate
+docker compose pull && docker compose up -d
 
-# what would the deploy DELETE? read this before every install — it is the safety case
-for d in src dist public; do
-  rsync -n -v -a --delete --exclude=.env --exclude=data/ --exclude=node_modules/ \
-    "$PWD/$d/" "/opt/elegooweb/$d/" | grep '^deleting' || true
-done
-# -n writes nothing. The list must contain only files you meant to remove, and must
-# never mention .env, data/ or node_modules/ — if it does, stop and do not install.
-
-# deploy (from a clean, merged checkout on main)
-git switch main && git pull --ff-only
-bun install && bun run gates && bun run build        # dist/ must be current
-sudo bun run service:install                       # rsync --delete + install --prod + restart
-
-# restart / stop only
-sudo systemctl restart elegooweb
-sudo systemctl stop elegooweb
+# roll back to a known-good tag — edit `image:` to a pinned x.y.z, then
+docker compose up -d
 ```
 
-**Verify at the receiver, not at the exit code** — a successful `cp` proves nothing:
+**Verify at the receiver, not at the exit code** — a successful `pull` proves nothing:
 
 ```bash
-curl -s localhost:8088/api/health | jq .          # {"ok":true,"mqtt":"connected","mqttPhase":"connected","build":{…}}
-systemctl show -p ActiveEnterTimestamp elegooweb  # did it actually restart?
-journalctl -u elegooweb -n 30 --no-pager          # startup banner: build, printer, ports, AI/Telegram state
+curl -s localhost:8088/api/health | jq .   # {"ok":true,"mqtt":"connected","mqttPhase":…,"build":{…}}
+docker compose ps                          # did it actually recreate, and is it healthy?
 ```
 
-Two fields in there carry the whole check:
+Two fields carry the whole check:
 
-- **`build.commit`** answers "is my change live?". Compare it against the commit you
-  deployed — `git rev-parse HEAD` in the checkout you installed from. Equal means the
-  copy landed; anything else means it did not, whatever the `cp` exit code said. All
-  nulls means the install predates the stamp (or was not run from a checkout).
+- **`build.commit`** answers "is my change live?". Compare it against the commit the
+  image was built from. Equal means the pull landed; anything else means it did not,
+  whatever the pull said. All nulls means the image was built locally, without the
+  publish workflow's stamp.
 - **`mqtt":"connected"`** is the one that matters for whether it *works*: the process can
   start happily and fail to reach the printer, and the web UI then looks fine and shows
   nothing.
@@ -191,12 +117,12 @@ Two fields in there carry the whole check:
 ELEG has `tracksProduction` **on**, so `IN_PRODUCTION` exists and is meaningful:
 
 - A merged PR moves the issue to `MERGED` and changes **nothing that is running**.
-- `IN_PRODUCTION` means the copy + restart happened and `/api/health` answered from the
-  new code. That is operator work — file it as its own `OPERATOR:` issue rather than
-  leaving a code issue open across a manual step, give the exact commands above, and
-  ask for the output. **The evidence is `build.commit` from `/api/health` matching the
-  commit that was deployed**, not a successful `sudo bun run service:install` — set the
-  status from that output rather than from the install having exited 0.
+- `IN_PRODUCTION` means the image was published, pulled, and `/api/health` answered from
+  the new code. That is operator work — file it as its own `OPERATOR:` issue rather than
+  leaving a code issue open across a manual step, give the exact commands above, and ask
+  for the output. **The evidence is `build.commit` from `/api/health` matching the commit
+  the image was built from**, not a successful `docker compose pull` — set the status
+  from that output rather than from the pull having exited 0.
 - The status automation never moves an issue backwards out of `MERGED` /
   `IN_PRODUCTION`, so setting `IN_PRODUCTION` optimistically is not correctable later.
   Set it after the verification, from the output you were given.

@@ -1,13 +1,13 @@
 /**
  * Deploy stamp — which commit is actually running.
  *
- * Production is `/opt/elegooweb`, which is not a git checkout and carries no git
- * metadata, so `contrib/install.sh` writes `build-info.json` at the install root and
- * this reads it back. "Is this change live?" is then a `/api/health` request rather
- * than a hand-diff of two directories.
+ * Production is a container, which is not a git checkout and carries no git metadata,
+ * so the image's last layer writes `build-info.json` at the app root and this reads it
+ * back. "Is this change live?" is then a `/api/health` request rather than a guess
+ * about which image is running.
  *
- * An absent stamp is normal, not an error: `pnpm dev` runs from the checkout and any
- * deploy made before this landed has no file. Every failure — missing, unreadable,
+ * An absent stamp is normal, not an error: `bun run dev` runs from the checkout, and a
+ * local `docker build` without the publish workflow's `BUILD_*` args has no values. Every failure — missing, unreadable,
  * malformed, wrong shape — degrades to `UNKNOWN_BUILD_INFO`, so the caller never has
  * to guard and `/api/health` never 500s over a version string.
  */
@@ -47,8 +47,8 @@ export const UNKNOWN_BUILD_INFO: BuildInfo = {
 
 /**
  * Install root. This file is `<root>/src/server/build-info.ts` in the checkout and in
- * production alike, so resolving from the module beats `process.cwd()` — the systemd
- * unit happens to set `WorkingDirectory=/opt/elegooweb`, but that is a property of the
+ * production alike, so resolving from the module beats `process.cwd()` — the image
+ * happens to set `WORKDIR /app`, but that is a property of the
  * unit file, and a `cd` anywhere would break a cwd-relative path silently.
  */
 export const BUILD_INFO_PATH = join(

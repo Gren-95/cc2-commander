@@ -16,8 +16,9 @@ on demand when working in that area:
   gate split is unnecessary in this repo (no e2e, no port-binding gate)
 - `.agents/architecture.md` — one MQTT connection fanned out to WebSocket / REST /
   Moonraker / OctoPrint / Telegram; which layer a change belongs in
-- `.agents/deployment.md` — production is systemd `elegooweb.service` running from
-  `/opt/elegooweb`, which is **not a git checkout**; what `IN_PRODUCTION` means here
+- `.agents/deployment.md` — production is the published container
+  `ghcr.io/gren-95/cc2-commander`, which is **not a git checkout**; what
+  `IN_PRODUCTION` means here
 - `.agents/testing.md` — what the suite covers (very little), how to probe a live
   printer **read-only**, and what nothing checks
 - `.agents/security.md` — the exposure posture: single-user auth exists but is **off

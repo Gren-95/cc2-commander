@@ -1,9 +1,9 @@
 /**
  * The built SPA, served by Bun's static route table.
  *
- * `dist/` is immutable for the lifetime of a process — production rsyncs a new build
- * into /opt/elegooweb and restarts the unit (contrib/install.sh), and the container
- * bakes it into the image — so the whole tree is walked once at startup and turned
+ * `dist/` is immutable for the lifetime of a process — the container bakes it into the
+ * image, and a deploy replaces the container rather than editing files underneath a
+ * running one — so the whole tree is walked once at startup and turned
  * into `Bun.serve({ routes })` entries. Bun answers those from its own route table
  * without entering JavaScript at all, which is the point of the exercise: the request
  * burst a browser makes when it opens the dashboard never reaches our code.

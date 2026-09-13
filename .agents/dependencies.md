@@ -54,9 +54,9 @@ published something destroys "a red check on your branch is yours".
 
 - **`dotenv`** — `config.ts` opened with `import 'dotenv/config'`, which had been a no-op
   since the Bun conversion: Bun loads `.env`, `.env.local` and `.env.<NODE_ENV>` before
-  any user code runs. All three deployment paths were already covered without it — dev
-  and Docker by Bun itself, production by systemd's
-  `EnvironmentFile=/opt/elegooweb/.env`. The shape to recognise: **a dependency that a
+  any user code runs. Both deployment paths were already covered without it — a dev
+  checkout by Bun itself, a container by the `environment:` block compose passes in.
+  The shape to recognise: **a dependency that a
   runtime change made redundant stays in `package.json` looking load-bearing**, because
   nothing fails when it is present.
 - **`concurrently`** — ran vite and the service side by side. `bun run dev` is one

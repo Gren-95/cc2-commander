@@ -213,8 +213,8 @@ export function renderServiceStatus(): void {
 
   // `x.y.z+aa`, the way RCP renders it — see formatBuildVersion. The dot is grey on an
   // unstamped build rather than green, because "unknown" is a real gap: production runs
-  // from /opt/elegooweb, and a deploy where the installer never re-ran shows exactly
-  // this (ELEG-48).
+  // as a container, and an image built outside the publish workflow shows exactly this
+  // (ELEG-48).
   const version = buildVersionLabel(s.build);
 
   // The banner used to fire on `broker_only && attempts >= 3`, which meant it could

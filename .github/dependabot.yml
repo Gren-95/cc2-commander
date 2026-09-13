@@ -43,7 +43,7 @@ updates:
     #
     # The stakes are higher with bun than they were with node: this base is also the
     # TypeScript runtime and the HTTP server, so it has to move in step with
-    # .github/workflows/*.yml and the floor in contrib/install.sh. Patches and minors
+    # .github/workflows/*.yml. Patches and minors
     # still flow; a major is a review, not a merge.
     ignore:
       - dependency-name: oven/bun

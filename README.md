@@ -277,34 +277,29 @@ be picked up.
 
 ## Production Deployment
 
-Install as a systemd service:
+Run the published image. `docker compose up -d` with the file from
+[Docker Compose](#docker-compose) above is the whole deployment:
 
 ```bash
-bun run build
-sudo bash contrib/install.sh
+docker compose pull && docker compose up -d    # upgrade to the latest image
+docker compose logs -f                         # tail logs
+docker compose restart                         # after editing the compose file
+docker compose down                            # stop and remove
 ```
 
-`install.sh` resolves the absolute path to `bun` and writes it into the systemd unit.
-The unit runs with `ProtectHome=true`, so a Bun installed under `~/.bun` will not work —
-install it system-wide (for example `install -m 0755 ~/.bun/bin/bun /usr/local/bin/bun`)
-and the installer will say so if you have not.
+Web UI: `http://<host>:8088`. Config lives in the compose file's `environment:` block,
+and the data you care about is under whatever you mounted at `/app/data`.
 
-This creates:
-- Service user `elegooweb`
-- Installation at `/opt/elegooweb/`
-- systemd unit `elegooweb.service` (auto-start on boot)
-- Default `.env` config at `/opt/elegooweb/.env`
+**A merged commit is not a deployed one.** The image is built and pushed by the publish
+workflow on a tag or a push to `main`; until you pull it, the container keeps running the
+build it started with. The version in the web UI's status dropdown is the authoritative
+answer to "which build is this?" — it comes from a stamp baked into the image, so it
+cannot drift from what is actually running.
 
-Edit `/opt/elegooweb/.env` to configure printer IP, Telegram, the camera, etc.
-
-```bash
-sudo systemctl status elegooweb       # Check status
-sudo journalctl -u elegooweb -f       # Tail logs
-sudo systemctl restart elegooweb      # Restart after config changes
-sudo bash contrib/uninstall.sh        # Uninstall
-```
-
-Web UI: `http://<host>:8088`
+There is no systemd installer any more. `contrib/` held one — `install.sh`,
+`uninstall.sh` and an `elegooweb.service` unit that deployed to `/opt/elegooweb` — and it
+was removed because this fork deploys as a container and nobody ran it. `git log` has it
+if a no-Docker install is ever wanted again.
 
 ## Project Structure
 

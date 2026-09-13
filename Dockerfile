@@ -7,8 +7,8 @@
 #
 # Bun replaced Node + pnpm + tsx here in one move: it is the package manager
 # (bun install), the TypeScript runtime (no tsx, no transpile step) and the HTTP
-# server (Bun.serve in src/server/index.ts). Keep this version, .github/workflows and
-# contrib/install.sh in step — they are the three places a Bun version is named.
+# server (Bun.serve in src/server/index.ts). Keep this version and .github/workflows in
+# step — they are the two places a Bun version is named.
 FROM oven/bun:1.4.2-slim AS build
 
 WORKDIR /app
@@ -61,14 +61,13 @@ COPY src ./src
 # not be built from a fresh checkout. Nothing under it needs seeding: every consumer
 # creates what it needs in DATA_DIR on first write.
 
-# The deploy stamp, the same shape contrib/install.sh writes on metal (ELEG-10) and the
-# same one the UI renders as x.y.z+aa (ELEG-48). Without it a container reports
+# The deploy stamp (ELEG-10), the shape the UI renders as x.y.z+aa (ELEG-48). Without it a container reports
 # "unknown", which is honest but useless when someone opens an issue — "which build are
 # you running?" is the first question, and a public image needs to answer it itself.
 #
 # Deliberately the LAST layer: these args change on every commit, so anything below them
-# would be rebuilt every time. Empty stays null, matching install.sh, so an unstamped
-# local `docker build` still degrades to "unknown" rather than lying.
+# would be rebuilt every time. Empty stays null, so an unstamped local `docker build`
+# still degrades to "unknown" rather than lying.
 ARG BUILD_COMMIT=""
 ARG BUILD_DESCRIBE=""
 ARG BUILD_VERSION=""

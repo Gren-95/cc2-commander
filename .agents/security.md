@@ -116,7 +116,7 @@ get this right.
   credential on disk and, given the above, a credential behind an unauthenticated
   endpoint.
 - **Committed files carry placeholders only** — `.env.example`, the compose snippet in
-  `README.md`, `contrib/install.sh`'s generated default `.env`, any fixture. This repo is **public**: a committed secret is published, and rotating it is
+  `README.md`, any fixture. This repo is **public**: a committed secret is published, and rotating it is
   the only remedy.
 - **There are two `.env` files** on a host that runs the service locally: the
   checkout's and production's. Neither is in git; see

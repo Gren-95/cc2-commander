@@ -2,10 +2,10 @@
  * "About this project" — what this is, which build is running, and what it is talking
  * to.
  *
- * The build stamp is the reason this panel exists. Production runs from
- * `/opt/elegooweb`, which is not a git checkout (see `.agents/deployment.md`), so the
- * stamp `contrib/install.sh` writes is the only answer to "which commit am I looking
- * at?" — and that is the first question anyone asks when a stranger reports a bug.
+ * The build stamp is the reason this panel exists. Production runs as a container,
+ * which is not a git checkout (see `.agents/deployment.md`), so the stamp baked into
+ * the image is the only answer to "which commit am I looking at?" — and that is the
+ * first question anyone asks when a stranger reports a bug.
  *
  * Which is also why the **Copy diagnostics** button is here rather than the version
  * being something to squint at and retype. It puts the build, the printer, the service
