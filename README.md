@@ -179,6 +179,29 @@ supplied by the publish workflow, not by `docker build`.
 | `TELEGRAM_ALLOWED_CHAT_IDS` | `TELEGRAM_CHAT_ID` | Comma-separated numeric sender ids permitted to **issue** bot commands. Anyone else is ignored silently |
 | `PROGRESS_INTERVAL` | `25` | Notify every N% progress |
 | `DATA_DIR` | `./data` | Data directory for state, reports, logs |
+| `HOMEASSISTANT_URL` | — | Home Assistant base URL, e.g. `http://homeassistant.local:8123` |
+| `HOMEASSISTANT_TOKEN` | — | Long-lived access token. **Read-only use** — this service issues nothing but `GET /api/states/…` |
+| `HOMEASSISTANT_ENTITIES` | — | Comma-separated entity ids, e.g. `sensor.dry_box_humidity,sensor.workshop_temperature` |
+
+### Home Assistant (ambient temperature and humidity)
+
+The printer reports its own nozzle, bed and chamber. It cannot tell you the **humidity of
+the room the filament is sitting in** — which decides whether a spool prints cleanly or
+strings, and is the only way to know whether a drying session achieved anything.
+
+Set all three `HOMEASSISTANT_*` variables and the readings appear in the Temperatures
+card. Humidity is tinted: green below 40%, amber to 60%, red above — coarse advisory
+bands, since this is someone else's sensor and not a control input.
+
+Make the token under your Home Assistant profile → Security → **Long-lived access
+tokens**. It carries the permissions of the account that made it, so prefer an account
+with little access: this service only ever issues `GET /api/states/<entity>` and never
+writes, but the token itself does not know that. It is read from the environment, never
+logged, and never sent to the browser — `/api/home-assistant` returns readings only.
+
+Entities are polled once a minute. Home Assistant being down, or a renamed entity, shows
+as "Home Assistant unreachable" on that row and changes nothing else: a thermometer on
+another machine is not a reason for a printer dashboard to stop working.
 
 ### Volumes
 

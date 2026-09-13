@@ -29,6 +29,7 @@ export interface WsClientOptions {
   onChartData?: (t: number, values: Record<string, number>) => void;
   /** Called when the service's dryer state changes */
   onDryerState?: (data: Record<string, unknown>) => void;
+  onHomeAssistant?: (data: Record<string, unknown>) => void;
   /** Called when a drying session ends, whatever ended it */
   onDryerFinished?: (reason: string, label: string) => void;
   /** Called with event log entries */
@@ -169,6 +170,11 @@ export class WsClient {
 
       case 'dryer_state': {
         this.opts.onDryerState?.(msg);
+        break;
+      }
+
+      case 'home_assistant': {
+        this.opts.onHomeAssistant?.(msg);
         break;
       }
 

@@ -108,6 +108,8 @@ export const ICONS = {
   disconnected: 'circle',
   // Filament into and out of the extruder. Not `load`, which is a folder-open
   // glyph for opening a file and means nothing on a spool.
+  // Relative humidity, from an external sensor.
+  humidity: 'droplet-half',
   filamentLoad: 'box-arrow-in-down',
   filamentUnload: 'box-arrow-up',
   powerLoss: 'lightning-charge-fill',

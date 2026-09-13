@@ -4,6 +4,7 @@
 // variables would go unloaded.
 import { parseAllowedChatIds } from './allowlist.js';
 import { type CorsPolicy, parseCorsPolicy } from './cors.js';
+import { parseEntityList } from './home-assistant.js';
 
 export interface ServiceConfig {
   // Printer
@@ -48,6 +49,19 @@ export interface ServiceConfig {
 
   // Moonraker compat server (optional)
   moonrakerPort: number;
+
+  /**
+   * Home Assistant (optional): ambient temperature and humidity the printer cannot
+   * measure itself. Read-only — see the note in `home-assistant.ts` about what a
+   * long-lived token can do.
+   */
+  homeAssistant: {
+    enabled: boolean;
+    url: string;
+    /** Long-lived access token. A SECRET: never logged, never sent to the browser. */
+    token: string;
+    entities: string[];
+  };
 
   // AI monitoring (optional)
 }
@@ -148,6 +162,26 @@ export function loadConfig(): ServiceConfig {
     );
   }
 
+  // ── Home Assistant (optional) ──────────────────────────────────────────────
+  //
+  // All three are required together: a URL with no token cannot authenticate, and a
+  // token with no entities has nothing to read. Any one alone is a half-finished
+  // configuration, so it is treated as "off" rather than started and left failing.
+  const haUrl = env('HOMEASSISTANT_URL').trim().replace(/\/+$/, '');
+  const haToken = env('HOMEASSISTANT_TOKEN').trim();
+  const haEntities = parseEntityList(env('HOMEASSISTANT_ENTITIES'));
+  if (haUrl && !/^https?:\/\//.test(haUrl)) {
+    throw new Error(`Invalid HOMEASSISTANT_URL: "${haUrl}" (must start with http:// or https://)`);
+  }
+  // `sensor.living_room_humidity` — domain, dot, object id. A bare name is the usual
+  // mistake and produces a 404 per poll that reads like the server is down.
+  const badEntity = haEntities.find((e) => !/^[a-z_]+\.[a-z0-9_]+$/.test(e));
+  if (badEntity) {
+    throw new Error(
+      `Invalid HOMEASSISTANT_ENTITIES entry: "${badEntity}" (expected e.g. sensor.room_humidity)`,
+    );
+  }
+
   return {
     auth: loadAuthConfig(),
     printerIp,
@@ -164,5 +198,11 @@ export function loadConfig(): ServiceConfig {
     progressInterval: parseInt(env('PROGRESS_INTERVAL', '25'), 10) || 25,
     dataDir: env('DATA_DIR') || './data',
     moonrakerPort,
+    homeAssistant: {
+      enabled: !!(haUrl && haToken && haEntities.length),
+      url: haUrl,
+      token: haToken,
+      entities: haEntities,
+    },
   };
 }

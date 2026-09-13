@@ -24,6 +24,7 @@ import sharp from 'sharp';
 import type { StateStore } from './state-store.js';
 import type { ServiceConfig } from './config.js';
 import type { DryerService } from './dryer.js';
+import type { HomeAssistantService } from './home-assistant.js';
 import type { PrintReportCollector } from './print-report-collector.js';
 import type { MqttBridge } from './mqtt-bridge.js';
 import { generateReportPDF } from './print-report-pdf.js';
@@ -669,6 +670,7 @@ export function createRestRouter(
   dryer?: DryerService | null,
   reportCollector?: PrintReportCollector | null,
   bridge?: MqttBridge | null,
+  homeAssistant?: HomeAssistantService | null,
   /**
    * Whether this caller is known. Only `/api/health` asks, because it is the one route
    * that answers without credentials — a predicate rather than the gate itself so this
@@ -866,6 +868,34 @@ export function createRestRouter(
      * `server/dryer.ts` for why something that heats a bed cannot be owned by a page
      * that a phone can put to sleep.
      */
+    /**
+     * Ambient temperature and humidity from Home Assistant.
+     *
+     * Read once on page load, then kept current by `home_assistant` WebSocket frames —
+     * the same shape as `/api/dryer`, and for the same reason: a client that connects
+     * between two polls would otherwise show nothing until the next one, which is up to
+     * a minute of a blank row.
+     *
+     * The token is NOT in this payload and must never be. It is a Home Assistant
+     * long-lived token, which usually carries administrator rights.
+     */
+    if (url === '/api/home-assistant') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          success: true,
+          data: homeAssistant?.getState() ?? {
+            configured: false,
+            reachable: false,
+            readings: [],
+            lastError: null,
+            lastPolledAt: null,
+          },
+        }),
+      );
+      return;
+    }
+
     if (url === '/api/dryer') {
       if (!dryer) {
         res.writeHead(503, { 'Content-Type': 'application/json' });

@@ -9,6 +9,7 @@ import { bindControls, onCommandResponse } from './ui/controls';
 import { bindDebugPanel, renderDebugPanel, trackStateChanges } from './ui/debug-panel';
 import { applyDryerState, handleDryerFinished, setDryerClient } from './ui/dryer-panel';
 import { handleEventLog, loadEventLogHistory } from './ui/event-log';
+import { initAmbient, renderAmbient } from './ui/ambient';
 import { currentFileDir, currentFileSource } from './ui/file-browsing';
 import { handleInlineThumbnail } from './ui/file-thumbnails';
 import { bindFileControls, renderFiles } from './ui/files';
@@ -630,6 +631,9 @@ function connectToService(): void {
     onDryerState(data) {
       applyDryerState(data);
     },
+    onHomeAssistant(data) {
+      renderAmbient(data);
+    },
     onDryerFinished(reason, label) {
       handleDryerFinished(reason, label);
     },
@@ -747,6 +751,7 @@ async function boot(): Promise<void> {
 
 initDashboardEdit();
 initSegmented();
+void initAmbient();
 initSteppers();
 
 void boot();

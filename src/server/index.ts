@@ -32,6 +32,7 @@ import { MoonrakerServer } from './moonraker-server.js';
 import { TelegramIntegration } from './telegram.js';
 import { StatePersistence } from './state-persistence.js';
 import { DryerService } from './dryer.js';
+import { HomeAssistantService } from './home-assistant.js';
 import { PrintReportCollector } from './print-report-collector.js';
 import { getBuildInfo } from './build-info.js';
 import { applyCors, corsHeaders } from './cors.js';
@@ -68,6 +69,12 @@ log.info(
 log.info(`Service: http://0.0.0.0:${config.servicePort}`);
 log.info(`Camera:  ${config.cameraEnabled ? config.cameraUrl : 'disabled'}`);
 log.info(`Data:    ${config.dataDir}`);
+if (config.homeAssistant.enabled) {
+  // The URL, never the token.
+  log.info(
+    `Home Assistant: ${config.homeAssistant.url} (${config.homeAssistant.entities.length} entities)`,
+  );
+}
 if (config.telegramEnabled) {
   log.info(`Telegram: enabled (progress every ${config.progressInterval}%)`);
 }
@@ -117,6 +124,19 @@ const reportCollector = new PrintReportCollector(store, config);
  */
 const dryer = new DryerService(store, bridge);
 
+/*
+ * --- Home Assistant (optional) ---
+ *
+ * Ambient temperature and humidity, which the printer cannot measure. Read-only, and
+ * every failure degrades to "unreachable" — a thermometer on someone else's server is
+ * not a reason for this dashboard to stop working.
+ */
+const homeAssistant = new HomeAssistantService(
+  config.homeAssistant.url,
+  config.homeAssistant.token,
+  config.homeAssistant.entities,
+);
+
 // --- HTTP Server ---
 const restHandler = createRestRouter(
   store,
@@ -124,6 +144,7 @@ const restHandler = createRestRouter(
   dryer,
   reportCollector,
   bridge,
+  homeAssistant,
   (req) => authGate.authenticate(req).ok,
 );
 const octoPrintHandler = createOctoPrintRouter(store, bridge, config);
@@ -217,6 +238,10 @@ wsTransport.setServices({ telegram });
 
 // The dryer's state reaches the browser the same way everything else does, so a panel
 // opened halfway through a session shows the truth without polling.
+homeAssistant.on('readings', (state: Record<string, unknown>) => {
+  wsTransport.broadcast({ type: 'home_assistant', ...state });
+});
+
 dryer.on('state', (state: Record<string, unknown>) => {
   wsTransport.broadcast({ type: 'dryer_state', ...state });
 });
@@ -302,6 +327,7 @@ async function start(): Promise<void> {
   // After the bridge is up, so the off command a finished session sends has somewhere
   // to go. A session that expired while the service was down is ended here, not resumed.
   await dryer.start();
+  homeAssistant.start();
 }
 
 // Graceful shutdown
@@ -311,6 +337,7 @@ function shutdown(): void {
   // deliberately: a restart resumes it, and turning a heater off because a process is
   // cycling would end a four-hour job on a `systemctl restart`.
   dryer.stop();
+  homeAssistant.stop();
   persistence.stop();
   moonrakerServer.stop();
   wsTransport.close();
