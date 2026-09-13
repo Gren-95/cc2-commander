@@ -217,7 +217,24 @@ export class MqttBridge extends EventEmitter {
         this.sendCommand(1001, {}); // GET_ATTRIBUTES
         this.sendCommand(1002, {}); // GET_STATUS
         this.sendCommand(2005, {}); // GET_CANVAS_STATUS
-        this.sendCommand(1044, { storage_media: 'udisk', dir: '', offset: 0, limit: 200 }); // GET_FILE_LIST
+        // 'local', not 'udisk'. Probed read-only against a CC2 on firmware
+        // 02.01.00.00, sending 1044 with each spelling:
+        //
+        //     'local'   -> { error_code: 0, file_list: [ ...gcode... ] }
+        //     'u-disk'  -> { error_code: 0, file_list: [ ...USB folders... ] }
+        //     'udisk'   -> { error_code: 0 }            and NO file_list key
+        //
+        // So 'udisk' is not rejected, it succeeds and returns nothing. The 1044 handler
+        // in state-store.ts guards with `if (fileList)`, so the reply was not even an
+        // empty list overwriting anything: it was a request that did nothing at all,
+        // silently, on every connect.
+        //
+        // 'local' rather than 'u-disk' because this listing is what `store.files` holds
+        // until a browser asks for something else, and that store backs Moonraker's
+        // `server.files.list` and OctoPrint's file list. Both start prints with
+        // `storage_media: 'local'`, so listing the stick would show a client one set of
+        // files and print from another.
+        this.sendCommand(1044, { storage_media: 'local', dir: '', offset: 0, limit: 200 }); // GET_FILE_LIST
         this.emit('connected', this.sn);
       } else if ((data.code as number) === 3) {
         log.warn('Registration rejected: too many clients (max 2). Will retry every 30s...');

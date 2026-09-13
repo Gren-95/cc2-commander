@@ -656,8 +656,9 @@ export class MoonrakerServer {
       case 'printer.print.start': {
         // `storage_media` takes 'local' or 'u-disk', per `FileSource` in
         // ui/file-browsing.ts, which is what the dashboard's own working print path
-        // sends. This said 'udisk', which is neither, so the command was malformed
-        // rather than merely aimed at the wrong disk.
+        // sends. This said 'udisk', which is neither. Probed on firmware 02.01.00.00,
+        // the printer answers 'udisk' with error_code 0 and no file_list: it succeeds
+        // and does nothing, which is why this never looked broken. See mqtt-bridge.ts.
         //
         // Uploads through this server PUT to `/upload`, the local path, so 'local' is
         // also the medium the file is genuinely on.
