@@ -394,7 +394,7 @@ function connectToService(): void {
         // its port — an unrelated nginx container answering on 8088 produces exactly this
         // screen, and without the URL there is nothing to go on.
         $('connect-error').textContent =
-          `Cannot reach the elegoo-web service at ${serviceUrl}. It may not be running, ` +
+          `Cannot reach the CC2 Commander service at ${serviceUrl}. It may not be running, ` +
           'or something else may be listening on that port.';
         toast('Service connection failed', 'error');
       }
@@ -845,7 +845,7 @@ applyCardLayout();
 /*
  * The sidebar resize handle and toggle used to live here — about 55 lines of drag
  * maths plus two localStorage keys (`elegoo-web-sidebar-width`,
- * `elegoo-web-sidebar-hidden`). Both went with the sidebar itself: the dashboard is one
+ * `elegoo-web-sidebar-hidden`, named before the rename). Both went with the sidebar itself: the dashboard is one
  * grid now and a card's width is a per-card setting rather than a property of which
  * rail it happened to be in. The stale keys are harmless if still in storage; nothing
  * reads them.

@@ -127,7 +127,7 @@ export class AuthGate {
       'Content-Type': 'application/json',
       // Names the scheme a machine client should use. A browser is not offered Basic:
       // that would pop the browser's own credential dialog over the SPA's login form.
-      'WWW-Authenticate': 'Bearer realm="elegoo-web"',
+      'WWW-Authenticate': 'Bearer realm="cc2-commander"',
       'Cache-Control': 'no-store',
     });
     res.end(JSON.stringify({ error: 'Authentication required', code: 'AUTH_REQUIRED' }));

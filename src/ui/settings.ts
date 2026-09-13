@@ -1,6 +1,7 @@
 /** Settings panel — persistent card layout + Telegram config */
 
 import { toggleState } from './state-classes';
+import { readMigrated } from './storage-migration';
 import { icon, iconSolo } from './icons';
 import { $, fetchTimeout } from './helpers';
 import {
@@ -26,7 +27,9 @@ import { playAlert } from './alert-sound';
 import { refreshTimestamps } from './relative-time';
 import { loadUISettings, saveUISettings } from './ui-settings';
 
-const STORAGE_KEY = 'elegoo-web-card-layout';
+const STORAGE_KEY = 'cc2-commander-card-layout';
+/** The pre-rename name. See `storage-migration.ts` — a renamed key is a deleted key. */
+const LEGACY_STORAGE_KEY = 'elegoo-web-card-layout';
 
 // ---- Card layout settings (localStorage) ----
 //
@@ -35,7 +38,7 @@ const STORAGE_KEY = 'elegoo-web-card-layout';
 
 function loadCardLayout(): CardLayout {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = readMigrated(STORAGE_KEY, LEGACY_STORAGE_KEY);
     if (raw) return normaliseCardLayout(JSON.parse(raw));
   } catch {
     /* unreadable or malformed — fall through to the defaults */

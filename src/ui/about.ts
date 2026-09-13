@@ -124,7 +124,7 @@ function buildFacts(stamp: BuildStampish | null | undefined): { facts: Fact[]; s
 export function diagnosticsText(s: AboutStatus | null, userAgent: string): string {
   const stamp = s?.build;
   const lines = [
-    'elegoo-web diagnostics',
+    'CC2 Commander diagnostics',
     `version:   ${buildVersionLabel(stamp)}`,
     `commit:    ${stamp?.commit ?? 'unknown'}`,
     `installed: ${stamp?.installedAt ?? 'unknown'}`,

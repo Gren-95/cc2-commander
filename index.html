@@ -29,7 +29,11 @@
        */
       (function () {
         try {
-          var saved = JSON.parse(localStorage.getItem('elegoo-web-ui-settings') || '{}');
+          // Same two-key read as `storage-migration.ts`, inline because this runs
+          // before the bundle. It only READS; the bundle performs the migration.
+          var raw = localStorage.getItem('cc2-commander-ui-settings')
+            || localStorage.getItem('elegoo-web-ui-settings');
+          var saved = JSON.parse(raw || '{}');
           var choice = saved.theme || 'auto';
           var light =
             choice === 'light' ||

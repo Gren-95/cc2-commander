@@ -23,6 +23,7 @@ const EXPOSED = {
   serviceStatus: 'src/ui/service-status.ts',
   about: 'src/ui/about.ts',
   uiSettings: 'src/ui/ui-settings.ts',
+  storageMigration: 'src/ui/storage-migration.ts',
 };
 
 async function bundle(): Promise<string> {

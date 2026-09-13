@@ -1,6 +1,14 @@
 name: Publish image
 
-# Publishes ghcr.io/runnane/elegoo-web (ELEG-69).
+# Publishes ghcr.io/<owner>/<repo> — resolved from `github.repository` below, so this
+# follows a fork or a rename with no edit here. On this fork that is
+# ghcr.io/gren-95/cc2-commander (ELEG-69).
+#
+# NOTE FOR A FRESH FORK: GitHub disables Actions on forks until someone enables them
+# (Actions tab → "I understand my workflows, go ahead and enable them"), and the
+# resulting package is private until made public in its own settings — which is
+# separate from repository visibility. The summary step at the bottom prints the
+# anonymous `docker pull` to check exactly that.
 #
 # WHY THIS EXISTS
 #

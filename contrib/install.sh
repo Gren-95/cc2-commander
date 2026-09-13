@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Elegoo Web — Installation Script
-# Installs elegoo-web as a systemd service
+# Installs CC2 Commander as a systemd service
 #
 
 set -e

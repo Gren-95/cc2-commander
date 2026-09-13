@@ -1,9 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
   <rect width="512" height="512" rx="113" fill="#0f1117"/>
-  <rect x="218.7" y="74.7" width="74.7" height="362.7" rx="37.3" fill="#1e293b"/>
-  <rect x="74.7" y="218.7" width="362.7" height="74.7" rx="37.3" fill="#1e293b"/>
-  <circle cx="256.0" cy="112.0" r="34.7" fill="#ef4444"/>
-  <circle cx="256.0" cy="400.0" r="34.7" fill="#f59e0b"/>
-  <circle cx="256.0" cy="256.0" r="80.0" fill="#3b82f6"/>
-  <circle cx="256.0" cy="256.0" r="29.3" fill="#0f1117"/>
+  <rect x="53.3" y="138.7" width="405.3" height="69.3" rx="34.7" fill="#1e293b"/>
+  <circle cx="176.0" cy="173.3" r="40.0" fill="#3b82f6"/>
+  <circle cx="336.0" cy="173.3" r="40.0" fill="#3b82f6"/>
+  <circle cx="176.0" cy="173.3" r="16.0" fill="#0f1117"/>
+  <circle cx="336.0" cy="173.3" r="16.0" fill="#0f1117"/>
+  <path d="M224.0 256.0h64.0l-32.0 69.3z" fill="#ef4444"/>
+  <path d="M144.0 373.3q112.0 58.7 224.0 0"
+        stroke="#f59e0b" stroke-width="42.7" stroke-linecap="round"/>
 </svg>

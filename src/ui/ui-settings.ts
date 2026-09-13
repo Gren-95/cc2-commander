@@ -1,11 +1,9 @@
+import { readMigrated } from './storage-migration';
 /** Persistent UI settings stored in localStorage */
 
-// Deliberately NOT renamed with the project. This key is the only handle on a
-// browser's saved state — theme, dashboard layout and card widths, list sorts,
-// alert volume. Changing it does not migrate anything; it silently orphans all of
-// it and the user sees a factory-fresh dashboard with no explanation. A cosmetic
-// rename is not worth that.
-const STORAGE_KEY = 'elegoo-web-ui-settings';
+const STORAGE_KEY = 'cc2-commander-ui-settings';
+/** The pre-rename name. See `storage-migration.ts` — a renamed key is a deleted key. */
+const LEGACY_STORAGE_KEY = 'elegoo-web-ui-settings';
 
 export interface UISettings {
   /** Per-chart time window in seconds, keyed by canvasId */
@@ -80,7 +78,7 @@ let cached: UISettings | null = null;
 export function loadUISettings(): UISettings {
   if (cached) return cached;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = readMigrated(STORAGE_KEY, LEGACY_STORAGE_KEY);
     if (raw) {
       cached = { ...defaults, ...JSON.parse(raw) };
       return cached!;

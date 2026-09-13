@@ -1,8 +1,8 @@
 services:
-  elegoo-web:
-    image: ghcr.io/runnane/elegoo-web:latest
+  cc2-commander:
+    image: ghcr.io/gren-95/cc2-commander:latest
     # build: .  # Uncomment to build locally instead of pulling
-    container_name: elegoo-web
+    container_name: cc2-commander
     restart: unless-stopped
     ports:
       - "8088:8088"   # Web UI + API + WebSocket

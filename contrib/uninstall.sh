@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Elegoo Web — Uninstallation Script
-# Removes elegoo-web systemd service and optionally removes files
+# Removes the CC2 Commander systemd service and optionally removes files
 #
 
 set -e

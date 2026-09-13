@@ -28,7 +28,7 @@
 
 import { type Page, expect, test } from '@playwright/test';
 
-const STORAGE_KEY = 'elegoo-web-ui-settings';
+const STORAGE_KEY = 'cc2-commander-ui-settings';
 
 /** A genuine reload, then wait for the harness bundle to re-expose the modules. */
 async function reload(page: Page): Promise<void> {
@@ -151,5 +151,62 @@ test.describe('audible alert settings (ELEG-46)', () => {
         return { sound: s.alertSound, volume: s.alertVolume };
       }),
     ).toEqual({ sound: true, volume: 0.2 });
+  });
+});
+
+/**
+ * The rename from `elegoo-web-*` to `cc2-commander-*`.
+ *
+ * localStorage has no rename: writing a new key leaves the old value stranded and every
+ * module falls back to defaults, so a person who had arranged their dashboard opens a
+ * factory-fresh one with nothing to explain where it went. These assert the data
+ * actually moves, which is the only reason the migration exists.
+ */
+test.describe('the storage-key rename carries data across', () => {
+  const LEGACY = 'elegoo-web-ui-settings';
+
+  test('adopts a value written under the old key', async ({ page }) => {
+    await page.evaluate((legacy) => {
+      localStorage.clear();
+      // What a browser that last ran the old build would be holding.
+      localStorage.setItem(legacy, JSON.stringify({ theme: 'dark', alertVolume: 0.2 }));
+    }, LEGACY);
+    await reload(page);
+
+    const settings = await page.evaluate(() => {
+      const s = (window as never as { T: any }).T.uiSettings.loadUISettings();
+      return { theme: s.theme, volume: s.alertVolume };
+    });
+    // 'dark' and 0.2 are both non-default, so defaults cannot fake this passing.
+    expect(settings).toEqual({ theme: 'dark', volume: 0.2 });
+  });
+
+  test('removes the old key once adopted, so a later rename cannot resurrect it', async ({ page }) => {
+    const keys = await page.evaluate(
+      ({ legacy, current }) => {
+        localStorage.clear();
+        localStorage.setItem(legacy, JSON.stringify({ theme: 'dark' }));
+        (window as never as { T: any }).T.storageMigration.readMigrated(current, legacy);
+        return { legacy: localStorage.getItem(legacy), current: localStorage.getItem(current) };
+      },
+      { legacy: LEGACY, current: STORAGE_KEY },
+    );
+    expect(keys.legacy).toBeNull();
+    expect(JSON.parse(keys.current as string).theme).toBe('dark');
+  });
+
+  test('prefers the new key when both exist', async ({ page }) => {
+    // A browser that ran the new build, then briefly an old one. The newer value wins.
+    const theme = await page.evaluate(
+      ({ legacy, current }) => {
+        localStorage.clear();
+        localStorage.setItem(legacy, JSON.stringify({ theme: 'light' }));
+        localStorage.setItem(current, JSON.stringify({ theme: 'dark' }));
+        const raw = (window as never as { T: any }).T.storageMigration.readMigrated(current, legacy);
+        return JSON.parse(raw).theme;
+      },
+      { legacy: LEGACY, current: STORAGE_KEY },
+    );
+    expect(theme).toBe('dark');
   });
 });

@@ -1,3 +1,4 @@
+import { readMigrated } from './storage-migration';
 /** Spool Calculator — visualizes remaining filament on a spool */
 
 // Material densities in g/cm³
@@ -14,12 +15,9 @@ const MATERIALS: Record<string, number> = {
   PVA: 1.23,
 };
 
-// Deliberately NOT renamed with the project. This key is the only handle on a
-// browser's saved state — theme, dashboard layout and card widths, list sorts,
-// alert volume. Changing it does not migrate anything; it silently orphans all of
-// it and the user sees a factory-fresh dashboard with no explanation. A cosmetic
-// rename is not worth that.
-const STORAGE_KEY = 'elegoo-web-spool-calc';
+const STORAGE_KEY = 'cc2-commander-spool-calc';
+/** The pre-rename name. See `storage-migration.ts` — a renamed key is a deleted key. */
+const LEGACY_STORAGE_KEY = 'elegoo-web-spool-calc';
 
 interface SpoolParams {
   hubDiameter: number; // mm — inner diameter (the core around which filament is wound)
@@ -47,7 +45,7 @@ const DEFAULTS: SpoolParams = {
 
 function loadParams(): SpoolParams {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = readMigrated(STORAGE_KEY, LEGACY_STORAGE_KEY);
     if (raw) return { ...DEFAULTS, ...JSON.parse(raw) };
   } catch {
     /* ignore */

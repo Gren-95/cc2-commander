@@ -1,5 +1,5 @@
 /**
- * WebSocket client — connects to the elegoo-web service instead of
+ * WebSocket client — connects to the CC2 Commander service instead of
  * directly to the printer's MQTT broker.
  *
  * Provides the same interface as the old CC2MqttClient so the UI
