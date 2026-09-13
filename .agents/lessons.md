@@ -60,7 +60,7 @@ extruder.filament_detected flips 1→0→1 during swap
 The `gcode-preview` library's `WebGLPreview.animate()` runs a continuous 60fps `requestAnimationFrame` loop calling `renderer.render(scene, camera)` every frame. With a ~15MB gcode model loaded, each WebGL render allocates GPU-backed objects that leak ~23 MB/s of JS heap — GC cannot reclaim them fast enough, causing OOM crashes within minutes.
 
 ### Profiling Method
-Used Playwright MCP to measure `performance.memory.usedJSHeapSize` over timed intervals:
+Used a headless browser to measure `performance.memory.usedJSHeapSize` over timed intervals:
 - **Before fix**: 282 MB → 1,235 MB in 42s (+23 MB/s), 871 rAF calls/5s
 - **rAF blocked entirely**: 0.23 MB growth in 20s (confirmed leak is 100% animation loops)
 - **After fix**: 241 MB → 104 MB in 42s (GC reclaiming), 30 rAF calls/5s

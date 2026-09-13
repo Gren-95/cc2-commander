@@ -6,7 +6,7 @@
  * `src/` or `index.html` changes. The service serves the built SPA itself, so there is
  * one port (`SERVICE_PORT`, default 8088) rather than vite's 5173 proxying to it — which
  * also means the dev setup now matches production instead of approximating it, and the
- * proxy table for `/ws`, `/api`, `/mcp`, `/octoprint` and `/moonraker` is gone with it.
+ * proxy table for `/ws`, `/api`, `/octoprint` and `/moonraker` is gone with it.
  *
  * ## What is lost, plainly
  *

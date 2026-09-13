@@ -730,7 +730,7 @@ export interface LayerTimeEntry {
  * store no longer produces one that is not. But a series can still arrive non-monotonic
  * from *outside* that guarantee — `data/state.json` written before that fix, or any
  * future path that gets it wrong — and a cross-print entry then skews `/api/metrics`, the
- * MCP `layers` tool and the print-report stats, none of which look at anything but the
+ * print-report stats, which do not look at anything but the
  * raw array (ELEG-18).
  *
  * Anything at or before the last decrease belongs to a previous print, so it goes. Its

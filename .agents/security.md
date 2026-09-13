@@ -41,7 +41,7 @@ Three things make this sharper than a typical "no auth" note:
 1. **The consequences are physical.** A request can heat a nozzle, drive the toolhead,
    start a job or abort a 14-hour print. There is no undo.
 2. **`Access-Control-Allow-Origin: *` — fixed in ELEG-24, and worth understanding anyway.**
-   It used to be set on **five** surfaces: `/mcp` (since removed), `/octoprint/*`, `/moonraker/*`, and the
+   It used to be set on **four** surfaces: `/octoprint/*`, `/moonraker/*`, and the
    two the original note missed — **`/api/*`** (the snapshot, stream and control routes)
    and **the dedicated `:7125` server**. With no credentials to withhold, that meant **any
    web page a browser visits could issue those requests** from inside the network the

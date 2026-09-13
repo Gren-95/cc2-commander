@@ -80,7 +80,6 @@ export function corsHeaders(
   requestOrigin: string | undefined,
   methods: string,
   headers: string,
-  exposeHeaders?: string,
 ): Record<string, string> {
   const allow = allowOriginFor(policy, requestOrigin);
   if (allow === null) return {};
@@ -91,7 +90,6 @@ export function corsHeaders(
     'Access-Control-Allow-Headers': headers,
     'Access-Control-Max-Age': '86400',
   };
-  if (exposeHeaders) out['Access-Control-Expose-Headers'] = exposeHeaders;
   // Responses differ by Origin, so a shared cache must not serve one origin's response
   // to another. Omitted when the policy is 'any', where the answer is the same for all.
   if (policy.kind === 'list') out.Vary = 'Origin';

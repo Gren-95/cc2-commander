@@ -106,13 +106,12 @@ describe('corsHeaders', () => {
     ).toEqual({});
   });
 
-  it('includes expose-headers only when asked', () => {
-    const policy = parseCorsPolicy('*');
+  it('never sets expose-headers', () => {
+    // Asserted rather than dropped: an expose-header is how a response field becomes
+    // readable cross-origin, so adding one should be a deliberate act with a caller.
+    // The only one this service ever set belonged to an endpoint that is gone.
     expect(
-      corsHeaders(policy, undefined, 'GET', 'X')['Access-Control-Expose-Headers'],
+      corsHeaders(parseCorsPolicy('*'), undefined, 'GET', 'X')['Access-Control-Expose-Headers'],
     ).toBeUndefined();
-    expect(
-      corsHeaders(policy, undefined, 'GET', 'X', 'mcp-session-id')['Access-Control-Expose-Headers'],
-    ).toBe('mcp-session-id');
   });
 });

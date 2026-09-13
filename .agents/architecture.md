@@ -16,7 +16,7 @@ follows from that.
    ┌──────────┬──────────┬────────────┼─────────────┬──────────────┬──────────┐
    │          │          │            │             │              │          │
  /ws       /api/*                /octoprint/*   /moonraker/*   :7125      Telegram
-ws-       rest-api   mcp-       octoprint-     moonraker-    moonraker-  telegram.ts
+ws-       rest-api              octoprint-     moonraker-    moonraker-  telegram.ts
 transport   .ts      server.ts   compat.ts      compat.ts     server.ts  + telegram/
 ```
 
@@ -94,7 +94,7 @@ order matters: the first match wins, and the SPA fallback is last.
   `src/ui/*.ts`. Push state changes over `/ws` (`wsTransport.broadcast`) rather than
   making the browser poll.
 - **A new machine-facing capability** → the relevant compat layer **and** `README.md` in the same
-  commit (see [mcp.md](mcp.md)).
+  commit.
 - **A new notification** → `src/server/telegram.ts`, driven off a `state-store` event,
   never off a poll of the printer.
 

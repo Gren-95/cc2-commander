@@ -18,19 +18,14 @@ Printer MQTT ←→ MqttBridge (singleton) ←→ StateStore
     (browsers)  (+camera)    (:7125)     (compat)    (bot)
 ```
 
-Work is tracked in the **ELEG** project of our own control-plane portal, reached over
-the `respawn-control` MCP server. [`.mcp.json`](.mcp.json) wires it up but deliberately
-contains **no URL and no token** — this repository is public, so both come from the
-environment:
+**This is a fork, and it has no issue tracker.** Upstream tracked work in an **ELEG**
+project reached over an MCP server on the original author's infrastructure; that config
+and its env vars are gone, because a fork cannot reach someone else's private portal and
+a token nobody here holds is not configuration, it is decoration.
 
-```bash
-export RESPAWN_MCP_URL='https://<portal-host>/mcp?modules=issues'
-export RESPAWN_MCP_TOKEN='<api key>'
-```
-
-Set those in your shell profile (not in a file in this repo). With them unset the
-`respawn-control` MCP server simply fails to connect, and the `/`-commands below will tell you to fix it
-rather than guessing at issue state.
+`ELEG-nn` references survive throughout this file and the deep dives. Read them as
+provenance — *why this code is shaped this way* — not as tickets to open. They are
+frequently the only record of an incident, and that is worth more than the link.
 
 **The thing on the other end is a physical machine with heaters and motors.** That
 single fact is what makes this repo different from its siblings, and it has its own
@@ -277,8 +272,8 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   simply the only client-side preference store there is.)
 - **`README.md`'s environment-variable table changes with `src/server/config.ts`.** A
   new key without the doc edit in the same commit is drift in the only place anyone
-  looks. (There used to be a second doc-parity rule here, for an `/mcp` surface; that
-  feature is gone — see the note at the end of this file.)
+  looks. (There used to be a second doc-parity rule here, for an endpoint that has since
+  been removed — see the note at the end of this file.)
 - **Auth is one gate, applied once.** `src/server/auth.ts` holds the decisions (password
   hashing, sessions, throttling, constant-time key compare); `src/server/auth-gate.ts`
   holds the HTTP policy and the `/api/auth/*` routes. It is wired in **three** places —
@@ -365,7 +360,6 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   | Action | Who runs it |
   | --- | --- |
   | shell on this host, `systemctl`, reading `/opt/elegooweb`, `journalctl` | **them** — give exact commands, ask for output |
-  | anything through the **tracker's** MCP server (`respawn-control`) or a tracker write | **you** — never "here are the calls to make"; they have no client for it |
   | a printer command (temps, motion, print start/stop, emergency stop) | **them**, at or near the machine |
 
   And the distinction that decides most of these: **stopping something is not the same
@@ -436,7 +430,9 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
 An MCP server lived at `POST /mcp` and exposed the printer to AI agents — 6 resources
 and 31 tools, including `set_temperature`, `move`, `start_print` and `emergency_stop`.
 It is gone: `mcp-server.ts`, `docs/MCP.md`, `.agents/mcp.md` and the doc-parity test with
-it, ~1,100 lines.
+it, ~1,100 lines. So is the `.mcp.json` that pointed at upstream's issue tracker, and the
+`exposeHeaders` argument to `corsHeaders`, whose only caller was `/mcp`'s session
+header.
 
 The reason was proportion, not principle. This is a home 3D-printer dashboard, and the
 SDK was the heaviest thing in the tree for what it did: `@modelcontextprotocol/sdk`
@@ -444,10 +440,6 @@ pulled **express *and* hono** — two complete HTTP frameworks — plus `cors`, 
 `ajv`, into a service that deliberately uses `Bun.serve` and wrote its own
 `node-compat.ts` to get off the Node HTTP layer. Nothing in `src/` imported any of them.
 `zod` went too; its only use was declaring MCP tool parameters.
-
-**Do not confuse this with `.mcp.json` in the repo root.** That is the *client* config
-for the `respawn-control` tracker — how an agent reaches the ELEG issues — and it is
-unrelated to the printer endpoint that was removed.
 
 If an agent-facing surface is ever wanted again, the compat layers already carry the same
 control surface in vocabularies clients speak (Moonraker on `:7125`, OctoPrint under

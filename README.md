@@ -338,7 +338,6 @@ src/
 │   ├── moonraker-compat.ts  # Moonraker API compatibility
 │   ├── moonraker-server.ts  # Moonraker standalone server (:7125)
 │   ├── octoprint-compat.ts  # OctoPrint API compatibility
-│   ├── mcp-server.ts        # Model Context Protocol server
 │   ├── state-persistence.ts # Persist/restore state across restarts
 │   ├── print-report-collector.ts  # Collect print data for reports
 │   └── print-report-pdf.ts       # PDF report generation

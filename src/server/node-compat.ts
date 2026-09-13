@@ -5,7 +5,7 @@
  * types. The SPA and the WebSocket transport are native Bun and never come through
  * here — this file exists for the ~11k lines of compatibility surface that are not:
  * `rest-api.ts`, `octoprint-compat.ts`, `moonraker-compat.ts`, `moonraker-server.ts`
- * and the MCP SDK's transport, all of which are written against `IncomingMessage` /
+ * all of which are written against `IncomingMessage` /
  * `ServerResponse`.
  *
  * Rewriting those to the fetch types would be an 11k-line change to routes that no
@@ -255,7 +255,7 @@ function toNodeRequest(request: Request, remoteAddress: string | undefined): Inc
 
   const headers: Record<string, string> = {};
   // `rawHeaders` is the flat [name, value, name, value, …] array Node exposes. It looks
-  // redundant next to `headers`, but the MCP SDK's body parser reads it directly and
+  // redundant next to `headers`, but a Node-style body parser reads it directly and
   // throws `undefined is not an object (evaluating 'rawHeaders.length')` without it.
   const rawHeaders: string[] = [];
   for (const [name, value] of request.headers) {

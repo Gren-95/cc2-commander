@@ -9,7 +9,7 @@
  * belongs to neither print. It sits in front of the new series, leaving `layerTimes`
  * non-monotonic — which is what made the layer chart paint outside its own axes.
  *
- * This file lives under `src/server/` for the same reason as `mcp-doc-parity.test.ts`:
+ * This file lives under `src/server/` for the same reason as the other server tests:
  * `tsconfig.json` excludes that directory, so importing server code from
  * `src/__tests__/` would drag Node-only modules into the browser typecheck. Here it is
  * covered by `pnpm service:check`. The chart half is tested separately, in

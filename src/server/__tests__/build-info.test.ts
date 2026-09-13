@@ -7,7 +7,7 @@
  * half-written stamp actually takes: valid JSON that is not an object, and an object
  * with fields missing or blank.
  *
- * Lives under `src/server/` for the same reason as the MCP parity test: `tsconfig.json`
+ * Lives under `src/server/` for the same reason as the other server tests: `tsconfig.json`
  * excludes this directory, so importing server code from `src/__tests__/` would drag
  * Node-only modules into the browser typecheck. Here it is covered by
  * `pnpm service:check`.

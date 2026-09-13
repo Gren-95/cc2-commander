@@ -28,7 +28,7 @@ const PROJECT_URL = 'https://github.com/runnane/elegoo-web';
 const SUMMARY =
   'A web frontend and service for the Elegoo Centauri Carbon 2. One MQTT connection ' +
   'to the printer, fanned out to this dashboard, a REST API, Prometheus metrics, an ' +
-  'MCP server, and Moonraker and OctoPrint compatibility endpoints.';
+  'and Moonraker and OctoPrint compatibility endpoints.';
 
 /** The slice of the service broadcast this panel reads. */
 export interface AboutStatus {

@@ -502,7 +502,7 @@ export class StateStore extends EventEmitter {
    * Sanitised on the way in (ELEG-18). `data/state.json` is accepted up to 24h old and is
    * not necessarily written by code that had the ELEG-16 fix, so a persisted series can
    * still carry an entry from a previous print. Everything downstream — `/api/metrics`,
-   * the MCP `layers` tool, `computeLayerStats` in the report collector — reads the raw
+   * `computeLayerStats` in the report collector — reads the raw
    * array and would average a cross-print duration into its numbers. Cleaning here means
    * none of them has to know.
    */

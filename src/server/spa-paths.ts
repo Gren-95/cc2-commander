@@ -32,7 +32,7 @@
  * does not exist — and answering it with the app's HTML at 200 is the same silent
  * failure as serving HTML for a missing script: the caller gets a success it cannot use.
  *
- * Found when `/mcp` was removed. Every POST to every unknown path was answering 200 with
+ * Found when an endpoint was removed. Every POST to every unknown path answered 200 with
  * the dashboard, so a client calling the deleted endpoint saw success and a body it
  * could not parse, rather than a 404 naming the problem.
  */
