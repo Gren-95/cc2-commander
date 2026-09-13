@@ -60,6 +60,7 @@ import {
   login,
   logout,
   renderSignIn,
+  setChromeVisible,
 } from './ui/auth';
 import { initTheme } from './ui/theme';
 import { maybeAlertForEvent } from './ui/alert-sound';
@@ -167,7 +168,13 @@ function showDashboard(): void {
   if (dashboardShown) return;
   dashboardShown = true;
   $('connect-dialog').classList.add('hidden');
+  // The tab bar, the header controls and the focus rail come back with the dashboard.
+  setChromeVisible(true);
   $('dashboard').classList.remove('hidden');
+  // `applyCardLayout` runs at startup, while the sign-in card is still up, so the rail
+  // it would have drawn was suppressed. Draw it now that there is a session — hiding the
+  // element is not enough on its own, because the rail is rebuilt rather than toggled.
+  applyCardLayout();
   $('dashboard').dataset.connected = 'true';
 
   if (!controlsBound) {
@@ -748,6 +755,10 @@ async function boot(): Promise<void> {
     connectToService();
     return;
   }
+  // Nothing but the sign-in card until there is a session: no tab bar, no focus rail,
+  // no header controls. They navigate nowhere useful, and on a phone the rail sits over
+  // the card and clips the password field.
+  setChromeVisible(false);
   renderSignIn(authState);
 }
 

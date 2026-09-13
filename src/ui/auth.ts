@@ -90,6 +90,41 @@ export async function logout(): Promise<void> {
 }
 
 /**
+ * Everything that is not the sign-in card.
+ *
+ * On a phone the sign-in screen came up with the full app around it: the tab bar along
+ * the bottom, the focus rail down the right — thirteen card buttons — and the header's
+ * layout control. None of it does anything useful before you are signed in, the rail
+ * overlapped the card and clipped the password field, and offering navigation on a login
+ * screen invites the question of what it navigates to.
+ *
+ * Hidden by id rather than by a class on `<body>`: these are three unrelated elements
+ * with no shared hook, and `hidden` is the mechanism the rest of the app already uses.
+ */
+const CHROME_IDS = ['main-tabs-bar', 'header-actions', 'mobile-focus-rail'];
+
+/**
+ * Show or hide the app's chrome around the sign-in card.
+ *
+ * The focus rail is rebuilt by `renderFocusRail` on every layout change, so hiding the
+ * element is not enough on its own — `mobile-focus.ts` asks `isSignedOut()` before it
+ * draws one.
+ */
+export function setChromeVisible(visible: boolean): void {
+  signedOut = !visible;
+  for (const id of CHROME_IDS) {
+    document.getElementById(id)?.classList.toggle('hidden', !visible);
+  }
+}
+
+let signedOut = true;
+
+/** Whether the sign-in card is what the user is looking at. */
+export function isSignedOut(): boolean {
+  return signedOut;
+}
+
+/**
  * Show the sign-in card, with the password field only when there is a password to give.
  *
  * With auth switched off the same card is the old "connect" button, so a service without

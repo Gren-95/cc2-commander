@@ -24,6 +24,7 @@ import {
 } from './card-layout';
 import { ICONS } from './icons';
 import { loadUISettings, saveUISettings } from './ui-settings';
+import { isSignedOut } from './auth';
 
 /** Must match the `max-[700px]` / `min-[701px]` variants used throughout the markup. */
 const PHONE = '(max-width: 700px)';
@@ -106,7 +107,9 @@ function button(
 export function renderFocusRail(layout: CardLayout, visible: boolean): void {
   let rail = document.getElementById(RAIL_ID);
 
-  if (!visible || !isPhone()) {
+  // Signed out, the rail is thirteen buttons to places you cannot go — and on a phone it
+  // sits on top of the sign-in card and clips the password field.
+  if (!visible || !isPhone() || isSignedOut()) {
     rail?.remove();
     const grid = document.getElementById('dashboard-grid');
     if (grid) grid.style.paddingRight = '';
