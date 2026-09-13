@@ -228,7 +228,7 @@ export function precacheGcode(fileName: string, config: ServiceConfig, source = 
  * Pre-download a gcode file to cache. Returns a promise that resolves
  * with { ok, cached, size } when done.
  */
-export async function precacheGcodeAsync(
+async function precacheGcodeAsync(
   fileName: string,
   config: ServiceConfig,
   source = 'local',

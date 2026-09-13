@@ -119,15 +119,6 @@ function warnStaleAsset(urlPath: string): void {
   );
 }
 
-/** The SPA entry document, for any path that is not a file and not an API route. */
-export function spaFallbackResponse(urlPath: string): Response {
-  if (!indexHtml || !wantsDocument(urlPath)) {
-    warnStaleAsset(urlPath);
-    return new Response('Not found', { status: 404 });
-  }
-  return new Response(indexHtml, { headers: INDEX_HEADERS });
-}
-
 /**
  * The same fallback for callers still holding a Node `ServerResponse` — rest-api.ts's
  * terminal "not an API route" branch, which behaves exactly as it did before.

@@ -3,59 +3,49 @@ import { WsClient } from './ws-client';
 import { PrinterState } from './printer-state';
 import { LogStore } from './log-store';
 import { ChartStore } from './chart-store';
+import { handleAIAlert, handleAIAnalysis, updateAIStatus } from './ui/ai-panel';
+import { renderCanvas, setCanvasClient } from './ui/canvas';
+import { initCharts, registerChart } from './ui/charts';
+import { bindControls, onCommandResponse } from './ui/controls';
+import { bindDebugPanel, renderDebugPanel, trackStateChanges } from './ui/debug-panel';
+import { setDryerClient } from './ui/dryer-panel';
+import { handleEventLog, loadEventLogHistory } from './ui/event-log';
 import {
-  renderDashboard,
-  renderCanvas,
-  renderFiles,
-  renderHeader,
-  bindControls,
-  onCommandResponse,
-  registerChart,
-  initCharts,
-  renderStructuredLog,
-  bindStructuredLogControls,
   bindFileControls,
-  toast,
-  setCanvasClient,
-  setDryerClient,
-  renderSystemInfo,
-  renderTimelapse,
-  setTimelapseClient,
-  requestTimelapseList,
-  showTimelapsePlayer,
-  renderGcodePreview,
-  renderLayerTimeChart,
-  updateServiceStatus,
-  setPrinterLink,
-  type PrinterLink,
-  fetchTimeout,
-  handleAIAnalysis,
-  handleAIAlert,
-  updateAIStatus,
-  applyCardLayout,
-  switchToTab,
-  currentFileSource,
   currentFileDir,
-  handleThumbnailResponse,
+  currentFileSource,
   handleInlineThumbnail,
-  handleEventLog,
-  loadEventLogHistory,
-  toggleCameraOverlay,
-  renderPrintHistory,
+  handleThumbnailResponse,
+  renderFiles,
+} from './ui/files';
+import { bindGcodePreviewControls, renderGcodePreview } from './ui/gcode-preview';
+import { fetchTimeout } from './ui/helpers';
+import { renderLayerTimeChart } from './ui/layer-chart';
+import { bindMaintenanceControls, renderMaintenance, setMaintenanceClient } from './ui/maintenance';
+import { handleFileDetailForPrint } from './ui/print-dialog';
+import {
   bindHistoryControls,
-  setHistoryClient,
+  renderPrintHistory,
   requestHistory,
-  renderMaintenance,
-  bindMaintenanceControls,
-  setMaintenanceClient,
-  renderReports,
-  bindReportControls,
-  handleFileDetailForPrint,
-  bindGcodePreviewControls,
-  renderDebugPanel,
-  bindDebugPanel,
-  trackStateChanges,
-} from './ui/dashboard';
+  setHistoryClient,
+} from './ui/print-history';
+import { bindReportControls, renderReports } from './ui/print-reports';
+import { renderDashboard, renderHeader, toggleCameraOverlay } from './ui/print-status';
+import {
+  type PrinterLink,
+  renderSystemInfo,
+  setPrinterLink,
+  updateServiceStatus,
+} from './ui/service-status';
+import { applyCardLayout, switchToTab } from './ui/settings';
+import { bindStructuredLogControls, renderStructuredLog } from './ui/structured-log';
+import {
+  renderTimelapse,
+  requestTimelapseList,
+  setTimelapseClient,
+  showTimelapsePlayer,
+} from './ui/timelapse';
+import { toast } from './ui/toast';
 import { renderLog, bindLogControls } from './ui/log';
 import { installThumbnailFallback } from './ui/helpers';
 import {

@@ -1,5 +1,5 @@
 /**
- * What the compat layers say about authentication — which is that there isn't any.
+ * What the compat layers say about authentication.
  *
  * Both layers used to answer credential requests with a plausible fixed string:
  * OctoPrint returned `apikey: 'elegoo-cc2-compat'`, Moonraker answered
@@ -9,7 +9,14 @@
  * existed. ELEG-2's description had to carry a warning not to read these as evidence —
  * that warning was only necessary because the code lied (ELEG-26).
  *
- * This service has no authentication at all. See `.agents/security.md`.
+ * Since `AUTH_API_KEY` exists, that answer is conditional, and every function here takes
+ * the flag rather than assuming. Getting this wrong reintroduces the exact dishonesty the
+ * module was written to remove, only from the other side: telling a Mainsail user there is
+ * no authentication to configure, and then refusing them with a 401. The gate in
+ * `auth-gate.ts` is what actually decides; these endpoints only describe it.
+ *
+ * The real key is never emitted, in either state. "API key auth is on" is a fact a client
+ * needs; the key itself is something its operator already has.
  *
  * Kept in its own module, free of dependencies, so both layers say the same thing and
  * the shapes can be asserted directly — the compat layers are pure state→JSON
@@ -17,10 +24,26 @@
  * client breaks silently when a field's shape drifts.
  */
 
-/** Returned in place of a fabricated key. Phrased for a human reading a client's error. */
+/** Phrased for a human reading a client's error, in whichever state they are in. */
 export const NO_API_KEY_MESSAGE =
   'This service has no authentication and issues no API key. ' +
   'Access is controlled by the network it is reachable from.';
+
+/**
+ * The same method when a key IS required.
+ *
+ * It still refuses — `access.get_api_key` means "hand me the key", and a service that
+ * hands out its own credential to an unauthenticated caller has no credential. But it
+ * says where to get one instead of claiming there is nothing to get.
+ */
+export const API_KEY_NOT_RETRIEVABLE_MESSAGE =
+  'This service requires an API key, but does not issue or return one through this API. ' +
+  'Use the value of AUTH_API_KEY from the service configuration, sent as X-Api-Key.';
+
+/** Which of the two a caller should be told, given the service's actual state. */
+export function apiKeyMessage(apiKeyRequired: boolean): string {
+  return apiKeyRequired ? API_KEY_NOT_RETRIEVABLE_MESSAGE : NO_API_KEY_MESSAGE;
+}
 
 /** Moonraker's JSON-RPC error code for an unavailable method. */
 export const MOONRAKER_NO_API_KEY_CODE = -32601;
@@ -48,6 +71,21 @@ export const NO_SESSIONS_MESSAGE =
   'Access is controlled by the network it is reachable from.';
 
 /**
+ * The same surface when a key is required.
+ *
+ * Still no user store and still no JWTs — single-user auth has one password and one key,
+ * and inventing a session here would imply a user store that does not exist. What changes
+ * is that the client is pointed at the mechanism that does work.
+ */
+export const API_KEY_ONLY_MESSAGE =
+  'This service has no user accounts or session tokens. ' +
+  'Authenticate with the API key instead, sent as X-Api-Key or Authorization: Bearer.';
+
+export function sessionsMessage(apiKeyRequired: boolean): string {
+  return apiKeyRequired ? API_KEY_ONLY_MESSAGE : NO_SESSIONS_MESSAGE;
+}
+
+/**
  * The one credential-shaped answer that is deliberately **kept**.
  *
  * In real Moonraker `oneshot_token` exists so a browser can open a WebSocket or a camera
@@ -67,29 +105,46 @@ export const NO_SESSIONS_MESSAGE =
 export const ONESHOT_TOKEN = 'no-auth-required';
 
 /**
+ * A oneshot token, or `null` when the caller must be refused.
+ *
+ * With a key configured this has to refuse. The token's whole purpose is to authenticate
+ * a URL that cannot carry a header, so returning a fixed string would be a bypass of the
+ * gate — any caller could mint it and use it. Refusing costs a browser client its
+ * query-string path to the camera and socket; the API key still works everywhere a header
+ * can be set, and the alternative is auth that can be walked around.
+ */
+export function oneshotToken(apiKeyRequired: boolean): string | null {
+  return apiKeyRequired ? null : ONESHOT_TOKEN;
+}
+
+/**
  * OctoPrint's `api` block in `GET /api/settings`.
  *
- * `enabled: false` is the honest statement, and it is a statement OctoPrint clients
- * already understand: it means this server does not do API-key authentication. The old
- * `enabled: true` plus a fixed key claimed the opposite.
+ * `enabled` reports whether this server does API-key authentication, which is exactly
+ * what the field means to an OctoPrint client. The original bug was `enabled: true` plus
+ * a fabricated key; the fix was a hardcoded `false`, which became its own lie the moment
+ * AUTH_API_KEY existed. It is now neither — it is read from the configuration.
  */
-export function octoprintApiSettings(): { enabled: false; key: null } {
-  return { enabled: false, key: null };
+export function octoprintApiSettings(apiKeyRequired: boolean): { enabled: boolean; key: null } {
+  // `key` stays null in both states. `enabled` is what the client acts on; the key is
+  // what its operator pastes in, and this endpoint is reachable without one.
+  return { enabled: apiKeyRequired, key: null };
 }
 
 /**
  * OctoPrint's `POST /api/login` body.
  *
- * `admin`/`user` stay true, and that is not a lie: with no authentication every caller
- * genuinely does have full control of this service — that is precisely the exposure
- * ELEG-2 is about, and understating it would be its own kind of dishonesty. What goes
- * is the claim about *how* the caller got that access: there is no api key and no login
- * mechanism, so `apikey` is dropped and `_login_mechanism` is null.
+ * `admin`/`user` stay true in both states, and that is not a lie: this service has one
+ * user, and anyone who gets this far — past an open door or past the gate — genuinely has
+ * full control. Understating it would be its own kind of dishonesty. `apikey` is never
+ * emitted; only `_login_mechanism` changes, to name how the caller actually got in.
  */
-export function octoprintLoginPayload(): Record<string, unknown> {
+export function octoprintLoginPayload(apiKeyRequired: boolean): Record<string, unknown> {
   return {
     _is_external_client: false,
-    _login_mechanism: null,
+    // Named honestly when there is one. A caller that reached this route past the gate
+    // authenticated with the key, so saying so is a description, not a claim.
+    _login_mechanism: apiKeyRequired ? 'apikey' : null,
     active: true,
     admin: true,
     groups: ['admins', 'users'],
@@ -99,4 +154,16 @@ export function octoprintLoginPayload(): Record<string, unknown> {
     roles: ['admin', 'user'],
     user: true,
   };
+}
+
+/**
+ * Whether this service actually checks an API key right now.
+ *
+ * Both halves matter: auth switched off, or switched on with no key configured, means a
+ * machine client has nothing to present — and telling it otherwise sends its operator
+ * looking for a key that does not exist. Takes the two fields rather than the whole
+ * config, so this module keeps its "no dependencies" property.
+ */
+export function apiKeyRequired(auth: { enabled: boolean; apiKey: string }): boolean {
+  return auth.enabled && auth.apiKey.length > 0;
 }

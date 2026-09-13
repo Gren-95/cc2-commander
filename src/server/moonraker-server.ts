@@ -38,9 +38,10 @@ import type { MqttBridge } from './mqtt-bridge.js';
 import type { ServiceConfig } from './config.js';
 import { applyCors, corsHeaders } from './cors.js';
 import {
-  NO_API_KEY_MESSAGE,
-  NO_SESSIONS_MESSAGE,
-  ONESHOT_TOKEN,
+  apiKeyMessage,
+  apiKeyRequired,
+  oneshotToken,
+  sessionsMessage,
   MOONRAKER_NO_API_KEY_CODE,
 } from './compat-auth.js';
 import type { FanInfo } from '../types.js';
@@ -1029,13 +1030,32 @@ export class MoonrakerServer {
         // may fetch this for a WebSocket or camera URL before it reads `access.info`,
         // so refusing it risks breaking the connection outright, and withdrawing it
         // would remove no protection because nothing validates it coming back.
-        client.ws.send(rpcResult(msg.id, ONESHOT_TOKEN));
+        {
+          const token = oneshotToken(apiKeyRequired(this.config.auth));
+          if (token === null) {
+            client.ws.send(
+              rpcError(
+                msg.id,
+                MOONRAKER_NO_API_KEY_CODE,
+                sessionsMessage(apiKeyRequired(this.config.auth)),
+              ),
+            );
+          } else {
+            client.ws.send(rpcResult(msg.id, token));
+          }
+        }
         break;
 
       case 'access.login':
         // No session is created, so no token is returned (ELEG-53). See `access.info`
         // below: `login_required: false` is how a client learns not to come here.
-        client.ws.send(rpcError(msg.id, MOONRAKER_NO_API_KEY_CODE, NO_SESSIONS_MESSAGE));
+        client.ws.send(
+          rpcError(
+            msg.id,
+            MOONRAKER_NO_API_KEY_CODE,
+            sessionsMessage(apiKeyRequired(this.config.auth)),
+          ),
+        );
         break;
 
       case 'access.logout':
@@ -1049,7 +1069,13 @@ export class MoonrakerServer {
       case 'access.delete_user':
       case 'access.user.password':
       case 'access.refresh_jwt':
-        client.ws.send(rpcError(msg.id, MOONRAKER_NO_API_KEY_CODE, NO_SESSIONS_MESSAGE));
+        client.ws.send(
+          rpcError(
+            msg.id,
+            MOONRAKER_NO_API_KEY_CODE,
+            sessionsMessage(apiKeyRequired(this.config.auth)),
+          ),
+        );
         break;
 
       case 'access.users.list':
@@ -1065,7 +1091,13 @@ export class MoonrakerServer {
         // clients display themselves as authenticated against a service that checks
         // nothing (ELEG-26). `access.info` below reports login_required: false, which
         // is how a client is supposed to learn that no credential is needed.
-        client.ws.send(rpcError(msg.id, MOONRAKER_NO_API_KEY_CODE, NO_API_KEY_MESSAGE));
+        client.ws.send(
+          rpcError(
+            msg.id,
+            MOONRAKER_NO_API_KEY_CODE,
+            apiKeyMessage(apiKeyRequired(this.config.auth)),
+          ),
+        );
         break;
 
       case 'access.info':
@@ -1073,7 +1105,7 @@ export class MoonrakerServer {
           rpcResult(msg.id, {
             default_source: 'moonraker',
             available_sources: ['moonraker'],
-            login_required: false,
+            login_required: apiKeyRequired(this.config.auth),
             trusted: true,
           }),
         );
@@ -1652,16 +1684,23 @@ export class MoonrakerServer {
       jsonResult(res, {
         default_source: 'moonraker',
         available_sources: ['moonraker'],
-        login_required: false,
+        login_required: apiKeyRequired(this.config.auth),
         trusted: true,
       });
       return;
     }
 
     // --- GET /access/oneshot_token ---
-    // Kept on purpose — see ONESHOT_TOKEN in compat-auth.ts and the JSON-RPC case above.
+    // Answered only when nothing is being checked — see `oneshotToken` in compat-auth.ts
+    // and the JSON-RPC case above. With a key configured this is a credential in a URL,
+    // so it refuses rather than mint one any caller could use.
     if (urlPath === '/access/oneshot_token' && method === 'GET') {
-      jsonResult(res, ONESHOT_TOKEN);
+      const token = oneshotToken(apiKeyRequired(this.config.auth));
+      if (token === null) {
+        jsonError(res, sessionsMessage(apiKeyRequired(this.config.auth)), 401);
+      } else {
+        jsonResult(res, token);
+      }
       return;
     }
 
@@ -1669,7 +1708,7 @@ export class MoonrakerServer {
     // A read of "the current user". There is no user store and no session, so there is
     // no current user to describe (ELEG-53).
     if (urlPath === '/access/user' && method === 'GET') {
-      jsonError(res, NO_SESSIONS_MESSAGE, 404);
+      jsonError(res, sessionsMessage(apiKeyRequired(this.config.auth)), 404);
       return;
     }
 
@@ -1874,7 +1913,7 @@ export class MoonrakerServer {
     // `GET /access/info` reports login_required: false, which is where a client should
     // have learned not to come here.
     if (urlPath === '/access/login' && method === 'POST') {
-      jsonError(res, NO_SESSIONS_MESSAGE, 404);
+      jsonError(res, sessionsMessage(apiKeyRequired(this.config.auth)), 404);
       return;
     }
 
@@ -1892,13 +1931,13 @@ export class MoonrakerServer {
 
     // POST /access/refresh_jwt — nothing was issued, so nothing can be refreshed.
     if (urlPath === '/access/refresh_jwt' && method === 'POST') {
-      jsonError(res, NO_SESSIONS_MESSAGE, 404);
+      jsonError(res, sessionsMessage(apiKeyRequired(this.config.auth)), 404);
       return;
     }
 
     // GET/POST /access/api_key — see the JSON-RPC case above (ELEG-26).
     if (urlPath === '/access/api_key' && (method === 'GET' || method === 'POST')) {
-      jsonError(res, NO_API_KEY_MESSAGE, 404);
+      jsonError(res, apiKeyMessage(apiKeyRequired(this.config.auth)), 404);
       return;
     }
 
@@ -1909,7 +1948,7 @@ export class MoonrakerServer {
       (urlPath === '/access/user' && (method === 'POST' || method === 'DELETE')) ||
       (urlPath === '/access/user/password' && method === 'POST')
     ) {
-      jsonError(res, NO_SESSIONS_MESSAGE, 404);
+      jsonError(res, sessionsMessage(apiKeyRequired(this.config.auth)), 404);
       return;
     }
 

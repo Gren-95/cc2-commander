@@ -6,7 +6,15 @@ import {
   NO_SESSIONS_MESSAGE,
   ONESHOT_TOKEN,
   MOONRAKER_NO_API_KEY_CODE,
+  apiKeyMessage,
+  apiKeyRequired,
+  oneshotToken,
+  sessionsMessage,
 } from '../compat-auth.js';
+
+/** The two states every function here has to describe correctly. */
+const OPEN = false;
+const GATED = true;
 
 /**
  * The compat layers are pure state→JSON translation, and a client breaks silently when
@@ -15,19 +23,92 @@ import {
  */
 
 describe('octoprintApiSettings', () => {
-  it('reports API-key auth as disabled', () => {
-    expect(octoprintApiSettings()).toEqual({ enabled: false, key: null });
+  it('reports API-key auth as disabled when nothing is checked', () => {
+    expect(octoprintApiSettings(OPEN)).toEqual({ enabled: false, key: null });
   });
 
-  it('never emits a key', () => {
-    // The regression this exists to catch: a fixed string that made clients show
-    // themselves as authenticated against a service that checks nothing.
-    expect(octoprintApiSettings().key).toBeNull();
+  it('reports it as enabled when a key IS required', () => {
+    // The second lie this module has now told: a hardcoded `false` was honest until
+    // AUTH_API_KEY existed, after which it sent a Mainsail user looking for a setting
+    // they were told not to configure — and then refused them with a 401.
+    expect(octoprintApiSettings(GATED)).toEqual({ enabled: true, key: null });
+  });
+
+  it('never emits a key, in either state', () => {
+    // The original regression: a fixed string that made clients show themselves as
+    // authenticated against a service that checked nothing. The real key must not leak
+    // here either — this endpoint is reachable without one.
+    expect(octoprintApiSettings(OPEN).key).toBeNull();
+    expect(octoprintApiSettings(GATED).key).toBeNull();
   });
 });
 
 describe('octoprintLoginPayload', () => {
-  const payload = octoprintLoginPayload();
+  it('names the mechanism the caller actually used', () => {
+    // A caller that got this far past an armed gate authenticated with the key; saying
+    // so is a description, not a claim. `apikey` itself is never emitted either way.
+    expect(octoprintLoginPayload(OPEN)._login_mechanism).toBeNull();
+    expect(octoprintLoginPayload(GATED)._login_mechanism).toBe('apikey');
+    expect('apikey' in octoprintLoginPayload(GATED)).toBe(false);
+  });
+
+  it('still reports full control in both states', () => {
+    // One user, and anyone past the door has all of it. Understating that would be its
+    // own kind of dishonesty.
+    for (const state of [OPEN, GATED]) {
+      expect(octoprintLoginPayload(state).admin).toBe(true);
+    }
+  });
+});
+
+describe('apiKeyRequired', () => {
+  it('needs auth on AND a key configured', () => {
+    // Auth on with no key means a machine client has nothing to present. Saying a key
+    // is required would send its operator hunting for one that does not exist.
+    expect(apiKeyRequired({ enabled: true, apiKey: 'k' })).toBe(true);
+    expect(apiKeyRequired({ enabled: true, apiKey: '' })).toBe(false);
+    expect(apiKeyRequired({ enabled: false, apiKey: 'k' })).toBe(false);
+    expect(apiKeyRequired({ enabled: false, apiKey: '' })).toBe(false);
+  });
+});
+
+describe('oneshotToken', () => {
+  it('answers when nothing is checked', () => {
+    // Refusing would break a browser client's WebSocket for no gain: nothing validates
+    // the token on the way back in.
+    expect(oneshotToken(OPEN)).toBe(ONESHOT_TOKEN);
+  });
+
+  it('refuses when a key is required', () => {
+    // This token exists to authenticate a URL that cannot carry a header. Handing out a
+    // fixed one with the gate armed would let any caller mint it — a bypass, not a
+    // compatibility shim.
+    expect(oneshotToken(GATED)).toBeNull();
+  });
+});
+
+describe('messages', () => {
+  it('say there is no auth only when that is true', () => {
+    expect(apiKeyMessage(OPEN)).toBe(NO_API_KEY_MESSAGE);
+    expect(sessionsMessage(OPEN)).toBe(NO_SESSIONS_MESSAGE);
+  });
+
+  it('point at the key when there is one', () => {
+    expect(apiKeyMessage(GATED)).not.toBe(NO_API_KEY_MESSAGE);
+    expect(apiKeyMessage(GATED)).toMatch(/AUTH_API_KEY|X-Api-Key/);
+    expect(sessionsMessage(GATED)).toMatch(/API key/i);
+  });
+
+  it('never claim "no authentication" while the gate is armed', () => {
+    // The one sentence that must never reach a user of a gated service.
+    for (const message of [apiKeyMessage(GATED), sessionsMessage(GATED)]) {
+      expect(message).not.toMatch(/has no authentication/i);
+    }
+  });
+});
+
+describe('octoprintLoginPayload', () => {
+  const payload = octoprintLoginPayload(OPEN);
 
   it('carries no apikey field at all', () => {
     expect('apikey' in payload).toBe(false);

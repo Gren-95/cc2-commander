@@ -30,12 +30,6 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 /** A handler written against Node's HTTP types. */
 export type NodeHandler = (req: IncomingMessage, res: ServerResponse) => void;
 
-/**
- * Same, but reports whether it claimed the request — the shape the OctoPrint and
- * Moonraker routers use so `index.ts` can fall through to the next router.
- */
-export type MaybeNodeHandler = (req: IncomingMessage, res: ServerResponse) => boolean;
-
 function toBytes(chunk: unknown): Uint8Array {
   if (chunk == null) return new Uint8Array(0);
   if (chunk instanceof Uint8Array) return chunk;
@@ -305,29 +299,5 @@ export function runNodeHandler(
   res.once('close', () => request.signal.removeEventListener('abort', onAbort));
 
   handler(req, res as unknown as ServerResponse);
-  return res.response;
-}
-
-/**
- * Run a handler that may decline the request. Resolves to `null` when the handler
- * returns false without having written anything, so the caller can try the next one.
- */
-export function runMaybeNodeHandler(
-  handler: MaybeNodeHandler,
-  request: Request,
-  remoteAddress?: string,
-): Promise<Response> | null {
-  const req = toNodeRequest(request, remoteAddress);
-  const res = new BunServerResponse();
-
-  const onAbort = () => res.destroy();
-  request.signal.addEventListener('abort', onAbort, { once: true });
-  res.once('close', () => request.signal.removeEventListener('abort', onAbort));
-
-  const claimed = handler(req, res as unknown as ServerResponse);
-  if (!claimed) {
-    request.signal.removeEventListener('abort', onAbort);
-    return null;
-  }
   return res.response;
 }
