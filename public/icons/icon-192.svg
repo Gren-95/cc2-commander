@@ -6,7 +6,7 @@
   </defs>
   <rect width="192" height="192" rx="46" fill="#0f1117"/>
   <path d="M96.0 19.8c28.8 38.8 52.5 60.0 52.5 88.8a52.5 52.5 0 0 1 -105.0 0c0 -28.8 23.8 -50.0 52.5 -88.8z" fill="url(#dropcc192100)"/>
-  <ellipse cx="73.5" cy="114.8" rx="10.0" ry="15.0" fill="#fff" opacity=".30" transform="rotate(-18 73.5 114.8)"/>
+  <path d="M96.0 34.8q-17.5 22.5 -20.0 37.5" stroke="#fff" stroke-width="11.2" stroke-linecap="round" fill="none" opacity=".28"/>
   <circle cx="77.2" cy="102.2" r="8.8" fill="#0f1117"/>
   <circle cx="114.8" cy="102.2" r="8.8" fill="#0f1117"/>
   <path d="M81.0 129.8q15.0 13.8 30.0 0" stroke="#0f1117" stroke-width="8.8" stroke-linecap="round" fill="none" opacity=".85"/>
