@@ -1472,8 +1472,9 @@ export function createRestRouter(
       return;
     }
 
-    // Not an API route — hand the browser the SPA entry document.
-    writeSpaFallback(res);
+    // Not an API route — hand the browser the SPA entry document, unless it asked for a
+    // file, in which case a missing file must read as missing.
+    writeSpaFallback(res, url);
 
     function handleClientError(req: IncomingMessage, res: ServerResponse): void {
       let body = '';

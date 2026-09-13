@@ -20,6 +20,7 @@ import { readdirSync, statSync, readFileSync, existsSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 import type { ServerResponse } from 'node:http';
 import { getLogger } from './logger.js';
+import { wantsDocument } from './spa-paths.js';
 
 const log = getLogger('SPA');
 
@@ -98,9 +99,32 @@ export function buildStaticRoutes(): Record<string, Response> {
   return routes;
 }
 
+/**
+ * Say so, once, when a fingerprinted asset is missing.
+ *
+ * The only way to reach this is a dist/ that has changed under a running process, and
+ * the symptom at the browser — a page that loads and does nothing — gives no hint of the
+ * cause. One line in the journal is the difference between a restart and an afternoon.
+ * Rate-limited because a stale index.html asks for every asset it references.
+ */
+let staleAssetWarnedAt = 0;
+function warnStaleAsset(urlPath: string): void {
+  if (!urlPath.startsWith('/assets/')) return;
+  const now = Date.now();
+  if (now - staleAssetWarnedAt < 60_000) return;
+  staleAssetWarnedAt = now;
+  log.warn(
+    `404 for ${urlPath} — the route table was built at startup and dist/ has changed since. ` +
+      'Restart the service to pick up the new build.',
+  );
+}
+
 /** The SPA entry document, for any path that is not a file and not an API route. */
-export function spaFallbackResponse(): Response {
-  if (!indexHtml) return new Response('Not found', { status: 404 });
+export function spaFallbackResponse(urlPath: string): Response {
+  if (!indexHtml || !wantsDocument(urlPath)) {
+    warnStaleAsset(urlPath);
+    return new Response('Not found', { status: 404 });
+  }
   return new Response(indexHtml, { headers: INDEX_HEADERS });
 }
 
@@ -108,8 +132,9 @@ export function spaFallbackResponse(): Response {
  * The same fallback for callers still holding a Node `ServerResponse` — rest-api.ts's
  * terminal "not an API route" branch, which behaves exactly as it did before.
  */
-export function writeSpaFallback(res: ServerResponse): void {
-  if (!indexHtml) {
+export function writeSpaFallback(res: ServerResponse, urlPath: string): void {
+  if (!indexHtml || !wantsDocument(urlPath)) {
+    warnStaleAsset(urlPath);
     res.writeHead(404);
     res.end('Not found');
     return;
