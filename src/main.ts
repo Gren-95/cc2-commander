@@ -391,8 +391,13 @@ function connectToService(): void {
       if (connState === 'error' && !dashboardShown) {
         ($('connect-btn') as HTMLButtonElement).disabled = false;
         ($('connect-btn') as HTMLButtonElement).textContent = 'Connect';
+        // Name the address that failed. "Ensure the service is running" is not actionable
+        // when the service IS running somewhere else, or when something else has taken
+        // its port — an unrelated nginx container answering on 8088 produces exactly this
+        // screen, and without the URL there is nothing to go on.
         $('connect-error').textContent =
-          'Cannot reach service. Ensure the elegoo-web service is running.';
+          `Cannot reach the elegoo-web service at ${serviceUrl}. It may not be running, ` +
+          'or something else may be listening on that port.';
         toast('Service connection failed', 'error');
       }
     },
