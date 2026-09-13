@@ -189,6 +189,18 @@ async function handleFileDownload(
         'Content-Disposition': presentation.inline
           ? `inline; filename="${baseName}"`
           : `attachment; filename="${baseName}"`,
+        // Forwarded, and it arrives — but it does NOT reach the browser, which sees
+        // `transfer-encoding: chunked` and no length. Established while chasing it:
+        // the printer does send `content-length: 7924491` (alongside a contradictory
+        // `transfer-encoding: chunked`, which is why this proxy needs
+        // `insecureHTTPParser`); `res.getHeader('content-length')` reads it back
+        // correctly after this `writeHead`; and Bun preserves a declared length on a
+        // streamed `Response` in isolation. So it is lost between the compat layer and
+        // the wire, and the cause is not yet known.
+        //
+        // The cost is small and bounded: a `<video>` plays fine without it but cannot
+        // seek until the file has buffered. Not worth buffering 8MB in memory per
+        // request to fix, which is the only remedy that does not need the cause.
         ...(proxyRes.headers['content-length']
           ? { 'Content-Length': proxyRes.headers['content-length'] }
           : {}),

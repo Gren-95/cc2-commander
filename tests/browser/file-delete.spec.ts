@@ -30,11 +30,11 @@ async function runDelete(
     const original = window.confirm;
     window.confirm = () => o.accept;
     const T = (globalThis as unknown as {
-      T: { files: Record<string, Function>; fileBrowsing: Record<string, Function> };
+      T: { fileActions: Record<string, Function>; fileBrowsing: Record<string, Function> };
     }).T;
     const filename = o.filename ?? 'benchy.gcode';
     const dir = o.dir ?? '/';
-    const result = T.files.confirmDeleteFile(
+    const result = T.fileActions.confirmDeleteFile(
       filename,
       T.fileBrowsing.filePathFor(filename, dir),
       o.source ?? 'local',
@@ -102,7 +102,7 @@ test.describe('filePathFor', () => {
     expect(
       await page.evaluate(() => {
         const T = (globalThis as unknown as {
-      T: { files: Record<string, Function>; fileBrowsing: Record<string, Function> };
+      T: { fileActions: Record<string, Function>; fileBrowsing: Record<string, Function> };
     }).T;
         return [
           T.fileBrowsing.filePathFor('a.gcode', '/'),

@@ -22,6 +22,7 @@ import {
   setFileDir,
   setFileSource,
 } from './file-browsing';
+import { bindFileActions, ensureFileActions } from './file-actions';
 import { reapplyBusyGuard } from './busy-guard';
 import { positionSegmented } from './segmented';
 import { EMPTY } from './design';
@@ -58,150 +59,6 @@ const ROW_BTN_BAD = [
 let _lastState: PrinterState | null = null;
 /** The sender for the whole card. Refreshed on every render. */
 let _client: CommandSender | null = null;
-
-/**
- * Delete a file from the printer, behind a confirmation.
- *
- * **Native `confirm`, deliberately.** A filename comes off the printer's own filesystem
- * and is shown back here; a native dialog renders plain text, so a name crafted to look
- * like markup is inert in it by construction. It is also what the emergency stop already
- * uses, for the same reason. The trade is that it cannot be styled, and a destructive,
- * irreversible action is the place to accept that.
- *
- * Returns whether the delete was actually sent, so a caller can leave its own UI alone
- * when the user backs out.
- */
-export function confirmDeleteFile(
-  filename: string,
-  fullPath: string,
-  source: string,
-  dir: string,
-  client: CommandSender | null,
-): boolean {
-  if (!confirm(`Delete ${filename}?\n\nThis permanently removes it from the printer.`)) {
-    return false;
-  }
-  client?.sendCommand(1047, { storage_media: source, file_path: [fullPath] });
-  // 1047 answers, but pushes no new listing — so ask for one, and for the disk figures
-  // the capacity bar reads, or the row stays on screen and the bar stays wrong.
-  setTimeout(() => {
-    client?.sendCommand(1044, { storage_media: source, dir, offset: 0, limit: 200 });
-    client?.sendCommand(1048, { storage_media: source });
-  }, 500);
-  return true;
-}
-
-let fileDelegationBound = false;
-
-/** Bind delegated event listeners on the file list container (once) */
-function ensureFileDelegation(container: HTMLElement): void {
-  if (fileDelegationBound) return;
-  fileDelegationBound = true;
-
-  // Delegated mouseenter/mouseleave for file popovers (use capture for mouseenter)
-  container.addEventListener(
-    'mouseenter',
-    (e) => {
-      const target = e.target as HTMLElement;
-      const item = target.closest('.file-item[data-type="file"]') as HTMLElement | null;
-      if (!item) return;
-      if (target.closest('.file-actions')) return;
-      const fn = item.dataset.filename;
-      if (!fn) return;
-      const file = popoverFile(fn);
-      if (!file) return;
-      schedulePopover(file, item);
-    },
-    true,
-  );
-
-  container.addEventListener(
-    'mouseleave',
-    (e) => {
-      const target = e.target as HTMLElement;
-      const item = target.closest('.file-item[data-type="file"]') as HTMLElement | null;
-      if (!item) return;
-      schedulePopoverClose();
-    },
-    true,
-  );
-
-  // Delegated click for folders, breadcrumbs, and print buttons
-  container.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-
-    // Print button
-    const printBtn = target.closest('.file-print-btn') as HTMLElement | null;
-    if (printBtn) {
-      e.stopPropagation();
-      const item = printBtn.closest('.file-item') as HTMLElement;
-      const filename = item?.dataset.filename;
-      if (filename && _lastState && _client) {
-        const fullPath =
-          currentFileDir() === '/'
-            ? filename
-            : currentFileDir().replace(/^\//, '') + '/' + filename;
-        requestPrintDialog(filename, fullPath, _client, _lastState);
-      }
-      return;
-    }
-
-    // Delete button. The popover had the only delete, and the popover opens on hover —
-    // so on a touchscreen there was no way to reach it at all.
-    const deleteBtn = target.closest('.file-delete-btn') as HTMLElement | null;
-    if (deleteBtn) {
-      e.stopPropagation();
-      const filename = (deleteBtn.closest('.file-item') as HTMLElement)?.dataset.filename;
-      if (!filename) return;
-      closeFilePopover();
-      confirmDeleteFile(
-        filename,
-        filePathFor(filename, currentFileDir()),
-        currentFileSource(),
-        currentFileDir(),
-        _client,
-      );
-      return;
-    }
-
-    // Folder click
-    const folder = target.closest('.file-item-folder') as HTMLElement | null;
-    if (folder) {
-      const dirname = folder.dataset.filename;
-      if (!dirname || !_client) return;
-      setFileDir(currentFileDir() === '/' ? `/${dirname}` : `${currentFileDir()}/${dirname}`);
-      resetThumbnailQueue();
-      container.innerHTML = `<div class="${EMPTY}"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>Loading…</div>`;
-      _client.sendCommand(1044, {
-        storage_media: currentFileSource(),
-        dir: currentFileDir(),
-        offset: 0,
-        limit: 200,
-      });
-      return;
-    }
-
-    // Breadcrumb nav
-    const navBtn = target.closest('.file-nav-btn') as HTMLElement | null;
-    if (navBtn) {
-      const dir = navBtn.dataset.dir;
-      if (dir == null || !_client) return;
-      setFileDir(dir);
-      resetThumbnailQueue();
-      container.innerHTML = `<div class="${EMPTY}"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>Loading…</div>`;
-      _client.sendCommand(1044, {
-        storage_media: currentFileSource(),
-        dir: currentFileDir(),
-        offset: 0,
-        limit: 200,
-      });
-    }
-  });
-}
-
-function _bindFilePopovers(_container: HTMLElement): void {
-  // No-op: popovers now handled by delegation in ensureFileDelegation
-}
 
 function renderBreadcrumb(_client: CommandSender): string {
   if (currentFileDir() === '/') return '';
@@ -298,7 +155,8 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
       `No files ${currentFileDir() === '/' ? '' : 'in this folder '}on ${currentFileSource() === 'u-disk' ? 'USB drive' : 'printer'}`,
     );
     container.innerHTML = html;
-    ensureFileDelegation(container);
+    bindFileActions(state, client);
+    ensureFileActions(container);
     return;
   }
 
@@ -366,7 +224,8 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
   }
 
   container.innerHTML = html;
-  ensureFileDelegation(container);
+  bindFileActions(state, client);
+  ensureFileActions(container);
   // Fresh markup comes back enabled; re-apply what the dashboard last knew.
   reapplyBusyGuard();
 

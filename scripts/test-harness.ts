@@ -32,6 +32,7 @@ const EXPOSED = {
   files: 'src/ui/files.ts',
   fileBrowsing: 'src/ui/file-browsing.ts',
   busyGuard: 'src/ui/busy-guard.ts',
+  fileActions: 'src/ui/file-actions.ts',
 };
 
 async function bundle(): Promise<string> {
