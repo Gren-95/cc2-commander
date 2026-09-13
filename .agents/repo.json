@@ -1,7 +1,7 @@
 {
-  "repo": "runnane/elegoo-web",
+  "repo": "Gren-95/cc2-commander",
   "trackerKey": "ELEG",
-  "trackerSlug": "elegoo-web",
+  "trackerSlug": "cc2-commander",
   "visibility": "public",
   "gates": {
     "all": "bun run gates",

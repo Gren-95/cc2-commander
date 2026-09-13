@@ -23,7 +23,7 @@ import { icon } from './icons';
 import { toast } from './toast';
 
 /** Where this code comes from. Upstream, not any particular fork. */
-const PROJECT_URL = 'https://github.com/runnane/elegoo-web';
+const PROJECT_URL = 'https://github.com/Gren-95/cc2-commander';
 
 const SUMMARY =
   'A web frontend and service for the Elegoo Centauri Carbon 2. One MQTT connection ' +

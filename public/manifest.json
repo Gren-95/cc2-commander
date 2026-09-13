@@ -1,16 +1,23 @@
 {
   "id": "/",
-  "name": "Elegoo Web",
-  "short_name": "Elegoo",
-  "description": "Browser-based web frontend for Elegoo Centauri Carbon 2 printers",
+  "name": "CC2 Commander",
+  "short_name": "Commander",
+  "description": "Self-hosted web dashboard for the Elegoo Centauri Carbon 2 (CC2) \u2014 live status, camera, print control, file management, filament dryer, and Moonraker/OctoPrint compatibility.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "browser"],
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
   "orientation": "any",
   "background_color": "#0f1117",
-  "theme_color": "#2196f3",
-  "categories": ["utilities", "productivity"],
+  "theme_color": "#3b82f6",
+  "categories": [
+    "utilities",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -41,7 +48,12 @@
     {
       "name": "Dashboard",
       "url": "/",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

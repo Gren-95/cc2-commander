@@ -31,7 +31,7 @@ backend** — copying a `.ts` file into `/opt/elegooweb/src/server/` and restart
 deploy. The frontend *does* need `vite build`, and the service serves the resulting
 `dist/` (with SPA fallback) from that same directory.
 
-There is also a Docker path (`ghcr.io/runnane/elegoo-web`, `Dockerfile`,
+There is also a Docker path (`ghcr.io/gren-95/cc2-commander`, `Dockerfile`,
 `contrib/docker-compose.example.yml`) — it is real and released, but it is **not** what runs
 here. Don't reason about this host's behaviour from the compose file.
 

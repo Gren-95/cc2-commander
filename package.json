@@ -1,5 +1,6 @@
 {
-  "name": "elegoo-web",
+  "name": "cc2-commander",
+  "description": "Self-hosted web dashboard for the Elegoo Centauri Carbon 2 (CC2) \u2014 live status, camera, print control, file management, filament dryer, and Moonraker/OctoPrint compatibility.",
   "version": "0.2.1",
   "private": true,
   "type": "module",
@@ -13,8 +14,8 @@
     "check": "biome check --write",
     "dev": "bun scripts/dev.ts",
     "dev:service": "bun --watch src/server/index.ts",
-    "docker:build": "docker build -t ghcr.io/runnane/elegoo-web:local .",
-    "docker:verify": "docker run --rm -e PRINTER_IP=192.0.2.99 -e TELEGRAM_BOT_TOKEN= -e AI_ENABLED=false -e CAMERA_ENABLED=false ghcr.io/runnane/elegoo-web:local bun -e \"import('./src/server/config.js').then(()=>console.log('image OK'))\"",
+    "docker:build": "docker build -t ghcr.io/gren-95/cc2-commander:local .",
+    "docker:verify": "docker run --rm -e PRINTER_IP=192.0.2.99 -e TELEGRAM_BOT_TOKEN= -e AI_ENABLED=false -e CAMERA_ENABLED=false ghcr.io/gren-95/cc2-commander:local bun -e \"import('./src/server/config.js').then(()=>console.log('image OK'))\"",
     "format": "biome format --write",
     "format:check": "biome format",
     "gates": "bash scripts/gates.sh",

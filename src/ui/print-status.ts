@@ -285,12 +285,12 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     const pctStr = `${progress}%`;
     const stateStr = isPaused ? 'Paused' : 'Printing';
     const sub = subStatusName ? ` · ${subStatusName}` : '';
-    document.title = `${pctStr} ${stateStr}${sub} — elegoo-web`;
+    document.title = `${pctStr} ${stateStr}${sub} — CC2 Commander`;
   } else if (machineStatus?.status === 1) {
-    document.title = 'Idle — elegoo-web';
+    document.title = 'Idle — CC2 Commander';
   } else {
     const sub = subStatusName ? ` · ${subStatusName}` : '';
-    document.title = `${statusName}${sub} — elegoo-web`;
+    document.title = `${statusName}${sub} — CC2 Commander`;
   }
 
   // Layer info — use fileTotalLayers from method 1046 or fallback to print_status

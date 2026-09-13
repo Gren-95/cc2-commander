@@ -1,6 +1,6 @@
-# elegoo-web
+# CC2 Commander
 
-A web frontend + backend service for Elegoo Centauri Carbon 2 (CC2) FDM printers. The Bun service maintains a single MQTT connection to the printer and exposes state to browsers via WebSocket, REST API, and Prometheus metrics.
+A self-hosted web dashboard for **Elegoo Centauri Carbon 2 (CC2)** FDM printers. The Bun service maintains a single MQTT connection to the printer and exposes state to browsers via WebSocket, REST API, and Prometheus metrics.
 
 ## Features
 
@@ -57,13 +57,13 @@ See [CC2 Protocol Documentation](https://github.com/danielcherubini/elegoo-homea
 
 ```bash
 docker run -d \
-  --name elegoo-web \
+  --name cc2-commander \
   --restart unless-stopped \
   -p 8088:8088 \
   -p 7125:7125 \
   -e PRINTER_IP=192.168.1.150 \
   -v elegoo-data:/app/data \
-  ghcr.io/runnane/elegoo-web:latest
+  ghcr.io/gren-95/cc2-commander:latest
 ```
 
 Web UI: `http://localhost:8088` · Moonraker API: `http://localhost:7125`
@@ -73,13 +73,13 @@ To keep the data on a host path you can browse, instead of a named volume:
 ```bash
 mkdir -p ./elegoo-data
 docker run -d \
-  --name elegoo-web \
+  --name cc2-commander \
   --restart unless-stopped \
   -p 8088:8088 \
   -p 7125:7125 \
   -e PRINTER_IP=192.168.1.150 \
   -v ./elegoo-data:/app/data \
-  ghcr.io/runnane/elegoo-web:latest
+  ghcr.io/gren-95/cc2-commander:latest
 ```
 
 Everything then appears under `./elegoo-data` — `reports/`, `gcode-cache/`, `logs/`,
@@ -117,8 +117,8 @@ status dropdown, which is the first thing to quote when reporting a problem.
 ### Build Locally
 
 ```bash
-docker build -t ghcr.io/runnane/elegoo-web:local .
-docker run -d -p 8088:8088 -p 7125:7125 -e PRINTER_IP=192.168.1.150 ghcr.io/runnane/elegoo-web:local
+docker build -t ghcr.io/gren-95/cc2-commander:local .
+docker run -d -p 8088:8088 -p 7125:7125 -e PRINTER_IP=192.168.1.150 ghcr.io/gren-95/cc2-commander:local
 ```
 
 A locally built image reports its version as `unknown`, which is expected: the stamp is

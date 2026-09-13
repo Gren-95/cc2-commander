@@ -1,5 +1,10 @@
 /** Persistent UI settings stored in localStorage */
 
+// Deliberately NOT renamed with the project. This key is the only handle on a
+// browser's saved state — theme, dashboard layout and card widths, list sorts,
+// alert volume. Changing it does not migrate anything; it silently orphans all of
+// it and the user sees a factory-fresh dashboard with no explanation. A cosmetic
+// rename is not worth that.
 const STORAGE_KEY = 'elegoo-web-ui-settings';
 
 export interface UISettings {
