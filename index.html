@@ -309,17 +309,27 @@
         <!-- Camera -->
         <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="camera-card">
           <div class="card-header flex items-center justify-between mb-3 @max-[420px]:flex-wrap @max-[420px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
-            <h3><i class="bi bi-camera-video bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Camera</h3>
-            <div class="camera-header-actions flex gap-1 @max-[420px]:flex-wrap @max-[420px]:min-w-0">
-              <button id="camera-snapshot-btn" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Save snapshot"><i class="bi bi-camera bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Snapshot</button>
-              <button id="camera-overlay-btn" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Toggle status overlay"><i class="bi bi-bar-chart-line bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Overlay</button>
-              <button id="camera-expand-btn" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Toggle large view"><i class="bi bi-arrows-angle-expand bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Expand</button>
+            <h3><i class="bi bi-camera-video bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i> Camera</h3>
+            <div class="flex items-center gap-1.5">
+              <button id="camera-snapshot-btn" class="inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg border border-line bg-surface text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Save a snapshot" aria-label="Save a snapshot"><i class="bi bi-camera" aria-hidden="true"></i></button>
+              <button id="camera-expand-btn" class="inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg border border-line bg-surface text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Full screen" aria-label="Show the camera full screen"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i></button>
             </div>
           </div>
-          <div class="camera-off flex-1 min-h-50 relative bg-[#000] rounded-chip overflow-hidden max-[700px]:max-w-full" id="camera-wrap" title="Click to enlarge">
-            <img id="camera-feed" alt="Camera off" class="w-full block cursor-pointer max-[700px]:max-w-full [#camera-card.camera-expanded_&]:max-h-[60vh] [#camera-card.camera-expanded_&]:object-contain hidden">
+          <div class="camera-off relative w-full aspect-video overflow-hidden rounded-chip bg-[#000] [&.camera-off]:aspect-auto [&.camera-off]:min-h-24" id="camera-wrap" title="Click to enlarge">
+            <img id="camera-feed" alt="Camera off" class="absolute inset-0 h-full w-full object-contain cursor-pointer hidden">
             <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 py-8 text-center text-xs text-fg-muted [&>i]:text-2xl [&>i]:opacity-40" id="camera-overlay"><i class="bi bi-camera-video-off" aria-hidden="true"></i><span id="camera-overlay-text">Camera not available</span></div>
           </div>
+
+          <label class="mt-3 flex items-center gap-3 cursor-pointer">
+            <span class="min-w-0 flex-1">
+              <span class="block text-xs text-fg">Overlay</span>
+              <span class="block text-[11px] text-fg-muted">Print status burned into the stream</span>
+            </span>
+            <span class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
+              <input type="checkbox" id="camera-overlay-btn" class="peer sr-only">
+              <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
+            </span>
+          </label>
         </div>
 
         <!-- Event Log -->
@@ -677,11 +687,9 @@
       </div>
 
       <!-- Camera Fullscreen Overlay (positioned fixed, outside the grid) -->
-      <div id="camera-modal" class="hidden fixed inset-0 z-[9999] bg-[rgba(0,_0,_0,_0.92)] items-center justify-center cursor-pointer" tabindex="-1">
-        <div class="relative max-w-[95vw] max-h-[95vh]">
-          <img id="camera-modal-img" alt="Camera" class="max-w-[95vw] max-h-[95vh] object-contain rounded-[8px]">
-          <button id="camera-modal-close" class="absolute top--3 right--3 w-8 h-8 rounded-full border-0 bg-card text-[var(--text)] text-[20px] cursor-pointer flex items-center justify-center [box-shadow:0_2px_8px_rgba(0,_0,_0,_0.5)]" title="Close">&times;</button>
-        </div>
+      <div id="camera-modal" class="hidden not-[.hidden]:flex fixed inset-0 z-[9999] bg-[rgba(0,_0,_0,_0.92)] items-center justify-center cursor-pointer" tabindex="-1">
+        <img id="camera-modal-img" alt="Camera" class="h-[95vh] w-[95vw] object-contain">
+        <button id="camera-modal-close" class="absolute top-4 right-4 w-10 h-10 rounded-full border-0 bg-card text-fg text-[20px] cursor-pointer flex items-center justify-center [box-shadow:0_2px_8px_rgba(0,_0,_0,_0.5)]" title="Close" aria-label="Close the full-screen view">&times;</button>
       </div>
     </div>
 
