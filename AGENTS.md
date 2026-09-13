@@ -140,7 +140,7 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   defaults to `./data`, so `$CWD/data` is the same directory on metal
   (`WorkingDirectory=/opt/elegooweb`) and in the container (`WORKDIR /app`). It only
   diverges for someone who sets `DATA_DIR` elsewhere — which `README.md` and
-  `docker-compose.example.yml` document as supported — and then the writes land in a
+  `contrib/docker-compose.example.yml` document as supported — and then the writes land in a
   directory nobody mounted or backs up.
 
   That is a shape worth recognising on its own: **a hardcoded value that happens to equal
@@ -259,7 +259,7 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   reach. (This rule used to warn against `src/persistence.ts` as the wrong home for such
   state. That file was unreachable and is gone — ELEG-65 — so `ui-settings.ts` is now
   simply the only client-side preference store there is.)
-- **MCP tools and [`MCP.md`](MCP.md) change together.** `MCP.md` is the documented
+- **MCP tools and [`docs/MCP.md`](docs/MCP.md) change together.** `docs/MCP.md` is the documented
   contract for the `/mcp` surface (resources, tools, parameters). A tool added,
   renamed, or given a new parameter without the doc edit in the same commit is drift
   in the only place agents look. Same for `README.md`'s environment-variable table
@@ -281,7 +281,7 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   `TELEGRAM_BOT_TOKEN`, `AI_VLM_API_KEY` are read from the environment
   (`.env`, which is gitignored) at runtime — never hardcoded, never returned to the
   browser, never logged, and **placeholders only** in `.env.example`,
-  `docker-compose.example.yml` and anything else committed. Mirrors the org
+  `contrib/docker-compose.example.yml` and anything else committed. Mirrors the org
   data-protection policy: no real credentials or PII in committed files, issue
   comments, or outbound requests. (The vendor default `elegoo`/`123456` in the README
   is documentation of a published protocol default, not a secret.)
@@ -457,7 +457,7 @@ checkout.
 | MQTT bridge (the single connection) | `src/server/mqtt-bridge.ts` |
 | Shared state + events | `src/server/state-store.ts` |
 | REST API + camera proxy | `src/server/rest-api.ts` |
-| MCP server (`/mcp`) | `src/server/mcp-server.ts` (documented in `MCP.md`) |
+| MCP server (`/mcp`) | `src/server/mcp-server.ts` (documented in `docs/MCP.md`) |
 | Moonraker / OctoPrint compat | `src/server/{moonraker-compat,moonraker-server,octoprint-compat}.ts` |
 | AI print monitor | `src/server/ai-monitor.ts` |
 | Telegram bot | `src/server/telegram.ts`, `src/server/allowlist.ts` |
@@ -484,6 +484,6 @@ checkout.
 
 ## Definition of done
 
-`bun run gates` green (biome + both typechecks + knip + build + tests), `MCP.md` / `README.md`
+`bun run gates` green (biome + both typechecks + knip + build + tests), `docs/MCP.md` / `README.md`
 updated if a documented surface changed, a conventional commit subject that reads as a
 release note, no secrets committed, the issue commented and its PR open.

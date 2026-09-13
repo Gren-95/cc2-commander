@@ -23,7 +23,7 @@ A web frontend + backend service for Elegoo Centauri Carbon 2 (CC2) FDM printers
 - **Timelapse viewer**: Download/play timelapse videos
 - **Spool calculator**: Remaining weight/meters from measured thickness
 - **Moonraker/OctoPrint compatibility**: API layers for Mainsail/Fluidd/KlipperScreen and OctoPrint clients
-- **MCP server**: Model Context Protocol for AI agent integration — [6 resources, 31 tools](MCP.md)
+- **MCP server**: Model Context Protocol for AI agent integration — [6 resources, 31 tools](docs/MCP.md)
 - **Prometheus metrics**: `/api/metrics/prometheus` endpoint for monitoring
 - **PWA support**: Installable app with manifest + service worker
 - **Dark theme**: Modern UI with CSS custom properties, responsive at 1200/800/480px breakpoints
@@ -97,12 +97,12 @@ Everything then appears under `./elegoo-data` — `reports/`, `gcode-cache/`, `l
 Copy the example file and edit your printer IP:
 
 ```bash
-cp docker-compose.example.yml docker-compose.yml
+cp contrib/docker-compose.example.yml docker-compose.yml
 # Edit PRINTER_IP in docker-compose.yml
 docker compose up -d
 ```
 
-See [`docker-compose.example.yml`](docker-compose.example.yml) for all available environment variables (Telegram, AI monitoring, camera, etc.).
+See [`contrib/docker-compose.example.yml`](contrib/docker-compose.example.yml) for all available environment variables (Telegram, AI monitoring, camera, etc.).
 
 ### Image tags
 

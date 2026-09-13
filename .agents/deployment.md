@@ -32,7 +32,7 @@ deploy. The frontend *does* need `vite build`, and the service serves the result
 `dist/` (with SPA fallback) from that same directory.
 
 There is also a Docker path (`ghcr.io/runnane/elegoo-web`, `Dockerfile`,
-`docker-compose.example.yml`) — it is real and released, but it is **not** what runs
+`contrib/docker-compose.example.yml`) — it is real and released, but it is **not** what runs
 here. Don't reason about this host's behaviour from the compose file.
 
 ## How a deploy happens

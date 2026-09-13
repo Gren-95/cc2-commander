@@ -2,7 +2,7 @@
 
 This repo is an MCP **server**: it exposes the printer to AI agents over
 StreamableHTTP at `POST /mcp` on `SERVICE_PORT`, implemented in
-`src/server/mcp-server.ts` and documented in [`MCP.md`](../MCP.md).
+`src/server/mcp-server.ts` and documented in [`docs/MCP.md`](../docs/MCP.md).
 
 It is also, separately, an MCP **client** of the RCP tracker — that is
 [`.mcp.json`](../.mcp.json), which is how the `/fix`, `/plan` and `/sweep` commands read
@@ -18,7 +18,7 @@ when reading a stack trace or an error message.
   from `src/server/index.ts` — so a tool never opens its own printer connection (see
   [architecture.md](architecture.md)).
 - **6 resources** (`printer://status|files|metrics|events|system|zones`) and **31
-  tools**, grouped in `MCP.md` as read-only / control / print management / maintenance.
+  tools**, grouped in `docs/MCP.md` as read-only / control / print management / maintenance.
 
 Connecting a client locally:
 
@@ -28,13 +28,13 @@ claude mcp add --transport http elegoo http://localhost:8088/mcp
 
 ## Two rules
 
-**1. `MCP.md` and `mcp-server.ts` change in the same commit.** The doc is the contract —
+**1. `docs/MCP.md` and `mcp-server.ts` change in the same commit.** The doc is the contract —
 it is what an agent reads to decide what to call.
 
 **A test now enforces the name half of this** (ELEG-7):
 `src/server/__tests__/mcp-doc-parity.test.ts` stands the server up over an in-memory
 transport, asks it for its tools and resources exactly as a client would, and compares
-that against the tables in `MCP.md` **in both directions** — a tool missing from the doc
+that against the tables in `docs/MCP.md` **in both directions** — a tool missing from the doc
 fails, and a doc row with no tool behind it fails too. It also checks the counts quoted in
 `README.md` and in this file. So adding a tool without touching the doc is now a red gate
 rather than silent drift, and the counts cannot rot.

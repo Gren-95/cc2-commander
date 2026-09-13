@@ -329,7 +329,7 @@ the current set — trust that over this page, which describes *shape* deliberat
 quotes no totals (ELEG-15):
 
 - `src/__tests__/types.test.ts` — zone detection and sub-status classification.
-- `src/server/__tests__/mcp-doc-parity.test.ts` — `MCP.md` lists exactly the registered
+- `src/server/__tests__/mcp-doc-parity.test.ts` — `docs/MCP.md` lists exactly the registered
   tools and resources (ELEG-7). That is a **documentation** check. It will catch you
   renaming a tool without touching the doc; it will not notice that the tool stopped
   working.

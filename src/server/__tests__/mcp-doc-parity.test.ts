@@ -30,6 +30,9 @@ import { createMcpServer } from '../mcp-server.js';
 const REPO_ROOT = join(import.meta.dirname, '..', '..', '..');
 const read = (file: string) => readFileSync(join(REPO_ROOT, file), 'utf8');
 
+/** The contract doc, relative to the repo root. */
+const MCP_DOC = 'docs/MCP.md';
+
 /** Registration never touches these; see the file header. */
 const stubStore = {} as unknown as StateStore;
 const stubBridge = {} as unknown as MqttBridge;
@@ -54,7 +57,7 @@ function firstColumnNames(slice: string, pattern: RegExp): string[] {
 /** Text between a `## heading` and the next `## ` heading (or end of file). */
 function section(md: string, heading: string): string {
   const start = md.indexOf(`\n## ${heading}\n`);
-  if (start === -1) throw new Error(`MCP.md has no "## ${heading}" section`);
+  if (start === -1) throw new Error(`${MCP_DOC} has no "## ${heading}" section`);
   const after = start + 1;
   const next = md.indexOf('\n## ', after);
   return md.slice(after, next === -1 ? undefined : next);
@@ -78,7 +81,7 @@ beforeAll(async () => {
 
 describe('MCP.md documents exactly the registered tools', () => {
   it('matches in both directions', () => {
-    const documented = firstColumnNames(section(read('MCP.md'), 'Tools'), /^`([a-z_]+)`$/).sort();
+    const documented = firstColumnNames(section(read(MCP_DOC), 'Tools'), /^`([a-z_]+)`$/).sort();
 
     // Set equality, but asserted as two directed differences so a failure names the
     // drifted tool instead of printing two 31-element arrays side by side.
@@ -90,7 +93,7 @@ describe('MCP.md documents exactly the registered tools', () => {
   });
 
   it('lists each tool exactly once', () => {
-    const documented = firstColumnNames(section(read('MCP.md'), 'Tools'), /^`([a-z_]+)`$/);
+    const documented = firstColumnNames(section(read(MCP_DOC), 'Tools'), /^`([a-z_]+)`$/);
     const dupes = documented.filter((t, i) => documented.indexOf(t) !== i);
     expect(dupes).toEqual([]);
   });
@@ -99,7 +102,7 @@ describe('MCP.md documents exactly the registered tools', () => {
 describe('MCP.md documents exactly the registered resources', () => {
   it('matches in both directions', () => {
     const documented = firstColumnNames(
-      section(read('MCP.md'), 'Resources'),
+      section(read(MCP_DOC), 'Resources'),
       /^`(printer:\/\/[a-z]+)`$/,
     ).sort();
 

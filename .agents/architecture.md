@@ -93,7 +93,7 @@ order matters: the first match wins, and the SPA fallback is last.
 - **A new browser-facing read or action** → `rest-api.ts` + the matching card in
   `src/ui/*.ts`. Push state changes over `/ws` (`wsTransport.broadcast`) rather than
   making the browser poll.
-- **A new agent-facing capability** → `mcp-server.ts` **and** `MCP.md` in the same
+- **A new agent-facing capability** → `mcp-server.ts` **and** `docs/MCP.md` in the same
   commit (see [mcp.md](mcp.md)).
 - **A new notification** → `src/server/telegram.ts`, driven off a `state-store` event,
   never off a poll of the printer.

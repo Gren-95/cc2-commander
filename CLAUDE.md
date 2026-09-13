@@ -19,9 +19,9 @@ on demand when working in that area:
   `/opt/elegooweb`, which is **not a git checkout**; what `IN_PRODUCTION` means here
 - `.agents/testing.md` — what the suite covers (very little), how to probe a live
   printer **read-only**, and what nothing checks
-- `.agents/security.md` — the exposure posture: the service is on the public internet
-  with **no authentication**, and `/mcp` can drive the machine
-- `.agents/mcp.md` — the `/mcp` surface, connecting a client, and the `MCP.md`
+- `.agents/security.md` — the exposure posture: single-user auth exists but is **off
+  until a password is configured**, and `/mcp` can drive the machine
+- `.agents/mcp.md` — the `/mcp` surface, connecting a client, and the `docs/MCP.md`
   doc-parity rule
 - `.agents/dependencies.md` — why each `overrides` floor in `package.json` exists (the
   reasons that used to be comments in `pnpm-workspace.yaml`), and what

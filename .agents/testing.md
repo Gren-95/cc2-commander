@@ -15,7 +15,7 @@ drifts).
 - `src/server/__tests__/state-store-restore.test.ts` — the only test that stands up a real
   `StateStore` (ELEG-18). See below.
 - `src/server/__tests__/telegram-allowlist.test.ts` — who may issue bot commands (ELEG-3).
-- `src/server/__tests__/mcp-doc-parity.test.ts` — `MCP.md` matches the registered tools
+- `src/server/__tests__/mcp-doc-parity.test.ts` — `docs/MCP.md` matches the registered tools
   and resources (ELEG-7). A *documentation* check.
 - `src/server/__tests__/build-info.test.ts` — the deployed-commit stamp (ELEG-6).
 
@@ -325,7 +325,7 @@ because nothing answered is worse than no check.
   in the console is still invisible to every gate. Look at the page.
 - **The WebSocket contract.** `ws-transport.ts` broadcasts and `ws-client.ts` consumes;
   nothing asserts they agree. Renaming a message `type` on one side is silent.
-- **The MCP surface's *behaviour*.** `mcp-doc-parity.test.ts` does check that `MCP.md`
+- **The MCP surface's *behaviour*.** `mcp-doc-parity.test.ts` does check that `docs/MCP.md`
   lists exactly the registered tools and resources, by standing the server up and asking
   it — so a renamed tool without a doc edit is caught. But that is a **documentation**
   check: it never invokes a handler, so a tool that is listed, documented and completely

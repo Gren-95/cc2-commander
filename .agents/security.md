@@ -117,7 +117,7 @@ get this right.
   credential on disk and, given the above, a credential behind an unauthenticated
   endpoint.
 - **Committed files carry placeholders only** — `.env.example`,
-  `docker-compose.example.yml`, `contrib/install.sh`'s generated default `.env`, any
+  `contrib/docker-compose.example.yml`, `contrib/install.sh`'s generated default `.env`, any
   fixture. This repo is **public**: a committed secret is published, and rotating it is
   the only remedy.
 - **There are two `.env` files** on a host that runs the service locally: the
