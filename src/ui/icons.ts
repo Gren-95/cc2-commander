@@ -31,9 +31,8 @@ export const ICONS = {
   help: 'question-circle',
   sidebar: 'layout-sidebar',
   close: 'x-lg',
+  editLayout: 'grid-1x2',
   add: 'plus-lg',
-  moveUp: 'chevron-up',
-  moveDown: 'chevron-down',
 
   // ── Print control ──
   pause: 'pause-fill',

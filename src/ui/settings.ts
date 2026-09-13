@@ -5,8 +5,6 @@ import { readMigrated } from './storage-migration';
 import { icon, iconSolo } from './icons';
 import { $, fetchTimeout } from './helpers';
 import {
-  CARD_NAMES,
-  CARD_WIDTH_LABELS,
   CARD_WIDTHS,
   CARD_WIDTH_UTILITIES,
   type CardLayout,
@@ -53,6 +51,24 @@ function saveCardLayout(layout: CardLayout): void {
 let currentLayout = loadCardLayout();
 
 /** Toggle a card's collapsed state */
+/** Read the live layout. Mutate it only through `updateCardLayout`. */
+export function getCardLayout(): CardLayout {
+  return currentLayout;
+}
+
+/**
+ * Change the layout, persist it and redraw — the single write path.
+ *
+ * `ui/dashboard-edit.ts` drives drag, resize and dismiss through this rather than
+ * touching storage itself. Two owners of one key is how the settings panel and the
+ * dashboard would come to disagree about which cards exist.
+ */
+export function updateCardLayout(mutate: (layout: CardLayout) => void): void {
+  mutate(currentLayout);
+  saveCardLayout(currentLayout);
+  applyCardLayout();
+}
+
 export function toggleCardCollapse(cardId: string): void {
   const idx = currentLayout.collapsed.indexOf(cardId);
   if (idx >= 0) {
@@ -243,44 +259,6 @@ export function renderSettingsContent(): void {
 function buildSettingsHTML(content: HTMLElement): void {
   currentLayout = loadCardLayout();
 
-  /**
-   * One row per card: visible, width, position.
-   *
-   * The panel dropdown is gone with the sidebar. It used to conflate two decisions —
-   * picking "sidebar" also picked narrow, and there was no way to have a narrow card
-   * further down the page. Width is its own control now.
-   */
-  function buildCardRows(order: string[]): string {
-    return order
-      .map((id, index) => {
-        const name = CARD_NAMES[id] || id;
-        const isHidden = currentLayout.hidden.includes(id);
-        const width = widthOf(currentLayout, id);
-        const first = index === 0;
-        const last = index === order.length - 1;
-        return `
-        <div class="flex items-center gap-2 [padding:6px_8px] rounded-chip bg-input hover:bg-[rgba(255,_255,_255,_0.05)] ${isHidden ? ' settings-card-row-hidden' : ''}" data-card-id="${id}">
-          <span class="" aria-hidden="true">${index + 1}</span>
-          <label class="flex-1 flex items-center gap-2 cursor-pointer text-[0.85rem] [&_input[type="checkbox"]]:[accent-color:var(--accent)]">
-            <input type="checkbox" class="settings-card-visible" data-card-id="${id}" ${isHidden ? '' : 'checked'}>
-            <span>${name}</span>
-          </label>
-          <select class="settings-card-width bg-input border border-line rounded-[4px] text-fg [padding:4px_8px] text-[0.8rem] [.spool-calc-inputs_&]:w-full [.spool-calc-inputs_&]:[padding:6px_10px] [.spool-calc-inputs_&]:text-[14px]" data-card-id="${id}" aria-label="Width">
-            ${CARD_WIDTHS.map(
-              (w) =>
-                `<option value="${w}" ${w === width ? 'selected' : ''}>${CARD_WIDTH_LABELS[w]}</option>`,
-            ).join('')}
-          </select>
-          <span class="settings-card-move flex [gap:2px]">
-            <button class="settings-move-up inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-card-id="${id}" title="Move up" aria-label="Move ${id} up" ${first ? 'disabled' : ''}>${iconSolo('moveUp')}</button>
-            <button class="settings-move-down inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]" data-card-id="${id}" title="Move down" aria-label="Move ${id} down" ${last ? 'disabled' : ''}>${iconSolo('moveDown')}</button>
-          </span>
-        </div>
-      `;
-      })
-      .join('');
-  }
-
   content.innerHTML = `
     <section class="mb-5 [&_h3]:text-[13px] [&_h3]:font-semibold [&_h3]:text-fg-soft [&_h3]:uppercase [&_h3]:tracking-[0.5px] [&_h3]:mb-2">
       <h3>Appearance</h3>
@@ -325,9 +303,11 @@ function buildSettingsHTML(content: HTMLElement): void {
         screen, <strong>Wide</strong> a half, <strong>Full</strong> the whole row. Narrow
         screens collapse everything to one column regardless.
       </p>
-      <div id="settings-card-list" class="flex flex-col [gap:2px]">
-        ${buildCardRows(currentLayout.order)}
-      </div>
+      <p class="text-[13px] text-fg-soft leading-[1.5] mb-3">
+        Arrange it on the dashboard itself: the layout button in the header turns on edit
+        mode, where you drag cards into order, drag a corner to resize, and use × to hide
+        one. Hidden cards go to a tray you can put them back from.
+      </p>
       <div class="mt-2 flex gap-2">
         <button id="settings-reset-layout" class="inline-flex items-center justify-center [padding:4px_10px] border border-line rounded-chip text-[11px] font-medium cursor-pointer [transition:all_0.15s] text-fg-soft bg-transparent max-[800px]:[padding:6px_12px] max-[800px]:text-[13px] pointer-coarse:min-h-11 hover:[filter:brightness(1.15)] active:[transform:scale(0.97)] [.spool-actions_&]:text-[9px] [.spool-actions_&]:[padding:2px_8px] [.spool-actions_&]:rounded-[10px] [.file-popover-actions_&]:text-[12px] [.file-popover-actions_&]:[padding:4px_10px] max-[800px]:[.file-actions_&]:min-h-9 max-[800px]:[.file-actions_&]:min-w-9 max-[800px]:[.file-actions_&]:[padding:6px_8px] [.settings-card-move_&]:[padding:1px_6px] [.settings-card-move_&]:text-[10px] [.settings-card-move_&]:leading-[1] [.ai-label-config-delete_&]:text-bad [.ai-label-config-delete_&]:[padding:4px_8px] [.ai-label-config-delete_&]:text-[14px] [.ai-label-config-delete_&]:leading-[1] hover:[.ai-label-config-delete_&]:bg-[rgba(239,_83,_80,_0.15)]">Reset to default</button>
       </div>
@@ -351,67 +331,8 @@ function buildSettingsHTML(content: HTMLElement): void {
   `;
 
   // Bind card visibility toggles
-  content.querySelectorAll('.settings-card-visible').forEach((cb) => {
-    cb.addEventListener('change', (e) => {
-      const input = e.target as HTMLInputElement;
-      const cardId = input.dataset.cardId!;
-      if (input.checked) {
-        currentLayout.hidden = currentLayout.hidden.filter((h) => h !== cardId);
-      } else {
-        if (!currentLayout.hidden.includes(cardId)) {
-          currentLayout.hidden.push(cardId);
-        }
-      }
-      saveCardLayout(currentLayout);
-      applyCardLayout();
-    });
-  });
 
   // Width, which replaced the sidebar/main panel selector.
-  content.querySelectorAll('.settings-card-width').forEach((sel) => {
-    sel.addEventListener('change', (e) => {
-      const select = e.target as HTMLSelectElement;
-      const cardId = select.dataset.cardId;
-      if (!cardId) return;
-      currentLayout.width[cardId] = select.value as CardWidth;
-      saveCardLayout(currentLayout);
-      applyCardLayout();
-      // No re-render: changing a width does not move anything in this list, and
-      // rebuilding it would throw away the focus the user is holding on the select.
-    });
-  });
-
-  /**
-   * Move a card one place in the single order list.
-   *
-   * The re-render afterwards is what keeps the row numbers and the disabled state of
-   * the first/last buttons honest — both are derived from position.
-   */
-  const move = (cardId: string, delta: -1 | 1): void => {
-    const list = currentLayout.order;
-    const idx = list.indexOf(cardId);
-    const next = idx + delta;
-    if (idx < 0 || next < 0 || next >= list.length) return;
-    [list[idx], list[next]] = [list[next], list[idx]];
-    saveCardLayout(currentLayout);
-    applyCardLayout();
-    settingsRendered = false;
-    renderSettingsContent();
-    // Keep the keyboard on the button that was just pressed, which has moved with the
-    // row — otherwise a second press needs a fresh tab-hunt down the list.
-    const selector = delta < 0 ? '.settings-move-up' : '.settings-move-down';
-    const again = document.querySelector(
-      `${selector}[data-card-id="${cardId}"]`,
-    ) as HTMLElement | null;
-    again?.focus();
-  };
-
-  content.querySelectorAll('.settings-move-up').forEach((btn) => {
-    btn.addEventListener('click', () => move((btn as HTMLElement).dataset.cardId ?? '', -1));
-  });
-  content.querySelectorAll('.settings-move-down').forEach((btn) => {
-    btn.addEventListener('click', () => move((btn as HTMLElement).dataset.cardId ?? '', 1));
-  });
 
   // Reset button
   const themeSelect = content.querySelector('#settings-theme') as HTMLSelectElement | null;
