@@ -1,10 +1,25 @@
 name: CI
 
+# Actions had never run on this fork. Total runs before this change: zero — and
+# `pull_request` did not fire, verified the hard way: PR #1 was opened AND reopened
+# against main with no run, no check-run, and `gh pr checks` reporting none.
+#
+# What unstuck it was running anything at all. A `workflow_dispatch` on Audit succeeded,
+# and PR events began arriving normally from that point — GitHub holds a fork's
+# workflows until one is exercised, and nothing in the API surfaces that state
+# (`actions/permissions` already said `enabled: true`, and all three workflows already
+# said `active`).
+#
+# `push` on every branch stays regardless, because for this repo it is the better
+# trigger: a topic branch gets checked before a PR exists for it, which is where the
+# work actually is. `workflow_dispatch` stays because it is the lever that fixed this,
+# and the one that works when nothing else does.
 on:
   push:
-    branches: [main]
+    branches: ['**']
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   ci:
@@ -20,8 +35,10 @@ jobs:
       # package manager, the TypeScript runtime AND the HTTP server, so a version
       # moving under CI can change how the service behaves, not just how it installs.
       #
-      # Keep this in step with the FROM lines in Dockerfile and the floor checked by
-      # contrib/install.sh. Those are the three places a Bun version is named.
+      # Keep this in step with the two FROM lines in Dockerfile and with audit.yml.
+      # Those are the four places a Bun version is named. It used to say three and name
+      # contrib/install.sh — that directory was deleted when the Docker instructions
+      # moved into README.md, so a third of the list pointed at nothing.
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
@@ -33,6 +50,17 @@ jobs:
       # --frozen-lockfile is the point of the step: it fails rather than re-resolving,
       # so CI installs exactly what the committed bun.lock says.
       - run: bun install --frozen-lockfile
+
+      # Without this, `bun run gates` SKIPS the browser gate rather than failing it —
+      # deliberately, so a fresh checkout is not blocked on a 130MB download (see the
+      # comment above the gate in scripts/gates.sh, which names this workflow as the
+      # reason it cannot simply install one itself). The effect in CI was that all 85
+      # Playwright tests never ran, and the run went green anyway: the gate summary
+      # listed the skip, and nothing reads a summary.
+      #
+      # --with-deps because ubuntu-latest lacks Chromium's shared libraries. Only
+      # chromium, because playwright.config.ts declares only that project.
+      - run: bunx playwright install --with-deps chromium
 
       # One step, not four. `scripts/gates.sh` is the single list of what has to pass,
       # so a gate can no longer exist in the repo but be missing from CI — which is

@@ -19,7 +19,7 @@ name: Audit
 # here should ever be made a required check.
 #
 # Fixing what it finds is usually a FLOOR in `overrides` in package.json, not a manifest
-# bump — see .agents/dependencies.md for the reason behind every existing floor, and
+# bump — see docs/dependencies.md for the reason behind every existing floor, and
 # .github/dependabot.yml for why Dependabot cannot do it for us.
 
 on:
@@ -75,7 +75,7 @@ jobs:
               : [
                   `**${rows.length} advisory/advisories** (critical ${counts.critical}, high ${counts.high}, moderate ${counts.moderate}, low ${counts.low}).`,
                   "",
-                  "Fix by raising a floor in `overrides` in `package.json` — Dependabot cannot write those. See `.agents/dependencies.md`.",
+                  "Fix by raising a floor in `overrides` in `package.json` — Dependabot cannot write those. See `docs/dependencies.md`.",
                   "",
                   "| severity | package | vulnerable | advisory |",
                   "| --- | --- | --- | --- |",
