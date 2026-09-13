@@ -80,6 +80,7 @@ export const ICONS = {
   refresh: 'arrow-repeat',
   expand: 'arrows-angle-expand',
   collapse: 'arrows-angle-contract',
+  fullscreen: 'arrows-fullscreen',
   vibration: 'activity',
   minus: 'dash-lg',
   plus: 'plus-lg',

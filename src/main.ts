@@ -229,9 +229,20 @@ function showDashboard(): void {
       cameraModalImg.src = '';
       releaseCameraTrap?.();
       releaseCameraTrap = null;
+      // Hide first, then drop out of full screen: the `fullscreenchange` that follows
+      // re-enters this function, and the guard above is what stops it looping.
+      if (document.fullscreenElement === cameraModal) void document.exitFullscreen();
     };
 
-    const openModal = () => {
+    /**
+     * Show the feed over the whole page, and over the whole *screen* when asked.
+     *
+     * `requestFullscreen` needs a user gesture and is refused outright by iOS Safari on
+     * anything but a `<video>`, so the overlay is the thing that opens and full screen
+     * is a request made on top of it. A refusal therefore costs the browser chrome, not
+     * the feature.
+     */
+    const openModal = (fullscreen = false) => {
       // `hidden` is what `updateCamera` actually toggles. The guard used to read
       // `alt === 'Camera off'` — the alt text was never changed off its placeholder,
       // so every enlarge, from the feed and from the button, returned here silently.
@@ -241,9 +252,17 @@ function showDashboard(): void {
       // Created after `.hidden` is removed: the trap reads the focusable children, and
       // this repo's `.hidden` class is one of the things it treats as not focusable.
       releaseCameraTrap = createFocusTrap(cameraModal, { onEscape: closeModal });
+      if (fullscreen) void cameraModal.requestFullscreen?.().catch(() => {});
     };
 
-    cameraWrap.addEventListener('click', openModal);
+    // Escape in full screen is taken by the browser to exit it, and never reaches the
+    // focus trap — without this, leaving full screen would strand the overlay open over
+    // the dashboard and need a second Escape.
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) closeModal();
+    });
+
+    cameraWrap.addEventListener('click', () => openModal());
 
     $('camera-modal-close').addEventListener('click', (e) => {
       e.stopPropagation();
@@ -251,13 +270,13 @@ function showDashboard(): void {
     });
     cameraModal.addEventListener('click', closeModal);
 
-    // The header button and the feed itself both open the large view. The button used
-    // to toggle a `camera-expanded` class that raised the img to 60vh — inside a grid
-    // cell whose width it could not change, so the feed grew only when the card was
-    // already nearly that tall. The modal is the large view; there is one of them now.
+    // The header button goes to full screen; clicking the feed itself opens the same
+    // overlay without it, so there is still a way to enlarge the picture that does not
+    // take over the display. The button used to toggle a `camera-expanded` class that
+    // raised the img to 60vh — inside a grid cell whose width it could not change.
     $('camera-expand-btn').addEventListener('click', (e) => {
       e.stopPropagation();
-      openModal();
+      openModal(true);
     });
 
     // Camera overlay switch
