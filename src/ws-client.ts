@@ -27,12 +27,6 @@ export interface WsClientOptions {
   onServiceStatus?: (data: Record<string, unknown>) => void;
   /** Called with chart data points from service */
   onChartData?: (t: number, values: Record<string, number>) => void;
-  /** Called with AI analysis results */
-  onAIAnalysis?: (data: Record<string, unknown>) => void;
-  /** Called with AI alerts (threshold reached) */
-  onAIAlert?: (data: Record<string, unknown>) => void;
-  /** Called with AI chart data (frame-to-frame motion, as a percentage) */
-  onAIChartData?: (t: number, motion: number) => void;
   /** Called with event log entries */
   onEventLog?: (entry: { ts: number; event: Record<string, unknown> }) => void;
   /** Called when server records a new layer time */
@@ -165,25 +159,6 @@ export class WsClient {
         const values = msg.values as Record<string, number>;
         if (t && values) {
           this.opts.onChartData?.(t, values);
-        }
-        break;
-      }
-
-      case 'ai_analysis': {
-        this.opts.onAIAnalysis?.(msg);
-        break;
-      }
-
-      case 'ai_alert': {
-        this.opts.onAIAlert?.(msg);
-        break;
-      }
-
-      case 'ai_chart_data': {
-        const t = msg.t as number;
-        const motion = msg.motion as number;
-        if (t) {
-          this.opts.onAIChartData?.(t, motion ?? 0);
         }
         break;
       }

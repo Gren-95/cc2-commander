@@ -50,8 +50,10 @@ extruder.filament_detected flips 1→0→1 during swap
 
 - Service (src/server/) maintains singleton MQTT connection via MqttBridge
 - Browser connects to service via WebSocket (/ws), NOT directly to printer MQTT
-- StateStore emits print_event for all subsystems (Telegram, AI, WS, event log)
-- AI monitor only runs analysis when sub_status === 2075 (actively printing)
+- StateStore emits print_event for all subsystems (Telegram, WS, event log)
+- `sub_status === 2075` is "actively printing", as opposed to heating or changing
+  filament. The AI monitor (removed) used it to gate analysis; anything else that must
+  act only during the print proper wants the same check
 - PrintEvent 'filament_runout' triggers both Telegram notification and event log entry
 
 ## Client Memory Leak: gcode-preview 60fps animate() (Fixed 2026-04-12)

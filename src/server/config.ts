@@ -50,15 +50,6 @@ export interface ServiceConfig {
   moonrakerPort: number;
 
   // AI monitoring (optional)
-  aiEnabled: boolean;
-  aiVlmEnabled: boolean;
-  aiVlmProvider: 'openai' | 'ollama';
-  aiVlmApiKey: string;
-  aiVlmBaseUrl: string;
-  aiVlmModel: string;
-  aiIntervalSec: number;
-  aiAlertThreshold: number;
-  aiAlertCooldownSec: number;
 }
 
 function env(key: string, fallback = ''): string {
@@ -173,24 +164,5 @@ export function loadConfig(): ServiceConfig {
     progressInterval: parseInt(env('PROGRESS_INTERVAL', '25'), 10) || 25,
     dataDir: env('DATA_DIR') || './data',
     moonrakerPort,
-
-    // AI monitoring
-    aiEnabled: env('AI_ENABLED') === 'true',
-    // Opt-in, exactly like aiEnabled above it. It used to default ON, so setting only
-    // AI_ENABLED=true — which is how the README says to turn on AI monitoring — silently
-    // started POSTing camera frames to the VLM endpoint as well (ELEG-72).
-    aiVlmEnabled: env('AI_VLM_ENABLED') === 'true',
-    aiVlmProvider: env('AI_VLM_PROVIDER', 'ollama') as 'openai' | 'ollama',
-    aiVlmApiKey: env('AI_VLM_API_KEY'),
-    // localhost, and ollama's actual port. The previous default was a hardcoded private
-    // LAN address on the maintainer's own network, which shipped in a public image: every
-    // user who enabled AI sent pictures of their printer to whatever held that IP on
-    // THEIR network. It also could never have worked against a stock ollama, which
-    // listens on 11434 rather than the 3000 that was hardcoded.
-    aiVlmBaseUrl: env('AI_VLM_BASE_URL', 'http://localhost:11434'),
-    aiVlmModel: env('AI_VLM_MODEL', 'llava'),
-    aiIntervalSec: parseInt(env('AI_INTERVAL', '60'), 10) || 60,
-    aiAlertThreshold: parseInt(env('AI_ALERT_THRESHOLD', '3'), 10) || 3,
-    aiAlertCooldownSec: parseInt(env('AI_ALERT_COOLDOWN', '300'), 10) || 300,
   };
 }

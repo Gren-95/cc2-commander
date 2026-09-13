@@ -23,28 +23,9 @@ services:
       # TELEGRAM_CHAT_ID: ""
       # PROGRESS_INTERVAL: "25"          # Notify every N% (default: 25)
 
-      # ── Optional: AI print monitoring ─────────────────
-      # AI_ENABLED: "false"              # Enable AI monitoring (default: false)
-      # AI_VLM_ENABLED: "true"           # Vision LLM analysis (default: FALSE — opt-in;
-      #                                  # AI_ENABLED alone does not turn this on)
-      # AI_VLM_PROVIDER: "ollama"        # ollama or openai (default: ollama)
-      # AI_VLM_BASE_URL: "http://host.docker.internal:11434"
-      #   ⚠ On LINUX, host.docker.internal does not resolve unless you also uncomment the
-      #   `extra_hosts` block below — it is provided automatically only on Docker Desktop
-      #   (macOS/Windows). Without it the VLM fails with a name-resolution error that
-      #   looks nothing like the actual cause. A plain host IP works too.
-      # AI_VLM_MODEL: "llava"
-      # AI_VLM_API_KEY: ""               # Required for openai provider
-      # AI_INTERVAL: "60"                # Seconds between AI checks (default: 60)
-      # AI_ALERT_THRESHOLD: "3"          # Consecutive failures before alert (default: 3)
-      # AI_ALERT_COOLDOWN: "300"         # Seconds between alerts (default: 300)
-
       # ── Optional: Data persistence ────────────────────
       # DATA_DIR: "./data"               # Data directory (default: ./data)
 
-    # Needed on Linux for AI_VLM_BASE_URL=http://host.docker.internal:… (see above).
-    # extra_hosts:
-    #   - "host.docker.internal:host-gateway"
 
     volumes:
       # Option A: Single named volume (simplest)

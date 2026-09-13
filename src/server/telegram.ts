@@ -11,7 +11,6 @@ import type { ServiceConfig } from './config.js';
 import { getSnapshot } from './rest-api.js';
 import { CRITICAL_EXCEPTIONS } from '../types.js';
 import { isAllowedSender } from './allowlist.js';
-import type { AIAlert } from './ai-monitor.js';
 import { getLogger } from './logger.js';
 
 const log = getLogger('Telegram');
@@ -318,29 +317,6 @@ export class TelegramIntegration {
         log.info('Bot is running ✓');
       },
     });
-  }
-
-  /** Send an AI alert with optional snapshot */
-  async sendAIAlert(alert: AIAlert): Promise<void> {
-    const esc = (text: string) => text.replace(/([_*[\]()~`>#+\-=|{}.!\\])/g, '\\$1');
-    const icon = alert.status === 'critical' ? '🚨' : '⚠️';
-    // Issue type + confidence, not the full description: a caption is capped at 1024 chars.
-    const issueLines = alert.issues
-      .map((i) => `${icon}  ${esc(i.type)} \\(${Math.round(i.confidence * 100)}%\\)`)
-      .join('\n');
-
-    const text = [
-      `🤖 *AI Print Alert*`,
-      issueLines || `${icon} ${esc(alert.description.slice(0, 80))}`,
-      `\n_${esc(`Consecutive warnings: ${alert.consecutiveWarnings}`)}_`,
-    ].join('\n');
-
-    try {
-      const photo = this.config.cameraEnabled ? await getSnapshot(this.config) : null;
-      await this.sendNew(text, photo, true);
-    } catch (err) {
-      log.error(`AI alert failed: ${(err as Error).message}`);
-    }
   }
 
   stop(): void {

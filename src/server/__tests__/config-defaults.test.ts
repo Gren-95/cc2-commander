@@ -25,51 +25,28 @@ afterEach(() => {
   process.env = ORIGINAL;
 });
 
-describe('AI defaults', () => {
-  it('leaves AI off entirely unless asked', () => {
-    expect(loadConfig().aiEnabled).toBe(false);
-  });
-
-  it('does NOT enable VLM just because AI is enabled', () => {
-    // The regression. `AI_ENABLED=true` is how the README says to turn on monitoring;
-    // it used to switch the VLM on as well, which starts POSTing camera frames to a
-    // remote endpoint the user never configured.
-    process.env.AI_ENABLED = 'true';
-    const config = loadConfig();
-    expect(config.aiEnabled).toBe(true);
-    expect(config.aiVlmEnabled).toBe(false);
-  });
-
-  it('still enables VLM when explicitly asked', () => {
+describe('AI monitoring, which no longer exists', () => {
+  it('exposes no AI configuration at all', () => {
+    // The whole subsystem is gone — local classification, the VLM backend, motion
+    // detection, the card and the alerts. What is asserted here is the *surface*: a
+    // stale AI_ENABLED or AI_VLM_* in an existing .env must be inert.
+    //
+    // This block used to hold four regression tests, and they are the reason it is
+    // still here rather than deleted. The VLM default once pointed at a hardcoded
+    // private address on the maintainer's own LAN and shipped that way in a public
+    // image, so every user who turned AI on sent pictures of their printer to whatever
+    // held that IP on THEIR network (ELEG-72); AI_ENABLED=true also silently switched
+    // the VLM on. Both are impossible now because nothing reads the keys — but if AI
+    // ever comes back, it must come back deliberately, and this test is what fails
+    // first to say so.
     process.env.AI_ENABLED = 'true';
     process.env.AI_VLM_ENABLED = 'true';
-    expect(loadConfig().aiVlmEnabled).toBe(true);
-  });
+    process.env.AI_VLM_BASE_URL = 'http://192.168.1.100:11434';
 
-  it('never defaults any endpoint to a private network address', () => {
-    // This shipped in a public image: the default pointed at a hardcoded address on the
-    // maintainer's own LAN, so every user who enabled AI sent pictures of their printer
-    // to whatever happened to hold that IP on THEIR network. Asserted as a pattern
-    // rather than an equality so any future private-range default is caught too.
-    const { aiVlmBaseUrl } = loadConfig();
-    expect(aiVlmBaseUrl).not.toMatch(/\/\/(10|127\.[^0]|172\.(1[6-9]|2\d|3[01])|192\.168)\./);
-    expect(aiVlmBaseUrl).toContain('localhost');
-  });
-
-  it('defaults to the port ollama actually listens on', () => {
-    // The old default was :3000, which could not have worked against a stock ollama
-    // even on the right host — so the feature was broken as well as misdirected.
-    expect(loadConfig().aiVlmProvider).toBe('ollama');
-    expect(loadConfig().aiVlmBaseUrl).toContain('11434');
-  });
-
-  it('has no local-analyzer knobs left to configure', () => {
-    // The CLIP backend was removed along with @huggingface/transformers. A stale
-    // AI_LOCAL_ENABLED in someone's .env must be inert rather than resurrect a key
-    // nothing reads — this asserts the config surface, not the env.
     const config = loadConfig() as unknown as Record<string, unknown>;
-    expect(config.aiLocalEnabled).toBeUndefined();
-    expect(config.aiLocalModel).toBeUndefined();
+    for (const key of Object.keys(config)) {
+      expect(key.startsWith('ai')).toBe(false);
+    }
   });
 });
 

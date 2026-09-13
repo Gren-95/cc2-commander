@@ -13,7 +13,6 @@ A self-hosted web dashboard for **Elegoo Centauri Carbon 2 (CC2)** FDM printers.
 - **Printer control**: Temperature presets, fans, speed mode, LED toggle, XY/Z movement, emergency stop
 - **Print management**: File browser with thumbnails/popovers, start dialog, pause/resume/stop, USB support
 - **Zone detection**: Server-side toolhead zone tracking (print area, cutter, purge) for AI/event suppression
-- **AI print monitoring**: Motion-based stall detection, zone-aware suppression, and optional VLM analysis
 - **Telegram notifications**: Print events, progress updates, camera snapshots, AI alerts
 - **MQTT Log**: Real-time structured log with diff view, method filtering, pinning
 - **Debug panel**: Live state tree with change tracking, watched paths, export
@@ -101,7 +100,7 @@ cp contrib/docker-compose.example.yml docker-compose.yml
 docker compose up -d
 ```
 
-See [`contrib/docker-compose.example.yml`](contrib/docker-compose.example.yml) for all available environment variables (Telegram, AI monitoring, camera, etc.).
+See [`contrib/docker-compose.example.yml`](contrib/docker-compose.example.yml) for all available environment variables (Telegram, camera, etc.).
 
 ### Image tags
 
@@ -147,15 +146,6 @@ supplied by the publish workflow, not by `docker build`.
 | `TELEGRAM_ALLOWED_CHAT_IDS` | `TELEGRAM_CHAT_ID` | Comma-separated numeric sender ids permitted to **issue** bot commands. Anyone else is ignored silently |
 | `PROGRESS_INTERVAL` | `25` | Notify every N% progress |
 | `DATA_DIR` | `./data` | Data directory for state, reports, logs |
-| `AI_ENABLED` | `false` | Enable AI print monitoring |
-| `AI_VLM_ENABLED` | `false` | Enable VLM analysis. Opt-in: `AI_ENABLED` alone does **not** turn this on |
-| `AI_VLM_PROVIDER` | `ollama` | VLM provider: `ollama` or `openai` |
-| `AI_VLM_API_KEY` | — | API key for OpenAI VLM provider |
-| `AI_VLM_BASE_URL` | `http://localhost:11434` | VLM API endpoint (ollama's default port) |
-| `AI_VLM_MODEL` | `llava` | VLM model name |
-| `AI_INTERVAL` | `60` | Seconds between AI analysis |
-| `AI_ALERT_THRESHOLD` | `3` | Consecutive alerts before notification |
-| `AI_ALERT_COOLDOWN` | `300` | Seconds between alert notifications |
 
 ### Volumes
 
@@ -272,7 +262,7 @@ This creates:
 - systemd unit `elegooweb.service` (auto-start on boot)
 - Default `.env` config at `/opt/elegooweb/.env`
 
-Edit `/opt/elegooweb/.env` to configure printer IP, Telegram, AI monitoring, etc.
+Edit `/opt/elegooweb/.env` to configure printer IP, Telegram, the camera, etc.
 
 ```bash
 sudo systemctl status elegooweb       # Check status
@@ -303,7 +293,6 @@ src/
 │   ├── logger.ts            # Winston structured logging with rotation
 │   ├── telegram.ts          # Telegram bot notifications
 │   ├── allowlist.ts         # Who may talk to the Telegram bot
-│   ├── ai-monitor.ts        # AI print monitoring (motion + optional VLM)
 │   ├── moonraker-compat.ts  # Moonraker API compatibility
 │   ├── moonraker-server.ts  # Moonraker standalone server (:7125)
 │   ├── octoprint-compat.ts  # OctoPrint API compatibility
@@ -327,7 +316,6 @@ src/
 │   ├── debug-panel.ts     # Live state tree, change tracking, export
 │   ├── settings.ts        # Card layout + tab management
 │   ├── event-log.ts       # Print event log
-│   ├── ai-panel.ts        # AI monitor panel
 │   ├── print-history.ts   # Print history
 │   ├── print-reports.ts   # PDF print reports
 │   ├── print-dialog.ts    # Print start confirmation dialog
@@ -378,23 +366,7 @@ Server-side toolhead zone tracking based on `gcode_move.x/y` coordinates:
 | `print_area` | — | X:0-256, Y:0-256 | Normal printing |
 | `outside` | — | everything else | Fallback |
 
-Used to suppress false AI stall alerts and filament runout events during Canvas filament changes.
-
-## AI Print Monitoring
-
-Enable with `AI_ENABLED=true`. Two detection paths, neither of which adds a dependency:
-
-**Motion-based stall detection** (always on): Computes frame-to-frame pixel diff (160×120 grayscale via sharp). If motion drops below 0.5% for 3 consecutive frames while printing, injects a `print_stalled` issue. This is the one thing a still image cannot show, which is why it is the path that stayed.
-
-**VLM analysis** (`AI_VLM_ENABLED`, off by default): Sends camera snapshots to an external vision-language model (Ollama or OpenAI-compatible API), which can describe what it sees: `under_extrusion`, `nozzle_clog`, `print_stalled`. Note this sends camera frames off the machine — to your own Ollama host, or to OpenAI if you point it there.
-
-A third backend used to sit here: local CLIP/SigLIP zero-shot classification through `@huggingface/transformers`. It was removed. The cost was ~530 MB of `node_modules` (onnxruntime ships prebuilt binaries for every platform and accelerator, most of which cannot run on any one host) plus a ~150 MB model download, and what it bought was nine hand-tuned sentences scored against a dim enclosure webcam. The printer's own failure detection does the same job better.
-
-**Zone-aware filtering**: Analysis only runs when `sub_status === 2075` (Printing) AND `zones.current === 'print_area'`. Skipped during heating, filament changes, and when the toolhead is in the cutter/purge area.
-
-**Alert logic**: Each cycle, critical issues add +2 and warnings add +1 to a consecutive counter (OK decays by -1). When the counter reaches `AI_ALERT_THRESHOLD` (default 3), an alert fires and is sent to Telegram (if configured) with a camera snapshot. Alerts are rate-limited by `AI_ALERT_COOLDOWN` (default 300s).
-
-**Charts**: AI data is shown as 5 score groups: Print in Progress, Spaghetti/Failure, Empty Bed, Paused/Stopped, Other — plus a motion percentage line.
+Used to suppress false filament runout events during Canvas filament changes.
 
 ## Credits
 

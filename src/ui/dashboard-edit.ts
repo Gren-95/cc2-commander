@@ -136,7 +136,13 @@ function undecorate(card: HTMLElement): void {
 
 function renderTray(layout: CardLayout): void {
   const tray = $('dashboard-edit-tray');
-  const hidden = layout.order.filter((id) => layout.hidden.includes(id));
+  // `document.getElementById` rather than the layout alone: `normaliseCardLayout`
+  // deliberately keeps an id it does not recognise, so a layout saved before a card was
+  // removed still names it (every layout saved before the AI monitor was deleted names
+  // `ai-card`). Offering it here would be a chip that restores nothing.
+  const hidden = layout.order.filter(
+    (id) => layout.hidden.includes(id) && document.getElementById(id),
+  );
 
   tray.classList.toggle('hidden', !editing);
   if (!editing) return;

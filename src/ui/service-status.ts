@@ -33,7 +33,6 @@ export interface ServiceStatus {
   printerIp: string;
   wsClients: number;
   telegram: string;
-  ai: string;
   camera: string;
 }
 
@@ -192,7 +191,6 @@ export function renderServiceStatus(): void {
   const checks: ServiceCheck[] = [
     { label: 'MQTT', state: s.mqtt, okValues: ['connected'] },
     { label: 'Telegram', state: s.telegram, okValues: ['running'] },
-    { label: 'AI', state: s.ai, okValues: ['monitoring', 'idle'] },
     { label: 'Camera', state: s.camera, okValues: ['available'] },
     { label: 'Printer', state: s.printerSn ? 'ok' : 'err', okValues: ['ok'] },
   ];
@@ -236,7 +234,6 @@ export function renderServiceStatus(): void {
     <div class="flex flex-col [gap:2px]">
       <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(isOk(s.mqtt, ['connected']))}<span class="text-fg-muted whitespace-nowrap">MQTT</span><span class="text-fg ml-auto font-medium">${mqttLabel}</span></div>
       <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(isOk(s.telegram, ['running']))}<span class="text-fg-muted whitespace-nowrap">Telegram</span><span class="text-fg ml-auto font-medium">${s.telegram}</span></div>
-      <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(isOk(s.ai, ['monitoring', 'idle']))}<span class="text-fg-muted whitespace-nowrap">AI</span><span class="text-fg ml-auto font-medium">${s.ai}</span></div>
       <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(isOk(s.camera, ['available']))}<span class="text-fg-muted whitespace-nowrap">Camera</span><span class="text-fg ml-auto font-medium">${s.camera}</span></div>
       <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(!!s.printerSn)}<span class="text-fg-muted whitespace-nowrap">Printer</span><span class="text-fg ml-auto font-medium">${s.printerSn || 'unknown'}</span></div>
       <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(true)}<span class="text-fg-muted whitespace-nowrap">WS Clients</span><span class="text-fg ml-auto font-medium">${s.wsClients}</span></div>

@@ -69,7 +69,6 @@ export const DEFAULT_ORDER = [
   'print-history-card',
   'print-reports-card',
   'timelapse-card',
-  'ai-card',
   'event-log-card',
   'log-card',
 ];
@@ -126,7 +125,6 @@ export const CARD_NAMES: Record<string, string> = {
   'temps-card': `${icon('temperature')} Temperatures`,
   'canvas-card': `${icon('canvas')} Canvas / AMS`,
   'camera-card': `${icon('camera')} Camera`,
-  'ai-card': `${icon('ai')} AI Monitor`,
   'event-log-card': `${icon('eventLog')} Event Log`,
   'gcode-preview-card': `${icon('gcode')} Layer Preview`,
   'toolhead-card': `${icon('toolhead')} Toolhead`,
@@ -151,7 +149,6 @@ export const CARD_ICONS: Record<string, IconName> = {
   'temps-card': 'temperature',
   'canvas-card': 'canvas',
   'camera-card': 'camera',
-  'ai-card': 'ai',
   'event-log-card': 'eventLog',
   'gcode-preview-card': 'gcode',
   'toolhead-card': 'toolhead',
@@ -190,7 +187,6 @@ export const CARD_ACCENTS: Record<string, string> = {
   'print-history-card': '#14b8a6', // teal — records
   'print-reports-card': '#10b981', // emerald — records
   'timelapse-card': '#a855f7', // purple — media
-  'ai-card': '#f43f5e', // rose — analysis
   'event-log-card': '#6366f1', // indigo — logs
   'log-card': '#7c3aed', // violet — logs
 };

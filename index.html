@@ -309,26 +309,6 @@
           </div>
         </div>
 
-        <!-- AI Monitor -->
-        <div class="card bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="ai-card">
-          <h3><i class="bi bi-robot bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> AI monitor</h3>
-          <div id="ai-panel">
-            <div class="text-fg-muted text-[0.85rem] [padding:8px_0]">AI monitoring disabled or not started</div>
-          </div>
-          <div class="grid grid-cols-[1fr] gap-3 mt-3">
-            <div class="mt-0 border-t0 pt-0">
-              <h4 class="text-xs font-medium text-fg-muted mb-1.5">Motion detection</h4>
-              <div class="flex [gap:2px] mb-1 justify-end pointer-coarse:gap-1 pointer-coarse:items-center">
-                <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-ai-motion" data-window="60">1m</button>
-                <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5 active bg-accent text-white border-accent" data-chart="chart-ai-motion" data-window="300">5m</button>
-                <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-ai-motion" data-window="900">15m</button>
-                <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-ai-motion" data-window="3600">1h</button>
-              </div>
-              <canvas id="chart-ai-motion" class="w-full h-40 block"></canvas>
-            </div>
-          </div>
-        </div>
-
         <!-- Event Log -->
         <div class="card bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="event-log-card">
           <h3><i class="bi bi-journal-text bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Event log</h3>

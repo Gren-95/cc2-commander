@@ -352,8 +352,8 @@ quotes no totals (ELEG-15):
   interval, so `destroy()` in `afterEach` is required or vitest never exits.
 
 Nothing tests the MQTT bridge, the state store's *event* handling, any REST route,
-the Moonraker/OctoPrint layers, the Telegram middleware wiring
-or the AI monitor. The one render test asserts *geometry*, not appearance — there is still
+the Moonraker/OctoPrint layers or the Telegram middleware wiring.
+The one render test asserts *geometry*, not appearance — there is still
 no browser and no screenshot, so colour, font, overlap and layout are unchecked by any
 gate.
 

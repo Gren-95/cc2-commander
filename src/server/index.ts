@@ -31,7 +31,6 @@ import { createMoonrakerRouter } from './moonraker-compat.js';
 import { MoonrakerServer } from './moonraker-server.js';
 import { TelegramIntegration } from './telegram.js';
 import { StatePersistence } from './state-persistence.js';
-import { AIMonitor, type AIAlert } from './ai-monitor.js';
 import { PrintReportCollector } from './print-report-collector.js';
 import { getBuildInfo } from './build-info.js';
 import { applyCors, corsHeaders } from './cors.js';
@@ -71,11 +70,6 @@ log.info(`Data:    ${config.dataDir}`);
 if (config.telegramEnabled) {
   log.info(`Telegram: enabled (progress every ${config.progressInterval}%)`);
 }
-if (config.aiEnabled) {
-  log.info(
-    `AI:       enabled (motion detection, VLM: ${config.aiVlmEnabled ? config.aiVlmModel : 'off'})`,
-  );
-}
 log.info(`Moonraker: http://0.0.0.0:${config.moonrakerPort}`);
 if (config.auth.enabled) {
   log.info(`Auth:    enabled (API key ${config.auth.apiKey ? 'set' : 'NOT set'})`);
@@ -107,12 +101,6 @@ const persistence = new StatePersistence(store, config.dataDir);
 let telegram: TelegramIntegration | null = null;
 if (config.telegramEnabled) {
   telegram = new TelegramIntegration(store, bridge, config);
-}
-
-// --- AI Monitor (optional, created early so REST API can reference it) ---
-let aiMonitor: AIMonitor | null = null;
-if (config.aiEnabled) {
-  aiMonitor = new AIMonitor(store, config);
 }
 
 // --- Print Report Collector ---
@@ -213,26 +201,7 @@ const nodeRouter: NodeHandler = (req, res) => {
 const wsTransport = new WebSocketTransport(store, bridge);
 
 // Provide service references for status panel
-wsTransport.setServices({ telegram, aiMonitor });
-
-// Forward AI events to WS clients
-if (aiMonitor) {
-  aiMonitor.on('analysis', (analysis: Record<string, unknown>) => {
-    wsTransport.broadcast({ type: 'ai_analysis', ...analysis });
-  });
-
-  aiMonitor.on('alert', (alert: AIAlert) => {
-    wsTransport.broadcast({ type: 'ai_alert', ...alert });
-    // Also send to Telegram
-    if (telegram) {
-      telegram.sendAIAlert(alert);
-    }
-  });
-
-  aiMonitor.on('ai_chart_data', (data: { t: number; motion: number }) => {
-    store.pushAIChartData(data);
-  });
-}
+wsTransport.setServices({ telegram });
 
 let server: ReturnType<typeof Bun.serve> | null = null;
 
@@ -301,17 +270,11 @@ async function start(): Promise<void> {
   if (telegram) {
     await telegram.start();
   }
-
-  // Start AI monitor if configured
-  if (aiMonitor) {
-    await aiMonitor.start();
-  }
 }
 
 // Graceful shutdown
 function shutdown(): void {
   log.info('Shutting down...');
-  aiMonitor?.stop();
   persistence.stop();
   moonrakerServer.stop();
   wsTransport.close();

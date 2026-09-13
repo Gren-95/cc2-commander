@@ -12,13 +12,7 @@
 import { writeFile, readFile, rename, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join, dirname } from 'path';
-import type {
-  StateStore,
-  ChartPoint,
-  AIChartPoint,
-  FilamentUsage,
-  EventLogEntry,
-} from './state-store.js';
+import type { StateStore, ChartPoint, FilamentUsage, EventLogEntry } from './state-store.js';
 import { getLogger } from './logger.js';
 
 const log = getLogger('Persistence');
@@ -32,8 +26,6 @@ interface PersistedState {
   layerTimes: Array<{ layer: number; duration: number; timestamp: number }>;
   lastLayer: number;
   lastLayerTime: number;
-  /** Added in version 2 */
-  aiChartData?: AIChartPoint[];
   /** Added in version 3 */
   filamentUsage?: FilamentUsage[];
   /** Added in version 4 */
@@ -71,9 +63,6 @@ export class StatePersistence {
 
       this.store.restoreChartData(data.chartData);
       this.store.restoreLayerData(data.layerTimes, data.lastLayer, data.lastLayerTime);
-      if (data.aiChartData) {
-        this.store.restoreAIChartData(data.aiChartData);
-      }
       if (data.filamentUsage) {
         this.store.restoreFilamentUsage(data.filamentUsage);
       }
@@ -83,10 +72,9 @@ export class StatePersistence {
 
       const chartCount = data.chartData?.length ?? 0;
       const layerCount = data.layerTimes?.length ?? 0;
-      const aiCount = data.aiChartData?.length ?? 0;
       const eventCount = data.eventLog?.length ?? 0;
       log.info(
-        `Restored ${chartCount} chart points, ${layerCount} layer entries, ${aiCount} AI points, ${eventCount} events (age: ${Math.round(age / 1000)}s)`,
+        `Restored ${chartCount} chart points, ${layerCount} layer entries, ${eventCount} events (age: ${Math.round(age / 1000)}s)`,
       );
       return true;
     } catch (err) {
@@ -126,7 +114,6 @@ export class StatePersistence {
         layerTimes: this.store.layerTimes,
         lastLayer: this.store.getLastLayer(),
         lastLayerTime: this.store.getLastLayerTime(),
-        aiChartData: this.store.getAIChartHistory(),
         filamentUsage: this.store.getFilamentUsageArray(),
         eventLog: this.store.getEventLog(),
       };

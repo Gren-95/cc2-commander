@@ -109,10 +109,10 @@ get this right.
 
 ## Secrets
 
-- `PRINTER_PASSWORD`, `TELEGRAM_BOT_TOKEN`, `AI_VLM_API_KEY` come from the environment
+- `PRINTER_PASSWORD` and `TELEGRAM_BOT_TOKEN` come from the environment
   (`.env`, gitignored) via `src/server/config.ts`. Read them at runtime through that
   config object — never hardcode one, never send one to the browser, never log one.
-  `logger.ts` writes to `${DATA_DIR}/logs`; an `AI_VLM_API_KEY` in a debug line is a
+  `logger.ts` writes to `${DATA_DIR}/logs`; a `TELEGRAM_BOT_TOKEN` in a debug line is a
   credential on disk and, given the above, a credential behind an unauthenticated
   endpoint.
 - **Committed files carry placeholders only** — `.env.example`,

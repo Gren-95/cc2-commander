@@ -19,8 +19,8 @@ drifts).
 - `src/server/__tests__/build-info.test.ts` — the deployed-commit stamp (ELEG-6).
 
 Everything else in this repo — the MQTT bridge, the state store's *event* handling, every
-REST route, both compatibility layers, the Telegram middleware
-wiring and the AI monitor — has **no test at all**.
+REST route, both compatibility layers and the Telegram middleware
+wiring — has **no test at all**.
 
 So `bun run gates` green means: it compiles, it is formatted, some pure functions still
 work, and one chart still puts its ink inside its own axes. Read that sentence again
@@ -296,7 +296,7 @@ So when you must run the service locally, blank the integrations rather than onl
 the ports:
 
 ```bash
-TELEGRAM_BOT_TOKEN= TELEGRAM_CHAT_ID= AI_ENABLED=false CAMERA_ENABLED=false \
+TELEGRAM_BOT_TOKEN= TELEGRAM_CHAT_ID= CAMERA_ENABLED=false \
   SERVICE_PORT=18096 MOONRAKER_PORT=17122 PRINTER_IP=192.0.2.99 DATA_DIR=/tmp/probe \
   bun src/server/index.ts
 ```

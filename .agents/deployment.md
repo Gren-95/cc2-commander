@@ -20,7 +20,7 @@ are different trees that can silently disagree.
 
 **The modes are stated by the installer on every run, deliberately.** They were `777` for
 a long time, which meant any local account could read `PRINTER_PASSWORD`,
-`TELEGRAM_BOT_TOKEN` and `AI_VLM_API_KEY`, and — because the service runs the TypeScript
+`TELEGRAM_BOT_TOKEN`, and — because the service runs the TypeScript
 directly — could drop a file into `src/server/` and have it executed as `elegooweb` on the
 next restart. Nothing corrected it, because `cp` onto an existing file keeps that file's
 mode and no line in the installer had ever expressed an intended one (ELEG-20). If you add

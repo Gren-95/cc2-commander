@@ -3,7 +3,6 @@ import { WsClient } from './ws-client';
 import { PrinterState } from './printer-state';
 import { LogStore } from './log-store';
 import { ChartStore } from './chart-store';
-import { handleAIAlert, handleAIAnalysis, updateAIStatus } from './ui/ai-panel';
 import { renderCanvas, setCanvasClient } from './ui/canvas';
 import { initCharts, registerChart } from './ui/charts';
 import { bindControls, onCommandResponse } from './ui/controls';
@@ -85,9 +84,6 @@ chartStore.defineSeries('fan_model', 'Model', '#4fc3f7');
 chartStore.defineSeries('fan_aux', 'Aux', '#66bb6a');
 chartStore.defineSeries('fan_case', 'Case', '#ffa726');
 
-// AI chart series — motion detection
-chartStore.defineSeries('ai_motion', 'Motion', '#58a6ff');
-
 // Speed & flow chart series
 chartStore.defineSeries('extrusion_rate', 'Extrusion', '#4fc3f7');
 
@@ -105,14 +101,6 @@ registerChart({
   seriesKeys: ['fan_model', 'fan_aux', 'fan_case'],
   yMin: 0,
   yMax: 100,
-  unit: '%',
-});
-
-registerChart({
-  canvasId: 'chart-ai-motion',
-  seriesKeys: ['ai_motion'],
-  yMin: 0,
-  yMax: 30,
   unit: '%',
 });
 
@@ -428,26 +416,12 @@ function connectToService(): void {
       }
       if (initData.serviceStatus) {
         updateServiceStatus(initData.serviceStatus as Record<string, unknown>);
-        const ss = initData.serviceStatus as Record<string, unknown>;
-        if (typeof ss.ai === 'string') {
-          updateAIStatus(ss.ai, ss.aiConfig as Record<string, unknown> | null);
-        }
       }
       // Load chart history from service (replaces localStorage persistence)
       if (initData.chartHistory && Array.isArray(initData.chartHistory)) {
         chartStore.loadHistory(
           initData.chartHistory as Array<{ t: number; values: Record<string, number> }>,
         );
-      }
-      // Load AI chart history from service
-      if (initData.aiChartHistory && Array.isArray(initData.aiChartHistory)) {
-        const aiPoints = initData.aiChartHistory as Array<{ t: number; motion: number }>;
-        // Convert AI chart points into the generic chart format for loadHistory merge
-        const converted = aiPoints.map((p) => ({ t: p.t, values: { ai_motion: p.motion } }));
-        // Push into existing series without clearing (chart history already loaded above)
-        for (const point of converted) {
-          chartStore.pushPoint(point.t, point.values);
-        }
       }
       // Load event log history
       if (initData.eventLog && Array.isArray(initData.eventLog)) {
@@ -626,21 +600,9 @@ function connectToService(): void {
     },
     onServiceStatus(data) {
       updateServiceStatus(data);
-      if (typeof data.ai === 'string') {
-        updateAIStatus(data.ai, data.aiConfig as Record<string, unknown> | null);
-      }
     },
     onChartData(t, values) {
       chartStore.pushPoint(t, values);
-    },
-    onAIAnalysis(data) {
-      handleAIAnalysis(data);
-    },
-    onAIAlert(data) {
-      handleAIAlert(data);
-    },
-    onAIChartData(t, motion) {
-      chartStore.pushPoint(t, { ai_motion: motion });
     },
     onEventLog(entry) {
       handleEventLog(entry);

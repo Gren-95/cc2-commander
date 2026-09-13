@@ -32,14 +32,6 @@ export interface ChartPoint {
 const CHART_MAX_POINTS = 300_000; // ~83 hours at 1 sample/sec (safety valve)
 const CHART_SAMPLE_MS = 1000;
 
-/** AI chart data point — frame-to-frame motion, as a percentage. */
-export interface AIChartPoint {
-  t: number;
-  motion: number;
-}
-
-const AI_CHART_MAX_POINTS = 300_000; // safety valve matching chart data
-
 /** Filament densities (g/cm³) for weight calculation */
 const FILAMENT_DENSITY: Record<string, number> = {
   PLA: 1.24,
@@ -223,9 +215,6 @@ export class StateStore extends EventEmitter {
   // Chart data ring buffer (server-side, no gaps)
   private chartData: ChartPoint[] = [];
   private chartTimer: ReturnType<typeof setInterval> | null = null;
-
-  // AI chart data ring buffer (motion + classification scores)
-  private aiChartData: AIChartPoint[] = [];
 
   // Raw log ring buffer for WS clients that want logs
   private rawLog: Array<{ direction: string; topic: string; data: unknown; ts: number }> = [];
@@ -471,27 +460,6 @@ export class StateStore extends EventEmitter {
   restoreChartData(data: ChartPoint[]): void {
     if (data && data.length > 0) {
       this.chartData = data;
-    }
-  }
-
-  /** Record an AI chart data point and broadcast to clients */
-  pushAIChartData(point: AIChartPoint): void {
-    this.aiChartData.push(point);
-    if (this.aiChartData.length > AI_CHART_MAX_POINTS) {
-      this.aiChartData.shift();
-    }
-    this.emit('ai_chart_data', point);
-  }
-
-  /** Get AI chart history for new WS clients */
-  getAIChartHistory(): AIChartPoint[] {
-    return this.aiChartData;
-  }
-
-  /** Restore AI chart data from persistence */
-  restoreAIChartData(data: AIChartPoint[]): void {
-    if (data && data.length > 0) {
-      this.aiChartData = data;
     }
   }
 
@@ -833,7 +801,6 @@ export class StateStore extends EventEmitter {
       this.clearEventLog();
       // Reset chart data for new print
       this.chartData = [];
-      this.aiChartData = [];
       this._lastExtruderE = 0;
       this._lastExtruderSampleTime = 0;
       if (ps?.filename) {

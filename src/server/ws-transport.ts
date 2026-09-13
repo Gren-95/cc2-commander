@@ -20,7 +20,6 @@ import type { StateStore, EventLogEntry } from './state-store.js';
 import { getCameraHealth } from './rest-api.js';
 import type { MqttBridge } from './mqtt-bridge.js';
 import type { TelegramIntegration } from './telegram.js';
-import type { AIMonitor } from './ai-monitor.js';
 import { getLogger } from './logger.js';
 import { getBuildInfo } from './build-info.js';
 
@@ -28,7 +27,6 @@ const log = getLogger('WS');
 
 export interface ServiceStatusProvider {
   telegram: TelegramIntegration | null;
-  aiMonitor: AIMonitor | null;
 }
 
 /** Per-connection state. Nothing to carry yet, but `upgrade()` requires the slot. */
@@ -43,7 +41,7 @@ const WS_OPEN = 1;
 export class WebSocketTransport {
   private readonly clients = new Set<BrowserSocket>();
   private statusInterval: ReturnType<typeof setInterval> | null = null;
-  private services: ServiceStatusProvider = { telegram: null, aiMonitor: null };
+  private services: ServiceStatusProvider = { telegram: null };
   private startTime = Date.now();
 
   constructor(
@@ -87,13 +85,6 @@ export class WebSocketTransport {
       'zone_change',
       (data: { from: string; to: string; x: number; y: number; timestamp: number }) => {
         this.broadcast({ type: 'zone_change', ...data });
-      },
-    );
-
-    store.on(
-      'ai_chart_data',
-      (point: { t: number; motion: number; scores: Record<string, number> }) => {
-        this.broadcast({ type: 'ai_chart_data', ...point });
       },
     );
 
@@ -183,14 +174,6 @@ export class WebSocketTransport {
           ? 'running'
           : 'stopped'
         : 'disabled',
-      ai: this.services.aiMonitor
-        ? this.services.aiMonitor.monitoring
-          ? 'monitoring'
-          : this.services.aiMonitor.isRunning
-            ? 'idle'
-            : 'stopped'
-        : 'disabled',
-      aiConfig: this.services.aiMonitor?.getConfigSummary() ?? null,
       camera: getCameraHealth(),
     };
   }
@@ -214,7 +197,6 @@ export class WebSocketTransport {
       layerTimes: this.store.layerTimes,
       filamentUsage: this.store.getFilamentUsageArray(),
       chartHistory: this.store.getChartHistory(),
-      aiChartHistory: this.store.getAIChartHistory(),
       eventLog: this.store.getEventLog(),
       serviceStatus: this.getServiceStatus(),
     };
