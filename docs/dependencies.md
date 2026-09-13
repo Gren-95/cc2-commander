@@ -46,7 +46,7 @@ install time — do not add one without a reason.
 ## Advisories are reported, never gated
 
 `bun audit` is deliberately **not** in `scripts/gates.sh`. See the header of
-`.github/workflows/audit.yml` and `.agents/gates.md` for the argument: the gate set is
+`.github/workflows/audit.yml` and `docs/gates.md` for the argument: the gate set is
 otherwise deterministic and offline, and a gate that can go red because a third party
 published something destroys "a red check on your branch is yours".
 

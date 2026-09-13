@@ -3,7 +3,7 @@
  * to.
  *
  * The build stamp is the reason this panel exists. Production runs as a container,
- * which is not a git checkout (see `.agents/deployment.md`), so the stamp baked into
+ * which is not a git checkout (see `docs/deployment.md`), so the stamp baked into
  * the image is the only answer to "which commit am I looking at?" — and that is the
  * first question anyone asks when a stranger reports a bug.
  *

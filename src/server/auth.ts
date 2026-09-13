@@ -1,7 +1,7 @@
 /**
  * Single-user authentication.
  *
- * This service had none — see `.agents/security.md`, which is blunt about what that
+ * This service had none — see `docs/security.md`, which is blunt about what that
  * meant: every REST route, the WebSocket and both compat layers answered any
  * request that reached the port, and the reachable surface includes `set_temperature`,
  * `move`, `start_print` and `emergency_stop`. The consequences are physical.
@@ -338,7 +338,7 @@ export function readApiKey(
  *
  * `SameSite=Strict` is the CSRF defence: a cross-site request carries no cookie at all,
  * so the control surface cannot be driven by a page the user happens to visit — the
- * exact attack `.agents/security.md` describes as surviving a LAN-only deployment.
+ * exact attack `docs/security.md` describes as surviving a LAN-only deployment.
  */
 export function sessionCookie(token: string, secure: boolean, maxAgeSeconds: number): string {
   const parts = [

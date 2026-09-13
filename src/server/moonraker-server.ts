@@ -269,7 +269,7 @@ export class MoonrakerServer {
     private bridge: MqttBridge,
     private config: ServiceConfig,
     /**
-     * The same gate the main server uses. This port is the one `.agents/security.md`
+     * The same gate the main server uses. This port is the one `docs/security.md`
      * calls the cautionary example — it carries the full control surface in Moonraker's
      * vocabulary on a separate listener, so anything applied only in index.ts misses it.
      */

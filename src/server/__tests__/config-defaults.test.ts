@@ -4,7 +4,7 @@ import { loadConfig } from '../config.js';
 /**
  * Defaults, which are the part of `config.ts` a user actually meets (ELEG-72).
  *
- * `.agents/testing.md` names this module as a high-value target with no coverage. The
+ * `docs/testing.md` names this module as a high-value target with no coverage. The
  * reason it earned a test now: two of its defaults were wrong in a way that only showed
  * up once the Docker image went public, because the production `.env` sets every AI key
  * explicitly and so the defaults were never exercised on the one install anyone looks at.

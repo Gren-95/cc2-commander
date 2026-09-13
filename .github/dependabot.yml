@@ -13,7 +13,7 @@ version: 2
 #
 # So treat this as covering DIRECT dependencies and the actions below. The transitive
 # half is caught by .github/workflows/audit.yml and fixed by hand in `overrides`; the
-# reason for each existing floor is in .agents/dependencies.md.
+# reason for each existing floor is in docs/dependencies.md.
 updates:
   - package-ecosystem: npm
     directory: /

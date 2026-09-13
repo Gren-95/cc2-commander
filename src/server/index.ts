@@ -150,7 +150,7 @@ const nodeRouter: NodeHandler = (req, res) => {
   const url = req.url || '';
 
   // Auth first, for every surface at once. Putting it here rather than in each of
-  // /octoprint, /moonraker and rest-api is the whole point: `.agents/security.md`
+  // /octoprint, /moonraker and rest-api is the whole point: `docs/security.md`
   // records that the CORS fix had to be applied five times and the :7125 server was
   // nearly missed. A new endpoint is protected by existing, not by remembering.
   if (authGate.handle(req, res)) return;

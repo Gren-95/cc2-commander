@@ -55,7 +55,7 @@ export const METHOD_NAMES: Record<number, string> = {
   // back from some *other* method would confirm that.
   //
   // This comment is the only committed record of the above: `data/` is gitignored in its
-  // entirety, so the protocol references AGENTS.md tells you to cite are not in a clone
+  // entirety, so the protocol references CLAUDE.md tells you to cite are not in a clone
   // (ELEG-66).
   //
   // The service no longer sends 1062 (ELEG-55); this entry stays only so the log viewer

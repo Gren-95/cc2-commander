@@ -23,7 +23,7 @@
  *
  * ## The boundary
  *
- * Both buttons command the printer. Neither was ever fired to test this, per AGENTS.md.
+ * Both buttons command the printer. Neither was ever fired to test this, per CLAUDE.md.
  */
 
 import { icon } from './icons';

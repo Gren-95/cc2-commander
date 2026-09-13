@@ -28,7 +28,7 @@ before quoting a green run as evidence in a closing comment.
 
 ## The state store is reachable after all
 
-`.agents/testing.md` long said the store was the most bug-prone untested code here, with
+`docs/testing.md` long said the store was the most bug-prone untested code here, with
 the MQTT bridge as the obstacle. It is not one:
 `src/server/__tests__/state-store-restore.test.ts` constructs a real `StateStore` with an
 `EventEmitter` stub in place of the bridge — the constructor only registers listeners, and
@@ -64,7 +64,7 @@ picks up both.
 bun run test              # vitest run
 bun run test:watch
 bun run test:coverage
-bun run gates             # the whole set — see .agents/gates.md
+bun run gates             # the whole set — see docs/gates.md
 ```
 
 `vitest.config.ts` runs in the **node** environment by default and picks up
@@ -146,7 +146,7 @@ With almost no tests, `tsc` is doing most of the work — which is exactly why
 `tsconfig.json` **excluding `src/server`** matters so much. `bun run build` and CI both run
 only that one, so **the whole backend can be type-broken while everything looks green.**
 Run `bun run service:check` (or just `bun run gates`) after touching `src/server/**`. See
-[`.agents/gates.md`](gates.md).
+[`docs/gates.md`](gates.md).
 
 ## Where a test is worth writing here
 
@@ -260,7 +260,7 @@ instinct a test failure produces: the printer is a physical machine. Reads are f
 and `emergency_stop` are **not test tools** — they heat a real nozzle, drive real
 motors into whatever is on the bed, or abort a job that has been running for hours.
 Verifying one of those is operator work: give the exact command, ask for the output,
-interpret it. See [`AGENTS.md`](../AGENTS.md).
+interpret it. See [`CLAUDE.md`](../CLAUDE.md).
 
 ## `bun run dev` on this host collides with production — three ways
 

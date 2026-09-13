@@ -1,8 +1,7 @@
 # Copilot instructions
 
-See [`AGENTS.md`](../AGENTS.md) in the repo root. That is the single source of truth for
-this repo's conventions, with topic deep-dives in [`../.agents/`](../.agents/) and the
-machine-readable facts in [`../.agents/repo.json`](../.agents/repo.json).
+See [`CLAUDE.md`](../CLAUDE.md) in the repo root. That is the single source of truth for
+this repo's conventions, with topic deep-dives in [`../docs/`](../docs/).
 
 This file is a pointer, not a second copy. It used to carry its own 298-line description
 of the architecture, the key files and the conventions — a full parallel copy that would
@@ -17,6 +16,6 @@ Two notes for anyone tempted to grow this file back:
   could aid an attacker. Where a fixture would otherwise contain such data, **generate**
   it rather than sanitise it — sanitising is a process that fails silently once.
 - The printer's `elegoo`/`123456` login is a **published vendor default**, documented as
-  such in the README and in `AGENTS.md`, not a secret. Real credentials —
+  such in the README and in `CLAUDE.md`, not a secret. Real credentials —
   `PRINTER_PASSWORD` and `TELEGRAM_BOT_TOKEN` — come from the environment
   at runtime and are never committed.

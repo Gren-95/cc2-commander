@@ -27,7 +27,7 @@
 # while `biome ci` checked 87 and found real formatting drift in both. Scope belongs in
 # biome.json alone; do not reintroduce a path here or in package.json's biome scripts.
 #
-# What this cannot check is in .agents/gates.md. In short: the suite is
+# What this cannot check is in docs/gates.md. In short: the suite is
 # small and almost entirely pure functions, nothing exercises a connection or a route,
 # there is no browser and no screenshot, and no gate on earth can tell you whether a
 # change does the right thing to a physical printer.
@@ -77,7 +77,7 @@ run 'typecheck: service half (tsconfig.server.json)' bun run service:check
 # imports, and the bundler tree-shakes it out SILENTLY — so an unreachable file
 # survives looking perfectly legitimate. Four have been found that way, all by hand.
 # Scoped to `files` only: unused *exports* are noisy here, and a check that cries wolf
-# gets ignored. See .agents/gates.md.
+# gets ignored. See docs/gates.md.
 run 'dead code (knip)' bunx knip --no-config-hints
 run 'build (bun + tailwind cli)' bun scripts/build.ts
 run 'unit tests (bun test)' bun test src/__tests__ src/server/__tests__
@@ -108,7 +108,7 @@ if [ "${#failed[@]}" -gt 0 ]; then
   exit 1
 fi
 printf '\n\033[32mAll gates green.\033[0m\n'
-printf '\033[2mNo browser and no screenshot — see .agents/gates.md for what this does NOT prove.\033[0m\n'
+printf '\033[2mNo browser and no screenshot — see docs/gates.md for what this does NOT prove.\033[0m\n'
 if [ "$fix" = 0 ]; then
   echo 'Reminder: if you edit anything else, re-run `bun run gates --fix` and commit what biome rewrites.'
 fi

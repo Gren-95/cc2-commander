@@ -3,7 +3,7 @@
 The gate command (which is what CI runs), why green still means very little here, and the
 printer boundary no gate can enforce.
 
-`.agents/repo.json` names this file as `gatesDoc`, which is how a repo-agnostic command
+`docs/repo.json` names this file as `gatesDoc`, which is how a repo-agnostic command
 finds this repo's particulars without carrying them. Its counterpart is the
 **`gate-failures` skill** in the userspace bundle: that one names no command or runner, so
 it can be shared; this one is nothing but commands and runners, so it never leaves the
@@ -103,7 +103,7 @@ throws at runtime, restarts (`Restart=always`), and throws again.
 ### ~~And neither typecheck proves an import specifier actually resolves~~ — closed by the move to Bun
 
 **This gap is gone.** It is recorded because it cost a release (ELEG-23) and because the
-reasoning explains why `AGENTS.md` still asks for `.js` on relative imports.
+reasoning explains why `CLAUDE.md` still asks for `.js` on relative imports.
 
 It used to work like this: both tsconfigs set `moduleResolution: "bundler"`, which
 accepts extensionless relative specifiers **that Node rejects**. So `./allowlist`
@@ -211,7 +211,7 @@ Three consequences, all of them the *opposite* of RCP's:
 - **There is nothing for the orchestrator to run serially.** Every worktree runs the whole
   of `bun run gates` concurrently and the results are independent.
 - **There is no fast gate to split off, and adding one would be inventing a field.**
-  `.agents/repo.json` lists `gates.all` and `gates.fix` and no `gates.quick`; absent means
+  `docs/repo.json` lists `gates.all` and `gates.fix` and no `gates.quick`; absent means
   absent. `bun run gates` *is* the fast gate here.
 - **N is not capped by test-server adoption**, because nothing serialises behind the
   orchestrator. The real ceilings are CI (a public repo on `ubuntu-latest`, so minutes are
@@ -291,15 +291,15 @@ that tier — the shared rules are skills in the userspace bundle now — so not
 to stay identical with anything.
 
 What remains true: `biome.json` scopes `files.includes` to `src/**` and `*.config.ts` with
-`!**/*.md`, so no markdown in this repo is formatted at all, including `AGENTS.md` and `.agents/**`. Confirmed
+`!**/*.md`, so no markdown in this repo is formatted at all, including `CLAUDE.md` and `docs/**`. Confirmed
 rather than assumed:
 
 ```
-$ bunx biome check .agents/gates.md
+$ bunx biome check docs/gates.md
 Checked 0 files in 782µs.
   × No files were processed in the specified paths.
   i These paths were provided but ignored:
-  - .agents/gates.md
+  - docs/gates.md
 ```
 
 So hand-formatting here is fine — unlike VTK, where root `*.md` **is** formatted and
@@ -320,8 +320,7 @@ twice:
 - If a mutation-testing script's pattern was copied out of a file *before* a commit
   reformatted it, the pattern silently no longer matches. Make any such script assert it
   applied (`if s.count(old) != 1: sys.exit("MUTATION DID NOT APPLY")`) — a `sed`/`perl`
-  one-liner exits 0 having changed nothing. This is the repo-specific half of §6 of the
-  [shared file](../shared/gate-failures.md).
+  one-liner exits 0 having changed nothing.
 
 `SKIP_SIMPLE_GIT_HOOKS=1` bypasses it, which you should not need.
 
@@ -381,8 +380,8 @@ more here than in a repo with real coverage:
    message `type` on the WebSocket — exists on both sides. The `/ws` contract is
    unasserted, so a renamed message type is silent.
 
-Undo each mutation with an inverse patch, **never `git checkout <file>`** — see
-[`shared/gate-failures.md`](../shared/gate-failures.md) §6.
+Undo each mutation with an inverse patch, **never `git checkout <file>`**: a checkout
+takes the whole file, including anything else you had not committed yet.
 
 ## Unreachable code is now gated — knip, after it had bitten four times
 
@@ -509,7 +508,7 @@ printer is **operator work**: name the exact command, ask for the output, interp
 record it on the issue.
 
 Two further collisions specific to running anything locally on this host, both in
-[`.agents/testing.md`](../../../.agents/testing.md): production already holds ports **8088
+[`testing.md`](testing.md): production already holds ports **8088
 and 7125**, and a second service process means **two MQTT registrations for one printer** —
 which degrades *production*, not your dev window.
 

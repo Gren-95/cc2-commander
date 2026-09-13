@@ -9,7 +9,7 @@
  * `ServerResponse`.
  *
  * Rewriting those to the fetch types would be an 11k-line change to routes that no
- * test exercises (see .agents/gates.md), so they keep their signature and pay one
+ * test exercises (see docs/gates.md), so they keep their signature and pay one
  * object allocation per request instead. Static assets — the hot path for a browser
  * loading the SPA — are served by Bun's own static route table and allocate nothing.
  *

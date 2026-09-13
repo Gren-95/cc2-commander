@@ -20,7 +20,7 @@
  *
  * Kept in its own module, free of dependencies, so both layers say the same thing and
  * the shapes can be asserted directly — the compat layers are pure state→JSON
- * translation, which `.agents/testing.md` names as the high-value test target, and a
+ * translation, which `docs/testing.md` names as the high-value test target, and a
  * client breaks silently when a field's shape drifts.
  */
 
