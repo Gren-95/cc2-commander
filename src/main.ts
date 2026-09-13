@@ -49,6 +49,7 @@ import { renderLog, bindLogControls } from './ui/log';
 import { installThumbnailFallback } from './ui/helpers';
 import { initDashboardEdit } from './ui/dashboard-edit';
 import { initSegmented } from './ui/segmented';
+import { initSteppers } from './ui/stepper';
 import {
   type AuthState,
   fetchAuthState,
@@ -719,6 +720,7 @@ async function boot(): Promise<void> {
 
 initDashboardEdit();
 initSegmented();
+initSteppers();
 
 void boot();
 
