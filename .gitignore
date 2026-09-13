@@ -24,3 +24,6 @@ test-results/
 
 # Output of `bun run screenshots` — pictures for a person, not an artefact.
 screenshots/
+
+# Runtime data for the production compose service (see docker-compose.yml).
+elegoo-data/
