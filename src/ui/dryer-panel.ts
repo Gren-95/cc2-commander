@@ -55,6 +55,52 @@ export interface DryerTemps {
 }
 
 let temps: DryerTemps = { bed: null, bedTarget: null, chamber: null, nozzle: null };
+
+/**
+ * Room humidity, when Home Assistant is reporting one.
+ *
+ * **This measures the room, not the filament.** Nothing here can tell you how wet a
+ * spool is — that needs a scale and a before/after weighing. What it does tell you is
+ * the two things worth knowing either side of a session: whether the air was damp
+ * enough to make the spool wet in the first place, and whether putting it back out
+ * afterwards will simply undo the work.
+ *
+ * Null when Home Assistant is unconfigured or unreachable, and the panel then shows
+ * nothing rather than a dash — an install without it should see no trace.
+ */
+let roomHumidity: number | null = null;
+
+export function setDryerHumidity(value: number | null): void {
+  const had = roomHumidity !== null;
+  roomHumidity = value;
+
+  // Patch the two spans in place rather than re-rendering.
+  //
+  // The idle view is a form: a full render once a minute would wipe a half-typed
+  // temperature or hour count out from under whoever was entering it — the same hazard
+  // that keeps list filters in a static sibling of their list. A reading arriving while
+  // someone types must change the number and nothing else.
+  const values = document.querySelectorAll<HTMLElement>('.dryer-humidity-value');
+  if (value !== null && values.length > 0) {
+    for (const el of values) {
+      // Remove all three before adding one: two colour utilities on one element have no
+      // defined winner.
+      el.classList.remove('text-ok', 'text-warn', 'text-bad');
+      el.classList.add(humidityTone(value));
+      el.textContent = `${value.toFixed(1)} %`;
+    }
+    for (const el of document.querySelectorAll<HTMLElement>('.dryer-humidity-advice')) {
+      el.textContent = humidityAdvice(value);
+    }
+    return;
+  }
+
+  // Appearing for the first time, or going away, changes the panel's shape rather than
+  // its text — so that needs a real render. Never while a field is focused.
+  const host = document.getElementById('dryer-content');
+  const typing = host?.contains(document.activeElement) && document.activeElement !== document.body;
+  if (had !== (value !== null) && host && !typing) renderDryer();
+}
 /** Set when a keepalive found the target had been cleared, for the running view. */
 let lastCorrectionAt: number | null = null;
 
@@ -115,6 +161,28 @@ async function refreshFromService(): Promise<void> {
 
 /* ── Rendering ──────────────────────────────────────────────────────── */
 
+/**
+ * The same advisory bands `ui/ambient.ts` uses, so one number is not two colours on one
+ * screen. Manufacturers put "store below" between 15 and 20% RH; above roughly 60% most
+ * hygroscopic filaments take on water fast enough to matter within a day.
+ */
+function humidityTone(value: number): string {
+  if (value >= 60) return 'text-bad';
+  if (value >= 40) return 'text-warn';
+  return 'text-ok';
+}
+
+/** One line of plain advice, or nothing when the room is already dry. */
+function humidityAdvice(value: number): string {
+  if (value >= 60) {
+    return 'Damp room — a dried spool will take moisture back on within a day out here.';
+  }
+  if (value >= 40) {
+    return 'Middling — keep dried filament in a sealed box rather than on the shelf.';
+  }
+  return 'Dry enough to store filament out of a box.';
+}
+
 function presetOptions(selected: string): string {
   return DRYING_PRESETS.map(
     (p) =>
@@ -174,6 +242,16 @@ function idleView(): string {
         temperature for hours and would ruin it.
       </p>
 
+      ${
+        roomHumidity === null
+          ? ''
+          : `<div class="flex flex-wrap items-baseline gap-x-2 gap-y-1 [padding:8px_10px] rounded-chip bg-input">
+               <span class="text-[11px] text-fg-muted">Room humidity</span>
+               <span class="dryer-humidity-value font-mono text-[15px] ${humidityTone(roomHumidity)}">${roomHumidity.toFixed(1)} %</span>
+               <span class="dryer-humidity-advice text-[12px] text-fg-muted">${humidityAdvice(roomHumidity)}</span>
+             </div>`
+      }
+
       <div class="flex items-center gap-3">
         <button id="dryer-start" class="[padding:8px_16px] rounded-chip bg-accent text-white font-semibold cursor-pointer border border-accent">
           ${icon('heat')} Start drying
@@ -222,11 +300,23 @@ function tempsView(session: DryerSession): string {
           temps.bedTarget,
         )} °C</span>`;
 
+  // Only when there is a reading: an install with no Home Assistant shows three cells,
+  // not a fourth reading "––".
+  const humidityCell =
+    roomHumidity === null
+      ? ''
+      : cell(
+          'Room humidity',
+          `<span class="dryer-humidity-value ${humidityTone(roomHumidity)}">${roomHumidity.toFixed(1)} %</span>`,
+          `<span class="text-[11px] text-fg-muted">measures the room, not the spool</span>`,
+        );
+
   return `
       <div class="flex flex-wrap gap-6 [padding:10px_12px] rounded-chip bg-input">
         ${cell(`Plate — drying at ${session.tempC} °C`, plateValue, plateState)}
         ${cell('Chamber', deg(temps.chamber))}
         ${cell('Nozzle', deg(temps.nozzle))}
+        ${humidityCell}
       </div>`;
 }
 

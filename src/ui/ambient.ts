@@ -12,6 +12,7 @@
  * nothing at all, versus a row that says it cannot reach the server.
  */
 
+import { setDryerHumidity } from './dryer-panel';
 import { $, escapeHtml, fetchTimeout } from './helpers';
 import { icon } from './icons';
 
@@ -46,6 +47,15 @@ function humidityTone(value: number): string {
 }
 
 export function renderAmbient(state: Record<string, unknown>): void {
+  const readings = Array.isArray(state.readings) ? (state.readings as Reading[]) : [];
+  const reachable = state.reachable === true;
+
+  // The dryer panel wants the humidity too, and this is the only place that knows the
+  // payload's shape. Null when there is none, so the panel shows nothing rather than a
+  // stale number from before Home Assistant went away.
+  const humidity = readings.find((r) => r.deviceClass === 'humidity');
+  setDryerHumidity(reachable && humidity ? humidity.value : null);
+
   const row = document.getElementById('ambient-row');
   if (!row) return;
 
@@ -55,9 +65,6 @@ export function renderAmbient(state: Record<string, unknown>): void {
     return;
   }
   row.classList.remove('hidden');
-
-  const readings = Array.isArray(state.readings) ? (state.readings as Reading[]) : [];
-  const reachable = state.reachable === true;
 
   if (!reachable || readings.length === 0) {
     const why =
