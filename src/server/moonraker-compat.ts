@@ -353,6 +353,10 @@ export function createMoonrakerRouter(
 
     // --- POST /printer/print/start ---
     if (path === '/printer/print/start' && method === 'POST') {
+      // `storage_media` takes 'local' or 'u-disk', per `FileSource` in
+      // ui/file-browsing.ts, which is what the dashboard's own working print path
+      // sends. This said 'udisk', which is neither, so the command was malformed
+      // rather than merely aimed at the wrong disk.
       const filename = query.filename;
       if (!filename) {
         readBody(req)
@@ -361,7 +365,7 @@ export function createMoonrakerRouter(
             if (parsed.filename) {
               bridge.sendCommand(1020, {
                 filename: parsed.filename,
-                storage_media: 'udisk',
+                storage_media: 'local',
               });
               json(res, 'ok');
             } else {
@@ -370,7 +374,7 @@ export function createMoonrakerRouter(
           })
           .catch(() => errorResponse(res, 'Invalid JSON'));
       } else {
-        bridge.sendCommand(1020, { filename, storage_media: 'udisk' });
+        bridge.sendCommand(1020, { filename, storage_media: 'local' });
         json(res, 'ok');
       }
       return true;

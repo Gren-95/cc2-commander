@@ -654,9 +654,16 @@ export class MoonrakerServer {
 
       // ── Print control ──
       case 'printer.print.start': {
+        // `storage_media` takes 'local' or 'u-disk', per `FileSource` in
+        // ui/file-browsing.ts, which is what the dashboard's own working print path
+        // sends. This said 'udisk', which is neither, so the command was malformed
+        // rather than merely aimed at the wrong disk.
+        //
+        // Uploads through this server PUT to `/upload`, the local path, so 'local' is
+        // also the medium the file is genuinely on.
         const filename = params.filename as string;
         if (filename) {
-          this.bridge.sendCommand(1020, { filename, storage_media: 'udisk' });
+          this.bridge.sendCommand(1020, { filename, storage_media: 'local' });
         }
         client.ws.send(rpcResult(msg.id, 'ok'));
         break;
@@ -1397,14 +1404,14 @@ export class MoonrakerServer {
     if (urlPath === '/printer/print/start' && method === 'POST') {
       const filename = query.filename;
       if (filename) {
-        this.bridge.sendCommand(1020, { filename, storage_media: 'udisk' });
+        this.bridge.sendCommand(1020, { filename, storage_media: 'local' });
         jsonResult(res, 'ok');
       } else {
         readBody(req)
           .then((body) => {
             const parsed = JSON.parse(body);
             if (parsed.filename) {
-              this.bridge.sendCommand(1020, { filename: parsed.filename, storage_media: 'udisk' });
+              this.bridge.sendCommand(1020, { filename: parsed.filename, storage_media: 'local' });
               jsonResult(res, 'ok');
             } else {
               jsonError(res, 'filename required');
@@ -2387,11 +2394,11 @@ export class MoonrakerServer {
         }
 
         // Refresh file list from printer
-        this.bridge.sendCommand(1044, { storage_media: 'udisk' });
+        this.bridge.sendCommand(1044, { storage_media: 'local' });
 
         // Start print if requested
         if (startPrint) {
-          this.bridge.sendCommand(1020, { filename: fileName, storage_media: 'udisk' });
+          this.bridge.sendCommand(1020, { filename: fileName, storage_media: 'local' });
         }
 
         jsonResult(res, {

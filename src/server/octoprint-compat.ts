@@ -308,11 +308,15 @@ export function createOctoPrintRouter(
           const cmd = JSON.parse(body);
           switch (cmd.command) {
             case 'start':
+              // `storage_media` takes 'local' or 'u-disk', per `FileSource` in
+              // ui/file-browsing.ts, which is what the dashboard's own working print path
+              // sends. This said 'udisk', which is neither, so the command was malformed
+              // rather than merely aimed at the wrong disk.
               // OctoPrint start requires a file already selected — we support filename
               if (cmd.filename) {
                 bridge.sendCommand(1020, {
                   filename: cmd.filename,
-                  storage_media: 'udisk',
+                  storage_media: 'local',
                 });
               }
               break;
