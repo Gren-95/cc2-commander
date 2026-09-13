@@ -76,25 +76,25 @@ const VARS: Record<keyof ChartPalette, string> = {
  * than like a new bug.
  */
 export const FALLBACK_PALETTE: ChartPalette = {
-  grid: 'rgba(160, 160, 184, 0.12)',
-  label: '#a0a0b8',
+  grid: 'rgba(168, 162, 158, 0.12)',
+  label: '#a8a29e',
   series: '#ab47bc',
   seriesFill: 'rgba(171, 71, 188, 0.12)',
   seriesLine: 'rgba(171, 71, 188, 0.4)',
   seriesPoint: 'rgba(171, 71, 188, 0.5)',
   crosshair: 'rgba(255, 255, 255, 0.25)',
-  tooltipBg: 'rgba(30, 30, 44, 0.92)',
+  tooltipBg: 'rgba(28, 25, 23, 0.92)',
   tooltipBorder: 'rgba(255, 255, 255, 0.15)',
-  tooltipText: '#e0e0e8',
+  tooltipText: '#e7e5e4',
   aboveAvg: '#ef5350',
   belowAvg: '#66bb6a',
   tempFill: 'rgba(33, 150, 243, 0.3)',
-  gcodeBg: '#1e1e2e',
+  gcodeBg: '#1c1917',
   gcodeExtrusion: '#2196f3',
-  gcodeTravel: '#444460',
+  gcodeTravel: '#57534e',
   gcodeTopLayer: '#00ffff',
   gcodeLastSegment: '#ffffff',
-  gcodeUnknownTool: '#888888',
+  gcodeUnknownTool: '#78716c',
 };
 
 let cached: ChartPalette | null = null;

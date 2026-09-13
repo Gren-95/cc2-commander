@@ -40,7 +40,7 @@ export function renderCanvas(state: PrinterState): void {
     for (const tray of unit.tray_list) {
       const color = `#${(tray.filament_color || '434343').replace(/^#/, '')}`;
       const isEmpty = tray.status === 0;
-      html += `<div class="w-8 h-1 rounded-[2px]" style="background: ${isEmpty ? '#434343' : escapeAttr(color)}"></div>`;
+      html += `<div class="w-8 h-1 rounded-[2px]" style="background: ${isEmpty ? '#44403c' : escapeAttr(color)}"></div>`;
     }
     html += `</div></div>`;
 
@@ -65,7 +65,7 @@ export function renderCanvas(state: PrinterState): void {
 
       html += `<div class="canvas-spool-slot flex flex-col items-center gap-1 relative p-1 ${statusClass}" title="${escapeAttr(tray.filament_name || typeLabel)} — click to edit" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}" data-type="${escapeAttr(tray.filament_type || '')}" data-color="${escapeAttr(tray.filament_color || '')}" data-brand="${escapeAttr(tray.brand || 'ELEGOO')}" data-name="${escapeAttr(tray.filament_name || '')}" data-min-temp="${tray.min_nozzle_temp || ''}" data-max-temp="${tray.max_nozzle_temp || ''}">`;
       html += `<div class="absolute top--1 left--1 w-5 h-5 rounded-full bg-fg-muted text-app text-[11px] font-bold flex items-center justify-center z-[1] [.spool-active_&]:bg-accent">${tray.tray_id + 1}</div>`;
-      html += `<div class="w-16 h-16 rounded-full [border:4px_solid] relative flex items-center justify-center [transition:all_0.3s] [.spool-empty_&]:opacity-[0.3]" style="border-color: ${isEmpty ? '#434343' : escapeAttr(color)}">`;
+      html += `<div class="w-16 h-16 rounded-full [border:4px_solid] relative flex items-center justify-center [transition:all_0.3s] [.spool-empty_&]:opacity-[0.3]" style="border-color: ${isEmpty ? '#44403c' : escapeAttr(color)}">`;
       html += `<div class="w-full h-full rounded-full opacity-[0.3]" style="background: ${isEmpty ? 'transparent' : escapeAttr(color)}"></div>`;
       html += `<div class="absolute top-[50%] left-[50%] [transform:translate(-50%,_-50%)] w-[18px] h-[18px] rounded-full bg-card border-2 border-[rgba(255,_255,_255,_0.1)]"></div>`;
       if (isActive) {

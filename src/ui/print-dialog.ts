@@ -461,7 +461,7 @@ function renderMappings(mappings: ColorMapping[], trays: FlatTray[]): string {
               : `#${ft.tray.filament_color}`;
             const isEmpty = ft.tray.status === 0;
             const isSelected = ft.canvasId === m.canvasId && ft.tray.tray_id === m.trayId;
-            const spoolColor = isEmpty ? '#434343' : color;
+            const spoolColor = isEmpty ? '#44403c' : color;
             const typeLabel = isEmpty ? '/' : ft.tray.filament_type;
             const trayNum = ft.tray.tray_id + 1;
             const labelContrast = contrastColor(spoolColor);
@@ -470,7 +470,7 @@ function renderMappings(mappings: ColorMapping[], trays: FlatTray[]): string {
           data-idx="${idx}" data-canvas="${ft.canvasId}" data-tray="${ft.tray.tray_id}"
           style="--spool-color: ${escapeAttr(spoolColor)}"
           title="${escapeAttr(typeLabel)} (C${canvasId + 1}:T${trayNum})">
-          <div class="absolute inset-0 rounded-[4px] bg-[var(--spool-color,_#434343)] [.print-spool-empty_&]:bg-[#434343]"></div>
+          <div class="absolute inset-0 rounded-[4px] bg-[var(--spool-color,_#44403c)] [.print-spool-empty_&]:bg-[#44403c]"></div>
           <div class="relative z-[1] text-[13px] [font-weight:800] leading-[1] [text-shadow:0_0_4px_rgba(0,_0,_0,_0.6)]" style="color:${labelContrast}">${trayNum}</div>
           <div class="relative z-[1] text-[8px] font-bold leading-[1] [text-shadow:0_0_3px_rgba(0,_0,_0,_0.6)] uppercase tracking-[0.3px]" style="color:${labelContrast}">${escapeHtml(typeLabel)}</div>
         </div>`;

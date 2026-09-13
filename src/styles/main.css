@@ -36,16 +36,33 @@
  */
 
 :root {
-  --bg-primary: #0f1117;
-  --bg-secondary: #1a1b26;
-  --bg-card: #1e1f2e;
-  --bg-card-hover: #252638;
-  --bg-hover: #2a2b3d;
-  --bg-input: #161722;
-  --bg-surface: #232435;
-  --text-primary: #e1e2e8;
-  --text-secondary: #9d9fb0;
-  --text-muted: #5c5e72;
+  /*
+   * Neutrals are Tailwind's `stone` ramp — a warm grey, as opposed to the blue-tinted
+   * navy this used to be. The named steps are 950 #0c0a09, 900 #1c1917, 800 #292524,
+   * 700 #44403c, 500 #78716c, 400 #a8a29e, 300 #d6d3d1, 200 #e7e5e4, 100 #f5f5f4,
+   * 50 #fafaf9; the two values below that are not on that list (#121110, #232120) are
+   * interpolated between adjacent steps, because stone has only three rungs below 700
+   * and this UI needs six distinct dark surfaces.
+   *
+   * Hue stops at the neutrals. Accent, ok/warn/bad and the nozzle/bed colours below
+   * keep their hues: stone has no semantic colours, and a grey "failed" badge is
+   * indistinguishable from a grey "finished" one.
+   */
+  --bg-primary: #0c0a09;
+  --bg-secondary: #1a1716;
+  --bg-card: #1c1917;
+  --bg-card-hover: #232120;
+  --bg-hover: #292524;
+  --bg-input: #121110;
+  --bg-surface: #232120;
+  /*
+   * The text ramp is one step lighter than the palette it replaced, at every level.
+   * The old `--text-muted` (#5c5e72 on #1e1f2e) measured 2.56:1, which fails WCAG AA
+   * for normal text; stone-400 on stone-900 is 7.0:1.
+   */
+  --text-primary: #f5f5f4;
+  --text-secondary: #d6d3d1;
+  --text-muted: #a8a29e;
   --accent: #3b82f6;
   --accent-light: #60a5fa;
   --accent-dim: rgba(59, 130, 246, 0.12);
@@ -57,8 +74,8 @@
   --danger-dim: rgba(239, 68, 68, 0.12);
   --nozzle-color: #ef4444;
   --bed-color: #f59e0b;
-  --border: #2a2b3d;
-  --border-subtle: #1f2033;
+  --border: #292524;
+  --border-subtle: #1c1917;
   --radius: 10px;
   --radius-sm: 6px;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.24), 0 1px 2px rgba(0, 0, 0, 0.16);
@@ -85,38 +102,49 @@
    *
    * The dark values are exactly the literals they replaced, so this half is a no-op.
    */
-  --chart-grid: rgba(160, 160, 184, 0.12);
-  --chart-label: #a0a0b8;
+  --chart-grid: rgba(168, 162, 158, 0.12);
+  --chart-label: #a8a29e;
   --chart-series: #ab47bc;
   --chart-series-fill: rgba(171, 71, 188, 0.12);
   --chart-series-line: rgba(171, 71, 188, 0.4);
   --chart-series-point: rgba(171, 71, 188, 0.5);
   --chart-crosshair: rgba(255, 255, 255, 0.25);
-  --chart-tooltip-bg: rgba(30, 30, 44, 0.92);
+  --chart-tooltip-bg: rgba(28, 25, 23, 0.92);
   --chart-tooltip-border: rgba(255, 255, 255, 0.15);
-  --chart-tooltip-text: #e0e0e8;
+  --chart-tooltip-text: #e7e5e4;
   --chart-above-avg: #ef5350;
   --chart-below-avg: #66bb6a;
   --chart-temp-fill: rgba(33, 150, 243, 0.3);
-  --gcode-bg: #1e1e2e;
+  --gcode-bg: #1c1917;
   --gcode-extrusion: #2196f3;
-  --gcode-travel: #444460;
+  --gcode-travel: #57534e;
   --gcode-top-layer: #00ffff;
   --gcode-last-segment: #ffffff;
-  --gcode-unknown-tool: #888888;
+  --gcode-unknown-tool: #78716c;
 }
 
 :root[data-theme="light"] {
-  --bg-primary: #f4f5fa;
-  --bg-secondary: #ffffff;
+  /*
+   * `--bg-surface` (utility `bg-raised`) must not equal `--bg-primary`. The print-status
+   * card is `bg-raised` with `border-transparent`, so it has no outline of its own and
+   * the fill is the only thing separating it from the page — setting both to stone-100
+   * made that whole card invisible in light mode. Caught on a screenshot, not by a gate.
+   */
+  --bg-primary: #f5f5f4;
+  --bg-secondary: #fafaf9;
   --bg-card: #ffffff;
-  --bg-card-hover: #f0f1f6;
-  --bg-hover: #e8e9f0;
+  --bg-card-hover: #ebe9e8;
+  --bg-hover: #e7e5e4;
   --bg-input: #ffffff;
-  --bg-surface: #f0f1f6;
-  --text-primary: #16171f;
-  --text-secondary: #4a4c5e;
-  --text-muted: #7c7e92;
+  --bg-surface: #ebe9e8;
+  --text-primary: #1c1917;
+  /*
+   * One step darker than the obvious stone-600/500 pairing. Measured in the browser,
+   * stone-500 on the raised surface is 4.40:1 — just under the 4.5 WCAG AA wants for
+   * normal text, and muted text is where this UI puts units, timestamps and captions.
+   */
+  --text-secondary: #44403c;
+  --text-muted: #57534e;
   --accent: #2563eb;
   --accent-light: #3b82f6;
   --accent-dim: rgba(37, 99, 235, 0.1);
@@ -128,30 +156,30 @@
   --danger-dim: rgba(185, 28, 28, 0.1);
   --nozzle-color: #b91c1c;
   --bed-color: #b45309;
-  --border: #d6d8e2;
-  --border-subtle: #e8e9f0;
-  --shadow: 0 1px 3px rgba(16, 18, 32, 0.1), 0 1px 2px rgba(16, 18, 32, 0.06);
-  --shadow-lg: 0 4px 12px rgba(16, 18, 32, 0.12), 0 2px 4px rgba(16, 18, 32, 0.08);
+  --border: #d6d3d1;
+  --border-subtle: #e7e5e4;
+  --shadow: 0 1px 3px rgba(28, 25, 23, 0.1), 0 1px 2px rgba(28, 25, 23, 0.06);
+  --shadow-lg: 0 4px 12px rgba(28, 25, 23, 0.12), 0 2px 4px rgba(28, 25, 23, 0.08);
 
-  --chart-grid: rgba(60, 60, 90, 0.14);
-  --chart-label: #5c5e72;
+  --chart-grid: rgba(68, 64, 60, 0.14);
+  --chart-label: #57534e;
   --chart-series: #8e24aa;
   --chart-series-fill: rgba(142, 36, 170, 0.1);
   --chart-series-line: rgba(142, 36, 170, 0.35);
   --chart-series-point: rgba(142, 36, 170, 0.5);
   --chart-crosshair: rgba(0, 0, 0, 0.25);
-  --chart-tooltip-bg: rgba(255, 255, 255, 0.96);
+  --chart-tooltip-bg: rgba(250, 250, 249, 0.96);
   --chart-tooltip-border: rgba(0, 0, 0, 0.15);
-  --chart-tooltip-text: #16171f;
+  --chart-tooltip-text: #1c1917;
   --chart-above-avg: #c62828;
   --chart-below-avg: #2e7d32;
   --chart-temp-fill: rgba(25, 118, 210, 0.25);
-  --gcode-bg: #eef0f6;
+  --gcode-bg: #e7e5e4;
   --gcode-extrusion: #1976d2;
-  --gcode-travel: #b0b4c8;
+  --gcode-travel: #a8a29e;
   --gcode-top-layer: #00838f;
   --gcode-last-segment: #212121;
-  --gcode-unknown-tool: #757575;
+  --gcode-unknown-tool: #78716c;
 }
 
 /*
