@@ -481,6 +481,9 @@ checkout.
   unauthenticated control surface, secrets, and the org policy.
 - [.agents/mcp.md](.agents/mcp.md) — the `/mcp` surface, how to connect a client, and
   the doc-parity rule.
+- [.agents/lessons.md](.agents/lessons.md) — findings from real bugs that the resulting
+  code does not show: `mqtt.js` reconnect behaviour, a CC2 filament-swap event sequence,
+  and three client-side memory-leak post-mortems.
 
 ## Definition of done
 

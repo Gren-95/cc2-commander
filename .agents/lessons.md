@@ -1,4 +1,18 @@
-# elegoo-web Lessons Learned
+# Lessons learned
+
+Findings from fixing real bugs, kept because each one cost a debugging session and none
+of them is derivable from the code that resulted. Dated, because firmware behaviour and
+library behaviour both move.
+
+Lived in `.github/lessons-learned.md` until 2026-09-13, where **nothing referenced it** —
+not AGENTS.md, not CLAUDE.md, not a single source comment. `.github/` is for files GitHub
+itself reads (`workflows/`, `dependabot.yml`, `copilot-instructions.md`); a deep-dive
+filed there is a deep-dive nobody opens, which is the exact failure the "capture durable
+learnings" rule in AGENTS.md exists to prevent.
+
+**Prefer putting a fact where someone will trip over it.** A comment next to the code
+beats an entry here — `types.ts` carries the registration-code-3 message for precisely
+that reason. This file is for what has no single home, or what spans several.
 
 ## MQTT Bridge Reconnection (Fixed 2026-04-12)
 

@@ -26,6 +26,8 @@ on demand when working in that area:
 - `.agents/dependencies.md` — why each `overrides` floor in `package.json` exists (the
   reasons that used to be comments in `pnpm-workspace.yaml`), and what
   `trustedDependencies` admits
+- `.agents/lessons.md` — findings from real bugs that the resulting code does not show:
+  MQTT reconnect behaviour, a firmware event sequence, three memory-leak post-mortems
 
 ## Commands — you invoke these
 
