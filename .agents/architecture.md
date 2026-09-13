@@ -15,7 +15,7 @@ follows from that.
                                       │
    ┌──────────┬──────────┬────────────┼─────────────┬──────────────┬──────────┐
    │          │          │            │             │              │          │
- /ws       /api/*      /mcp      /octoprint/*   /moonraker/*   :7125      Telegram
+ /ws       /api/*                /octoprint/*   /moonraker/*   :7125      Telegram
 ws-       rest-api   mcp-       octoprint-     moonraker-    moonraker-  telegram.ts
 transport   .ts      server.ts   compat.ts      compat.ts     server.ts  + telegram/
 ```
@@ -30,7 +30,7 @@ this repo any more.
 
 | Port | Source | Serves |
 | --- | --- | --- |
-| `SERVICE_PORT` (8088) | `Bun.serve` in `index.ts` | the built `dist/` as static routes, the `/ws` WebSocket, then `/mcp`, `/octoprint/*`, `/moonraker/*` and everything else falling through to `rest-api.ts` (`/api/*`, `/webcam/*`, SPA fallback) |
+| `SERVICE_PORT` (8088) | `Bun.serve` in `index.ts` | the built `dist/` as static routes, the `/ws` WebSocket, then `/octoprint/*`, `/moonraker/*` and everything else falling through to `rest-api.ts` (`/api/*`, `/webcam/*`, SPA fallback) |
 | `MOONRAKER_PORT` (7125) | `Bun.serve` in `moonraker-server.ts` | a **dedicated** Moonraker endpoint on its own port, for clients (Mainsail, Fluidd, KlipperScreen) that expect Moonraker at the root |
 
 So the Moonraker compatibility layer exists **twice**, deliberately: path-prefixed on
@@ -63,7 +63,7 @@ A request to 8088 is answered by exactly one of these, checked in this order:
 ### Why node-compat.ts exists
 
 `rest-api.ts`, `octoprint-compat.ts`, `moonraker-compat.ts`, `moonraker-server.ts` and
-the MCP SDK's transport are ~11k lines written against `IncomingMessage` /
+the compat layers are written against `IncomingMessage` /
 `ServerResponse`. Rewriting them to the fetch types would be an 11k-line change to
 routes that **no test exercises** (see [gates.md](gates.md)), so instead they keep their
 signature and one adapter object is allocated per request. The static path — the hot one
@@ -87,13 +87,13 @@ order matters: the first match wins, and the SPA fallback is last.
   `state-store.ts` for derived state and events. Nothing above this layer should parse
   raw MQTT payloads.
 - **Derived state that more than one consumer needs** (zone detection, layer times,
-  filament usage) → `state-store.ts`, *not* in the REST handler or the MCP tool that
-  happens to need it first. The point of the store is that the WebSocket, the MCP
+  filament usage) → `state-store.ts`, *not* in the REST handler or the compat layer that
+  happens to need it first. The point of the store is that the WebSocket, the REST API
   server and the Telegram bot all see the same numbers.
 - **A new browser-facing read or action** → `rest-api.ts` + the matching card in
   `src/ui/*.ts`. Push state changes over `/ws` (`wsTransport.broadcast`) rather than
   making the browser poll.
-- **A new agent-facing capability** → `mcp-server.ts` **and** `docs/MCP.md` in the same
+- **A new machine-facing capability** → the relevant compat layer **and** `README.md` in the same
   commit (see [mcp.md](mcp.md)).
 - **A new notification** → `src/server/telegram.ts`, driven off a `state-store` event,
   never off a poll of the printer.

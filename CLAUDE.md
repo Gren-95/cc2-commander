@@ -15,15 +15,13 @@ on demand when working in that area:
   little here, the printer boundary no gate can enforce, and why `/auto --parallel N`'s
   gate split is unnecessary in this repo (no e2e, no port-binding gate)
 - `.agents/architecture.md` — one MQTT connection fanned out to WebSocket / REST /
-  `/mcp` / Moonraker / OctoPrint / Telegram; which layer a change belongs in
+  Moonraker / OctoPrint / Telegram; which layer a change belongs in
 - `.agents/deployment.md` — production is systemd `elegooweb.service` running from
   `/opt/elegooweb`, which is **not a git checkout**; what `IN_PRODUCTION` means here
 - `.agents/testing.md` — what the suite covers (very little), how to probe a live
   printer **read-only**, and what nothing checks
 - `.agents/security.md` — the exposure posture: single-user auth exists but is **off
-  until a password is configured**, and `/mcp` can drive the machine
-- `.agents/mcp.md` — the `/mcp` surface, connecting a client, and the `docs/MCP.md`
-  doc-parity rule
+  until a password is configured**, and the compat layers can drive the machine
 - `.agents/dependencies.md` — why each `overrides` floor in `package.json` exists (the
   reasons that used to be comments in `pnpm-workspace.yaml`), and what
   `trustedDependencies` admits

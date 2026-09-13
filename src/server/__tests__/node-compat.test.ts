@@ -3,7 +3,7 @@
  *
  * This is the one piece of the Bun migration with no upstream to trust: if it gets a
  * body, a header or a stream wrong, it does so for `/api/*`, the OctoPrint and
- * Moonraker compat surfaces and `/mcp` all at once. Nothing else in the suite touches
+ * Moonraker compat surfaces all at once. Nothing else in the suite touches
  * a route, so these are the tests standing between a shim bug and production.
  */
 
@@ -162,7 +162,7 @@ describe('runNodeHandler — the request side', () => {
     // Node hands routers a path, never an absolute URL — every route here slices it.
     expect(seen!.url).toBe('/api/files?sort=name&dir=up');
     expect(seen!.headers['x-api-key']).toBe('secret');
-    // The MCP SDK's body parser reads the flat form.
+    // A Node-style body parser reads the flat form.
     expect(seen!.rawHeaders).toContain('x-api-key');
     expect(seen!.rawHeaders).toContain('secret');
   });

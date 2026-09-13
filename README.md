@@ -23,7 +23,6 @@ A web frontend + backend service for Elegoo Centauri Carbon 2 (CC2) FDM printers
 - **Timelapse viewer**: Download/play timelapse videos
 - **Spool calculator**: Remaining weight/meters from measured thickness
 - **Moonraker/OctoPrint compatibility**: API layers for Mainsail/Fluidd/KlipperScreen and OctoPrint clients
-- **MCP server**: Model Context Protocol for AI agent integration — [6 resources, 31 tools](docs/MCP.md)
 - **Prometheus metrics**: `/api/metrics/prometheus` endpoint for monitoring
 - **PWA support**: Installable app with manifest + service worker
 - **Dark theme**: Modern UI with CSS custom properties, responsive at 1200/800/480px breakpoints
@@ -147,10 +146,10 @@ recreated — about 200 MB and roughly 95 seconds here, and a good deal slower o
 | `MOONRAKER_PORT` | `7125` | Moonraker compatibility API port |
 | `CAMERA_ENABLED` | `true` | Enable camera MJPEG proxy |
 | `CAMERA_URL` | `http://<PRINTER_IP>:8080` | Override camera URL |
-| `CORS_ALLOWED_ORIGINS` | — (same-origin) | Comma-separated origins allowed to make cross-origin requests to `/api/*`, `/mcp`, `/moonraker/*`, `/octoprint/*` and `:7125`. Unset means **no cross-origin access**. `*` restores the old allow-everything behaviour |
+| `CORS_ALLOWED_ORIGINS` | — (same-origin) | Comma-separated origins allowed to make cross-origin requests to `/api/*`, `/moonraker/*`, `/octoprint/*` and `:7125`. Unset means **no cross-origin access**. `*` restores the old allow-everything behaviour |
 | `AUTH_PASSWORD_HASH` | — | Password hash for the dashboard login. Generate with `bun run auth:secret`. **With no password set, every endpoint answers without credentials** |
 | `AUTH_PASSWORD` | — | Plaintext alternative, hashed at startup. Prefer the hash |
-| `AUTH_API_KEY` | — | Shared secret for clients that cannot hold a cookie (`/mcp`, Moonraker, OctoPrint, slicers). Sent as `X-Api-Key` or `Authorization: Bearer` |
+| `AUTH_API_KEY` | — | Shared secret for clients that cannot hold a cookie (Moonraker, OctoPrint, slicers). Sent as `X-Api-Key` or `Authorization: Bearer` |
 | `AUTH_SESSION_HOURS` | `720` | Absolute session lifetime |
 | `AUTH_IDLE_HOURS` | `168` | How long a session survives unused |
 | `AUTH_ENABLED` | — | `false` keeps auth off even with a password set |
@@ -187,7 +186,7 @@ All persistent data lives under `/app/data` inside the container:
 
 | Port | Protocol | Purpose |
 |------|----------|---------|
-| 8088 | HTTP/WS | Web UI, REST API, WebSocket, camera proxy, MCP |
+| 8088 | HTTP/WS | Web UI, REST API, WebSocket, camera proxy |
 | 7125 | HTTP/WS | Moonraker compatibility API (for Mainsail/Fluidd/KlipperScreen) |
 
 ## Local AI monitoring is an opt-in install
@@ -224,7 +223,7 @@ Two credentials, because there are two kinds of client:
 | | credential | used by |
 | --- | --- | --- |
 | Browser | session cookie from the login form | the dashboard |
-| Machine | `AUTH_API_KEY` in a header | `/mcp`, Moonraker (Mainsail, Fluidd), OctoPrint (slicers) |
+| Machine | `AUTH_API_KEY` in a header | Moonraker (Mainsail, Fluidd), OctoPrint (slicers) |
 
 A slicer cannot log in and hold a cookie, and a browser should not carry a bearer token in
 JavaScript, so each gets the mechanism native to it. Machine clients send either header:

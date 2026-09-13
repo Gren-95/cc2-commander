@@ -13,7 +13,7 @@ are different trees that can silently disagree.
 | working dir | **`/opt/elegooweb` — not a git checkout.** `git -C /opt/elegooweb status` fails |
 | exec | `<abs path to bun> src/server/index.ts` — the **TypeScript is run directly**, so `src/**` in that directory *is* the production code. The path is substituted into the unit by `contrib/install.sh` (`@BUN@`), because systemd does not search `$PATH` and bun installs to different places. |
 | env | `EnvironmentFile=/opt/elegooweb/.env` (separate from the checkout's `.env`) |
-| ports | `SERVICE_PORT` 8088 (web + API + `/ws` + `/mcp`), `MOONRAKER_PORT` 7125 |
+| ports | `SERVICE_PORT` 8088 (web + API + `/ws`), `MOONRAKER_PORT` 7125 |
 | hardening | `NoNewPrivileges`, `ProtectSystem=strict`, `ProtectHome=true`, `PrivateTmp`, `ReadWritePaths=/opt/elegooweb`, `UMask=0027` |
 | restart | `Restart=always`, `RestartSec=5` |
 | modes | `750` on the tree, **`600` on `.env`**, `750` on `data/`, `640` on the root-level files — set by the installer, not inherited |

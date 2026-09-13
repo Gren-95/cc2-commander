@@ -329,7 +329,6 @@ the current set — trust that over this page, which describes *shape* deliberat
 quotes no totals (ELEG-15):
 
 - `src/__tests__/types.test.ts` — zone detection and sub-status classification.
-- `src/server/__tests__/mcp-doc-parity.test.ts` — `docs/MCP.md` lists exactly the registered
   tools and resources (ELEG-7). That is a **documentation** check. It will catch you
   renaming a tool without touching the doc; it will not notice that the tool stopped
   working.
@@ -350,7 +349,7 @@ quotes no totals (ELEG-15):
   interval, so `destroy()` in `afterEach` is required or vitest never exits.
 
 Nothing tests the MQTT bridge, the state store's *event* handling, any REST route,
-`/mcp`'s actual behaviour, the Moonraker/OctoPrint layers, the Telegram middleware wiring
+the Moonraker/OctoPrint layers, the Telegram middleware wiring
 or the AI monitor. The one render test asserts *geometry*, not appearance — there is still
 no browser and no screenshot, so colour, font, overlap and layout are unchecked by any
 gate.
@@ -375,7 +374,7 @@ more here than in a repo with real coverage:
 4. **Look at the page** for any `src/ui/**` or `index.html` change. `bun run dev:web`
    (vite :5173) with the API proxied at the running service is the cheap way, and it opens
    no second printer connection.
-5. **Verify every identifier you introduced** — route path, MCP tool name, env var,
+5. **Verify every identifier you introduced** — route path, env var,
    message `type` on the WebSocket — exists on both sides. The `/ws` contract is
    unasserted, so a renamed message type is silent.
 
@@ -502,7 +501,7 @@ date.
 machine**, and the temptation after a green run is to "just try it". Don't:
 `set_temperature`, `fan`, `move`, `home`, `start_print`, `pause_print`, `stop_print` and
 `emergency_stop` reach real hardware. Reads are fine — `/api/health`, `/api/status`,
-`/api/metrics`, the `printer://*` MCP resources, the MQTT log. Anything that commands the
+`/api/metrics`, the MQTT log. Anything that commands the
 printer is **operator work**: name the exact command, ask for the output, interpret it,
 record it on the issue.
 

@@ -20,7 +20,7 @@ import { readdirSync, statSync, readFileSync, existsSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 import type { ServerResponse } from 'node:http';
 import { getLogger } from './logger.js';
-import { wantsDocument } from './spa-paths.js';
+import { isNavigation, wantsDocument } from './spa-paths.js';
 
 const log = getLogger('SPA');
 
@@ -123,8 +123,8 @@ function warnStaleAsset(urlPath: string): void {
  * The same fallback for callers still holding a Node `ServerResponse` — rest-api.ts's
  * terminal "not an API route" branch, which behaves exactly as it did before.
  */
-export function writeSpaFallback(res: ServerResponse, urlPath: string): void {
-  if (!indexHtml || !wantsDocument(urlPath)) {
+export function writeSpaFallback(res: ServerResponse, urlPath: string, method?: string): void {
+  if (!indexHtml || !wantsDocument(urlPath) || !isNavigation(method)) {
     warnStaleAsset(urlPath);
     res.writeHead(404);
     res.end('Not found');

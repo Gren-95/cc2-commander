@@ -235,8 +235,8 @@ describe('isSecureRequest', () => {
 
 describe('readApiKey', () => {
   it('accepts both header styles', () => {
-    // X-Api-Key is what OctoPrint and Moonraker clients send; Bearer is what MCP and
-    // anything generic sends. Supporting one would mean a client needing a custom build.
+    // X-Api-Key is what OctoPrint and Moonraker clients send; Bearer is what a generic
+    // HTTP client sends. Supporting one would mean a client needing a custom build.
     expect(readApiKey({ 'x-api-key': 'k1' })).toBe('k1');
     expect(readApiKey({ authorization: 'Bearer k2' })).toBe('k2');
     expect(readApiKey({ authorization: 'bearer k3' })).toBe('k3');
@@ -264,7 +264,6 @@ describe('public paths', () => {
       '/api/snapshot',
       '/api/stream',
       '/api/files',
-      '/mcp',
       '/moonraker/printer/info',
       '/octoprint/api/job',
     ]) {

@@ -13,9 +13,9 @@ fans that single state stream out to every consumer:
 ```
 Printer MQTT ←→ MqttBridge (singleton) ←→ StateStore
                                              ↓
-        ┌──────────┬──────────┬──────────────┼───────────┬──────────┐
-     WebSocket   REST API   /mcp          Moonraker   OctoPrint  Telegram
-    (browsers)  (+camera)  (MCP server)    (:7125)     (compat)    (bot)
+        ┌──────────┬──────────┬───────────┬──────────┐
+     WebSocket   REST API   Moonraker   OctoPrint  Telegram
+    (browsers)  (+camera)    (:7125)     (compat)    (bot)
 ```
 
 Work is tracked in the **ELEG** project of our own control-plane portal, reached over
@@ -28,8 +28,8 @@ export RESPAWN_MCP_URL='https://<portal-host>/mcp?modules=issues'
 export RESPAWN_MCP_TOKEN='<api key>'
 ```
 
-Set those in your shell profile (not in a file in this repo). With them unset the MCP
-server simply fails to connect, and the `/`-commands below will tell you to fix it
+Set those in your shell profile (not in a file in this repo). With them unset the
+`respawn-control` MCP server simply fails to connect, and the `/`-commands below will tell you to fix it
 rather than guessing at issue state.
 
 **The thing on the other end is a physical machine with heaters and motors.** That
@@ -88,8 +88,8 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   the consequences are physical: `set_temperature` heats a real nozzle, `move` and
   `home` drive real motors into whatever is on the bed, `start_print` starts a
   print, `emergency_stop` aborts someone's 14-hour job. Reads are fine and
-  encouraged — `GET /api/health`, `/api/status`, `/api/metrics`, the MCP
-  `printer://*` resources, `bun run dev` against the live printer, watching the MQTT
+  encouraged — `GET /api/health`, `/api/status`, `/api/metrics`,
+  `bun run dev` against the live printer, watching the MQTT
   log. **Writes are for a human at the machine**, and that makes them *operator
   work* (see the rule below). If a change genuinely cannot be verified without a
   command, say so, give the exact command, and ask — never fire it and report the
@@ -275,11 +275,10 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   reach. (This rule used to warn against `src/persistence.ts` as the wrong home for such
   state. That file was unreachable and is gone — ELEG-65 — so `ui-settings.ts` is now
   simply the only client-side preference store there is.)
-- **MCP tools and [`docs/MCP.md`](docs/MCP.md) change together.** `docs/MCP.md` is the documented
-  contract for the `/mcp` surface (resources, tools, parameters). A tool added,
-  renamed, or given a new parameter without the doc edit in the same commit is drift
-  in the only place agents look. Same for `README.md`'s environment-variable table
-  when `src/server/config.ts` gains a key.
+- **`README.md`'s environment-variable table changes with `src/server/config.ts`.** A
+  new key without the doc edit in the same commit is drift in the only place anyone
+  looks. (There used to be a second doc-parity rule here, for an `/mcp` surface; that
+  feature is gone — see the note at the end of this file.)
 - **Auth is one gate, applied once.** `src/server/auth.ts` holds the decisions (password
   hashing, sessions, throttling, constant-time key compare); `src/server/auth-gate.ts`
   holds the HTTP policy and the `/api/auth/*` routes. It is wired in **three** places —
@@ -366,7 +365,7 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   | Action | Who runs it |
   | --- | --- |
   | shell on this host, `systemctl`, reading `/opt/elegooweb`, `journalctl` | **them** — give exact commands, ask for output |
-  | anything through an MCP tool or a tracker write | **you** — never "here are the MCP calls to make"; they have no client for it |
+  | anything through the **tracker's** MCP server (`respawn-control`) or a tracker write | **you** — never "here are the calls to make"; they have no client for it |
   | a printer command (temps, motion, print start/stop, emergency stop) | **them**, at or near the machine |
 
   And the distinction that decides most of these: **stopping something is not the same
@@ -432,6 +431,28 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   not prose. Cross-session context → persistent memory. Prefer updating the existing
   entry over adding a near-duplicate.
 
+## The `/mcp` surface was removed
+
+An MCP server lived at `POST /mcp` and exposed the printer to AI agents — 6 resources
+and 31 tools, including `set_temperature`, `move`, `start_print` and `emergency_stop`.
+It is gone: `mcp-server.ts`, `docs/MCP.md`, `.agents/mcp.md` and the doc-parity test with
+it, ~1,100 lines.
+
+The reason was proportion, not principle. This is a home 3D-printer dashboard, and the
+SDK was the heaviest thing in the tree for what it did: `@modelcontextprotocol/sdk`
+pulled **express *and* hono** — two complete HTTP frameworks — plus `cors`, `jose` and
+`ajv`, into a service that deliberately uses `Bun.serve` and wrote its own
+`node-compat.ts` to get off the Node HTTP layer. Nothing in `src/` imported any of them.
+`zod` went too; its only use was declaring MCP tool parameters.
+
+**Do not confuse this with `.mcp.json` in the repo root.** That is the *client* config
+for the `respawn-control` tracker — how an agent reaches the ELEG issues — and it is
+unrelated to the printer endpoint that was removed.
+
+If an agent-facing surface is ever wanted again, the compat layers already carry the same
+control surface in vocabularies clients speak (Moonraker on `:7125`, OctoPrint under
+`/octoprint/*`), and both are behind the same auth gate.
+
 ## This file is the source of truth for conventions
 
 [`CLAUDE.md`](CLAUDE.md) exists only to import this file so it loads every session,
@@ -480,7 +501,6 @@ checkout.
 | MQTT bridge (the single connection) | `src/server/mqtt-bridge.ts` |
 | Shared state + events | `src/server/state-store.ts` |
 | REST API + camera proxy | `src/server/rest-api.ts` |
-| MCP server (`/mcp`) | `src/server/mcp-server.ts` (documented in `docs/MCP.md`) |
 | Moonraker / OctoPrint compat | `src/server/{moonraker-compat,moonraker-server,octoprint-compat}.ts` |
 | AI print monitor | `src/server/ai-monitor.ts` |
 | Telegram bot | `src/server/telegram.ts`, `src/server/allowlist.ts` |
@@ -504,14 +524,12 @@ checkout.
   little), how to probe safely against a live printer, and what nothing checks.
 - [.agents/security.md](.agents/security.md) — the exposure posture, the
   unauthenticated control surface, secrets, and the org policy.
-- [.agents/mcp.md](.agents/mcp.md) — the `/mcp` surface, how to connect a client, and
-  the doc-parity rule.
 - [.agents/lessons.md](.agents/lessons.md) — findings from real bugs that the resulting
   code does not show: `mqtt.js` reconnect behaviour, a CC2 filament-swap event sequence,
   and three client-side memory-leak post-mortems.
 
 ## Definition of done
 
-`bun run gates` green (biome + both typechecks + knip + build + tests), `docs/MCP.md` / `README.md`
+`bun run gates` green (biome + both typechecks + knip + build + tests), `README.md`
 updated if a documented surface changed, a conventional commit subject that reads as a
 release note, no secrets committed, the issue commented and its PR open.

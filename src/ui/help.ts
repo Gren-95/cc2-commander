@@ -13,12 +13,12 @@ export function renderHelp(): void {
   <h3>Overview</h3>
   <p>This is a browser-based web frontend for Elegoo Centauri Carbon 2 (CC2) FDM printers.
   It connects to the printer via MQTT over WebSocket. A companion Node.js server provides
-  REST APIs, compatibility layers for Fluidd/Mainsail (Moonraker), OctoPrint, MCP, and Prometheus metrics.</p>
+  REST APIs, compatibility layers for Fluidd/Mainsail (Moonraker) and OctoPrint, and Prometheus metrics.</p>
 
   <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
     <thead><tr><th>Service</th><th>Port</th><th>Description</th></tr></thead>
     <tbody>
-      <tr><td>Web UI + REST API</td><td>8088</td><td>Main web interface, REST API, MCP, OctoPrint compat, Moonraker compat</td></tr>
+      <tr><td>Web UI + REST API</td><td>8088</td><td>Main web interface, REST API, OctoPrint compat, Moonraker compat</td></tr>
       <tr><td>Moonraker standalone</td><td>7125</td><td>Standalone Moonraker-compatible server (Fluidd/Mainsail)</td></tr>
       <tr><td>Printer MQTT</td><td>9001</td><td>Printer MQTT broker (WebSocket)</td></tr>
       <tr><td>Printer Camera</td><td>8080</td><td>MJPEG stream from printer</td></tr>
@@ -80,41 +80,6 @@ export function renderHelp(): void {
       <tr><td>elegoo_filament_used_mm</td><td>gauge</td><td>Filament used in mm</td></tr>
       <tr><td>elegoo_printer_status</td><td>gauge</td><td>Printer status code</td></tr>
       <tr><td>elegoo_printer_info</td><td>gauge</td><td>Printer info labels (model, firmware, SN)</td></tr>
-    </tbody>
-  </table>
-</div>
-
-<div class="mb-6 max-[700px]:overflow-x-auto [&_h3]:text-[15px] [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:mb-2 [&_h3]:border-b [&_h3]:border-line [&_h3]:pb-1 [&_h4]:text-[13px] [&_h4]:font-semibold [&_h4]:text-fg-soft [&_h4]:[margin:12px_0_6px] [&_p]:text-[13px] [&_p]:text-fg-soft [&_p]:[margin:0_0_8px] [&_p]:leading-[1.5] [&_code]:bg-input [&_code]:[padding:1px_5px] [&_code]:rounded-[3px] [&_code]:text-[12px] [&_pre]:bg-surface [&_pre]:border [&_pre]:border-line [&_pre]:rounded-card [&_pre]:[padding:10px_12px] [&_pre]:overflow-x-auto [&_pre]:[margin:6px_0_12px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[12px] [&_pre_code]:text-fg [&_pre_code]:leading-[1.6]">
-  <h3>MCP Server <code>/mcp</code></h3>
-  <p>Model Context Protocol endpoint (HTTP + SSE transport) for AI assistant integration.</p>
-
-  <h4>Resources</h4>
-  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
-    <thead><tr><th>URI</th><th>Description</th></tr></thead>
-    <tbody>
-      <tr><td>printer://status</td><td>Human-readable printer status summary</td></tr>
-      <tr><td>printer://files</td><td>File list as JSON</td></tr>
-      <tr><td>printer://metrics</td><td>Structured metrics snapshot</td></tr>
-    </tbody>
-  </table>
-
-  <h4>Tools</h4>
-  <table class="w-full [border-collapse:collapse] text-[12px] mb-3 [&_th]:text-left [&_th]:[padding:6px_8px] [&_th]:bg-surface [&_th]:text-fg-soft [&_th]:font-semibold [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.3px] [&_th]:border-b [&_th]:border-line [&_td]:[padding:5px_8px] [&_td]:border-b [&_td]:border-line [&_td]:text-fg [&_tr:hover]:bg-surface">
-    <thead><tr><th>Tool</th><th>Parameters</th><th>Description</th></tr></thead>
-    <tbody>
-      <tr><td>get_printer_status</td><td>—</td><td>Status summary text</td></tr>
-      <tr><td>get_temperatures</td><td>—</td><td>Nozzle, bed, chamber temps</td></tr>
-      <tr><td>get_print_progress</td><td>—</td><td>Active print progress</td></tr>
-      <tr><td>get_file_list</td><td>storage</td><td>List gcode files</td></tr>
-      <tr><td>set_temperature</td><td>nozzle?, bed?</td><td>Set temps (nozzle 0-300, bed 0-120)</td></tr>
-      <tr><td>pause_print</td><td>—</td><td>Pause current job</td></tr>
-      <tr><td>resume_print</td><td>—</td><td>Resume paused job</td></tr>
-      <tr><td>stop_print</td><td>—</td><td>Cancel print job</td></tr>
-      <tr><td>set_fan_speed</td><td>fan, speed</td><td>Fan: part/aux/case, speed: 0-100%</td></tr>
-      <tr><td>set_speed_mode</td><td>mode</td><td>silent/balanced/sport/ludicrous</td></tr>
-      <tr><td>home_axes</td><td>axes</td><td>Home xy/z/xyz</td></tr>
-      <tr><td>toggle_led</td><td>on</td><td>Toggle LED on/off</td></tr>
-      <tr><td>send_command</td><td>method, params</td><td>Raw MQTT command</td></tr>
     </tbody>
   </table>
 </div>
@@ -291,16 +256,6 @@ scrape_configs:
 
   <h4>Home Assistant (OctoPrint integration)</h4>
   <p>Add an OctoPrint integration pointing to <code>http://&lt;host&gt;:8088/octoprint/</code> with any API key.</p>
-
-  <h4>MCP (AI Assistant)</h4>
-  <pre><code>// Claude Desktop / VS Code config
-{
-  "mcpServers": {
-    "elegoo-cc2": {
-      "url": "http://&lt;host&gt;:8088/mcp"
-    }
-  }
-}</code></pre>
 
   <h4>curl Examples</h4>
   <pre><code># Get printer status

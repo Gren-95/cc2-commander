@@ -13,7 +13,7 @@
  */
 
 import { describe, expect, it } from 'bun:test';
-import { wantsDocument } from '../server/spa-paths.js';
+import { isNavigation, wantsDocument } from '../server/spa-paths.js';
 
 describe('wantsDocument', () => {
   it('serves the document for client-side routes', () => {
@@ -53,5 +53,25 @@ describe('wantsDocument', () => {
   it('treats a dotfile as a file, not a route', () => {
     expect(wantsDocument('/.well-known/foo')).toBe(true);
     expect(wantsDocument('/.env')).toBe(false);
+  });
+});
+
+describe('isNavigation', () => {
+  it('treats GET and HEAD as navigations', () => {
+    for (const m of ['GET', 'HEAD', 'get', 'head']) {
+      expect(isNavigation(m), m).toBe(true);
+    }
+    // Node leaves `method` optional on a synthetic request; default to the safe case.
+    expect(isNavigation(undefined)).toBe(true);
+  });
+
+  it('refuses every method a browser cannot navigate with', () => {
+    // A POST to an unmatched path is an API call to something that does not exist.
+    // Answering it with the app's HTML at 200 gives the caller a success it cannot
+    // parse — found when /mcp was removed and every POST to it started returning the
+    // dashboard.
+    for (const m of ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
+      expect(isNavigation(m), m).toBe(false);
+    }
   });
 });

@@ -24,6 +24,24 @@
  * A 404 makes that loud — a failed asset in the network tab — instead of a page that
  * loads and silently does nothing.
  */
+/**
+ * Methods a client-side route can arrive by.
+ *
+ * A browser navigates with GET (and HEAD for a preflight-ish probe). Nothing else is a
+ * navigation, so a POST/PUT/DELETE to an unmatched path is an API call to something that
+ * does not exist — and answering it with the app's HTML at 200 is the same silent
+ * failure as serving HTML for a missing script: the caller gets a success it cannot use.
+ *
+ * Found when `/mcp` was removed. Every POST to every unknown path was answering 200 with
+ * the dashboard, so a client calling the deleted endpoint saw success and a body it
+ * could not parse, rather than a 404 naming the problem.
+ */
+const NAVIGATION_METHODS = new Set(['GET', 'HEAD']);
+
+export function isNavigation(method: string | undefined): boolean {
+  return NAVIGATION_METHODS.has((method ?? 'GET').toUpperCase());
+}
+
 export function wantsDocument(rawPath: string): boolean {
   // Callers hand this the raw request URL, which may carry a query or a fragment.
   const urlPath = rawPath.split(/[?#]/)[0];

@@ -15,12 +15,11 @@ drifts).
 - `src/server/__tests__/state-store-restore.test.ts` — the only test that stands up a real
   `StateStore` (ELEG-18). See below.
 - `src/server/__tests__/telegram-allowlist.test.ts` — who may issue bot commands (ELEG-3).
-- `src/server/__tests__/mcp-doc-parity.test.ts` — `docs/MCP.md` matches the registered tools
   and resources (ELEG-7). A *documentation* check.
 - `src/server/__tests__/build-info.test.ts` — the deployed-commit stamp (ELEG-6).
 
 Everything else in this repo — the MQTT bridge, the state store's *event* handling, every
-REST route, the MCP server's behaviour, both compatibility layers, the Telegram middleware
+REST route, both compatibility layers, the Telegram middleware
 wiring and the AI monitor — has **no test at all**.
 
 So `bun run gates` green means: it compiles, it is formatted, some pure functions still
@@ -325,11 +324,6 @@ because nothing answered is worse than no check.
   in the console is still invisible to every gate. Look at the page.
 - **The WebSocket contract.** `ws-transport.ts` broadcasts and `ws-client.ts` consumes;
   nothing asserts they agree. Renaming a message `type` on one side is silent.
-- **The MCP surface's *behaviour*.** `mcp-doc-parity.test.ts` does check that `docs/MCP.md`
-  lists exactly the registered tools and resources, by standing the server up and asking
-  it — so a renamed tool without a doc edit is caught. But that is a **documentation**
-  check: it never invokes a handler, so a tool that is listed, documented and completely
-  broken passes (see [mcp.md](mcp.md)).
 - **The compatibility layers against a real client.** Mainsail/Fluidd/KlipperScreen
   compatibility is only ever proven by pointing one of them at `:7125`.
 - **Anything about the deployed service.** The gates run in the checkout;

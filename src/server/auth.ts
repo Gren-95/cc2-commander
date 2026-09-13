@@ -2,7 +2,7 @@
  * Single-user authentication.
  *
  * This service had none — see `.agents/security.md`, which is blunt about what that
- * meant: every REST route, the WebSocket, `/mcp`, and both compat layers answered any
+ * meant: every REST route, the WebSocket and both compat layers answered any
  * request that reached the port, and the reachable surface includes `set_temperature`,
  * `move`, `start_print` and `emergency_stop`. The consequences are physical.
  *
@@ -11,7 +11,7 @@
  * | | credential | who uses it |
  * | --- | --- | --- |
  * | browser | session cookie, from a password login | the dashboard |
- * | machine | API key in a header | `/mcp`, Moonraker, OctoPrint, slicers |
+ * | machine | API key in a header | Moonraker, OctoPrint, slicers |
  *
  * A slicer cannot log in and hold a cookie, and a browser should not be made to carry a
  * long-lived bearer token in JavaScript. Each client gets the mechanism native to it.
@@ -313,7 +313,7 @@ export function readCookie(
  * The API key a machine client presented, from either header it might use.
  *
  * `X-Api-Key` is what OctoPrint clients and Moonraker clients send; `Authorization:
- * Bearer` is what MCP clients and anything generic sends. Both are accepted so no client
+ * Bearer` is what a generic HTTP client sends. Both are accepted so no client
  * needs a special build.
  */
 export function readApiKey(

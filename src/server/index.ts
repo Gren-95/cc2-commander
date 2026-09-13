@@ -24,7 +24,6 @@ import { MqttBridge } from './mqtt-bridge.js';
 import { StateStore } from './state-store.js';
 import { WebSocketTransport } from './ws-transport.js';
 import { createRestRouter, precacheGcode } from './rest-api.js';
-import { handleMcpRequest } from './mcp-server.js';
 import { SessionStore, hashPassword } from './auth.js';
 import { AuthGate } from './auth-gate.js';
 import { createOctoPrintRouter } from './octoprint-compat.js';
@@ -164,38 +163,11 @@ const nodeRouter: NodeHandler = (req, res) => {
   const url = req.url || '';
 
   // Auth first, for every surface at once. Putting it here rather than in each of
-  // /mcp, /octoprint, /moonraker and rest-api is the whole point: `.agents/security.md`
+  // /octoprint, /moonraker and rest-api is the whole point: `.agents/security.md`
   // records that the CORS fix had to be applied five times and the :7125 server was
   // nearly missed. A new endpoint is protected by existing, not by remembering.
   if (authGate.handle(req, res)) return;
   if (!authGate.require(req, res)) return;
-
-  if (url === '/mcp' || url.startsWith('/mcp?')) {
-    // CORS for MCP endpoint — same-origin unless CORS_ALLOWED_ORIGINS says otherwise
-    applyCors(
-      res,
-      corsHeaders(
-        config.corsPolicy,
-        req.headers.origin,
-        'GET, POST, DELETE, OPTIONS',
-        'Content-Type, mcp-session-id',
-        'mcp-session-id',
-      ),
-    );
-    if (req.method === 'OPTIONS') {
-      res.writeHead(204);
-      res.end();
-      return;
-    }
-    handleMcpRequest(req, res, store, bridge).catch((err) => {
-      log.error('MCP request error:', err);
-      if (!res.headersSent) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Internal server error' }));
-      }
-    });
-    return;
-  }
 
   // OctoPrint compatibility API
   if (url === '/octoprint' || url.startsWith('/octoprint/') || url.startsWith('/octoprint?')) {
