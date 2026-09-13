@@ -143,7 +143,7 @@
       <div id="dashboard-edit-list" class="hidden flex-1 min-h-0 overflow-y-auto [padding:0_12px] min-[701px]:hidden max-[700px]:[padding-bottom:calc(var(--bottom-nav-height)_+_env(safe-area-inset-bottom,_0)_+_8px)]"></div>
       <div class="grid grid-cols-[minmax(0,_1fr)] min-[701px]:grid-cols-[repeat(12,_minmax(0,_1fr))] content-start items-stretch [gap:10px] flex-1 min-h-0 p-3 overflow-y-auto max-[700px]:gap-2 max-[700px]:p-2 max-[480px]:[padding:6px] max-[700px]:[padding-bottom:calc(var(--bottom-nav-height)_+_env(safe-area-inset-bottom,_0)_+_8px)]" id="dashboard-grid">
           <!-- Print status (compact, in sidebar) -->
-          <div id="print-status-bar" class="card @container flex flex-col bg-raised rounded-xl border border-transparent p-5 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted flex flex-col gap-3">
+          <div id="print-status-bar" class="card @container flex flex-col gap-3 bg-raised rounded-xl border border-line p-5 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted">
             <div class="flex items-center gap-3">
               <div class="h-14 w-14 shrink-0 rounded-lg border border-line bg-card overflow-hidden grid place-items-center" id="print-thumbnail-wrap">
                 <img class="thumb-img h-full w-full object-cover hidden" id="print-thumbnail" alt="">
@@ -155,69 +155,73 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-4">
-              <div>
-                <div class="text-xs text-fg-muted">Remaining</div>
-                <div class="font-mono text-2xl font-semibold tabular-nums leading-none text-fg mt-1 truncate" id="print-remaining">--</div>
+            <!--
+              Everything below is print-only and hidden outright when nothing is running.
+              It used to render regardless, so an idle printer showed nine fields reading
+              "--", an empty column under the word "Progress", and `0 of ??` set in the
+              largest type on the card.
+
+              `not-[.hidden]:flex` rather than a bare `flex`: `hidden` and `flex` both set
+              `display` and Tailwind guarantees no order between two utilities for one
+              property, so the pair is made mutually exclusive by the `:not(.hidden)` in
+              the selector instead of by cascade luck.
+            -->
+            <div id="print-progress-block" class="hidden not-[.hidden]:flex flex-col gap-2">
+              <div class="flex items-end justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="text-xs text-fg-muted">Remaining</div>
+                  <div class="font-mono text-3xl font-semibold tabular-nums leading-none text-fg mt-1 truncate" id="print-remaining">--</div>
+                </div>
+                <div class="progress-text-lg font-mono text-3xl font-semibold tabular-nums leading-none text-fg-soft shrink-0" id="print-progress-text">--%</div>
               </div>
-              <div>
-                <div class="text-xs text-fg-muted">Layer</div>
-                <div class="font-mono text-2xl font-semibold tabular-nums leading-none text-fg mt-1 truncate" id="print-layer">--</div>
-              </div>
-              <div>
-                <div class="text-xs text-fg-muted">Progress</div>
-                <div class="progress-text-lg font-mono text-2xl font-semibold tabular-nums leading-none text-fg mt-1 truncate" id="print-progress-text">--%</div>
+              <div class="h-1.5 w-full rounded-full bg-line-soft overflow-hidden">
+                <div class="progress-fill relative h-full rounded-full transition-[width] duration-500 bg-accent" id="print-progress-bar" style="width:0%"></div>
               </div>
             </div>
 
-            <div class="h-1 w-full rounded-full bg-line-soft overflow-hidden h-1.5">
-              <div class="progress-fill h-full rounded-full transition-[width] duration-500 bg-accent" id="print-progress-bar" style="width:0%"></div>
-            </div>
-
-            <div class="grid grid-cols-3 gap-x-4 gap-y-3">
-
+            <div id="print-detail-grid" class="hidden not-[.hidden]:grid grid-cols-2 @min-[400px]:grid-cols-3 gap-x-4 gap-y-3">
+                <div class="min-w-0">
+                  <div class="text-xs text-fg-muted">Layer</div>
+                  <div class="font-mono text-sm tabular-nums text-fg truncate mt-0.5" id="print-layer">--</div>
+                </div>
                 <div class="min-w-0">
                   <div class="text-xs text-fg-muted">Done at</div>
                   <div class="font-mono text-sm tabular-nums text-fg truncate mt-0.5" id="print-eta">--</div>
                 </div>
-
                 <div class="min-w-0">
                   <div class="text-xs text-fg-muted">Elapsed</div>
                   <div class="font-mono text-sm tabular-nums text-fg truncate mt-0.5" id="print-elapsed">--</div>
                 </div>
-
                 <div class="min-w-0">
                   <div class="text-xs text-fg-muted">Started</div>
                   <div class="font-mono text-sm tabular-nums text-fg truncate mt-0.5" id="print-started">--</div>
                 </div>
-
                 <div class="min-w-0">
                   <div class="text-xs text-fg-muted">Filament</div>
                   <div class="font-mono text-sm tabular-nums text-fg truncate mt-0.5" id="print-filament">--</div>
                 </div>
-
                 <div class="min-w-0">
                   <div class="text-xs text-fg-muted">Material</div>
                   <div class="font-mono text-sm tabular-nums text-fg truncate mt-0.5" id="print-active-filament">--</div>
                 </div>
-
-                <div class="min-w-0">
+              <div class="min-w-0">
                   <div class="text-xs text-fg-muted">Colours</div>
                   <div class="font-mono text-sm tabular-nums text-fg truncate mt-0.5" id="print-color-changes">--</div>
                 </div>
             </div>
 
-            <div class="border-t border-line-soft my-3"></div>
+            <!-- What an idle printer gets instead of nine dashes. -->
+            <div id="print-idle-note" class="hidden not-[.hidden]:flex flex-1 flex-col items-center justify-center gap-2 px-4 py-8 text-center text-xs text-fg-muted">
+              <span>Nothing printing</span>
+            </div>
 
-            <div class="flex items-center gap-2">
+            <div class="mt-auto flex items-center gap-2 border-t border-line-soft pt-3">
               <button id="btn-pause" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Pause" aria-label="Pause"><i class="bi bi-pause-fill" aria-hidden="true"></i>Pause</button>
               <button id="btn-resume" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed hidden" title="Resume" aria-label="Resume"><i class="bi bi-play-fill" aria-hidden="true"></i>Resume</button>
               <button id="btn-stop" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Stop" aria-label="Stop"><i class="bi bi-stop-fill" aria-hidden="true"></i>Stop</button>
               <button id="btn-estop" class="inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg border border-bad bg-bad-dim text-bad cursor-pointer transition-colors hover:bg-bad hover:text-white ml-auto" title="Emergency stop" aria-label="Emergency stop"><i class="bi bi-exclamation-octagon-fill" aria-hidden="true"></i></button>
             </div>
           </div>
-
-
 
         <!-- Temperatures -->
         <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="temps-card">
