@@ -1,4 +1,5 @@
 import { toggleState } from './state-classes';
+import { positionSegmented } from './segmented';
 import { EMPTY } from './design';
 import { icon, iconSolo, iconText } from './icons';
 import type { PrinterState } from '../printer-state';
@@ -660,6 +661,10 @@ export function bindFileControls(client: CommandSender): void {
       thumbnailFetching = null;
       document.querySelectorAll('.file-source-tab').forEach((t) => toggleState(t, 'active', false));
       toggleState(tab, 'active', true);
+      // The fill does not follow a class change on its own — it is positioned from the
+      // selected button's offsetLeft/offsetWidth, so every picker moves it by hand.
+      const track = tab.closest('.segmented') as HTMLElement | null;
+      if (track) positionSegmented(track);
       $('file-list').innerHTML =
         `<div class="${EMPTY}"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>Loading…</div>`;
       client.sendCommand(1044, { storage_media: source, dir: '/', offset: 0, limit: 200 });

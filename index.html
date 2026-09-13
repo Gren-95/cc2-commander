@@ -588,9 +588,10 @@
                 <i class="bi bi-upload bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Upload
                 <input type="file" id="file-upload-input" accept=".gcode,.3mf" hidden>
               </label>
-              <div class="flex [gap:2px] bg-input rounded-chip [padding:2px]">
-                <button class="file-source-tab inline-flex items-center justify-center whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5 active bg-accent text-white border-accent" data-source="local">Local</button>
-                <button class="file-source-tab inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-source="u-disk">USB</button>
+              <div class="segmented relative inline-flex items-center rounded-full bg-input ring-1 ring-line p-0.5">
+                <div class="segmented-fill pointer-events-none absolute inset-y-0.5 left-0 rounded-full bg-accent [transition:transform_180ms_ease,width_180ms_ease] motion-reduce:[transition:none]"></div>
+                <button class="file-source-tab segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5 active text-white" data-source="local">Local</button>
+                <button class="file-source-tab segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5 text-fg-soft" data-source="u-disk">USB</button>
               </div>
             </div>
           </div>

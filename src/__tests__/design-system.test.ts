@@ -73,7 +73,7 @@ describe('design tokens', () => {
 
 describe('state deltas', () => {
   /** The pickers built on SEGMENTED_BTN rather than CHIP. */
-  const SEGMENTED_BASES = ['dist-btn', 'speed-btn', 'chart-time-btn'];
+  const SEGMENTED_BASES = ['dist-btn', 'speed-btn', 'chart-time-btn', 'file-source-tab'];
 
   it('every chip picker shares one delta', () => {
     const deltas = new Set(

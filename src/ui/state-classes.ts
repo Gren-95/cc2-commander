@@ -62,7 +62,7 @@ export const STATE_UTILITIES: Record<string, Record<string, StateDelta>> = {
   active: {
     'chart-time-btn': SEGMENT_ACTIVE,
     'dist-btn': SEGMENT_ACTIVE,
-    'file-source-tab': CHIP_ACTIVE,
+    'file-source-tab': SEGMENT_ACTIVE,
     'list-sort-btn': CHIP_ACTIVE,
     'log-tab': CHIP_ACTIVE,
     'print-bed-btn': CHIP_ACTIVE,
