@@ -12,8 +12,8 @@
  * rather than reaching into two Maps it does not own.
  */
 
-import { currentFileDir, currentFileSource, filePathFor } from './file-browsing';
-import { THUMBNAIL_CLASS, applyDarkThumbnailCheck, fetchTimeout } from './helpers';
+import { currentFileDir, currentFileSource } from './file-browsing';
+import { THUMBNAIL_CLASS, applyDarkThumbnailCheck } from './helpers';
 import type { CommandSender } from '../ws-client';
 import type { PrinterState } from '../printer-state';
 
@@ -46,7 +46,6 @@ let thumbnailFetching: string | null = null;
 let _fetchingCached = false;
 export async function fetchCachedStatus(
   files: { filename: string; type?: string }[],
-  client: CommandSender,
 ): Promise<void> {
   if (_fetchingCached) return;
   const gcodeFiles = files

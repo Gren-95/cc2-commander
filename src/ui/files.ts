@@ -24,7 +24,7 @@ import {
 } from './file-browsing';
 import { positionSegmented } from './segmented';
 import { EMPTY } from './design';
-import { icon, iconSolo, iconText } from './icons';
+import { icon, iconSolo } from './icons';
 import type { PrinterState } from '../printer-state';
 import type { CommandSender } from '../ws-client';
 import type { FileEntry } from '../types';
@@ -34,7 +34,6 @@ import {
   formatBytes,
   escapeAttr,
   formatTime,
-  applyDarkThumbnailCheck,
   THUMBNAIL_CLASS,
   THUMBNAIL_PLACEHOLDER_SRC,
 } from './helpers';
@@ -91,7 +90,6 @@ export function confirmDeleteFile(
   return true;
 }
 
-const closePopoverTimeout: ReturnType<typeof setTimeout> | null = null;
 let fileDelegationBound = false;
 
 /** Bind delegated event listeners on the file list container (once) */
@@ -372,7 +370,6 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
   // Lend the popover this render's state, sender and listing.
   bindPopover(
     state,
-    client,
     new Map(sorted.filter((f) => f.type !== 'folder').map((f) => [f.filename, f])),
   );
 
@@ -382,7 +379,7 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
   // Lend the thumbnail module this render's state and a way to ask for another one.
   bindThumbnails(state, () => renderFiles(state, client));
   // Fetch cached status and inline thumbnails asynchronously
-  void fetchCachedStatus(sorted, client);
+  void fetchCachedStatus(sorted);
   fetchInlineThumbnails(sorted, client);
 }
 

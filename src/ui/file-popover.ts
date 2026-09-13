@@ -24,18 +24,17 @@ import {
 import { icon } from './icons';
 import type { PrinterState } from '../printer-state';
 import type { FileEntry } from '../types';
-import type { CommandSender } from '../ws-client';
 
 let boundState: PrinterState | null = null;
 
-/** Lend the popover this render's state, sender and listing. */
-export function bindPopover(
-  state: PrinterState,
-  client: CommandSender,
-  files: Map<string, FileEntry>,
-): void {
+/**
+ * Lend the popover this render's state and listing.
+ *
+ * No command sender: everything here either reads state or builds a download link, so
+ * taking one would be a dependency this module does not have.
+ */
+export function bindPopover(state: PrinterState, files: Map<string, FileEntry>): void {
   boundState = state;
-  boundClient = client;
   fileMap = files;
 }
 
@@ -98,7 +97,6 @@ export function schedulePopoverClose(): void {
 }
 /** Map filename → FileEntry for popover data lookup */
 let fileMap = new Map<string, FileEntry>();
-let boundClient: CommandSender | null = null;
 
 /** Try to extract filament info from ECC2 slicer filename pattern */
 function parseFilamentFromName(filename: string): { types: string[]; count: number } | null {
