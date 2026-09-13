@@ -97,7 +97,7 @@ export function createListControls<T>(options: ListControlsOptions<T>): ListCont
     ),
   );
   container.innerHTML = `
-    <input type="search" class="list-filter rounded-lg border border-line bg-input px-2.5 py-1.5 text-xs text-fg tabular-nums focus:outline-none focus:border-accent" id="${escapeAttr(id)}-filter"
+    <input type="search" class="list-filter min-w-32 flex-1 rounded-lg border border-line bg-input px-2.5 py-1.5 text-xs text-fg tabular-nums focus:outline-none focus:border-accent" id="${escapeAttr(id)}-filter"
            placeholder="${escapeAttr(options.filterPlaceholder ?? 'Filter…')}"
            aria-label="${escapeAttr(options.filterPlaceholder ?? 'Filter list')}">
     ${(options.selects ?? [])

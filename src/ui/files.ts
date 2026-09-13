@@ -270,12 +270,11 @@ function showFilePopover(file: FileEntry, anchor: HTMLElement): void {
   if (isCached) html += `<tr><td>Cache</td><td>${icon('cached')} Cached on server</td></tr>`;
   html += '</table>';
 
-  // Action buttons
-  html +=
-    '<div class="file-popover-actions flex [gap:6px] [margin-top:6px] pt-2 border-t border-line flex-wrap">';
-  html += `<button class="file-popover-preview inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Full preview">${icon('preview')} Preview</button>`;
-  html += `<button class="file-popover-download inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Download">${icon('download')} Download</button>`;
-  html += `<button class="file-popover-delete inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Delete">${icon('trash')} Delete</button>`;
+  // One action, and it is the one the row does not carry. Delete and Print live on the
+  // row; "Preview" opened a larger thumbnail popup from a popover that is already
+  // showing the thumbnail — a second floating layer over the first, for the same image.
+  html += '<div class="file-popover-actions flex [margin-top:6px] pt-2 border-t border-line">';
+  html += `<button class="file-popover-download inline-flex w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted" title="Download">${icon('download')} Download</button>`;
   html += '</div>';
 
   html += '</div></div>';
@@ -285,13 +284,6 @@ function showFilePopover(file: FileEntry, anchor: HTMLElement): void {
 
   // Bind popover action buttons
   const source = currentSource === 'u-disk' ? 'u-disk' : 'local';
-  el.querySelector('.file-popover-preview')?.addEventListener('click', () => {
-    closeFilePopover();
-    pendingThumbnailFile = fullPath;
-    pendingThumbnailAnchor = anchor;
-    _lastState?.thumbnailRequestQueue.push('popup');
-    _popoverClient?.sendCommand(1045, { storage_media: currentSource, file_name: fullPath });
-  });
   el.querySelector('.file-popover-download')?.addEventListener('click', () => {
     closeFilePopover();
     const a = document.createElement('a');
@@ -420,22 +412,6 @@ function ensureFileDelegation(container: HTMLElement): void {
       return;
     }
 
-    // Download button
-    const downloadBtn = target.closest('.file-download-btn') as HTMLElement | null;
-    if (downloadBtn) {
-      e.stopPropagation();
-      const filename = (downloadBtn.closest('.file-item') as HTMLElement)?.dataset.filename;
-      if (!filename) return;
-      const source = currentSource === 'u-disk' ? 'u-disk' : 'local';
-      const a = document.createElement('a');
-      a.href = `/api/files/download?file=${encodeURIComponent(filePathFor(filename, currentDir))}&source=${encodeURIComponent(source)}`;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      return;
-    }
-
     // Delete button. The popover had the only delete, and the popover opens on hover —
     // so on a touchscreen there was no way to reach it at all.
     const deleteBtn = target.closest('.file-delete-btn') as HTMLElement | null;
@@ -520,62 +496,15 @@ function renderCapacityBar(state: PrinterState): string {
   const cap = state.storageCapacity;
   if (!cap || cap.total === 0) return '';
   const usedPct = Math.min(100, Math.round((cap.used / cap.total) * 100));
-  const warn = usedPct > 90 ? ' capacity-warn' : usedPct > 75 ? ' capacity-high' : '';
-  return `<div class="flex items-center gap-2 [padding:6px_0] [margin-bottom:6px] max-[800px]:flex-wrap">
-    <div class="flex-1 h-[6px] bg-input rounded-[3px] overflow-hidden"><div class="h-full bg-accent rounded-[3px] [transition:width_0.3s] ${warn}" style="width:${usedPct}%"></div></div>
-    <span class="text-[11px] text-fg-muted whitespace-nowrap">${formatBytes(cap.used)} / ${formatBytes(cap.total)} (${usedPct}%)</span>
+  // ONE background utility, chosen here. It used to be `bg-accent` plus a `capacity-warn`
+  // / `capacity-high` class that appears at this call site and in no stylesheet — so a
+  // disk at 95% drew the same accent blue as one at 10%, and had the classes existed,
+  // two background utilities on one element have no defined winner anyway.
+  const fill = usedPct > 90 ? 'bg-bad' : usedPct > 75 ? 'bg-warn' : 'bg-accent';
+  return `<div class="mb-1.5 flex items-center gap-2">
+    <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-input"><div class="h-full rounded-full ${fill} [transition:width_0.3s]" style="width:${usedPct}%"></div></div>
+    <span class="shrink-0 text-[11px] text-fg-muted whitespace-nowrap">${formatBytes(cap.used)} / ${formatBytes(cap.total)}</span>
   </div>`;
-}
-
-// Thumbnail popup state
-let thumbnailPopup: HTMLElement | null = null;
-
-function showThumbnailPopup(base64: string, anchor: HTMLElement): void {
-  closeThumbnailPopup();
-  const popup = document.createElement('div');
-  popup.className = 'file-thumbnail-popup';
-  const img = document.createElement('img');
-  img.src = `data:image/png;base64,${base64}`;
-  img.alt = 'Thumbnail';
-  img.className = THUMBNAIL_CLASS;
-  popup.appendChild(img);
-  applyDarkThumbnailCheck(img, popup);
-  document.body.appendChild(popup);
-
-  // Position near anchor
-  const rect = anchor.getBoundingClientRect();
-  popup.style.left = `${rect.left}px`;
-  popup.style.top = `${Math.max(8, rect.top - 180)}px`;
-  thumbnailPopup = popup;
-}
-
-function closeThumbnailPopup(): void {
-  if (thumbnailPopup) {
-    thumbnailPopup.remove();
-    thumbnailPopup = null;
-  }
-}
-
-// Close thumbnail popup on click outside
-document.addEventListener('click', (e) => {
-  if (
-    thumbnailPopup &&
-    !(e.target as HTMLElement).closest('.file-thumbnail-btn') &&
-    !(e.target as HTMLElement).closest('.file-thumbnail-popup')
-  ) {
-    closeThumbnailPopup();
-  }
-});
-
-let pendingThumbnailFile: string | null = null;
-let pendingThumbnailAnchor: HTMLElement | null = null;
-
-export function handleThumbnailResponse(thumbnail: string | null): void {
-  if (thumbnail && pendingThumbnailFile && pendingThumbnailAnchor) {
-    showThumbnailPopup(thumbnail, pendingThumbnailAnchor);
-    pendingThumbnailFile = null;
-    pendingThumbnailAnchor = null;
-  }
 }
 
 /**
@@ -597,10 +526,11 @@ function ensureFileControls(): ListControls<FileEntry> {
     // active and in both directions, which is why it is not just another comparator.
     group: (file) => (file.type === 'folder' ? 0 : 1),
     columns: [
+      // You find a file by what it is called, how big it is, or how recent it is.
+      // "Print time" and "Layers" were two more chips above a list of two files; both
+      // figures are on every row to read, and neither is how anyone looks for a model.
       { key: 'name', label: 'Name', value: (f) => f.filename },
       { key: 'size', label: 'Size', value: (f) => f.size, initialDirection: 'desc' },
-      { key: 'time', label: 'Print time', value: (f) => f.print_time, initialDirection: 'desc' },
-      { key: 'layers', label: 'Layers', value: (f) => f.layer, initialDirection: 'desc' },
       { key: 'created', label: 'Added', value: (f) => f.create_time, initialDirection: 'desc' },
     ],
     defaultSort: { key: 'name', dir: 'asc' },
@@ -678,10 +608,14 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
     // One block, not two stacked rows. The name used to sit on its own line above a
     // second row holding the thumbnail, so a file was visually separated from its own
     // preview and every row was twice as tall as it needed to be.
+    // Two verbs, not three. Download went on the row a commit ago because the popover
+    // that held it opens on hover and is therefore unreachable on a touchscreen — but
+    // downloading a gcode off the printer only means anything on a machine with a mouse
+    // and a filesystem to put it on, which is exactly the machine that can hover. Print
+    // and Delete are the two that a phone needs, so they are the two the row carries.
     const actions = isFolder
       ? ''
       : `<button class="file-print-btn ${ROW_BTN}" title="Print ${escapeAttr(file.filename)}" aria-label="Print ${escapeAttr(file.filename)}">${iconSolo('play')}</button>
-         <button class="file-download-btn ${ROW_BTN}" title="Download ${escapeAttr(file.filename)}" aria-label="Download ${escapeAttr(file.filename)}">${iconSolo('download')}</button>
          <button class="file-delete-btn ${ROW_BTN_BAD}" title="Delete ${escapeAttr(file.filename)}" aria-label="Delete ${escapeAttr(file.filename)}">${iconSolo('trash')}</button>`;
 
     html += `

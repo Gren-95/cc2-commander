@@ -14,7 +14,6 @@ import {
   currentFileDir,
   currentFileSource,
   handleInlineThumbnail,
-  handleThumbnailResponse,
   renderFiles,
 } from './ui/files';
 import { bindGcodePreviewControls, renderGcodePreview } from './ui/gcode-preview';
@@ -505,13 +504,12 @@ function connectToService(): void {
         requestAnimationFrame(() => renderFiles(state, client!));
       }
       if (method === 1045) {
-        const purpose = state._lastThumbnailPurpose;
-        if (purpose === 'popup') {
-          handleThumbnailResponse(state._lastRawThumbnail);
-        } else if (purpose === 'inline') {
+        // 'popup' went with the popover's Preview button — it opened a second floating
+        // layer holding the same thumbnail the popover was already showing, and the
+        // G-code card renders the actual model. 'print' is handled in printer-state.ts.
+        if (state._lastThumbnailPurpose === 'inline') {
           handleInlineThumbnail(state._lastRawThumbnail);
         }
-        // 'print' purpose is handled in printer-state.ts directly
       }
       if (method === 1046) {
         handleFileDetailForPrint(state);
