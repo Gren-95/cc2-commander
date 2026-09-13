@@ -9,5 +9,7 @@
   <path d="M96.0 34.8q-17.5 22.5 -20.0 37.5" stroke="#fff" stroke-width="11.2" stroke-linecap="round" fill="none" opacity=".28"/>
   <circle cx="77.2" cy="102.2" r="8.8" fill="#0f1117"/>
   <circle cx="114.8" cy="102.2" r="8.8" fill="#0f1117"/>
+  <circle cx="80.2" cy="99.2" r="4.0" fill="#fff"/>
+  <circle cx="117.8" cy="99.2" r="4.0" fill="#fff"/>
   <path d="M81.0 129.8q15.0 13.8 30.0 0" stroke="#0f1117" stroke-width="8.8" stroke-linecap="round" fill="none" opacity=".85"/>
 </svg>
