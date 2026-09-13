@@ -28,6 +28,7 @@ const EXPOSED = {
   segmented: 'src/ui/segmented.ts',
   stepper: 'src/ui/stepper.ts',
   stateClasses: 'src/ui/state-classes.ts',
+  canvas: 'src/ui/canvas.ts',
 };
 
 async function bundle(): Promise<string> {

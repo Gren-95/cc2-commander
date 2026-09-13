@@ -1,5 +1,6 @@
-import { icon, iconSolo } from './icons';
+import { iconSolo } from './icons';
 import { EMPTY, SWITCH_KNOB, SWITCH_TRACK } from './design';
+import type { CanvasTray } from '../types';
 import type { PrinterState } from '../printer-state';
 import type { CommandSender } from '../ws-client';
 import { $, escapeHtml, escapeAttr } from './helpers';
@@ -10,6 +11,71 @@ let canvasDelegationBound = false;
 
 export function setCanvasClient(client: CommandSender): void {
   canvasClient = client;
+}
+
+/** The icon-only load/unload control on a tile. */
+const SLOT_ACTION = [
+  'inline-flex items-center justify-center shrink-0 h-7 w-7 rounded-md',
+  'border border-line bg-card text-fg-soft cursor-pointer',
+  'transition-colors hover:bg-hover hover:text-fg',
+].join(' ');
+
+/**
+ * One spool slot.
+ *
+ * A tile, not a bare ring. The ring carried the whole slot — colour, number and the
+ * click target — so an empty Canvas rendered as four anonymous circles with nothing
+ * saying they could be clicked, and a full one said nothing about what it held without
+ * hovering for the `title`.
+ *
+ * Two real buttons side by side rather than one nested inside the other: the body edits
+ * what the slot holds, load/unload is its own control. Nesting them would be invalid
+ * HTML, and it is the same mistake the auto-refill row made with nested `<label>`s.
+ */
+export function spoolTile(unitId: number, tray: CanvasTray, isActive: boolean): string {
+  const isEmpty = tray.status === 0;
+  const color = `#${(tray.filament_color || '434343').replace(/^#/, '')}`;
+  const stateClass = isActive ? 'spool-active' : isEmpty ? 'spool-empty' : 'spool-loaded';
+
+  const typeLabel = isEmpty ? 'Empty' : tray.filament_type || 'Unknown';
+  const sub = isEmpty
+    ? 'Tap to set'
+    : tray.min_nozzle_temp
+      ? `${tray.min_nozzle_temp}–${tray.max_nozzle_temp}°C`
+      : tray.brand || '';
+
+  // The ring keeps the filament's own colour. The accent means "engaged" and nothing
+  // else, so an active spool says so with the tile's border instead.
+  const ring = isEmpty
+    ? '<span class="block h-9 w-9 rounded-full border-2 border-dashed border-line"></span>'
+    : `<span class="grid h-9 w-9 place-items-center rounded-full border-[3px]" style="border-color:${escapeAttr(color)}">
+         <span class="h-3 w-3 rounded-full border border-line bg-card"></span>
+       </span>`;
+
+  const action = isActive
+    ? `<button type="button" class="spool-unload-btn ${SLOT_ACTION}" data-canvas-id="${unitId}" data-tray-id="${tray.tray_id}" title="Unload this spool" aria-label="Unload spool ${tray.tray_id + 1}">${iconSolo('filamentUnload')}</button>`
+    : isEmpty
+      ? ''
+      : `<button type="button" class="spool-load-btn ${SLOT_ACTION}" data-canvas-id="${unitId}" data-tray-id="${tray.tray_id}" title="Load this spool" aria-label="Load spool ${tray.tray_id + 1}">${iconSolo('filamentLoad')}</button>`;
+
+  return `<div class="${stateClass} flex min-w-0 items-center gap-2 rounded-lg border border-line bg-surface p-2 [&.spool-active]:border-accent">
+    <button type="button" class="canvas-spool-slot flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-left"
+      data-canvas-id="${unitId}" data-tray-id="${tray.tray_id}"
+      data-type="${escapeAttr(tray.filament_type || '')}" data-color="${escapeAttr(tray.filament_color || '')}"
+      data-brand="${escapeAttr(tray.brand || 'ELEGOO')}" data-name="${escapeAttr(tray.filament_name || '')}"
+      data-min-temp="${tray.min_nozzle_temp || ''}" data-max-temp="${tray.max_nozzle_temp || ''}"
+      title="${escapeAttr(tray.filament_name || typeLabel)} — click to edit">
+      <span class="relative shrink-0">
+        ${ring}
+        <span class="absolute -top-1 -left-1 grid h-4 w-4 place-items-center rounded-full bg-fg-muted text-[10px] font-bold text-app [.spool-active_&]:bg-accent">${tray.tray_id + 1}</span>
+      </span>
+      <span class="min-w-0 flex-1">
+        <span class="block truncate text-xs font-medium text-fg">${escapeHtml(typeLabel)}</span>
+        <span class="block truncate text-[11px] text-fg-muted">${escapeHtml(sub)}</span>
+      </span>
+    </button>
+    ${action}
+  </div>`;
 }
 
 export function renderCanvas(state: PrinterState): void {
@@ -29,87 +95,54 @@ export function renderCanvas(state: PrinterState): void {
   let html = '';
   for (const unit of canvas.canvas_list) {
     const connected = !!unit.connected;
-    html += `<div class="flex flex-col [gap:10px] ${connected ? '' : 'opacity-[0.5]'}">`;
-    html += `<div class="text-[13px] font-semibold text-fg-soft">Canvas ${unit.canvas_id + 1} ${connected ? `${icon('connected', 'canvas-state-ok')} Connected` : `${icon('disconnected', 'canvas-state-off')} Disconnected`}</div>`;
+    html += `<div class="flex flex-col gap-2.5 ${connected ? '' : 'opacity-50'}">`;
 
-    // Physical layout: 2×2 grid of spools inside a "device" frame
-    html += `<div class="flex items-center gap-3 bg-surface rounded-card p-4 relative">`;
-    html += `<div class="flex flex-col items-center gap-1 min-w-12">`;
-    html += `<div class="text-[9px] text-fg-muted uppercase tracking-[0.5px]">Canvas</div>`;
-    html += `<div class="flex flex-col [gap:3px]">`;
-    for (const tray of unit.tray_list) {
-      const color = `#${(tray.filament_color || '434343').replace(/^#/, '')}`;
-      const isEmpty = tray.status === 0;
-      html += `<div class="w-8 h-1 rounded-[2px]" style="background: ${isEmpty ? '#44403c' : escapeAttr(color)}"></div>`;
-    }
-    html += `</div></div>`;
+    // The state was a dot plus a word, and the dot carried `canvas-state-ok` /
+    // `canvas-state-off` — classes that appear at that one call site and in no
+    // stylesheet, so both rendered in the same grey and connected differed from
+    // disconnected by the word alone. A coloured chip carries it now.
+    html += `<div class="flex items-center justify-between gap-2">
+      <span class="text-[13px] font-semibold text-fg-soft">Canvas ${unit.canvas_id + 1}</span>
+      <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+        connected ? 'bg-ok-dim text-ok' : 'bg-bad-dim text-bad'
+      }">${iconSolo(connected ? 'connected' : 'disconnected')} ${connected ? 'Connected' : 'Disconnected'}</span>
+    </div>`;
 
-    html += `<div class="grid grid-cols-[repeat(2,_1fr)] gap-3 flex-1 max-[800px]:[gap:10px]">`;
-    // Physical layout is CCW from top-left: 0=TL, 1=BL, 2=BR, 3=TR
-    // CSS grid fills row-major: pos0=TL, pos1=TR, pos2=BL, pos3=BR
-    // Reorder: grid[0]=tray0, grid[1]=tray3, grid[2]=tray1, grid[3]=tray2
+    // Physical layout is counter-clockwise from top-left: 0=TL, 1=BL, 2=BR, 3=TR, while
+    // a CSS grid fills row-major — hence the reorder rather than a plain map.
     const gridOrder = [0, 3, 1, 2];
     const orderedTrays = gridOrder
       .filter((i) => i < unit.tray_list.length)
       .map((i) => unit.tray_list[i]);
+
+    // Keyed on the CARD. This card can be narrowed to a third of the dashboard in edit
+    // mode, where two tiles do not fit whatever the window is doing — which is what the
+    // `max-[800px]:` gap it replaces could not express.
+    html += '<div class="grid grid-cols-1 gap-2 @min-[340px]:grid-cols-2">';
     for (const tray of orderedTrays) {
       const isActive =
         tray.status === 2 ||
         (unit.canvas_id === canvas.active_canvas_id && tray.tray_id === canvas.active_tray_id);
-      const isEmpty = tray.status === 0;
-      const color = `#${(tray.filament_color || '434343').replace(/^#/, '')}`;
-      const statusClass = isActive ? 'spool-active' : isEmpty ? 'spool-empty' : 'spool-loaded';
-      const typeLabel = tray.filament_type || (isEmpty ? '' : '?');
-      const tempRange =
-        !isEmpty && tray.min_nozzle_temp ? `${tray.min_nozzle_temp}–${tray.max_nozzle_temp}°C` : '';
-
-      html += `<div class="canvas-spool-slot flex flex-col items-center gap-1 relative p-1 ${statusClass}" title="${escapeAttr(tray.filament_name || typeLabel)} — click to edit" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}" data-type="${escapeAttr(tray.filament_type || '')}" data-color="${escapeAttr(tray.filament_color || '')}" data-brand="${escapeAttr(tray.brand || 'ELEGOO')}" data-name="${escapeAttr(tray.filament_name || '')}" data-min-temp="${tray.min_nozzle_temp || ''}" data-max-temp="${tray.max_nozzle_temp || ''}">`;
-      html += `<div class="absolute top--1 left--1 w-5 h-5 rounded-full bg-fg-muted text-app text-[11px] font-bold flex items-center justify-center z-[1] [.spool-active_&]:bg-accent">${tray.tray_id + 1}</div>`;
-      html += `<div class="w-16 h-16 rounded-full [border:4px_solid] relative flex items-center justify-center [transition:all_0.3s] [.spool-empty_&]:opacity-[0.3]" style="border-color: ${isEmpty ? '#44403c' : escapeAttr(color)}">`;
-      html += `<div class="w-full h-full rounded-full opacity-[0.3]" style="background: ${isEmpty ? 'transparent' : escapeAttr(color)}"></div>`;
-      html += `<div class="absolute top-[50%] left-[50%] [transform:translate(-50%,_-50%)] w-[18px] h-[18px] rounded-full bg-card border-2 border-[rgba(255,_255,_255,_0.1)]"></div>`;
-      if (isActive) {
-        html += `<div class="absolute [inset:-6px] rounded-full border-2 border-accent [animation:pulse_1.5s_infinite]"></div>`;
-      }
-      html += `</div>`;
-      html += `<div class="text-[11px] font-semibold text-fg text-center">${escapeHtml(typeLabel)}</div>`;
-      if (tempRange) {
-        html += `<div class="text-[9px] text-fg-muted">${tempRange}</div>`;
-      }
-      html += `<div class="spool-actions flex gap-1 justify-center [margin-top:2px]">`;
-      if (isActive) {
-        html += `<button class="spool-unload-btn inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}">Unload</button>`;
-      } else if (!isEmpty) {
-        html += `<button class="spool-load-btn inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" data-canvas-id="${unit.canvas_id}" data-tray-id="${tray.tray_id}">Load</button>`;
-      }
-      html += `</div>`;
-      html += `</div>`;
+      html += spoolTile(unit.canvas_id, tray, isActive);
     }
-    html += `</div>`; // canvas-spools
+    html += '</div>';
 
-    // Extruder icon
-    html += `<div class="flex items-center justify-center min-w-12" title="Extruder">`;
-    html += `<div class="text-[32px] text-fg-muted opacity-[0.6]">${iconSolo('extruder')}</div>`;
-    html += `</div>`;
-
-    html += `</div>`; // canvas-device
-
-    // Action bar
-    html += `<div class="flex items-center gap-2">`;
-    html += `<label class="text-[12px] text-fg-muted flex items-center gap-2 cursor-pointer">Auto-refill: `;
-    html += `<label class="${SWITCH_TRACK}"><input type="checkbox" class="auto-refill-toggle peer sr-only" ${canvas.auto_refill ? 'checked' : ''}><span class="${SWITCH_KNOB}"></span></label>`;
-    html += `</label>`;
-    html += `</div>`;
-
-    html += `</div>`; // canvas-unit
+    html += '</div>'; // canvas-unit
   }
 
-  container.innerHTML = html;
+  // One switch for the machine, not one per unit. `auto_refill` is a single field on the
+  // canvas payload, so rendering it inside the loop gave a second Canvas a second switch
+  // writing the same setting — and the row nested a <label> inside a <label>, which is
+  // invalid and makes a click on the text toggle twice or not at all.
+  html += `<label class="mt-auto flex cursor-pointer items-center gap-3 border-t border-line-soft pt-3">
+    <span class="min-w-0 flex-1">
+      <span class="block text-xs text-fg">Auto-refill</span>
+      <span class="block text-[11px] text-fg-muted">Switch to another spool of the same colour when one runs out</span>
+    </span>
+    <span class="${SWITCH_TRACK}"><input type="checkbox" class="auto-refill-toggle peer sr-only" ${canvas.auto_refill ? 'checked' : ''}><span class="${SWITCH_KNOB}"></span></span>
+  </label>`;
 
-  // Set cursor on spool slots (no event binding needed — delegation below)
-  container.querySelectorAll('.canvas-spool-slot').forEach((slot) => {
-    (slot as HTMLElement).style.cursor = 'pointer';
-  });
+  container.innerHTML = html;
 
   // Bind delegated event listeners once on the container
   if (!canvasDelegationBound) {
@@ -181,6 +214,12 @@ export function renderCanvas(state: PrinterState): void {
   container.setAttribute('data-printing', isPrinting ? '1' : '0');
 }
 
+/**
+ * The no-Canvas case: a printer feeding one spool straight into the extruder.
+ *
+ * Built from the same tile as a Canvas slot so the card looks like one card in both
+ * shapes, rather than the two unrelated layouts it used to carry.
+ */
 function renderMonoFilament(container: HTMLElement, info: Record<string, unknown>): void {
   const type = (info.filament_type ?? info.type ?? '') as string;
   const color = (info.filament_color ?? info.color ?? '') as string;
@@ -191,46 +230,18 @@ function renderMonoFilament(container: HTMLElement, info: Record<string, unknown
 
   const colorHex = color ? `#${color.replace(/^#/, '')}` : '#666';
   const label = name || type || 'Unknown';
-  const tempRange = minTemp && maxTemp ? `${minTemp}–${maxTemp}°C` : '';
-  const brandLabel = brand ? escapeHtml(brand) + ' ' : '';
+  const tempRange = minTemp && maxTemp ? `${minTemp}–${maxTemp}°C` : brand;
 
-  let html = '<div class="p-3">';
-  html += '<div class="text-[13px] font-semibold text-fg-soft mb-3">Direct Drive Filament</div>';
-  html += '<div class="flex items-center gap-4">';
-  html += `<div class="w-13 h-13 rounded-full [border:4px_solid] relative flex items-center justify-center [transition:all_0.3s] shrink-0 [.spool-empty_&]:opacity-[0.3]" style="border-color: ${escapeAttr(colorHex)}">`;
-  html += `<div class="w-full h-full rounded-full opacity-[0.3]" style="background: ${escapeAttr(colorHex)}"></div>`;
-  html += `<div class="absolute top-[50%] left-[50%] [transform:translate(-50%,_-50%)] w-[18px] h-[18px] rounded-full bg-card border-2 border-[rgba(255,_255,_255,_0.1)]"></div>`;
-  html += '</div>';
-  html += `<div class="flex flex-col [gap:2px]">`;
-  html += `<div class="text-[14px] font-medium">${brandLabel}${escapeHtml(label)}</div>`;
-  if (tempRange) html += `<div class="text-[12px] text-fg-muted">${tempRange}</div>`;
-  html += `</div>`;
-  html += '</div>';
-
-  // Show raw fields if we got unexpected structure (helps debug)
-  const knownKeys = new Set([
-    'filament_type',
-    'type',
-    'filament_color',
-    'color',
-    'filament_name',
-    'name',
-    'min_nozzle_temp',
-    'minTemp',
-    'max_nozzle_temp',
-    'maxTemp',
-    'brand',
-    'error_code',
-  ]);
-  const extra = Object.entries(info).filter(([k]) => !knownKeys.has(k));
-  if (extra.length > 0 && !type && !name) {
-    html += '<div class="mt-2 text-[11px] text-fg-muted">';
-    for (const [k, v] of extra) {
-      html += `<div class="[&_span]:text-fg-soft [&_span]:font-medium"><span>${escapeHtml(k)}:</span> ${escapeHtml(String(v))}</div>`;
-    }
-    html += '</div>';
-  }
-
-  html += '</div>';
-  container.innerHTML = html;
+  container.innerHTML = `<div class="flex flex-col gap-2.5">
+    <span class="text-[13px] font-semibold text-fg-soft">Direct drive</span>
+    <div class="flex min-w-0 items-center gap-2.5 rounded-lg border border-line bg-surface p-2">
+      <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full border-[3px]" style="border-color:${escapeAttr(colorHex)}">
+        <span class="h-3 w-3 rounded-full border border-line bg-card"></span>
+      </span>
+      <span class="min-w-0 flex-1">
+        <span class="block truncate text-xs font-medium text-fg">${escapeHtml(label)}</span>
+        <span class="block truncate text-[11px] text-fg-muted">${escapeHtml(tempRange)}</span>
+      </span>
+    </div>
+  </div>`;
 }

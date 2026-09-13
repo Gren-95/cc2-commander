@@ -106,6 +106,10 @@ export const ICONS = {
   unwatched: 'circle',
   connected: 'circle-fill',
   disconnected: 'circle',
+  // Filament into and out of the extruder. Not `load`, which is a folder-open
+  // glyph for opening a file and means nothing on a spool.
+  filamentLoad: 'box-arrow-in-down',
+  filamentUnload: 'box-arrow-up',
   powerLoss: 'lightning-charge-fill',
   heartbeat: 'activity',
   filament: 'bezier2',
