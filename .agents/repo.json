@@ -7,7 +7,7 @@
     "all": "bun run gates",
     "fix": "bun run gates --fix"
   },
-  "release": "release-it",
+  "release": "none",
   "ci": "github-hosted",
   "liveBoundary": "printer",
   "worktreeSafe": true,

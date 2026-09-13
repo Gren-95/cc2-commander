@@ -301,10 +301,17 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   data-protection policy: no real credentials or PII in committed files, issue
   comments, or outbound requests. (The vendor default `elegoo`/`123456` in the README
   is documentation of a published protocol default, not a secret.)
-- **Conventional commits are the changelog.** There are no changesets here: release
-  is `release-it` with `@release-it/conventional-changelog`, so the commit subject
-  *is* the release note. `feat:` → minor, `fix:` → patch, and anything user-visible
-  needs one of those rather than `chore:`.
+- **Conventional commits ARE the changelog — there is no file.** `CHANGELOG.md` and
+  `release-it` were removed once this became a fork nobody upstreams: the file had not
+  been touched in 115 commits and every link in it pointed at `runnane/elegoo-web`
+  rather than this fork, so it described someone else's repo. `git log --oneline`
+  answers "what changed" without going stale.
+
+  The commit convention stays, and matters more without a file collecting it: the
+  subject line *is* the release note. `feat:` → minor, `fix:` → patch, and anything
+  user-visible needs one of those rather than `chore:`. The version the About panel
+  shows never came from the changelog anyway — `build-info.ts` stamps
+  `git describe --tags --always --dirty` at install time.
 - **Branch → commit → PR, always from fresh `main`.** Finished work never sits as
   uncommitted working-tree changes. Branch `<type>/<eleg-lower>-<kebab-title>`
   (e.g. `feat/eleg-12-layer-chart-zoom`), a conventional commit, one PR, and
@@ -445,7 +452,7 @@ ELEG-81 adopted it here. There is nothing left to sync, and no `sha256sum` check
   `/agent-userspace:fix` under `--plugin-dir`.
 - **[`.agents/repo.json`](.agents/repo.json)** — the facts that differ between repos, and
   three of ELEG's differ from most of the set: `visibility: "public"`,
-  `release: "release-it"` (**not** changesets — those are RCP's alone) and
+  `release: "none"` (**not** changesets, and no longer release-it — see above) and
   `liveBoundary: "printer"`.
 - **What stays tracked here** — `CLAUDE.md`, this file, the five `.agents/` deep dives
   and [`.agents/gates.md`](.agents/gates.md).

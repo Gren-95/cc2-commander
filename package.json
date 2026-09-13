@@ -10,7 +10,6 @@
     "dev": "bun scripts/dev.ts",
     "dev:service": "bun --watch src/server/index.ts",
     "build": "tsc && bun scripts/build.ts",
-    "preview": "vite preview",
     "service": "bun src/server/index.ts",
     "service:check": "tsc --project tsconfig.server.json",
     "service:install": "sudo bash contrib/install.sh",
@@ -18,8 +17,6 @@
     "service:restart": "sudo systemctl restart elegooweb",
     "service:stop": "sudo systemctl stop elegooweb",
     "service:logs": "sudo journalctl -u elegooweb -f",
-    "release": "release-it",
-    "release:dry": "release-it --dry-run",
     "docker:build": "docker build -t ghcr.io/runnane/elegoo-web:local .",
     "docker:verify": "docker run --rm -e PRINTER_IP=192.0.2.99 -e TELEGRAM_BOT_TOKEN= -e AI_ENABLED=false -e CAMERA_ENABLED=false ghcr.io/runnane/elegoo-web:local bun -e \"import('./src/server/config.js').then(()=>console.log('image OK'))\"",
     "gates": "bash scripts/gates.sh",
@@ -38,13 +35,12 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.9",
     "@playwright/test": "^1.63.0",
-    "@release-it/conventional-changelog": "^12.0.0",
     "@tailwindcss/cli": "^4.3.3",
     "@types/bun": "^1.4.2",
     "@types/pdfkit": "^0.17.6",
     "@types/three": "0.178.1",
+    "@types/ws": "^8.18.1",
     "knip": "^6.34.0",
-    "release-it": "^21.0.2",
     "simple-git-hooks": "^2.11.1",
     "tailwindcss": "4.3.3",
     "typescript": "^7.0.2"
@@ -105,72 +101,5 @@
     "include": [
       "files"
     ]
-  },
-  "release-it": {
-    "git": {
-      "commitMessage": "chore: release v${version}",
-      "tagName": "v${version}",
-      "tagAnnotation": "Release v${version}",
-      "requireCleanWorkingDir": true,
-      "requireUpstream": true,
-      "tagArgs": [
-        "--no-sign"
-      ]
-    },
-    "github": {
-      "release": true,
-      "releaseName": "v${version}"
-    },
-    "npm": {
-      "publish": false
-    },
-    "plugins": {
-      "@release-it/conventional-changelog": {
-        "preset": {
-          "name": "conventionalcommits",
-          "types": [
-            {
-              "type": "feat",
-              "section": "Features"
-            },
-            {
-              "type": "fix",
-              "section": "Bug Fixes"
-            },
-            {
-              "type": "perf",
-              "section": "Performance"
-            },
-            {
-              "type": "refactor",
-              "section": "Refactors"
-            },
-            {
-              "type": "docs",
-              "section": "Documentation"
-            },
-            {
-              "type": "chore",
-              "hidden": true
-            },
-            {
-              "type": "style",
-              "hidden": true
-            },
-            {
-              "type": "test",
-              "hidden": true
-            }
-          ]
-        },
-        "infile": "CHANGELOG.md",
-        "header": "# Changelog"
-      }
-    },
-    "hooks": {
-      "before:init": "bun run lint && bun run format:check && bun run test",
-      "after:bump": "bun run build && docker build -t ghcr.io/runnane/elegoo-web:${version} -t ghcr.io/runnane/elegoo-web:latest .",
-      "after:release": "echo \"$GITHUB_TOKEN\" | docker login ghcr.io -u runnane --password-stdin && docker push ghcr.io/runnane/elegoo-web:${version} && docker push ghcr.io/runnane/elegoo-web:latest"
-    }
   }
 }

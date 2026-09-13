@@ -96,7 +96,7 @@ fi
 #
 # This builds in $SCRIPT_DIR — the checkout — and NOT in $INSTALL_DIR. Building in the
 # install directory is what used to drag the entire dev toolchain (vite, vitest,
-# typescript, release-it) into production, which every later production install then
+# typescript, and at the time release-it) into production, which every later install then
 # had to prune back out, emitting the "Failed to create bin ... ENOENT" warnings that
 # made a healthy deploy look broken (ELEG-19). $INSTALL_DIR gets runtime dependencies
 # and nothing else.

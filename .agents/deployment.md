@@ -49,7 +49,7 @@ back to a copy that cannot delete.
 `--prod`; if the source tree has no `dist/`, the installer builds it in the *checkout*
 (dropping to `$SUDO_USER`, so root does not leave artefacts in your working tree) and
 rsyncs the result. It used to run a full `bun install` + `bun run build` inside
-`/opt/elegooweb` on first install, which put vite, vitest, typescript and release-it
+`/opt/elegooweb` on first install, which put the dev toolchain (then vite, vitest, typescript, release-it)
 into production and left every later `--prod` run pruning them back out — the source of
 the `Failed to create bin … ENOENT` warnings that made a healthy deploy read as broken
 (ELEG-19). The runbook below builds before installing anyway, so that path was only ever
