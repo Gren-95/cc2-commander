@@ -46,7 +46,7 @@
     </script>
   </head>
 <body>
-  <header id="app-header" class="flex justify-between items-center [padding:0_20px] h-[var(--header-height)] bg-surface border-b border-line sticky top-0 z-[100] [backdrop-filter:blur(8px)] max-[700px]:[padding:0_12px] max-[700px]:[gap:10px] max-[700px]:backdrop-filter-none">
+  <header id="app-header" class="flex justify-between items-center [padding:0_20px] h-[var(--header-height)] bg-surface border-b border-line sticky top-0 z-[300] [backdrop-filter:blur(8px)] max-[700px]:[padding:0_12px] max-[700px]:[gap:10px] max-[700px]:backdrop-filter-none">
     <div class="max-[700px]:min-w-0 max-[700px]:[flex:1_1_auto] max-[700px]:overflow-hidden [&_h1]:text-[16px] [&_h1]:font-semibold [&_h1]:text-accent [&_h1]:tracking-[-0.01em] [&_h1]:whitespace-nowrap max-[800px]:[&_h1]:text-[14px]">
       <!--
         Two spellings of the same name. The full one does not fit a phone header —
@@ -54,7 +54,9 @@
         both are in the DOM and the breakpoint picks one. aria-label carries the real
         name either way, which is why both spans are aria-hidden.
       -->
-      <h1 class="" aria-label="CC2 Commander">
+      <img src="/icons/icon-192.svg" alt="" aria-hidden="true"
+           class="h-6 w-6 shrink-0 align-middle [margin-inline-end:0.5rem] inline-block" />
+      <h1 class="inline-block align-middle" aria-label="CC2 Commander">
         <span class="max-[700px]:hidden" aria-hidden="true">CC2 Commander</span>
         <span class="min-[701px]:hidden" aria-hidden="true">Commander</span>
       </h1>
