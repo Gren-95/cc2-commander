@@ -306,46 +306,45 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   user-visible needs one of those rather than `chore:`. The version the About panel
   shows never came from the changelog anyway — `build-info.ts` stamps
   `git describe --tags --always --dirty` at install time.
-- **Branch → commit → PR, always from fresh `main`.** Finished work never sits as
-  uncommitted working-tree changes. Branch `<type>/<eleg-lower>-<kebab-title>`
-  (e.g. `feat/eleg-12-layer-chart-zoom`), a conventional commit, one PR, and
-  `gh pr create --base main` **explicitly** — `gh` otherwise defaults to the tracked
-  branch, which is how a PR merges into a dead branch and never reaches `main`.
-  Sync twice: before cutting the branch, and again (`git fetch` + rebase + re-run the
-  gates) before opening the PR if `main` moved.
+- **Commit straight to `main`. No topic branch, no PR.** This is a personal fork with
+  no issue tracker, no collaborators and nothing upstream to propose changes to, so the
+  branch → PR → merge cycle was ceremony: the same person opened and merged every PR,
+  minutes apart, with no review in between. It also had a failure mode that bit —
+  finished work sitting on an unmerged branch while `main` (and therefore the running
+  service, which is built from the checkout) silently lacked it.
 
-  **Preflight `git switch`, because this checkout is shared.** More than one agent
-  works this machine. Check `git rev-parse --abbrev-ref HEAD`,
-  `git status --porcelain` and `git worktree list` first; **if `HEAD` is already a
-  topic branch, stop and report it** — that is someone else's work in flight, and
-  `git switch` carries modified files across. Unrelated dirt is left alone; a dirty
-  file *this* issue will touch is an overlap and also a reason to stop. Never stash,
-  reset or `git checkout <file>` to clear your path — each one takes changes you did not
-  make.
-- **One issue → one PR → one merge, and the status is automated.** The tracker's PR
-  webhook moves ELEG issues off GitHub events: draft PR → `IN_PROGRESS`,
-  opened/readied → `IN_REVIEW`, merged → `MERGED`, closed unmerged → `TODO`. Two
-  consequences:
-  - **The branch name is what makes it work.** The transition needs the issue key in
-    the PR's **branch or title**; a key only in the body is recorded as an
-    association and moves nothing. The `<type>/<eleg-lower>-…` convention satisfies
-    this by construction.
-  - **The automation never moves an issue backwards** out of `MERGED`,
-    `IN_PRODUCTION`, `DONE` or `CANCELLED` — so a status you set wrongly by hand will
-    not be corrected later. Comment on start and finish; let the automation move the
-    status.
+  **This deliberately overrides the global "never commit directly to main" rule**, which
+  exists for shared repositories. Stated by the repo owner, 2026-09-13.
 
-  A sub-issue's status also cascades to its parent (a child reaching `IN_PROGRESS`
-  starts a `BACKLOG`/`TODO` ancestor; a parent whose every non-`CANCELLED` child is
-  `DONE` becomes `DONE`), so don't hand-maintain an epic's status.
-- **`IN_PRODUCTION` is real here, and merging is not it.** ELEG has
-  `tracksProduction` on because production is a *separate step*: the service runs as a
-  **container** from `ghcr.io/gren-95/cc2-commander`, which is **not a git checkout**,
-  and nothing pulls it for you. A merged PR changes nothing that is running. See
-  [`docs/deployment.md`](docs/deployment.md) — and note that performing the
-  deploy is operator work.
-- **An issue is either repo work or operator work — never both.** Repo work is done
-  when its PR merges; operator work is done when a human has run something against
+  What does NOT change:
+
+  - **Finished work is committed, never left as working-tree dirt.**
+  - **`bun run gates` green before every commit**, because there is no PR check standing
+    between a commit and `main` any more. The gate is the only gate.
+  - **A conventional commit subject, because it is still the changelog** (`feat:` minor,
+    `fix:` patch; anything user-visible is one of those, not `chore:`).
+  - **Never stash, reset or `git checkout <file>` to clear your path** — each one takes
+    changes you did not make.
+
+  **Every commit to `main` publishes a container.** `publish.yml` runs on push to main
+  and pushes `ghcr.io/gren-95/cc2-commander:latest`, built for amd64 **and** arm64 under
+  QEMU. That is deliberate — the workflow's own header argues a stale `latest` is worse
+  than a moving one — but committing directly makes it fire far more often. Batch
+  related edits into one commit rather than pushing five in a row.
+
+- **Committing is not deploying.** Production is a *separate step*: the service runs as
+  a **container** from `ghcr.io/gren-95/cc2-commander`, which is **not a git checkout**,
+  and nothing pulls it for you. A commit on `main` builds and publishes a new `:latest`
+  (see the publish note above), and changes nothing that is *running* until someone
+  pulls it. See [`docs/deployment.md`](docs/deployment.md) — performing the deploy is
+  operator work.
+
+  The local dev service is the other half of this: it serves `dist/`, and `spa.ts`
+  snapshots those filenames at startup. A rebuild without a restart therefore 404s every
+  asset. Rebuild **and** restart, or the page you are looking at is not the code you
+  just wrote.
+- **Work is either repo work or operator work — never both.** Repo work is done
+  when it is committed; operator work is done when a human has run something against
   the live service or the printer and recorded the result. An issue holding both can
   never close cleanly. So when repo work needs a deploy or a printer command
   afterwards, **file that as its own `OPERATOR:`-titled issue**, self-contained: why
@@ -496,4 +495,5 @@ Not auto-loaded. Open the relevant one when working in that area.
 
 `bun run gates` green (biome + both typechecks + knip + build + tests), `README.md`
 updated if a documented surface changed, a conventional commit subject that reads as a
-release note, no secrets committed, the issue commented and its PR open.
+release note, no secrets committed, and the work **committed to `main`** — not left as
+working-tree dirt, and not on a branch. There is no PR to open and no issue to comment.
