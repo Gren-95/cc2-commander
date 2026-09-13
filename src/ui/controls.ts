@@ -1,3 +1,4 @@
+import { positionAllSegmented } from './segmented';
 import { toggleState } from './state-classes';
 import { iconText } from './icons';
 import type { CommandSender } from '../ws-client';
@@ -161,6 +162,7 @@ export function bindControls(client: CommandSender): void {
       currentMoveDistance = parseFloat((btn as HTMLElement).dataset.dist ?? '10');
       document.querySelectorAll('.dist-btn').forEach((b) => toggleState(b, 'active', false));
       toggleState(btn, 'active', true);
+      positionAllSegmented();
     });
   });
 
@@ -186,19 +188,28 @@ export function bindControls(client: CommandSender): void {
     guardedSend(client, 1030, { box_fan: on ? 255 : 0 }, e.target as HTMLElement);
   });
 
-  // Fan +/- buttons
-  document.querySelectorAll('.fan-dec, .fan-inc').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const el = btn as HTMLElement;
-      const fanKey = el.dataset.fan!;
-      const step = parseInt(el.dataset.step ?? '13'); // ~5% of 255
-      const barId =
-        fanKey === 'fan' ? 'fan-model-bar' : fanKey === 'aux_fan' ? 'fan-aux-bar' : 'fan-case-bar';
-      const bar = $(barId) as HTMLElement;
-      const currentPct = parseFloat(bar.style.width) || 0;
-      const currentVal = Math.round((currentPct / 100) * 255);
-      const newVal = Math.max(0, Math.min(255, currentVal + step));
-      guardedSend(client, 1030, { [fanKey]: newVal }, el);
+  // Fan sliders.
+  //
+  // These replaced a read-only bar flanked by -/+ buttons that stepped by 13 (~5% of
+  // 255). Two rows per fan became one, and a value you could only walk towards became
+  // one you can point at — while keeping the keyboard path a native range gives for
+  // free, which the old buttons only had because they were buttons.
+  document.querySelectorAll('.fan-range').forEach((el) => {
+    const input = el as HTMLInputElement;
+    const fanKey = input.dataset.fan;
+    if (!fanKey) return;
+
+    // Live label while dragging, but no command: `input` fires per pixel, and a drag
+    // across this slider would be dozens of MQTT publishes at a printer.
+    input.addEventListener('input', () => {
+      const valueEl = document.getElementById(`${input.id.replace('-range', '')}-value`);
+      if (valueEl) valueEl.textContent = `${input.value}%`;
+    });
+
+    // `change` is the release, and the only place a command is sent.
+    input.addEventListener('change', () => {
+      const pct = Math.max(0, Math.min(100, Number(input.value) || 0));
+      guardedSend(client, 1030, { [fanKey]: Math.round((pct / 100) * 255) }, input);
     });
   });
 

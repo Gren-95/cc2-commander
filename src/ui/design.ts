@@ -156,6 +156,46 @@ export const CHIP = [
 ].join(' ');
 
 /** A segmented picker. `LABEL` sits before it on the same line. */
+/**
+ * A segmented picker: one track, one fill that slides to the choice.
+ *
+ * The alternative — and what this replaced — is N separate chips with one filled. That
+ * reads as N buttons that happen to be adjacent rather than as one control with N
+ * positions, and it gives no sense of moving between settings. The fill is a single
+ * element positioned by `ui/segmented.ts`, so the label widths can differ ("0.1mm" and
+ * "Ludicrous" are not the same size) without the track needing equal columns.
+ *
+ * The edge is a **ring, not a border**. A ring is a box-shadow: it draws the hairline
+ * without adding a border box, and an absolutely positioned child is offset from its
+ * container's padding box while `offsetLeft` measures from the border box — so a real
+ * 1px border would put the fill 1px out of step with the label it sits under.
+ *
+ * The hairline is not decoration. `--bg-input` and `--bg-card` are both #ffffff in the
+ * light theme, so a track filled with `bg-input` on a card is invisible there and the
+ * control reads as a stray blue pill with loose words beside it. Two tokens that happen
+ * to be equal in one theme is a recurring trap in this palette.
+ */
+export const SEGMENTED =
+  'segmented relative inline-flex items-center rounded-full bg-input ring-1 ring-line p-0.5';
+
+/** One position in the track. Transparent: the fill behind it supplies the colour. */
+export const SEGMENTED_BTN = [
+  'segmented-btn relative z-[1]',
+  'inline-flex items-center justify-center whitespace-nowrap',
+  'rounded-full px-3 py-1',
+  'text-[11px] font-medium text-fg-soft cursor-pointer',
+  'transition-colors',
+  'pointer-coarse:min-h-9 pointer-coarse:px-3.5',
+].join(' ');
+
+/** The fill. Width and X are set from the selected button; everything else is here. */
+export const SEGMENTED_FILL = [
+  'segmented-fill pointer-events-none absolute inset-y-0.5 left-0',
+  'rounded-full bg-accent',
+  '[transition:transform_180ms_ease,width_180ms_ease]',
+  'motion-reduce:[transition:none]',
+].join(' ');
+
 export const CHIP_ROW = 'flex flex-wrap items-center gap-1.5';
 
 /** A jog-pad key. Square, so the pad reads as a directional cross. */

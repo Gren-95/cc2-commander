@@ -1,4 +1,5 @@
 import { setDryerPrinting, setDryerTemps } from './dryer-panel';
+import { positionSegmented } from './segmented';
 import { toggleState } from './state-classes';
 import { icon, iconOnly, iconSolo, iconText } from './icons';
 import type { PrinterState } from '../printer-state';
@@ -90,7 +91,11 @@ function getActiveFilamentInfo(state: PrinterState): { type: string; color: stri
 
 function updateFan(prefix: string, speed: number, toggleId: string, rpm?: number): void {
   const pct = fanPct(speed);
-  ($(`${prefix}-bar`) as HTMLElement).style.width = `${pct}%`;
+  const range = document.getElementById(`${prefix}-range`) as HTMLInputElement | null;
+  // Never while it has focus. A status frame lands every second, and writing the
+  // reported speed back mid-drag snaps the thumb out from under the pointer — the fan
+  // has not spun up yet, so the value being written is the OLD one.
+  if (range && document.activeElement !== range) range.value = String(pct);
   $(`${prefix}-value`).textContent = `${pct}%`;
   ($(toggleId) as HTMLInputElement).checked = speed > 0;
   const rpmEl = $(`${prefix}-rpm`);
@@ -483,6 +488,10 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     const mode = parseInt((btn as HTMLElement).dataset.mode ?? '100');
     toggleState(btn, 'active', mode === speedMode);
   });
+  // The selection here comes from the printer, not from a click, so the fill has to be
+  // told to follow it — the speed picker moves on its own when the machine changes mode.
+  const speedTrack = document.querySelector('.speed-btn')?.closest<HTMLElement>('.segmented');
+  if (speedTrack) positionSegmented(speedTrack);
 
   // LED toggle
   const ledOn = s.led?.status === 1;

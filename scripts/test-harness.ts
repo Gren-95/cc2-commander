@@ -25,6 +25,8 @@ const EXPOSED = {
   uiSettings: 'src/ui/ui-settings.ts',
   storageMigration: 'src/ui/storage-migration.ts',
   dryerPanel: 'src/ui/dryer-panel.ts',
+  segmented: 'src/ui/segmented.ts',
+  stateClasses: 'src/ui/state-classes.ts',
 };
 
 async function bundle(): Promise<string> {

@@ -20,6 +20,7 @@ import {
   BTN_ICON,
   BTN_ICON_DANGER,
   CHIP,
+  SEGMENTED_BTN,
   EMPTY,
   FIELD,
   JOG,
@@ -71,22 +72,52 @@ describe('design tokens', () => {
 });
 
 describe('state deltas', () => {
-  it('every active picker shares one delta', () => {
+  /** The pickers built on SEGMENTED_BTN rather than CHIP. */
+  const SEGMENTED_BASES = ['dist-btn', 'speed-btn'];
+
+  it('every chip picker shares one delta', () => {
     const deltas = new Set(
       Object.entries(STATE_UTILITIES.active)
-        .filter(([base]) => base !== 'main-tab' && base !== 'subtab' && base !== 'progress-fill')
+        .filter(
+          ([base]) => !['main-tab', 'subtab', 'progress-fill', ...SEGMENTED_BASES].includes(base),
+        )
         .map(([, d]) => `${d.add}|${d.remove}`),
     );
     expect([...deltas]).toHaveLength(1);
   });
 
-  it('the picker delta clears every neutral it overrides on CHIP', () => {
-    const delta = STATE_UTILITIES.active['dist-btn'];
-    const applied = CHIP.split(' ')
-      .filter((c) => !delta.remove.split(' ').includes(c))
-      .concat(delta.add.split(' '))
-      .join(' ');
-    expect(collisions(applied)).toEqual([]);
+  it('every segmented picker shares one delta, and it is not the chip one', () => {
+    // A second family, deliberately: a segmented button has no background of its own —
+    // the sliding fill behind it supplies the colour — so "selected" is a text colour
+    // and nothing else. Adding the chip's `bg-accent` here would paint a static pill on
+    // top of the sliding one and hide the slide entirely.
+    const deltas = new Set(
+      SEGMENTED_BASES.map((base) => {
+        const d = STATE_UTILITIES.active[base];
+        return `${d.add}|${d.remove}`;
+      }),
+    );
+    expect([...deltas]).toHaveLength(1);
+    expect(STATE_UTILITIES.active['dist-btn'].add).not.toContain('bg-');
+    expect(STATE_UTILITIES.active['dist-btn'].add).not.toContain('border-');
+  });
+
+  it('each picker delta clears every neutral it overrides on its own base', () => {
+    // The delta has to be read against the base it is actually applied to. Checking the
+    // segmented delta against CHIP would pass while leaving `bg-surface` and `text-white`
+    // on the same element in the app.
+    for (const [base, token] of [
+      ['chart-time-btn', CHIP],
+      ['dist-btn', SEGMENTED_BTN],
+    ] as const) {
+      const delta = STATE_UTILITIES.active[base];
+      const applied = token
+        .split(' ')
+        .filter((c) => !delta.remove.split(' ').includes(c))
+        .concat(delta.add.split(' '))
+        .join(' ');
+      expect(collisions(applied), base).toEqual([]);
+    }
   });
 
   for (const [state, bySelector] of Object.entries(STATE_UTILITIES)) {

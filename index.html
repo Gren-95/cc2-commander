@@ -404,21 +404,17 @@
 
           <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
             <span class="text-xs text-fg-muted w-14 shrink-0">Step</span>
-            <div class="flex flex-wrap items-center gap-1.5">
-                <button class="dist-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-dist="0.1">0.1mm</button>
-                <button class="dist-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-dist="1">1mm</button>
-                <button class="dist-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5 active bg-accent text-white border-accent" data-dist="10">10mm</button>
-                <button class="dist-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-dist="30">30mm</button>
-            </div>
+            <div class="segmented relative inline-flex items-center rounded-full bg-input ring-1 ring-line p-0.5"><div class="segmented-fill pointer-events-none absolute inset-y-0.5 left-0 rounded-full bg-accent [transition:transform_180ms_ease,width_180ms_ease] motion-reduce:[transition:none]"></div><button class="dist-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-dist="0.1">0.1mm</button>
+                <button class="dist-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-dist="1">1mm</button>
+                <button class="dist-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5 active text-white" data-dist="10">10mm</button>
+                <button class="dist-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-dist="30">30mm</button></div>
           </div>
           <div class="flex flex-wrap items-center gap-x-3 gap-y-2 mt-2">
             <span class="text-xs text-fg-muted w-14 shrink-0">Speed</span>
-            <div class="flex flex-wrap items-center gap-1.5">
-                <button class="speed-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-mode="50">Silent</button>
-                <button class="speed-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5 active bg-accent text-white border-accent" data-mode="100">Balanced</button>
-                <button class="speed-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-mode="130">Sport</button>
-                <button class="speed-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-mode="160">Ludicrous</button>
-            </div>
+            <div class="segmented relative inline-flex items-center rounded-full bg-input ring-1 ring-line p-0.5"><div class="segmented-fill pointer-events-none absolute inset-y-0.5 left-0 rounded-full bg-accent [transition:transform_180ms_ease,width_180ms_ease] motion-reduce:[transition:none]"></div><button class="speed-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-mode="50">Silent</button>
+                <button class="speed-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5 active text-white" data-mode="100">Balanced</button>
+                <button class="speed-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-mode="130">Sport</button>
+                <button class="speed-btn segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-mode="160">Ludicrous</button></div>
           </div>
 
           <div class="border-t border-line-soft my-3"></div>
@@ -445,66 +441,42 @@
         </div>
 
         <!-- Fans -->
-        <div class="card @container bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="fans-card">
+        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="fans-card">
           <h3><i class="bi bi-fan" aria-hidden="true"></i>Fans &amp; light</h3>
 
-          <div class="flex flex-col gap-3">
-            <div>
-              <div class="flex items-center gap-2">
-                <i class="bi bi-fan text-fg-muted" aria-hidden="true"></i>
-                <span class="text-xs text-fg">Model</span>
-                <span class="ml-auto flex items-baseline gap-1">
-                  <span class="font-mono text-base tabular-nums leading-none text-fg-soft" id="fan-model-value">--%</span>
-                  <span class="text-xs text-fg-muted font-normal" id="fan-model-rpm"></span>
-                </span>
-                <label class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
-                  <input type="checkbox" id="fan-model-toggle" class="peer sr-only" checked>
-                  <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
-                </label>
-              </div>
-              <div class="mt-2 flex items-center gap-2">
-                <button class="fan-dec inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg border border-line bg-surface text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed h-7 w-7" data-fan="fan" data-step="-13" aria-label="Decrease Model fan"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
-                <div class="h-1 w-full rounded-full bg-line-soft overflow-hidden h-1.5 flex-1"><div class="h-full rounded-full transition-[width] duration-500 bg-accent" id="fan-model-bar" style="width:0%"></div></div>
-                <button class="fan-inc inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg border border-line bg-surface text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed h-7 w-7" data-fan="fan" data-step="13" aria-label="Increase Model fan"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
-              </div>
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-2">
+              <i class="bi bi-fan text-fg-muted shrink-0" aria-hidden="true"></i>
+              <span class="text-xs text-fg w-16 shrink-0 truncate">Model</span>
+              <input type="range" min="0" max="100" step="5" value="0" id="fan-model-range" data-fan="fan" class="fan-range flex-1 min-w-0 cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-line [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent" aria-label="Model fan speed">
+              <span class="font-mono text-xs tabular-nums leading-none text-fg shrink-0 w-9 text-right" id="fan-model-value">--%</span>
+              <span class="text-[10px] text-fg-muted shrink-0 tabular-nums" id="fan-model-rpm"></span>
+              <label class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
+                <input type="checkbox" id="fan-model-toggle" class="peer sr-only">
+                <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
+              </label>
             </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <i class="bi bi-fan text-fg-muted" aria-hidden="true"></i>
-                <span class="text-xs text-fg">Assistance</span>
-                <span class="ml-auto flex items-baseline gap-1">
-                  <span class="font-mono text-base tabular-nums leading-none text-fg-soft" id="fan-aux-value">--%</span>
-                  <span class="text-xs text-fg-muted font-normal" id="fan-aux-rpm"></span>
-                </span>
-                <label class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
-                  <input type="checkbox" id="fan-aux-toggle" class="peer sr-only">
-                  <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
-                </label>
-              </div>
-              <div class="mt-2 flex items-center gap-2">
-                <button class="fan-dec inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg border border-line bg-surface text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed h-7 w-7" data-fan="aux_fan" data-step="-13" aria-label="Decrease Assistance fan"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
-                <div class="h-1 w-full rounded-full bg-line-soft overflow-hidden h-1.5 flex-1"><div class="h-full rounded-full transition-[width] duration-500 bg-accent" id="fan-aux-bar" style="width:0%"></div></div>
-                <button class="fan-inc inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg border border-line bg-surface text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed h-7 w-7" data-fan="aux_fan" data-step="13" aria-label="Increase Assistance fan"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
-              </div>
+            <div class="flex items-center gap-2">
+              <i class="bi bi-fan text-fg-muted shrink-0" aria-hidden="true"></i>
+              <span class="text-xs text-fg w-16 shrink-0 truncate">Assistance</span>
+              <input type="range" min="0" max="100" step="5" value="0" id="fan-aux-range" data-fan="aux_fan" class="fan-range flex-1 min-w-0 cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-line [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent" aria-label="Assistance fan speed">
+              <span class="font-mono text-xs tabular-nums leading-none text-fg shrink-0 w-9 text-right" id="fan-aux-value">--%</span>
+              <span class="text-[10px] text-fg-muted shrink-0 tabular-nums" id="fan-aux-rpm"></span>
+              <label class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
+                <input type="checkbox" id="fan-aux-toggle" class="peer sr-only">
+                <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
+              </label>
             </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <i class="bi bi-fan text-fg-muted" aria-hidden="true"></i>
-                <span class="text-xs text-fg">Case</span>
-                <span class="ml-auto flex items-baseline gap-1">
-                  <span class="font-mono text-base tabular-nums leading-none text-fg-soft" id="fan-case-value">--%</span>
-                  <span class="text-xs text-fg-muted font-normal" id="fan-case-rpm"></span>
-                </span>
-                <label class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
-                  <input type="checkbox" id="fan-case-toggle" class="peer sr-only" checked>
-                  <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
-                </label>
-              </div>
-              <div class="mt-2 flex items-center gap-2">
-                <button class="fan-dec inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg border border-line bg-surface text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed h-7 w-7" data-fan="box_fan" data-step="-13" aria-label="Decrease Case fan"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
-                <div class="h-1 w-full rounded-full bg-line-soft overflow-hidden h-1.5 flex-1"><div class="h-full rounded-full transition-[width] duration-500 bg-accent" id="fan-case-bar" style="width:0%"></div></div>
-                <button class="fan-inc inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg border border-line bg-surface text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed h-7 w-7" data-fan="box_fan" data-step="13" aria-label="Increase Case fan"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
-              </div>
+            <div class="flex items-center gap-2">
+              <i class="bi bi-fan text-fg-muted shrink-0" aria-hidden="true"></i>
+              <span class="text-xs text-fg w-16 shrink-0 truncate">Case</span>
+              <input type="range" min="0" max="100" step="5" value="0" id="fan-case-range" data-fan="box_fan" class="fan-range flex-1 min-w-0 cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-line [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent" aria-label="Case fan speed">
+              <span class="font-mono text-xs tabular-nums leading-none text-fg shrink-0 w-9 text-right" id="fan-case-value">--%</span>
+              <span class="text-[10px] text-fg-muted shrink-0 tabular-nums" id="fan-case-rpm"></span>
+              <label class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
+                <input type="checkbox" id="fan-case-toggle" class="peer sr-only">
+                <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
+              </label>
             </div>
           </div>
 
@@ -516,7 +488,7 @@
               <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-fans" data-window="900">15m</button>
               <button class="chart-time-btn inline-flex items-center justify-center whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-chart="chart-fans" data-window="3600">1h</button>
           </div>
-          <canvas id="chart-fans" class="mt-2 w-full h-[160px]"></canvas>
+          <canvas id="chart-fans" class="mt-2 w-full flex-1 min-h-[160px]"></canvas>
         </div>
 
         <!-- Speed & Flow -->

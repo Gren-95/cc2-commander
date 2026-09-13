@@ -46,15 +46,27 @@ const CHIP_ACTIVE: StateDelta = {
   remove: 'bg-surface text-fg-soft border-line',
 };
 
+/**
+ * Selected, on a segmented picker.
+ *
+ * Only the text colour, because the fill behind the label supplies the background —
+ * adding `bg-accent` here would paint a second pill on top of the sliding one and the
+ * slide would be invisible under it.
+ */
+const SEGMENT_ACTIVE: StateDelta = {
+  add: 'text-white',
+  remove: 'text-fg-soft',
+};
+
 export const STATE_UTILITIES: Record<string, Record<string, StateDelta>> = {
   active: {
     'chart-time-btn': CHIP_ACTIVE,
-    'dist-btn': CHIP_ACTIVE,
+    'dist-btn': SEGMENT_ACTIVE,
     'file-source-tab': CHIP_ACTIVE,
     'list-sort-btn': CHIP_ACTIVE,
     'log-tab': CHIP_ACTIVE,
     'print-bed-btn': CHIP_ACTIVE,
-    'speed-btn': CHIP_ACTIVE,
+    'speed-btn': SEGMENT_ACTIVE,
     'temp-preset-btn': CHIP_ACTIVE,
     'timelapse-play-btn': CHIP_ACTIVE,
     'main-tab': {
