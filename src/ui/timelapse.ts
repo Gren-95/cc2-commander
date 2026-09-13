@@ -157,13 +157,27 @@ function _formatDuration(seconds: number): string {
   return h > 0 ? `${h}h${m}m` : `${m}m`;
 }
 
+/**
+ * Play a timelapse.
+ *
+ * `url` is what the printer reports — a bare path like
+ * `video/<name>.gcode<timestamp>.mp4`, with no scheme and no host. Assigning it to a
+ * `<video>` resolved it against the dashboard's own origin, which has nothing there:
+ * the element got a 404 whose body is not a video and reported
+ * `MEDIA_ERR_SRC_NOT_SUPPORTED — "Format error"`, blaming the format rather than the
+ * address. It goes through the service's proxy now, which fetches it from the printer
+ * and, crucially, gives it a content type the printer itself does not send.
+ */
 export function showTimelapsePlayer(url: string): void {
   const player = $('timelapse-player') as HTMLVideoElement;
   const container = $('timelapse-player-wrap');
   if (!player || !container) return;
 
-  player.src = url;
+  player.src = `/api/timelapse/video?file=${encodeURIComponent(url)}`;
   container.classList.remove('hidden');
+  // Autoplay is refused without a user gesture in some browsers, and the click that got
+  // here does not always count once an await has intervened. Controls are visible, so a
+  // refusal costs a second click rather than the feature.
   player.play().catch(() => {});
 }
 

@@ -594,6 +594,18 @@ export class StateStore extends EventEmitter {
         break;
       }
       case 1050: {
+        // **1050 answers with a TOKEN, not a url.** Probed read-only against a CC2 on
+        // firmware 02.01.00.00:
+        //
+        //     { "id": 59, "method": 1050, "result": { "error_code": 0, "token": "QHtL4s" } }
+        //
+        // So `result.url` is never present and this branch has never fired. It is left in
+        // place rather than deleted because 1051 (export) does appear to answer with one,
+        // and the two share this field — but nothing should rely on 1050 filling it.
+        //
+        // What the token is for is unknown; the timelapse player does not need it. A
+        // video comes down the ordinary `/download?X-Token=<printer password>&file_name=`
+        // endpoint, the same one gcode uses (see /api/timelapse/video in rest-api.ts).
         const errorCode = result.error_code as number | undefined;
         const url = result.url as string | undefined;
         if (errorCode === 0 && url) this.videoUrl = url;

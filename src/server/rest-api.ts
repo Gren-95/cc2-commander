@@ -112,6 +112,20 @@ async function evictOldCache(): Promise<void> {
   }
 }
 
+/**
+ * How a proxied file should be presented to the browser.
+ *
+ * A timelapse needs `video/mp4` and `inline` or a `<video>` element will not play it;
+ * everything else is a download. **The printer sends no `Content-Type` at all** — the
+ * header comes back `null` — so whatever this proxy does not set, nothing does, and the
+ * browser is left guessing. That is the whole reason a timelapse failed with
+ * `MEDIA_ERR_SRC_NOT_SUPPORTED` and the word "Format" in it.
+ */
+interface DownloadPresentation {
+  contentType: string;
+  inline: boolean;
+}
+
 async function handleFileDownload(
   res: ServerResponse,
   fileName: string,
@@ -119,6 +133,7 @@ async function handleFileDownload(
   source: string,
   isGcode: boolean,
   config: ServiceConfig,
+  presentation: DownloadPresentation = { contentType: 'application/octet-stream', inline: false },
 ): Promise<void> {
   // Try serving from cache first (gcode files only)
   if (isGcode) {
@@ -170,8 +185,10 @@ async function handleFileDownload(
       // Keep the socket alive during slow transfers
       proxyRes.socket?.setTimeout(120_000);
       res.writeHead(200, {
-        'Content-Type': 'application/octet-stream',
-        'Content-Disposition': `attachment; filename="${baseName}"`,
+        'Content-Type': presentation.contentType,
+        'Content-Disposition': presentation.inline
+          ? `inline; filename="${baseName}"`
+          : `attachment; filename="${baseName}"`,
         ...(proxyRes.headers['content-length']
           ? { 'Content-Length': proxyRes.headers['content-length'] }
           : {}),
@@ -1124,6 +1141,34 @@ export function createRestRouter(
 
       // Try cache first, then fall through to printer proxy
       void handleFileDownload(res, fileName, baseName, source, isGcode, config);
+      return;
+    }
+
+    /**
+     * Stream a timelapse video from the printer.
+     *
+     * The play button used to point a `<video>` at the bare path the printer reports —
+     * `video/<name>.mp4` — which has no host, so the browser resolved it against the
+     * dashboard, got this service's 404, and reported
+     * `MEDIA_ERR_SRC_NOT_SUPPORTED: Format error`: a 404 body is not a video, and the
+     * element blames the format rather than the address.
+     *
+     * The file is real and reachable; it comes down the same `/download` endpoint as a
+     * gcode, with the same token. What it does NOT come with is a content type, so this
+     * supplies one — without it the proxy would fail exactly as the 404 did.
+     */
+    if (url.startsWith('/api/timelapse/video') && req.method === 'GET') {
+      const fileName = new URL(url, 'http://localhost').searchParams.get('file');
+      if (!fileName) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Missing file parameter' }));
+        return;
+      }
+      const baseName = fileName.split('/').pop() || 'timelapse.mp4';
+      void handleFileDownload(res, fileName, baseName, 'local', false, config, {
+        contentType: 'video/mp4',
+        inline: true,
+      });
       return;
     }
 
