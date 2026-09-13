@@ -10,7 +10,8 @@ imported below so they load every session.
 Topic deep-dives are in `.agents/` and are **not** auto-loaded — open the relevant one
 on demand when working in that area:
 
-- `.agents/gates.md` — the gate command (which is what CI runs), why green means very
+- `.agents/gates.md` — the gate command (which is what CI runs; seven gates, two of them
+  test runners — `bun test` for logic and Playwright for the browser), why green means very
   little here, the printer boundary no gate can enforce, and why `/auto --parallel N`'s
   gate split is unnecessary in this repo (no e2e, no port-binding gate)
 - `.agents/architecture.md` — one MQTT connection fanned out to WebSocket / REST /

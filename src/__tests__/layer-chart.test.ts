@@ -14,7 +14,7 @@
  * verified by eye, not by a test.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'bun:test';
 import { computeDomain, selectVisibleLayers, type LayerTimePoint } from '../ui/layer-chart';
 
 const pt = (layer: number, duration: number): LayerTimePoint => ({

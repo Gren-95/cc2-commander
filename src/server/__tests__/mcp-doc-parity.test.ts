@@ -22,7 +22,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'bun:test';
 import type { MqttBridge } from '../mqtt-bridge.js';
 import type { StateStore } from '../state-store.js';
 import { createMcpServer } from '../mcp-server.js';

@@ -12,7 +12,7 @@
  * running process advertises is gone from disk.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import { wantsDocument } from '../server/spa-paths.js';
 
 describe('wantsDocument', () => {

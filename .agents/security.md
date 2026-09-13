@@ -131,6 +131,12 @@ get this right.
   an attacker"*, and it sat in a **public** repo. They now come from
   `VITE_ALLOWED_HOSTS` in the gitignored `.env`, defaulting to `localhost`.
 
+  **That setting is gone as of the Vite removal**, along with the dev server it
+  configured — `bun run dev` now serves through the service itself. The lesson it taught
+  is the part that outlives it, and it is restated because the next dev-only config will
+  be just as easy to miss: dev-only settings still get committed, and a hostname naming a
+  deployment is infrastructure detail in a public repo even though it is not a secret.
+
   Two things worth carrying forward. First, **dev-only config still gets committed** —
   `server.*` never reaches production, so it reads as harmless and escapes the review
   that a runtime setting would get. Second, **the values remain in git history and that

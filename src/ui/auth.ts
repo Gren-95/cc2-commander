@@ -128,12 +128,14 @@ export function handleUnauthorized(): void {
  */
 export function installUnauthorizedHandler(): void {
   const original = window.fetch;
-  window.fetch = async (...args: Parameters<typeof fetch>) => {
+  // `Object.assign` onto the original keeps the statics — `fetch.preconnect` exists and
+  // is part of the type, so a bare arrow function is not a `typeof fetch`.
+  window.fetch = Object.assign(async (...args: Parameters<typeof fetch>) => {
     const res = await original(...args);
     // The login route answers 401 on a wrong password; reloading there would throw the
     // user back to an empty form instead of showing them the message.
     const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request).url;
     if (res.status === 401 && !url.includes('/api/auth/')) handleUnauthorized();
     return res;
-  };
+  }, original);
 }

@@ -2,7 +2,7 @@
  * Dashboard card layout — the pure half.
  *
  * Deliberately free of DOM and localStorage so it can be unit-tested directly (the
- * vitest environment here is `node`, with no document). `ui/settings.ts` owns the
+ * test runner here is `bun test`, which has no document). `ui/settings.ts` owns the
  * storage and the rendering; everything that decides *what the layout is* lives here.
  *
  * THE SIDEBAR IS GONE

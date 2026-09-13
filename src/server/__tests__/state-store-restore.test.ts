@@ -14,7 +14,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach } from 'bun:test';
 import { StateStore } from '../state-store.js';
 import type { MqttBridge } from '../mqtt-bridge.js';
 

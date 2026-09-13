@@ -14,7 +14,7 @@
  * layer, so all of this runs without a server.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import {
   LOGIN_MAX_ATTEMPTS,
   LOGIN_WINDOW_MS,

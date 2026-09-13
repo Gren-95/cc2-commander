@@ -2,7 +2,7 @@
  * List sorting and filtering — the pure half (ELEG-49).
  *
  * Deliberately free of DOM and localStorage so it can be unit-tested directly (the
- * vitest environment here is `node`, with no document). `ui/list-controls.ts` owns the
+ * test runner here is `bun test`, which has no document). `ui/list-controls.ts` owns the
  * control bar, the storage and the event wiring; everything that decides *what the list
  * is* lives here.
  *

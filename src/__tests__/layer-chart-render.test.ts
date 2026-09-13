@@ -15,7 +15,7 @@
  * survived of `L63: 15.0s` was the `L`.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'bun:test';
 import { renderLayerTimeChart } from '../ui/layer-chart';
 import { FALLBACK_PALETTE } from '../ui/chart-palette';
 import type { PrinterState } from '../printer-state';
@@ -194,7 +194,7 @@ describe('chart colours', () => {
   it('takes every colour from the palette, never from a literal', () => {
     // The ELEG-34 regression: a hardcoded '#a0a0b8' or 'rgba(171,71,188,0.4)' here would
     // stay dark-on-dark in the light theme, and nothing else in this repo would notice.
-    // Under vitest there is no DOM, so chartPalette() returns FALLBACK_PALETTE and every
+    // Under `bun test` there is no DOM, so chartPalette() returns FALLBACK_PALETTE and every
     // assigned colour must be one of its values.
     const assigned = render(series)
       .filter((o) => o.op === 'set:fillStyle' || o.op === 'set:strokeStyle')

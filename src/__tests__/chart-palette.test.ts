@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'bun:test';
 import { resolvePalette, chartPalette, FALLBACK_PALETTE } from '../ui/chart-palette';
 import { resolveTheme, isThemeChoice } from '../ui/theme';
 

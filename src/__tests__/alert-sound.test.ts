@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import { alertForEvent } from '../ui/alert-sound';
 import { CRITICAL_EXCEPTIONS } from '../types';
 

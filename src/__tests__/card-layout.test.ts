@@ -8,7 +8,7 @@
  * worse failure than a crash because nothing announces it.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import {
   ALL_CARD_IDS,
   CARD_ICONS,

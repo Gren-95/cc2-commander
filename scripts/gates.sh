@@ -51,6 +51,7 @@ done
 
 failed=()
 passed=()
+skipped=()
 
 run() {
   local label="$1"
@@ -73,19 +74,33 @@ run 'biome ci (non-writing, as CI runs it)' bunx biome ci
 run 'typecheck: browser half (tsconfig.json)' bunx tsc
 run 'typecheck: service half (tsconfig.server.json)' bun run service:check
 # Dead-code check (ELEG-65). Neither typecheck complains about a module nothing
-# imports, and `vite build` tree-shakes it out SILENTLY — so an unreachable file
+# imports, and the bundler tree-shakes it out SILENTLY — so an unreachable file
 # survives looking perfectly legitimate. Four have been found that way, all by hand.
-# Scoped to `files` only: unused *exports* are noisy here because dashboard.ts
-# re-exports a barrel, and a check that cries wolf gets ignored. See .agents/gates.md.
+# Scoped to `files` only: unused *exports* are noisy here, and a check that cries wolf
+# gets ignored. See .agents/gates.md.
 run 'dead code (knip)' bunx knip --no-config-hints
-run 'build (vite)' bunx vite build
-# Vitest, not `bun test`. The suite leans on `vi.resetModules()` to re-evaluate modules
-# under different env — seven tests do — and bun:test has no equivalent. Vitest itself
-# runs fine under bun, so this is a deliberate stop, not an unfinished migration.
-run 'unit tests (vitest)' bunx vitest run
+run 'build (bun + tailwind cli)' bun scripts/build.ts
+run 'unit tests (bun test)' bun test src/__tests__ src/server/__tests__
+# The browser half. These six suites used to run under `@vitest-environment jsdom`;
+# they now run in Chromium, which is the whole reason the DOM assertions are worth
+# anything — jsdom does not implement `inert`, so the focus trap's central safety
+# property could only be asserted as "the attribute was set" and checked by hand.
+#
+# Needs a browser binary. Rather than fail a fresh checkout — or CI, whose workflow is a
+# protected file nobody has authorised adding an install step to — this SKIPS when no
+# browser is present and says so loudly. A skipped gate is not a passed one: the summary
+# below lists it separately so a green run cannot be mistaken for a covered one.
+if bunx playwright install --dry-run chromium >/dev/null 2>&1 && \
+   [ -d "${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}" ] && \
+   ls "${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}" 2>/dev/null | grep -q chromium; then
+  run 'browser tests (playwright)' bunx playwright test
+else
+  skipped+=('browser tests (playwright) — no browser; run `bunx playwright install chromium`')
+fi
 
 printf '\n\033[1m── gates ──\033[0m\n'
 for g in "${passed[@]:-}"; do [ -n "$g" ] && printf '\033[32m  ✓ %s\033[0m\n' "$g"; done
+for g in "${skipped[@]:-}"; do [ -n "$g" ] && printf '\033[33m  ⊘ %s\033[0m\n' "$g"; done
 for g in "${failed[@]:-}"; do [ -n "$g" ] && printf '\033[31m  ✗ %s\033[0m\n' "$g"; done
 
 if [ "${#failed[@]}" -gt 0 ]; then

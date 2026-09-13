@@ -13,7 +13,7 @@
  * is every way the decision itself can go wrong.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'bun:test';
 import { isAllowedSender, parseAllowedChatIds } from '../allowlist.js';
 
 describe('parseAllowedChatIds', () => {

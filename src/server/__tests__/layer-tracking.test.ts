@@ -16,7 +16,7 @@
  * `src/__tests__/layer-chart.test.ts`.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'bun:test';
 import { classifyLayerReport } from '../state-store.js';
 import { trailingLayerRun } from '../../types.js';
 

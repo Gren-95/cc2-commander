@@ -10,7 +10,7 @@
  * `emergency_stop`, `/api/snapshot` and `/api/stream`.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'bun:test';
 import { allowOriginFor, corsHeaders, parseCorsPolicy } from '../cors.js';
 
 describe('parseCorsPolicy', () => {

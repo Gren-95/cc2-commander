@@ -17,7 +17,7 @@
  *
  * ## Falls back rather than throwing
  *
- * There is no DOM under vitest (`environment: "node"`), and the render test in
+ * There is no DOM under `bun test`, and the render test in
  * `src/__tests__/layer-chart-render.test.ts` stubs `document` with nothing but
  * `getElementById`. Every lookup therefore degrades to the dark value, which keeps the
  * charts drawable in any environment and keeps that test meaningful.
@@ -121,7 +121,7 @@ export function resolvePalette(readVar: (name: string) => string | undefined): C
 export function chartPalette(): ChartPalette {
   if (cached) return cached;
   if (typeof document === 'undefined' || typeof getComputedStyle !== 'function') {
-    // No DOM — under vitest, or the render-test stub. Do not cache: a real document may
+    // No DOM — under `bun test`, or the render-test stub. Do not cache: a real document may
     // exist by the next call in a browser.
     return FALLBACK_PALETTE;
   }

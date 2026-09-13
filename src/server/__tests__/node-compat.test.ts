@@ -7,7 +7,7 @@
  * a route, so these are the tests standing between a shim bug and production.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'bun:test';
 import { Readable } from 'node:stream';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { runNodeHandler } from '../node-compat.js';
@@ -81,18 +81,18 @@ describe('runNodeHandler — buffered responses', () => {
   });
 
   it('reports headersSent, which several error paths branch on', async () => {
-    let before: boolean | null = null;
-    let after: boolean | null = null;
+    const seen: boolean[] = [];
 
     await runNodeHandler((_req, res) => {
-      before = res.headersSent;
+      seen.push(res.headersSent);
       res.writeHead(500);
-      after = res.headersSent;
+      seen.push(res.headersSent);
       res.end('x');
     }, new Request('http://localhost/api/thing'));
 
-    expect(before).toBe(false);
-    expect(after).toBe(true);
+    // Collected rather than assigned to two `let`s: TypeScript cannot see the callback
+    // run, so it narrows those to their initialiser and the comparison stops compiling.
+    expect(seen).toEqual([false, true]);
   });
 });
 

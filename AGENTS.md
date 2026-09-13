@@ -41,14 +41,19 @@ rule below.
 ```bash
 bun install
 cp .env.example .env       # set PRINTER_IP at minimum
-bun run dev                # vite on :5173 + the service on :8088, concurrently
-bun run dev:web            # frontend only
-bun run dev:service        # service only (bun --watch)
+bun run dev                # build, serve on :8088, rebuild+restart on any change
+bun run dev:service        # service only (bun --watch), against an existing dist/
 ```
 
-Bun ≥ 1.2.3. There is no Node, no pnpm, no tsx, no database and no container needed
-for development. Bun is the package manager, the TypeScript runtime *and* the HTTP
-server — see the front-door note in `.agents/architecture.md`.
+Bun ≥ 1.2.3, and `bunx playwright install chromium` once for the browser tests. There is
+no Node, no pnpm, no tsx, no Vite, no database and no container needed for development.
+Bun is the package manager, the TypeScript runtime, the bundler, the test runner **and**
+the HTTP server — see the front-door note in `.agents/architecture.md`.
+
+**There is one port in development now, not two.** The service serves the built SPA
+itself, so `bun run dev` builds `dist/` and restarts on change rather than running a
+separate vite server on :5173 that proxied back. Dev and production are the same shape;
+what is lost is hot module replacement, and the rebuild is ~550ms.
 
 ## Build / test / lint (run before finishing any change)
 
@@ -59,7 +64,9 @@ bun run gates --fix    # biome --write first, then the gates — commit what it 
 
 `bun run gates` is the one to run: `biome ci` (**non-writing**, as CI does it),
 `tsc` (the browser half), **`bun run service:check`** (the server + telegram half),
-**`knip`** (unreachable modules — ELEG-65), `vite build`, and `vitest run`. The
+**`knip`** (unreachable modules — ELEG-65), the build, `bun test`, and **`playwright
+test`** — the last needs a browser binary, so a fresh checkout runs
+`bunx playwright install chromium` once. The
 individual scripts still exist for a tight inner
 loop; details, traps and the known gaps are in
 [`.agents/gates.md`](.agents/gates.md) — the file `.agents/repo.json` names as `gatesDoc`.
@@ -161,6 +168,15 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
 - **The frontend is hand-written TypeScript + DOM.** No framework, no JSX, no
   component library: `src/main.ts` composes modules from `src/ui/*.ts`. Match the
   surrounding idiom rather than introducing a framework in one card.
+- **Tailwind is compiled by `@tailwindcss/cli`, not a bundler plugin, and that is
+  load-bearing.** `bun build` parses CSS but does not understand Tailwind v4: it warns
+  `invalid @ rule encountered: '@theme'`, drops the directives, **exits 0**, and emits a
+  stylesheet in which not one utility class is defined. A build that fails by handing you
+  an unstyled site is worse than one that stops, so `scripts/build.ts` runs the CLI and
+  joins the halves itself — and asserts every `url()` the result names actually exists,
+  because Tailwind's CLI does not rewrite or copy what it imports (the Bootstrap Icons
+  fonts are the case that bit).
+
 - **Styling is Tailwind utilities on the element. There is no stylesheet to edit.**
   `src/styles/main.css` is Tailwind's *configuration* — the palette, `@theme`,
   keyframes and a handful of base rules — and nothing else. Do not add component CSS
@@ -465,7 +481,9 @@ checkout.
 | Frontend entry | `src/main.ts`, `index.html` |
 | Frontend cards / views | `src/ui/*.ts` |
 | Shared types | `src/types.ts` |
-| Tests | `src/__tests__/**` |
+| Tests (logic, `bun test`) | `src/__tests__/**`, `src/server/__tests__/**` |
+| Tests (browser, Playwright) | `tests/browser/**` |
+| Frontend build / dev loop | `scripts/build.ts`, `scripts/dev.ts` |
 | systemd unit + installer | `contrib/` |
 | Roadmap | the **ELEG tracker** — there is no roadmap file |
 

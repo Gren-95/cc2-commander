@@ -7,7 +7,7 @@
  * tab was closed for part of it.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import {
   clampMinutes,
   clampTemp,

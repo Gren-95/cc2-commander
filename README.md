@@ -244,14 +244,14 @@ bun install
 bun run dev
 ```
 
-This starts both the backend service and Vite dev server. Open `http://localhost:5173`.
+This builds the frontend, starts the service, and rebuilds on change. Open
+`http://localhost:8088` — one port, the same shape as production.
 
 The dev server answers to `localhost` only. To reach it by another name — a machine
 hostname, a LAN address, a tunnel — list them in `.env` (which is gitignored), so that
 no environment-specific hostname is committed:
 
 ```bash
-VITE_ALLOWED_HOSTS=my-box.example.internal,10.0.0.5
 ```
 
 This is a **dev-server** setting: `vite build` ignores it, and production never runs vite.
