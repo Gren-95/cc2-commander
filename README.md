@@ -1,27 +1,27 @@
 # CC2 Commander
 
 A self-hosted web dashboard for the **Elegoo Centauri Carbon 2**. One Bun service holds
-the printer's single MQTT slot and fans it out — to browsers over a WebSocket, to
+the printer's single MQTT slot and fans it out: to browsers over a WebSocket, to
 Mainsail or Fluidd over a Moonraker-compatible API, and to Prometheus.
 
 ![The dashboard](docs/images/dashboard.png)
 
 ## What it does
 
-- **Live dashboard** — temperatures, fans, speed and flow, toolhead position, Canvas/AMS
+- **Live dashboard**: temperatures, fans, speed and flow, toolhead position, Canvas/AMS
   spools and the camera, pushed as the printer reports them.
-- **Print control** — start, pause, stop, move, home, temperature presets, LED,
+- **Print control**: start, pause, stop, move, home, temperature presets, LED,
   emergency stop. Controls that need an idle printer disable themselves when it isn't.
-- **Files** — browse local and USB storage with thumbnails, upload, print, delete.
-- **3D gcode preview** — Three.js toolpath with layer-follow and nozzle tracking.
-- **Filament dryer** — uses the printer's own heated bed, and the timer lives in the
+- **Files**: browse local and USB storage with thumbnails, upload, print, delete.
+- **3D gcode preview**: Three.js toolpath with layer-follow and nozzle tracking.
+- **Filament dryer**: uses the printer's own heated bed, and the timer lives in the
   *service*, so closing the tab cannot leave a hot bed with nothing to turn it off.
-- **History, reports, timelapse** — past prints, PDF reports with charts, video download.
-- **Telegram notifications** — print events, progress, camera snapshots.
-- **Moonraker & OctoPrint APIs** — point Mainsail, Fluidd, KlipperScreen or an OctoPrint
+- **History, reports, timelapse**: past prints, PDF reports with charts, video download.
+- **Telegram notifications**: print events, progress, camera snapshots.
+- **Moonraker & OctoPrint APIs**: point Mainsail, Fluidd, KlipperScreen or an OctoPrint
   client at it.
 - **Prometheus metrics** at `/api/metrics/prometheus`.
-- **Works on a phone** — below 700px the grid becomes a one-card focus rail. Installable
+- **Works on a phone**: below 700px the grid becomes a one-card focus rail. Installable
   as a PWA.
 
 <table>
@@ -70,7 +70,7 @@ bun run gates    # lint, typecheck, dead code, build, unit + browser tests
 ```
 
 There is also a container that keeps `node_modules`, the browsers and every generated
-directory off your machine — see **[docs/development.md](docs/development.md)**.
+directory off your machine. See **[docs/development.md](docs/development.md)**.
 
 ## Documentation
 
@@ -81,7 +81,7 @@ directory off your machine — see **[docs/development.md](docs/development.md)*
 | [Architecture](docs/architecture.md) | How the pieces fit, and where a change belongs |
 | [Protocol](docs/protocol.md) | The CC2 MQTT protocol, its quirks, zone detection, limits |
 | [Security](docs/security.md) | What an unauthenticated request can reach, and secrets |
-| [Gates](docs/gates.md) | What the checks prove — and what they do not |
+| [Gates](docs/gates.md) | What the checks prove, and what they do not |
 | [Testing](docs/testing.md) | How the suites are organised |
 | [Deployment](docs/deployment.md) | Why a merged commit is not a deployed one |
 | [Dependencies](docs/dependencies.md) | What is pinned, and why |
@@ -94,14 +94,15 @@ printers (Mars, Saturn) use SDCP over WebSocket and are **not** supported.
 
 ## Credits
 
-- [gcode-preview](https://github.com/remcoder/gcode-preview) — Three.js toolpath rendering
-- [elegoo-link](https://github.com/ELEGOO-3D/elegoo-link) — Elegoo's official C++ SDK
-- [elegoo-homeassistant](https://github.com/danielcherubini/elegoo-homeassistant) — CC2 protocol documentation
-- [Fluidd](https://github.com/fluidd-core/fluidd) — UI inspiration
-- [mqtt.js](https://github.com/mqttjs/MQTT.js) — MQTT client
+- [gcode-preview](https://github.com/remcoder/gcode-preview): Three.js toolpath rendering
+- [elegoo-link](https://github.com/ELEGOO-3D/elegoo-link): Elegoo's official C++ SDK
+- [elegoo-homeassistant](https://github.com/danielcherubini/elegoo-homeassistant): CC2 protocol documentation
+- [Fluidd](https://github.com/fluidd-core/fluidd): UI inspiration
+- [mqtt.js](https://github.com/mqttjs/MQTT.js): MQTT client
 
 Forked from [runnane/elegoo-web](https://github.com/runnane/elegoo-web).
 
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE), which carries both the upstream author's copyright and this
+fork's.
