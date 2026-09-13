@@ -15,6 +15,7 @@ import type { Object3D } from 'three';
 import type { PrinterState } from '../printer-state';
 import { $, fetchTimeout } from './helpers';
 import { chartPalette } from './chart-palette';
+import { positionSegmented } from './segmented';
 import { onThemeChange } from './theme';
 
 /** Internal fields of WebGLPreview we need to access to stop the animate loop */
@@ -28,7 +29,15 @@ let loadedFile = '';
 let loading = false;
 let lastEndLayer = -1;
 let followMode = localStorage.getItem('gcode-follow') !== 'false';
-let singleLayerMode = localStorage.getItem('gcode-single-layer') !== 'false';
+/*
+ * Stacked unless explicitly asked otherwise.
+ *
+ * This read `!== 'false'`, so an absent key meant single-layer ON — the opposite of what
+ * the card actually rendered, and the opposite of what anyone wants on first open: a
+ * preview exists to show the model, and one slice of a benchy is not a benchy. Anyone
+ * who turned it on has `'true'` stored and keeps it.
+ */
+let singleLayerMode = localStorage.getItem('gcode-single-layer') === 'true';
 /** Track last known printer file so we auto-load when print starts */
 let lastPrinterFile = '';
 
@@ -238,7 +247,10 @@ export function renderGcodePreview(state: PrinterState): void {
 
     // Sync slider
     const slider = $('gcode-layer-slider') as HTMLInputElement | null;
-    if (slider) slider.value = String(currentLayer);
+    if (slider) {
+      slider.value = String(currentLayer);
+      updateLayerReadout();
+    }
   } else if (isPrinting && nozzleMesh?.visible) {
     // Re-render to show updated nozzle position (lightweight, no geometry rebuild)
     lightRender();
@@ -396,6 +408,7 @@ export async function loadGcode(filename: string, source = 'local'): Promise<voi
     if (slider) {
       slider.max = String(totalLayers);
       slider.value = String(totalLayers);
+      updateLayerReadout();
     }
 
     // Show total layers
@@ -407,6 +420,38 @@ export async function loadGcode(filename: string, source = 'local'): Promise<voi
     loading = false;
     if (loadBtn) loadBtn.disabled = false;
   }
+}
+
+/**
+ * Write the layer readout from the slider.
+ *
+ * `updateInfo` only runs when a printer status frame arrives, so with no printer — a
+ * file opened by hand, or the service offline — the Layer row sat blank however far you
+ * scrubbed. The slider knows both numbers on its own; nothing about them needs the
+ * machine.
+ */
+function updateLayerReadout(): void {
+  const infoEl = document.getElementById('gcode-preview-info');
+  const slider = document.getElementById('gcode-layer-slider') as HTMLInputElement | null;
+  if (!infoEl || !slider || !preview) return;
+  infoEl.textContent = `${slider.value}/${slider.max}`;
+}
+
+/** Reflect `followMode` in the switch without firing its change handler. */
+function setFollowChecked(on: boolean): void {
+  const box = document.getElementById('btn-gcode-follow') as HTMLInputElement | null;
+  if (box) box.checked = on;
+}
+
+/** Move the segmented fill to whichever view is selected. */
+function syncViewButtons(): void {
+  for (const btn of document.querySelectorAll<HTMLElement>('[data-single]')) {
+    toggleState(btn, 'active', (btn.dataset.single === '1') === singleLayerMode);
+  }
+  const track = document
+    .querySelector<HTMLElement>('[data-single]')
+    ?.closest<HTMLElement>('.segmented');
+  if (track) positionSegmented(track);
 }
 
 /** Update the info bar below the 3D view */
@@ -429,11 +474,19 @@ function updateInfo(state: PrinterState): void {
   const progress = s?.machine_status?.progress ?? 0;
   const displayedLayer = preview.endLayer ?? preview.countLayers;
 
-  if (isPrinting) {
-    const layerLabel = singleLayerMode ? `Showing ${displayedLayer}` : `Layer ${currentLayer}`;
-    infoEl.textContent = `${layerLabel}/${totalLayer} · Z: ${zPos.toFixed(1)}mm · ${progress}%`;
-  } else {
-    infoEl.textContent = `Layer ${displayedLayer}/${preview.countLayers}`;
+  /*
+   * The numbers only. The row is labelled "Layer" now, so repeating the word here both
+   * duplicated it and overflowed a 64px cell — the text rendered underneath the slider
+   * and read as missing. Z and progress moved to the status line below, which has the
+   * width for them and is where the file name already lives.
+   */
+  const shown = isPrinting && !singleLayerMode ? currentLayer : displayedLayer;
+  infoEl.textContent = `${shown}/${totalLayer || preview.countLayers}`;
+
+  const statusEl = document.getElementById('gcode-preview-status');
+  if (statusEl && loadedFile) {
+    const detail = isPrinting ? ` · Z ${zPos.toFixed(1)}mm · ${progress}%` : '';
+    statusEl.textContent = `${preview.countLayers} layers · ${loadedFile}${detail}`;
   }
 }
 
@@ -452,6 +505,11 @@ export function bindGcodePreviewControls(): void {
   // the placeholder stacked under it — taller than before the placeholder existed.
   setPreviewEmpty(true);
 
+  // The controls start from the stored modes rather than from whatever the markup
+  // happens to mark active — they disagreed before, and nothing reconciled them.
+  syncViewButtons();
+  setFollowChecked(followMode);
+
   // Layer slider
   const slider = $('gcode-layer-slider') as HTMLInputElement | null;
   if (slider) {
@@ -463,9 +521,9 @@ export function bindGcodePreviewControls(): void {
       preview.endLayer = val;
       lastEndLayer = val;
       preview.render();
+      updateLayerReadout();
 
-      const followBtn = $('btn-gcode-follow');
-      if (followBtn) toggleState(followBtn, 'active', false);
+      setFollowChecked(false);
 
       if (preview) {
         preview.singleLayerMode = singleLayerMode;
@@ -474,13 +532,20 @@ export function bindGcodePreviewControls(): void {
     });
   }
 
-  // Single layer toggle button
-  const singleBtn = $('btn-gcode-single-layer');
-  if (singleBtn) {
-    singleBtn.addEventListener('click', () => {
-      singleLayerMode = !singleLayerMode;
+  /*
+   * View: stacked or single, as a segmented picker.
+   *
+   * It was one button that flipped a boolean and called `toggleState(btn, 'active', …)`.
+   * That adds a bare `.active` class, and with the stylesheet gone nothing maps it to a
+   * utility — measured, the computed style was identical on and off, so the control gave
+   * no clue which mode you were in. Two named positions say it without needing a state
+   * to be styled at all.
+   */
+  for (const btn of document.querySelectorAll<HTMLElement>('[data-single]')) {
+    btn.addEventListener('click', () => {
+      singleLayerMode = btn.dataset.single === '1';
       localStorage.setItem('gcode-single-layer', String(singleLayerMode));
-      toggleState(singleBtn, 'active', singleLayerMode);
+      syncViewButtons();
       if (preview) {
         preview.singleLayerMode = singleLayerMode;
         preview.render();
@@ -488,17 +553,14 @@ export function bindGcodePreviewControls(): void {
     });
   }
 
-  // Follow toggle button
-  const followBtn = $('btn-gcode-follow');
-  if (followBtn) {
-    followBtn.addEventListener('click', () => {
-      followMode = !followMode;
+  // Follow, as a switch. Same reasoning: a checkbox shows its own state.
+  const followBox = $('btn-gcode-follow') as HTMLInputElement | null;
+  if (followBox) {
+    followBox.addEventListener('change', () => {
+      followMode = followBox.checked;
       localStorage.setItem('gcode-follow', String(followMode));
-      toggleState(followBtn, 'active', followMode);
-      if (followMode && preview) {
-        // Reset so the render loop picks up the current print layer
-        lastEndLayer = -1;
-      }
+      // Reset so the render loop picks up the current print layer.
+      if (followMode) lastEndLayer = -1;
     });
   }
 
@@ -530,6 +592,7 @@ export function bindGcodePreviewControls(): void {
         if (slider) {
           slider.max = String(preview.countLayers);
           slider.value = String(preview.countLayers);
+          updateLayerReadout();
         }
         const statusEl = $('gcode-preview-status');
         if (statusEl) statusEl.textContent = `${preview.countLayers} layers · ${file.name}`;

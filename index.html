@@ -334,24 +334,41 @@
         <!-- Gcode Preview -->
         <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="gcode-preview-card">
           <div class="card-header flex items-center justify-between mb-3 @max-[420px]:flex-wrap @max-[420px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
-            <h3><i class="bi bi-bounding-box bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> G-code preview</h3>
-            <div class="gcode-preview-actions flex gap-1 @max-[420px]:flex-wrap @max-[420px]:min-w-0">
-              <button id="btn-gcode-follow" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed active" title="Follow print progress"><i class="bi bi-geo-alt bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Follow</button>
-              <button id="btn-gcode-single-layer" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed active" title="Show only current layer"><i class="bi bi-search bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Single layer</button>
-              <button id="btn-load-gcode" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Load gcode file"><i class="bi bi-folder2-open bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Load</button>
+            <h3><i class="bi bi-bounding-box bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i> G-code preview</h3>
+            <div class="flex items-center gap-1.5">
+              <button id="btn-load-gcode" class="inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg border border-line bg-surface text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Load a .gcode file" aria-label="Load a gcode file"><i class="bi bi-folder2-open" aria-hidden="true"></i></button>
               <input type="file" id="gcode-file-input" accept=".gcode,.gco,.g" style="display:none">
-              <button id="btn-reset-layer-data" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Reset layer duration data"><i class="bi bi-arrow-counterclockwise bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Reset</button>
+              <button id="btn-reset-layer-data" class="inline-flex items-center justify-center shrink-0 h-8 w-8 rounded-lg border border-line bg-surface text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Reset layer duration data" aria-label="Reset layer duration data"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i></button>
             </div>
           </div>
           <div class="relative flex-1 min-h-[240px] flex flex-col max-[700px]:max-w-full">
             <canvas id="gcode-preview-canvas" class="w-full flex-1 min-h-[240px] block rounded-[4px]"></canvas>
             <div class="flex flex-col items-center justify-center gap-2 px-4 py-8 text-center text-xs text-fg-muted [&>i]:text-2xl [&>i]:opacity-40" id="gcode-preview-empty"><i class="bi bi-box" aria-hidden="true"></i>No G-code loaded</div>
-            <div id="gcode-preview-status" class="absolute top-2 left-2 text-[11px] text-fg-soft bg-[rgba(0,_0,_0,_0.5)] [padding:2px_8px] rounded-[4px] pointer-events-none empty:hidden"></div>
           </div>
-          <div class="[padding:4px_0]">
-            <input type="range" id="gcode-layer-slider" min="1" max="1" value="1" class="w-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-line [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent">
-            <div id="gcode-preview-info" class="text-[11px] text-fg-soft text-center [padding:2px_0] empty:hidden"></div>
+          <div class="flex items-center gap-3 mt-3">
+            <span class="text-xs text-fg-muted w-12 shrink-0">Layer</span>
+            <input type="range" id="gcode-layer-slider" min="1" max="1" value="1" class="flex-1 min-w-0 cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-line [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent" aria-label="Layer">
+            <span id="gcode-preview-info" class="font-mono text-xs tabular-nums leading-none text-fg-soft shrink-0 w-20 text-right"></span>
           </div>
+
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-2 mt-2">
+            <span class="text-xs text-fg-muted w-12 shrink-0">View</span>
+            <div class="segmented relative inline-flex items-center rounded-full bg-input ring-1 ring-line p-0.5">
+              <div class="segmented-fill pointer-events-none absolute inset-y-0.5 left-0 rounded-full bg-accent [transition:transform_180ms_ease,width_180ms_ease] motion-reduce:[transition:none]"></div>
+              <button id="btn-gcode-stacked" class="segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5 active text-white" data-single="0">Stacked</button>
+              <button id="btn-gcode-single-layer" class="segmented-btn relative z-[1] inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-medium text-fg-soft cursor-pointer transition-colors pointer-coarse:min-h-9 pointer-coarse:px-3.5" data-single="1">Single</button>
+            </div>
+            <label class="ml-auto flex items-center gap-2 cursor-pointer">
+              <span class="text-xs text-fg-muted">Follow</span>
+              <span class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
+                <input type="checkbox" id="btn-gcode-follow" class="peer sr-only">
+                <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
+              </span>
+            </label>
+          </div>
+
+          <div id="gcode-preview-status" class="mt-2 text-[11px] text-fg-muted truncate"></div>
+
           <div class="mt-3 border-t border-line pt-2">
             <canvas id="chart-layer-time" class="w-full h-40 block"></canvas>
           </div>
