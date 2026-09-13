@@ -56,7 +56,7 @@
       -->
       <h1 class="" aria-label="CC2 Commander">
         <span class="max-[700px]:hidden" aria-hidden="true">CC2 Commander</span>
-        <span class="hidden max-[700px]:inline" aria-hidden="true">Commander</span>
+        <span class="min-[701px]:hidden" aria-hidden="true">Commander</span>
       </h1>
       <span id="printer-name" class="text-[11px] text-fg-soft max-[700px]:hidden"></span>
     </div>
@@ -82,7 +82,7 @@
         <button class="svc-header-badge inline-flex items-center [gap:6px] [padding:4px_10px] rounded-[12px] border border-line bg-input text-fg-soft text-[11px] font-semibold cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:bg-hover hover:border-fg-muted" id="svc-header-badge">
           <i class="bi max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0] text-[13px] leading-[1] [.svc-header-badge.svc-printer-connected_&]:text-ok [.svc-header-badge.svc-printer-connecting_&]:text-warn [.svc-header-badge.svc-printer-disconnected_&]:text-bad" id="svc-printer-icon" aria-hidden="true"></i>
           <span id="svc-printer-state" class="font-semibold max-[700px]:hidden [.svc-header-badge.svc-printer-connecting_&]:text-warn [.svc-header-badge.svc-printer-disconnected_&]:text-bad"></span>
-          <span id="svc-header-dots" class="inline-flex [gap:3px] items-center"></span>
+          <span id="svc-header-dots" class="hidden min-[701px]:inline-flex [gap:3px] items-center"></span>
           <span id="svc-header-count">--</span>
         </button>
         <div class="hidden absolute top-[calc(100%_+_8px)] right-0 w-80 bg-card border border-line rounded-card shadow-float z-[200] overflow-hidden" id="svc-dropdown">
