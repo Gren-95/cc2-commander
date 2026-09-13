@@ -323,3 +323,83 @@ describe('isWellFormedHash', () => {
     expect(isWellFormedHash('')).toBe(false);
   });
 });
+
+describe('signed sessions (AUTH_SECRET)', () => {
+  const TTL = { absoluteTtlMs: 30 * 24 * 3600_000, idleTtlMs: 7 * 24 * 3600_000 };
+  const SECRET = 'a-long-random-signing-secret';
+
+  it('survives a restart: a fresh store believes a token it has never seen', () => {
+    const before = new SessionStore(TTL, SECRET);
+    const { token } = before.create();
+    // A restart is exactly this — a new process with an empty map.
+    const after = new SessionStore(TTL, SECRET);
+    expect(after.validate(token)).not.toBeNull();
+  });
+
+  it('without a secret, a restart signs you out — the behaviour it replaces', () => {
+    const before = new SessionStore(TTL);
+    const { token } = before.create();
+    expect(new SessionStore(TTL).validate(token)).toBeNull();
+  });
+
+  it('refuses a token signed with a different secret', () => {
+    // Rotating AUTH_SECRET is the documented way to sign out everywhere.
+    const { token } = new SessionStore(TTL, SECRET).create();
+    expect(new SessionStore(TTL, 'a-different-secret').validate(token)).toBeNull();
+  });
+
+  it('refuses a tampered payload', () => {
+    // The whole point: the payload carries the issue time, so forging an older or newer
+    // one must not verify.
+    const { token } = new SessionStore(TTL, SECRET).create();
+    const [payload, sig] = token.split('.');
+    const forged = Buffer.from(JSON.stringify({ iat: Date.now(), n: 'x' })).toString('base64url');
+    expect(new SessionStore(TTL, SECRET).validate(`${forged}.${sig}`)).toBeNull();
+    expect(payload).not.toBe(forged);
+  });
+
+  it('refuses a token with no signature at all', () => {
+    const { token } = new SessionStore(TTL, SECRET).create();
+    expect(new SessionStore(TTL, SECRET).validate(token.split('.')[0])).toBeNull();
+    expect(new SessionStore(TTL, SECRET).validate('nonsense')).toBeNull();
+    expect(new SessionStore(TTL, SECRET).validate('nonsense.signature')).toBeNull();
+  });
+
+  it('still honours the absolute cap across a restart', () => {
+    const short = { absoluteTtlMs: 1000, idleTtlMs: 1000 };
+    const { token } = new SessionStore(short, SECRET).create(Date.now() - 5000);
+    // Issued five seconds ago with a one-second cap: rehydrating must not resurrect it.
+    expect(new SessionStore(short, SECRET).validate(token)).toBeNull();
+  });
+
+  it('mints a different token for two logins in the same millisecond', () => {
+    const store = new SessionStore(TTL, SECRET);
+    const now = Date.now();
+    expect(store.create(now).token).not.toBe(store.create(now).token);
+  });
+
+  it('signing out actually signs out, even though the signature stays valid', () => {
+    // The trap: deleting the session does nothing on its own, because `rehydrate` would
+    // verify the signature and hand the token straight back. A logout button that does
+    // not log out is the one outcome this must never have.
+    const store = new SessionStore(TTL, SECRET);
+    const { token } = store.create();
+    store.revoke(token);
+    expect(store.validate(token)).toBeNull();
+  });
+
+  it('signing out everywhere refuses tokens this process never issued', () => {
+    // `revokeAll` cannot list signed tokens it has not seen, so it refuses by issue time.
+    const issued = new SessionStore(TTL, SECRET).create(Date.now() - 1000).token;
+    const store = new SessionStore(TTL, SECRET);
+    store.revokeAll();
+    expect(store.validate(issued)).toBeNull();
+  });
+
+  it('a session created after signing out everywhere still works', () => {
+    const store = new SessionStore(TTL, SECRET);
+    store.revokeAll();
+    const { token } = store.create();
+    expect(store.validate(token)).not.toBeNull();
+  });
+});

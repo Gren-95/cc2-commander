@@ -34,7 +34,7 @@
  * hot nozzle.
  */
 
-import { type ScryptOptions, randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
+import { type ScryptOptions, createHmac, randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 
 /** A minted session. The token is the credential; everything else is bookkeeping. */
@@ -135,26 +135,125 @@ export class LoginThrottle {
 /* ── Sessions ────────────────────────────────────────────────────────── */
 
 /**
- * Live sessions, in memory only.
+ * Sign a payload so a token can be trusted without the server remembering it.
  *
- * Deliberately not persisted. A session token on disk is a credential at rest, in a
- * `DATA_DIR` that this same service serves reports and camera stills out of; the cost of
- * not persisting is that a restart asks for the password again, which for a service that
- * restarts on deploy is the correct trade.
+ * HMAC-SHA256 with `AUTH_SECRET`. Compared in constant time, because a byte-by-byte
+ * comparison that returns early leaks where the first difference is, and a signature is
+ * exactly the value an attacker gets unlimited attempts at.
+ */
+function sign(payload: string, secret: string): string {
+  return createHmac('sha256', secret).update(payload).digest('base64url');
+}
+
+function verifySignature(payload: string, signature: string, secret: string): boolean {
+  const expected = Buffer.from(sign(payload, secret), 'base64url');
+  const actual = Buffer.from(signature, 'base64url');
+  // `timingSafeEqual` throws on a length mismatch, which is itself an answer — check
+  // first rather than letting the throw do it.
+  return expected.length === actual.length && timingSafeEqual(expected, actual);
+}
+
+/**
+ * Live sessions, in memory — plus, when `AUTH_SECRET` is set, tokens that can be
+ * believed again after a restart.
+ *
+ * Sessions were memory-only and nothing was persisted, on the reasoning that a session
+ * token on disk is a credential at rest in a `DATA_DIR` this same service serves camera
+ * stills out of. That reasoning still holds and nothing is written to disk now either.
+ *
+ * What changed is that a token can *carry* its own claim. With a secret configured,
+ * `create` mints `<payload>.<hmac>`; `validate` falls back to checking that signature
+ * when the token is not in memory, and rehydrates the session. A restart therefore no
+ * longer signs everyone out — which for a service that restarts on every deploy was a
+ * daily annoyance rather than a security property.
+ *
+ * **The trade, stated plainly.** `revoke` and `revokeAll` clear memory, so within a
+ * running process they work as before. A signed token revoked and then replayed *after*
+ * a restart would be honoured again, because nothing persists the revocation. Signing
+ * out everywhere for real means rotating `AUTH_SECRET`, which invalidates every
+ * outstanding token at once. Without a secret, behaviour is exactly what it was.
  */
 export class SessionStore {
   private readonly sessions = new Map<string, Session>();
 
-  constructor(private readonly config: Pick<AuthConfig, 'absoluteTtlMs' | 'idleTtlMs'>) {}
+  /**
+   * Signed tokens that have been logged out.
+   *
+   * Needed because a signed token proves only that we issued it — deleting it from
+   * `sessions` does nothing, since `rehydrate` would verify the signature and hand it
+   * straight back. Without this, pressing "sign out" left the token working, which is
+   * the one thing a logout button must not do.
+   *
+   * In memory, like the sessions themselves. A restart forgets these, so a token
+   * revoked before a restart works again after it; rotating `AUTH_SECRET` is the
+   * durable answer, and it is what the logs and the README say to do.
+   */
+  private readonly revoked = new Set<string>();
+
+  /** Tokens issued at or before this are refused wholesale. `revokeAll` sets it. */
+  private revokedBefore = 0;
+
+  constructor(
+    private readonly config: Pick<AuthConfig, 'absoluteTtlMs' | 'idleTtlMs'>,
+    /** `AUTH_SECRET`. Empty keeps the old memory-only behaviour. */
+    private readonly secret = '',
+  ) {}
 
   create(now = Date.now()): Session {
     const session: Session = {
-      token: randomBytes(TOKEN_BYTES).toString('base64url'),
+      token: this.mintToken(now),
       createdAt: now,
       lastSeenAt: now,
     };
     this.sessions.set(session.token, session);
     return session;
+  }
+
+  /**
+   * An opaque random token, or a signed one carrying its own issue time.
+   *
+   * The nonce is not decoration: without it two logins in the same millisecond would
+   * produce the same token, and a token is supposed to identify one session.
+   */
+  private mintToken(now: number): string {
+    const random = randomBytes(TOKEN_BYTES).toString('base64url');
+    if (!this.secret) return random;
+    const payload = Buffer.from(JSON.stringify({ iat: now, n: random })).toString('base64url');
+    return `${payload}.${sign(payload, this.secret)}`;
+  }
+
+  /**
+   * Rebuild a session from a signed token this process has never seen.
+   *
+   * Only the ABSOLUTE cap is enforced here. The idle clock restarts, because the token
+   * carries the time it was issued and not the last time it was used — tracking that
+   * statelessly would mean re-issuing the cookie on every request. An idle timeout
+   * exists to close an abandoned browser, and restarting its clock at a service restart
+   * is the smaller compromise; the absolute cap, which is the one that bounds how long a
+   * stolen token is worth anything, is still honoured exactly.
+   */
+  private rehydrate(token: string, now: number): Session | null {
+    if (!this.secret) return null;
+    const dot = token.lastIndexOf('.');
+    if (dot <= 0) return null;
+
+    if (this.revoked.has(token)) return null;
+
+    const payload = token.slice(0, dot);
+    if (!verifySignature(payload, token.slice(dot + 1), this.secret)) return null;
+
+    try {
+      const { iat } = JSON.parse(Buffer.from(payload, 'base64url').toString()) as { iat: number };
+      if (!Number.isFinite(iat) || now - iat >= this.config.absoluteTtlMs) return null;
+      if (iat <= this.revokedBefore) return null;
+      const session: Session = { token, createdAt: iat, lastSeenAt: now };
+      this.sessions.set(token, session);
+      return session;
+    } catch {
+      // A signature that verifies over a payload that will not parse means the secret is
+      // right and the format is not — a token from an older build. Treat it as invalid.
+      return null;
+    }
   }
 
   /**
@@ -165,7 +264,7 @@ export class SessionStore {
    */
   validate(token: string | undefined, now = Date.now()): Session | null {
     if (!token) return null;
-    const session = this.sessions.get(token);
+    const session = this.sessions.get(token) ?? this.rehydrate(token, now);
     if (!session) return null;
     if (this.hasExpired(session, now)) {
       this.sessions.delete(token);
@@ -183,12 +282,18 @@ export class SessionStore {
   }
 
   revoke(token: string | undefined): void {
-    if (token) this.sessions.delete(token);
+    if (!token) return;
+    this.sessions.delete(token);
+    // Forgetting a signed token is not enough — `rehydrate` would accept it again.
+    if (this.secret) this.revoked.add(token);
   }
 
   /** Log out everywhere. Used by the "sign out all devices" path. */
-  revokeAll(): void {
+  revokeAll(now = Date.now()): void {
     this.sessions.clear();
+    // Everything issued up to this instant is refused, which covers signed tokens this
+    // process has never seen and so cannot list.
+    this.revokedBefore = now;
   }
 
   prune(now = Date.now()): void {
@@ -270,6 +375,29 @@ export async function hashPassword(password: string): Promise<string> {
  * Returns false rather than throwing on a malformed hash: a typo in `AUTH_PASSWORD_HASH`
  * must fail closed (nobody logs in) rather than open.
  */
+/**
+ * Turn `AUTH_PASSWORD` into the hash the gate actually checks against.
+ *
+ * Config cannot do this itself: hashing is async and `loadConfig` is not, which is why
+ * `loadAuthConfig` left a comment saying "filled in by initAuth()" — for a function that
+ * did not exist. The result was the worst shape a security feature can take: setting
+ * `AUTH_PASSWORD` switched auth ON with an EMPTY hash, so every login failed and the
+ * dashboard locked its owner out with no error explaining it.
+ *
+ * Call once at startup, before anything can authenticate. A hash always wins over a
+ * plaintext password, so a deployment that has both keeps the stronger one.
+ */
+export async function initAuth(
+  auth: {
+    enabled: boolean;
+    passwordHash: string;
+  },
+  plainPassword: string,
+): Promise<void> {
+  if (!auth.enabled || auth.passwordHash || !plainPassword) return;
+  auth.passwordHash = await hashPassword(plainPassword);
+}
+
 /**
  * Does this look like a hash `verifyPassword` could ever accept?
  *

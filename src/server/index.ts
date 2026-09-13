@@ -31,7 +31,7 @@ import { createMoonrakerRouter } from './moonraker-compat.js';
 import { MoonrakerServer } from './moonraker-server.js';
 import { TelegramIntegration } from './telegram.js';
 import { StatePersistence } from './state-persistence.js';
-import { isWellFormedHash } from './auth.js';
+import { initAuth, isWellFormedHash } from './auth.js';
 import { DryerService } from './dryer.js';
 import { HomeAssistantService } from './home-assistant.js';
 import { PrintReportCollector } from './print-report-collector.js';
@@ -70,6 +70,23 @@ log.info(
 log.info(`Service: http://0.0.0.0:${config.servicePort}`);
 log.info(`Camera:  ${config.cameraEnabled ? config.cameraUrl : 'disabled'}`);
 log.info(`Data:    ${config.dataDir}`);
+// Hash `AUTH_PASSWORD` before anything can authenticate. A hash always wins over a
+// plaintext password, so a deployment carrying both keeps the stronger one.
+await initAuth(config.auth, config.auth.plainPassword);
+if (config.auth.enabled && !config.auth.sessionSecret) {
+  log.info(
+    'Auth:    sessions are memory-only — a restart signs every browser out. Set ' +
+      'AUTH_SECRET to a long random string to keep them (`bun run auth:secret` prints one).',
+  );
+}
+if (config.auth.enabled && config.auth.plainPassword) {
+  log.warn(
+    'AUTH_PASSWORD is a plaintext credential in a file. It works — it is hashed at ' +
+      'startup and never stored — but `bun run auth:secret` prints a hash to use instead, ' +
+      'and then the file holds nothing worth stealing.',
+  );
+}
+
 // A hash that cannot parse means nobody can ever log in, and the only symptom is a 401
 // with no explanation — see `isWellFormedHash` for the `.env` expansion that causes it.
 if (
@@ -176,7 +193,7 @@ const moonrakerHandler = createMoonrakerRouter(store, bridge, config);
  * `AUTH_PASSWORD` is hashed here rather than in `loadConfig` because hashing is async
  * and config loading is not — argon2 is deliberately slow, which is the point of it.
  */
-const sessions = new SessionStore(config.auth);
+const sessions = new SessionStore(config.auth, config.auth.sessionSecret);
 if (config.auth.enabled && !config.auth.passwordHash) {
   config.auth.passwordHash = await hashPassword(process.env.AUTH_PASSWORD ?? '');
 }

@@ -174,6 +174,8 @@ supplied by the publish workflow, not by `docker build`.
 | `AUTH_SESSION_HOURS` | `720` | Absolute session lifetime |
 | `AUTH_IDLE_HOURS` | `168` | How long a session survives unused |
 | `AUTH_ENABLED` | — | `false` keeps auth off even with a password set |
+| `AUTH_PASSWORD` | — | Plaintext password, hashed at startup and never stored. Use when you would rather not paste a hash; a hash wins if both are set |
+| `AUTH_SECRET` | — | Signs session tokens so a restart does not sign every browser out. Rotating it signs out everywhere |
 | `TELEGRAM_BOT_TOKEN` | — | Telegram bot token (enables notifications) |
 | `TELEGRAM_CHAT_ID` | — | Telegram chat ID — where notifications are **sent** |
 | `TELEGRAM_ALLOWED_CHAT_IDS` | `TELEGRAM_CHAT_ID` | Comma-separated numeric sender ids permitted to **issue** bot commands. Anyone else is ignored silently |
@@ -182,6 +184,30 @@ supplied by the publish workflow, not by `docker build`.
 | `HOMEASSISTANT_URL` | — | Home Assistant base URL, e.g. `http://homeassistant.local:8123` |
 | `HOMEASSISTANT_TOKEN` | — | Long-lived access token. **Read-only use** — this service issues nothing but `GET /api/states/…` |
 | `HOMEASSISTANT_ENTITIES` | — | Comma-separated entity ids, e.g. `sensor.dry_box_humidity,sensor.workshop_temperature` |
+
+### Passwords, and staying logged in
+
+Two ways to set the password, and you only need one:
+
+```bash
+bun run auth:secret          # prints AUTH_PASSWORD_HASH, AUTH_API_KEY and AUTH_SECRET
+```
+
+```ini
+AUTH_PASSWORD_HASH=scrypt\$65536\$8\$1\$…   # every $ BACKSLASH-ESCAPED — see below
+# — or, if you would rather not handle a hash —
+AUTH_PASSWORD=your-password                  # hashed at startup, never stored
+```
+
+**Escape every `$` in the hash.** Bun loads `.env` itself and expands `$VAR` — inside
+single quotes and double quotes alike. An scrypt hash is `scrypt$N$r$p$salt$key`, so an
+unescaped one arrives as the bare word `scrypt`, and every login answers 401 with nothing
+saying why. `auth:secret` prints it already escaped; paste that line as-is. The service
+also checks the shape at startup and logs an error naming this if it looks wrong.
+
+`AUTH_SECRET` signs session tokens so they are still valid after a restart — without it,
+every deploy signs every browser out. Rotating the secret is how you sign out everywhere;
+it invalidates every outstanding token at once.
 
 ### Home Assistant (ambient temperature and humidity)
 

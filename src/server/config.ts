@@ -21,6 +21,13 @@ export interface ServiceConfig {
   auth: {
     enabled: boolean;
     passwordHash: string;
+    /** `AUTH_PASSWORD`, hashed by `initAuth()` at startup and never stored. */
+    plainPassword: string;
+    /**
+     * `AUTH_SECRET`. Signs session tokens so they survive a restart; empty keeps
+     * sessions memory-only, which is what they were.
+     */
+    sessionSecret: string;
     apiKey: string;
     absoluteTtlMs: number;
     idleTtlMs: number;
@@ -102,10 +109,14 @@ function loadAuthConfig(): ServiceConfig['auth'] {
   const idleHours = parseInt(env('AUTH_IDLE_HOURS', '168'), 10) || 168;
 
   return {
-    // `passwordHash` is filled in by initAuth() when only AUTH_PASSWORD was given —
-    // hashing is async and config loading is not.
+    // `passwordHash` is filled in by `initAuth()` when only AUTH_PASSWORD was given —
+    // hashing is async and config loading is not. That function has to be CALLED; when
+    // it was only described in this comment, a plaintext password enabled auth with an
+    // empty hash and locked the owner out silently.
     enabled: !explicitlyOff && Boolean(hash || plain),
     passwordHash: hash,
+    plainPassword: plain,
+    sessionSecret: env('AUTH_SECRET', '').trim(),
     apiKey: env('AUTH_API_KEY', '').trim(),
     absoluteTtlMs: absoluteHours * HOURS,
     // An idle timeout longer than the absolute cap is a typo, not a policy; the cap wins

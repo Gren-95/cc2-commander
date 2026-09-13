@@ -71,6 +71,7 @@ const apiKeyOnly = process.argv.includes('--api-key-only');
 
 if (apiKeyOnly) {
   console.log(`AUTH_API_KEY=${mintApiKey()}`);
+console.log(`AUTH_SECRET=${mintApiKey()}`);
   process.exit(0);
 }
 
@@ -92,6 +93,7 @@ const hash = await hashPassword(password);
 console.log('\nAdd these to .env (which is gitignored — never commit them):\n');
 console.log(`AUTH_PASSWORD_HASH=${hash.replaceAll('$', String.raw`\$`)}`);
 console.log(`AUTH_API_KEY=${mintApiKey()}`);
+console.log(`AUTH_SECRET=${mintApiKey()}`);
 console.log(`
 Each '$' in the hash is BACKSLASH-ESCAPED, and it has to be. Bun loads .env itself and
 expands $VAR inside single quotes and double quotes alike — verified: A=scrypt$65536$8$1$x,
@@ -99,4 +101,7 @@ expands $VAR inside single quotes and double quotes alike — verified: A=scrypt
 scrypt$N$r$p$salt$hash, so an unescaped hash always loses everything after "scrypt" and
 every login answers 401 with nothing to say why.
 
-Paste the line exactly as printed. Restart the service for either to take effect.`);
+Paste the lines exactly as printed. Restart the service for them to take effect.
+
+AUTH_SECRET signs session tokens so a restart no longer signs every browser out. Rotating
+it is how you sign out everywhere: it invalidates every outstanding token at once.`);
