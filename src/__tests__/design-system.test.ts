@@ -75,15 +75,46 @@ describe('state deltas', () => {
   /** The pickers built on SEGMENTED_BTN rather than CHIP. */
   const SEGMENTED_BASES = ['dist-btn', 'speed-btn', 'chart-time-btn', 'file-source-tab'];
 
+  /**
+   * Standalone on/off buttons, which are not pickers at all.
+   *
+   * A picker's delta can be shared because every option sits on the same base. These sit
+   * on `BTN`, whose neutral text colour is `text-fg` — so `CHIP_ACTIVE` cannot be reused
+   * for them: it clears `text-fg-soft`, which these do not have, and its `text-white`
+   * would then sit beside a surviving `text-fg`. Two utilities, one property, no defined
+   * winner. Each carries a delta that clears the neutral it actually displaces.
+   */
+  const STANDALONE_BASES = ['debug-log-toggle'];
+
   it('every chip picker shares one delta', () => {
     const deltas = new Set(
       Object.entries(STATE_UTILITIES.active)
         .filter(
-          ([base]) => !['main-tab', 'subtab', 'progress-fill', ...SEGMENTED_BASES].includes(base),
+          ([base]) =>
+            ![
+              'main-tab',
+              'subtab',
+              'progress-fill',
+              ...SEGMENTED_BASES,
+              ...STANDALONE_BASES,
+            ].includes(base),
         )
         .map(([, d]) => `${d.add}|${d.remove}`),
     );
     expect([...deltas]).toHaveLength(1);
+  });
+
+  it('a standalone toggle clears the neutral its active state displaces', () => {
+    // The rule every delta obeys: for each property `add` touches, `remove` must clear
+    // the base's utility for that property.
+    for (const base of STANDALONE_BASES) {
+      const delta = STATE_UTILITIES.active[base];
+      expect(delta, `${base} has no active delta`).toBeDefined();
+      const properties = (u: string) => (u.startsWith('border-') ? 'border-color' : 'color');
+      const added = new Set(delta.add.split(' ').filter(Boolean).map(properties));
+      const removed = new Set(delta.remove.split(' ').filter(Boolean).map(properties));
+      expect([...added].sort()).toEqual([...removed].sort());
+    }
   });
 
   it('every segmented picker shares one delta, and it is not the chip one', () => {

@@ -42,10 +42,43 @@ export function isNavigation(method: string | undefined): boolean {
   return NAVIGATION_METHODS.has((method ?? 'GET').toUpperCase());
 }
 
+/**
+ * Prefixes that belong to a server, not to the app's router.
+ *
+ * A path under one of these is an API call to something that does not exist, and the
+ * right answer is 404. Without this, `GET /api/canvas` — a typo for `/api/status` —
+ * answered **200 with the dashboard's HTML**: `res.ok` is true, `res.json()` then throws
+ * a parse error about an unexpected `<`, and the actual problem (no such route) appears
+ * nowhere. Every unknown path under every compat layer did the same.
+ *
+ * This is the GET twin of the POST case the note above already describes. That one was
+ * fixed by checking the method; a GET to a missing endpoint is just as much an API call,
+ * and the method check cannot see it.
+ */
+const SERVER_PREFIXES = [
+  '/api/',
+  '/octoprint/', // OctoPrint compat
+  '/printer/', // Moonraker compat, also mounted on the main port
+  '/server/',
+  '/machine/',
+  '/access/',
+];
+
+/**
+ * Endpoints, not trees — matched exactly.
+ *
+ * `startsWith('/metrics')` would also claim `/metrics-dashboard`, a perfectly good
+ * client-side route. The auth gate's public-path list is exact for the same reason, and
+ * that one is a security boundary.
+ */
+const SERVER_PATHS = new Set(['/metrics', '/ws']);
+
 export function wantsDocument(rawPath: string): boolean {
   // Callers hand this the raw request URL, which may carry a query or a fragment.
   const urlPath = rawPath.split(/[?#]/)[0];
   if (urlPath.startsWith('/assets/')) return false;
+  if (SERVER_PATHS.has(urlPath)) return false;
+  if (SERVER_PREFIXES.some((prefix) => urlPath.startsWith(prefix))) return false;
   const lastSegment = urlPath.slice(urlPath.lastIndexOf('/') + 1);
   const dot = lastSegment.lastIndexOf('.');
   // No extension at all is a client-side route; `.html` is the document itself. A

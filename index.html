@@ -584,7 +584,7 @@
           <div class="files-header flex items-center justify-between mb-3 @max-[460px]:flex-wrap max-[800px]:gap-2 @max-[420px]:flex-wrap @max-[420px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
             <h3><i class="bi bi-folder bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Files</h3>
             <div class="flex items-center gap-2">
-              <label class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" id="file-upload-label">
+              <label class="file-upload-label inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" id="file-upload-label">
                 <i class="bi bi-upload bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Upload
                 <input type="file" id="file-upload-input" accept=".gcode,.3mf" hidden>
               </label>
@@ -758,7 +758,7 @@
           <div class="flex flex-col gap-3">
             <div class="debug-controls flex flex-wrap gap-2 items-center [padding:8px_0]">
               <input type="text" id="debug-filter" placeholder="Filter fields..." class="rounded-lg border border-line bg-input px-2.5 py-1.5 text-xs text-fg tabular-nums focus:outline-none focus:border-accent">
-              <button class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" id="debug-log-toggle"><i class="bi bi-play-fill bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Start Logging</button>
+              <button class="debug-log-toggle inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed text-fg" id="debug-log-toggle"><i class="bi bi-play-fill bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Start Logging</button>
               <select id="debug-log-timeout" class="rounded-lg border border-line bg-input px-2.5 py-1.5 text-xs text-fg tabular-nums focus:outline-none focus:border-accent">
                 <option value="1">Auto-stop: 1m</option>
                 <option value="5" selected>Auto-stop: 5m</option>

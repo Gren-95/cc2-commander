@@ -75,3 +75,40 @@ describe('isNavigation', () => {
     }
   });
 });
+
+describe('server prefixes are never client-side routes', () => {
+  // Every one of these answered 200 with the dashboard's HTML. A caller sees `res.ok`,
+  // then `res.json()` throws on the leading `<`, and nothing names the real problem.
+  const apiPaths = [
+    '/api/canvas',
+    '/api/nonexistent',
+    '/api/files/typo',
+    '/octoprint/bogus',
+    '/printer/objects/query',
+    '/server/info',
+    '/machine/update/status',
+    '/access/login',
+    '/metrics',
+    '/ws',
+  ];
+  for (const path of apiPaths) {
+    it(`404s rather than serving the app for ${path}`, () => {
+      expect(wantsDocument(path)).toBe(false);
+    });
+  }
+
+  it('still serves the app for real client-side routes', () => {
+    for (const path of ['/', '/settings', '/files/some-model', '/about']) {
+      expect(wantsDocument(path)).toBe(true);
+    }
+  });
+
+  it('does not mistake a route that merely starts with the same letters', () => {
+    // `/apiary` is not `/api/`. Prefix matching that ignored the slash would take it.
+    expect(wantsDocument('/apiary')).toBe(true);
+    expect(wantsDocument('/servers-of-the-world')).toBe(true);
+    // `/metrics` and `/ws` are endpoints, so they match exactly and claim no tree.
+    expect(wantsDocument('/metrics-dashboard')).toBe(true);
+    expect(wantsDocument('/wsl-notes')).toBe(true);
+  });
+});

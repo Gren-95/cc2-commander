@@ -69,6 +69,8 @@ export const STATE_UTILITIES: Record<string, Record<string, StateDelta>> = {
     'speed-btn': SEGMENT_ACTIVE,
     'temp-preset-btn': CHIP_ACTIVE,
     'timelapse-play-btn': CHIP_ACTIVE,
+    // Logging is running: the accent means "this control is engaged".
+    'debug-log-toggle': { add: 'border-accent text-accent', remove: 'border-line text-fg' },
     'main-tab': {
       add: 'bg-accent text-white max-[700px]:bg-transparent max-[700px]:text-accent max-[700px]:[box-shadow:inset_0_2px_0_0_var(--accent)]',
       remove: 'bg-transparent text-fg-muted',
