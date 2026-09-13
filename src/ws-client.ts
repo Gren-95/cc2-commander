@@ -27,6 +27,10 @@ export interface WsClientOptions {
   onServiceStatus?: (data: Record<string, unknown>) => void;
   /** Called with chart data points from service */
   onChartData?: (t: number, values: Record<string, number>) => void;
+  /** Called when the service's dryer state changes */
+  onDryerState?: (data: Record<string, unknown>) => void;
+  /** Called when a drying session ends, whatever ended it */
+  onDryerFinished?: (reason: string, label: string) => void;
   /** Called with event log entries */
   onEventLog?: (entry: { ts: number; event: Record<string, unknown> }) => void;
   /** Called when server records a new layer time */
@@ -160,6 +164,16 @@ export class WsClient {
         if (t && values) {
           this.opts.onChartData?.(t, values);
         }
+        break;
+      }
+
+      case 'dryer_state': {
+        this.opts.onDryerState?.(msg);
+        break;
+      }
+
+      case 'dryer_finished': {
+        this.opts.onDryerFinished?.(String(msg.reason ?? ''), String(msg.label ?? ''));
         break;
       }
 

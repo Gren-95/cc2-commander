@@ -7,7 +7,7 @@ import { renderCanvas, setCanvasClient } from './ui/canvas';
 import { initCharts, registerChart } from './ui/charts';
 import { bindControls, onCommandResponse } from './ui/controls';
 import { bindDebugPanel, renderDebugPanel, trackStateChanges } from './ui/debug-panel';
-import { setDryerClient } from './ui/dryer-panel';
+import { applyDryerState, handleDryerFinished, setDryerClient } from './ui/dryer-panel';
 import { handleEventLog, loadEventLogHistory } from './ui/event-log';
 import {
   bindFileControls,
@@ -605,6 +605,12 @@ function connectToService(): void {
     },
     onChartData(t, values) {
       chartStore.pushPoint(t, values);
+    },
+    onDryerState(data) {
+      applyDryerState(data);
+    },
+    onDryerFinished(reason, label) {
+      handleDryerFinished(reason, label);
     },
     onEventLog(entry) {
       handleEventLog(entry);

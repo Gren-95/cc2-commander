@@ -309,6 +309,22 @@ export class TelegramIntegration {
     return this._running;
   }
 
+  /**
+   * Send a plain notice, unattached to a print.
+   *
+   * The dryer is the only caller: its session runs in the service now, so "the filament
+   * is dry and the bed is off" has to reach someone who is not looking at a browser —
+   * which is the entire reason that timer moved off the page.
+   */
+  async notify(text: string): Promise<void> {
+    if (!this._running) return;
+    try {
+      await this.sendNew(text, null, false);
+    } catch (err) {
+      log.error(`Notify failed: ${(err as Error).message}`);
+    }
+  }
+
   async start(): Promise<void> {
     log.info('Starting bot...');
     this.bot.start({

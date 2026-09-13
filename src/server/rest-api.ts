@@ -23,6 +23,7 @@ import { PassThrough } from 'stream';
 import sharp from 'sharp';
 import type { StateStore } from './state-store.js';
 import type { ServiceConfig } from './config.js';
+import type { DryerService } from './dryer.js';
 import type { PrintReportCollector } from './print-report-collector.js';
 import type { MqttBridge } from './mqtt-bridge.js';
 import { generateReportPDF } from './print-report-pdf.js';
@@ -665,6 +666,7 @@ let _bridge: MqttBridge | null = null;
 export function createRestRouter(
   store: StateStore,
   config: ServiceConfig,
+  dryer?: DryerService | null,
   reportCollector?: PrintReportCollector | null,
   bridge?: MqttBridge | null,
   /**
@@ -857,6 +859,78 @@ export function createRestRouter(
         });
         return;
       }
+    }
+
+    /*
+     * Filament drying. The session lives in the service, not in a tab — see
+     * `server/dryer.ts` for why something that heats a bed cannot be owned by a page
+     * that a phone can put to sleep.
+     */
+    if (url === '/api/dryer') {
+      if (!dryer) {
+        res.writeHead(503, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: { code: 'UNAVAILABLE', message: 'Dryer not running' } }));
+        return;
+      }
+
+      if (req.method === 'GET') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, data: dryer.getState() }));
+        return;
+      }
+
+      if (req.method === 'DELETE') {
+        void dryer.finish('stopped').then(() => {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, data: dryer.getState() }));
+        });
+        return;
+      }
+
+      if (req.method === 'POST') {
+        let body = '';
+        req.on('data', (chunk: Buffer) => {
+          body += chunk.toString();
+        });
+        req.on('end', () => {
+          let parsed: { presetId?: string; tempC?: number; hours?: number };
+          try {
+            parsed = JSON.parse(body);
+          } catch {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(
+              JSON.stringify({ error: { code: 'INVALID_FORMAT', message: 'Body is not JSON' } }),
+            );
+            return;
+          }
+          if (!parsed.presetId) {
+            res.writeHead(422, { 'Content-Type': 'application/json' });
+            res.end(
+              JSON.stringify({ error: { code: 'MISSING_FIELD', message: 'presetId is required' } }),
+            );
+            return;
+          }
+          // `begin` clamps the temperature and the duration itself; a value arriving over
+          // HTTP gets the same ceiling as one typed into the panel, because the clamp is
+          // shared rather than reimplemented on each side.
+          void dryer
+            .begin({ presetId: parsed.presetId, tempC: parsed.tempC, hours: parsed.hours })
+            .then((refusal) => {
+              if (refusal) {
+                res.writeHead(409, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: { code: 'CONFLICT', message: refusal } }));
+                return;
+              }
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ success: true, data: dryer.getState() }));
+            });
+        });
+        return;
+      }
+
+      res.writeHead(405, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { code: 'METHOD_NOT_ALLOWED', message: req.method } }));
+      return;
     }
 
     // Debug capture: start a timed raw MQTT capture

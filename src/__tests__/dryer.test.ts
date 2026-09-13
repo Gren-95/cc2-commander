@@ -23,7 +23,7 @@ import {
   presetById,
   progressOf,
   sessionFromPreset,
-} from '../ui/dryer';
+} from '../dryer-core';
 
 const MIN = 60_000;
 const session = (over: Partial<DryerSession> = {}): DryerSession => ({

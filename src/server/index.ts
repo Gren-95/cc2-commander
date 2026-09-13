@@ -31,6 +31,7 @@ import { createMoonrakerRouter } from './moonraker-compat.js';
 import { MoonrakerServer } from './moonraker-server.js';
 import { TelegramIntegration } from './telegram.js';
 import { StatePersistence } from './state-persistence.js';
+import { DryerService } from './dryer.js';
 import { PrintReportCollector } from './print-report-collector.js';
 import { getBuildInfo } from './build-info.js';
 import { applyCors, corsHeaders } from './cors.js';
@@ -106,10 +107,21 @@ if (config.telegramEnabled) {
 // --- Print Report Collector ---
 const reportCollector = new PrintReportCollector(store, config);
 
+/*
+ * --- Filament dryer ---
+ *
+ * Owned here rather than by the browser: the session heats the bed for hours, and a
+ * timer living in a tab meant closing the tab left the heater on with nothing running to
+ * turn it off. `start()` below adopts whatever is on disk, including ending a session
+ * that ran out while the service was down.
+ */
+const dryer = new DryerService(store, bridge);
+
 // --- HTTP Server ---
 const restHandler = createRestRouter(
   store,
   config,
+  dryer,
   reportCollector,
   bridge,
   (req) => authGate.authenticate(req).ok,
@@ -203,6 +215,22 @@ const wsTransport = new WebSocketTransport(store, bridge);
 // Provide service references for status panel
 wsTransport.setServices({ telegram });
 
+// The dryer's state reaches the browser the same way everything else does, so a panel
+// opened halfway through a session shows the truth without polling.
+dryer.on('state', (state: Record<string, unknown>) => {
+  wsTransport.broadcast({ type: 'dryer_state', ...state });
+});
+dryer.on(
+  'finished',
+  ({ session, reason }: { session: { label: string } | null; reason: string }) => {
+    if (!session) return;
+    wsTransport.broadcast({ type: 'dryer_finished', label: session.label, reason });
+    if (telegram && reason === 'done') {
+      void telegram.notify(`🌡 ${session.label} is dry — bed turned off`);
+    }
+  },
+);
+
 let server: ReturnType<typeof Bun.serve> | null = null;
 
 // --- Startup ---
@@ -270,11 +298,19 @@ async function start(): Promise<void> {
   if (telegram) {
     await telegram.start();
   }
+
+  // After the bridge is up, so the off command a finished session sends has somewhere
+  // to go. A session that expired while the service was down is ended here, not resumed.
+  await dryer.start();
 }
 
 // Graceful shutdown
 function shutdown(): void {
   log.info('Shutting down...');
+  // Only the interval. The session stays on disk and the bed stays at temperature —
+  // deliberately: a restart resumes it, and turning a heater off because a process is
+  // cycling would end a four-hour job on a `systemctl restart`.
+  dryer.stop();
   persistence.stop();
   moonrakerServer.stop();
   wsTransport.close();
