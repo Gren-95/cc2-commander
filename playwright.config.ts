@@ -20,10 +20,17 @@ export default defineConfig({
   // try to run these as unit tests. Separate directories keep the two runners from
   // fighting over the same files.
   testDir: 'tests/browser',
-  // The suites share one page fixture and mutate document.body; parallel files are fine,
-  // parallel tests inside a file are not.
-  fullyParallel: false,
-  workers: process.env.CI ? 2 : undefined,
+  // Every test gets its own page and browser context, and the harness keeps no state, so
+  // tests are independent even within a file. (This used to say they shared one page
+  // fixture and could not run in parallel. Nothing in tests/browser does that: no
+  // `describe.serial`, no `beforeAll`, no shared page.) Checked: 5 runs of the suite x2,
+  // fully parallel, 1,120 tests, no failures and nothing flaky.
+  fullyParallel: true,
+  // Half the cores, not `CI ? 2 : undefined`. The dev container sets CI=1 for an unrelated
+  // reason (see `reuseExistingServer`), which pinned local runs to 2 workers on a 12-core
+  // machine. Measured there: 2 workers 9.1s, 6 workers 5.8s, 10 workers 6.0s -- past
+  // about half the cores, browsers contend for CPU. On a 4-core CI runner this is still 2.
+  workers: '50%',
   forbidOnly: !!process.env.CI,
   // Written outside the project when those directories exist — the dev container mounts
   // volumes at `/test-results` and `/playwright-report` precisely so a test run leaves
