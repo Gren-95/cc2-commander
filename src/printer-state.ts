@@ -1,3 +1,4 @@
+import { mapTaskStatus } from './print-task-status';
 import type { PrinterAttributes, PrinterStatus, CanvasInfo, FileEntry, ZoneState } from './types';
 import { trailingLayerRun } from './types';
 
@@ -28,23 +29,6 @@ function deepMerge(
 }
 
 /** Map CC2 task status to human-readable string */
-function mapTaskStatus(status: number | string | undefined): string {
-  if (typeof status === 'string') return status;
-  switch (status) {
-    case 0:
-      return 'unknown';
-    case 1:
-      return 'printing';
-    case 2:
-      return 'completed';
-    case 3:
-      return 'failed';
-    case 4:
-      return 'stopped';
-    default:
-      return 'unknown';
-  }
-}
 
 export class PrinterState {
   attributes: PrinterAttributes | null = null;
