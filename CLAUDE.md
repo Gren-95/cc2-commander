@@ -50,6 +50,29 @@ itself, so `bun run dev` builds `dist/` and restarts on change rather than runni
 separate vite server on :5173 that proxied back. Dev and production are the same shape;
 what is lost is hot module replacement, and the rebuild is ~550ms.
 
+## Working in the dev container
+
+When the production container (`cc2-commander`) is running it holds port 8088 **and the
+printer's MQTT connection**, so `cc2-dev` cannot start beside it and must not: a second
+service is a second MQTT client. Work like this instead:
+
+```bash
+# A long-lived work container: no published ports, so it never collides with 8088.
+docker compose --profile dev run -d --name cc2-work dev sleep infinity
+docker exec cc2-work bun run gates        # seconds, not a container start per run
+
+# Checking a UI or API change against the real app, without the printer:
+docker compose --profile probe up -d --build probe     # http://127.0.0.1:18096
+docker compose --profile probe cp fixture.json probe:/probe-data/ledger.json
+```
+
+**Bun auto-loads `.env` from the working directory**, which in these containers is your
+checkout. Any `bun` process there inherits the real credentials unless they are set to
+empty first; the `probe` service does exactly that for every integration. A probe that
+kept `TELEGRAM_BOT_TOKEN` would open a second `getUpdates` poller and knock the
+production bot offline. Blank by the names in `src/server/config.ts`, not by guess:
+it is `HOMEASSISTANT_URL`, not `HOME_ASSISTANT_URL`.
+
 ## Build / test / lint (run before finishing any change)
 
 ```bash
@@ -227,24 +250,30 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   have one. The first version queried `.subtab` across the document, which was fine
   with one strip and wrong the moment there were two — picking a tool would have
   deactivated Help and Debug.
-  About, Help & API and Debug are the three sub-tabs of the About page; Filament Dryer
-  and Spool Calculator are the two under Tools.
+  About, Help & API and Debug are the three sub-tabs of the About page. Under Tools:
+  Filament Dryer, Spool Calculator and Statistics, with Cost, Maintenance and Inventory
+  to come: their services and `/api/workshop/*` routes exist, and the panels are GitHub
+  issues. The strip scrolls sideways, and the selected tab is scrolled into view.
 
 
 - **The filament dryer heats the bed on a timer, and that makes it the one tool in
-  here with a physical failure mode.** `ui/dryer.ts` holds the presets, the schedule
-  maths and the clamps; `ui/dryer-panel.ts` is the only place that sends `1028`
-  (`Set temperature`) for drying. Three properties must survive any change:
+  here with a physical failure mode.** The SERVICE owns the session, not a tab:
+  `src/dryer-core.ts` holds the presets, clamps and schedule maths (shared with the
+  browser), `src/server/dryer.ts` is the only place that sends `1028` for drying, and
+  `ui/dryer-panel.ts` sends no commands at all; it drives `/api/dryer`. Three
+  properties must survive any change:
 
-  - **`MAX_SAFE_C` is a ceiling on everything**, including a temperature typed by hand
-    and one restored from localStorage. A non-finite input clamps to the FLOOR, not the
-    ceiling — a heater fails cold.
-  - **The session stores an absolute `startedAt`.** A tab reopened hours later resolves
-    it, sees it expired, and turns the bed off. Storing a remaining-duration instead
-    would make a closed tab pause the clock and leave the bed hot.
-  - **Every exit turns the heater off** — finished, stopped, or resumed-expired all go
-    through `finish()`. Closing the tab mid-session is the case nothing can cover; the
-    panel says so rather than implying otherwise.
+  - **`MAX_SAFE_C` is a ceiling on everything**, including a temperature arriving over
+    HTTP. A non-finite input clamps to the FLOOR, not the ceiling: a heater fails cold.
+  - **The session stores an absolute `startedAt`** in `DATA_DIR/dryer.json`. A service
+    restarted mid-session resumes it; one restarted after it should have ended turns the
+    bed off at boot. A remaining-duration would make downtime pause the clock.
+  - **Every exit turns the heater off.** Finished, stopped, print-started and
+    expired-while-down all go through `finish()`, and the target is re-asserted every
+    30 s because something clearing it reads exactly like a session running normally.
+    The hole left is the service itself dying mid-session; `src/dryer-gcode.ts` is the
+    start of closing it (a cycle the printer runs as a job), unwired until someone
+    confirms the printer will run a file with no motion in it.
 
 - **The phone dashboard shows ONE card at a time.** Below 700px a vertical rail down
   the right edge (`ui/mobile-focus.ts`) focuses a single card; `All` restores the
@@ -475,8 +504,9 @@ Not auto-loaded. Open the relevant one when working in that area.
 - [docs/architecture.md](docs/architecture.md) — one MQTT connection fanned out to
   WebSocket / REST / Moonraker / OctoPrint / Telegram; the two HTTP servers, state flow,
   and which layer a change belongs in.
-- [docs/gates.md](docs/gates.md) — the gate command (which is what CI runs; seven gates,
-  two of them test runners — `bun test` for logic and Playwright for the browser), why
+- [docs/gates.md](docs/gates.md) — the gate command (which is what CI runs; eight gates,
+  the first of which installs exactly what `bun.lock` says so that local matches CI, and
+  two of which are test runners: `bun test` for logic, Playwright for the browser), why
   green means very little here, and the printer boundary no gate can enforce.
 - [docs/testing.md](docs/testing.md) — what the suite actually covers (very little), how
   to probe a live printer **read-only**, and what nothing checks.

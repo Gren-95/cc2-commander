@@ -64,6 +64,15 @@ run() {
   fi
 }
 
+# Install exactly what bun.lock says before judging anything. CI installs fresh, so a
+# local node_modules that has drifted from the lockfile runs different tools than CI and
+# the two stop meaning the same thing. It happened: the dev container's node_modules
+# volume was re-seeded from an older image, and the gates ran biome 2.5.9 against a
+# lockfile pinning 2.5.13 -- green locally on a tree CI would have judged differently.
+# ~10ms when already in sync. --frozen-lockfile fails rather than rewriting bun.lock, so
+# package.json/lockfile drift is caught here too, first.
+run 'dependencies match bun.lock' bun install --frozen-lockfile --silent
+
 if [ "$fix" = 1 ]; then
   printf '\n\033[1m▶ biome check --write\033[0m  (fixing before the gates)\n'
   bun run check || true

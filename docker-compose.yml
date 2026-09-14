@@ -90,6 +90,56 @@ services:
     # option when you are only editing the server.
     command: ["bun", "scripts/dev.ts"]
 
+  # An isolated copy of the service for checking a UI or API change against the real app,
+  # without the printer. `docker compose --profile probe up -d probe`, then
+  # http://127.0.0.1:18096. See docs/testing.md.
+  #
+  # Every variable below is blanked ON PURPOSE. Bun auto-loads `.env` from the working
+  # directory, which here is your checkout, so without this the probe would inherit your
+  # real credentials: a second Telegram poller on your bot token knocks the production
+  # bot offline (getUpdates allows one consumer), and it would poll your Home Assistant.
+  # An empty value counts as set, so Bun does not fill it in from `.env`.
+  probe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    container_name: cc2-probe
+    profiles: [probe]
+    user: "${UID:-1000}:${GID:-1000}"
+    ports:
+      # This machine only. With auth blanked, anything wider would be an open control
+      # surface on the LAN.
+      - "127.0.0.1:18096:18096"
+    environment:
+      SERVICE_PORT: "18096"
+      MOONRAKER_PORT: "17122"
+      # TEST-NET (RFC 5737): the MQTT connection goes nowhere, so it can never become a
+      # second registration against the real printer.
+      PRINTER_IP: "192.0.2.99"
+      PRINTER_SN: ""
+      DATA_DIR: /probe-data
+      CAMERA_ENABLED: "false"
+      TELEGRAM_BOT_TOKEN: ""
+      TELEGRAM_CHAT_ID: ""
+      TELEGRAM_ALLOWED_CHAT_IDS: ""
+      HOMEASSISTANT_URL: ""
+      HOMEASSISTANT_TOKEN: ""
+      HOMEASSISTANT_ENTITIES: ""
+      AUTH_ENABLED: ""
+      AUTH_PASSWORD: ""
+      AUTH_PASSWORD_HASH: ""
+      AUTH_API_KEY: ""
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+      - dist:/app/dist
+      - probe-data:/probe-data
+      - playwright-browsers:/ms-playwright
+    # Build first so the probe always serves the code in front of you, not a stale dist/.
+    command: ["sh", "-c", "bun run build && exec bun src/server/index.ts"]
+
 volumes:
   node_modules:
   dist:
@@ -97,3 +147,4 @@ volumes:
   test-results:
   playwright-report:
   playwright-browsers:
+  probe-data:

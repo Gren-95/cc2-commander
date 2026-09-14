@@ -293,10 +293,24 @@ notifications rather than anything lasting. It also takes your dev process down,
 how you find out. Measured while verifying ELEG-24.
 
 So when you must run the service locally, blank the integrations rather than only moving
-the ports:
+the ports. That is now one command, the `probe` service in `docker-compose.yml`:
 
 ```bash
-TELEGRAM_BOT_TOKEN= TELEGRAM_CHAT_ID= CAMERA_ENABLED=false \
+docker compose --profile probe up -d --build probe     # http://127.0.0.1:18096
+docker compose --profile probe cp fixture.json probe:/probe-data/ledger.json
+docker restart cc2-probe                               # services read DATA_DIR at start
+```
+
+It blanks every integration by the names `config.ts` actually reads, binds to
+`127.0.0.1` only (auth is off, so anything wider is an open control surface on the LAN),
+and builds before serving so it never shows a stale `dist/`. The hand-rolled version this
+replaced blanked `HOME_ASSISTANT_URL`, which is not a variable anything reads, and so
+quietly polled the real Home Assistant; it also bound to every interface.
+
+Outside a container the old form still works, with the same caution about names:
+
+```bash
+TELEGRAM_BOT_TOKEN= TELEGRAM_CHAT_ID= HOMEASSISTANT_URL= CAMERA_ENABLED=false \
   SERVICE_PORT=18096 MOONRAKER_PORT=17122 PRINTER_IP=192.0.2.99 DATA_DIR=/tmp/probe \
   bun src/server/index.ts
 ```
