@@ -41,7 +41,8 @@ describe('with nothing recorded', () => {
   });
 
   it('has no cost rather than a cost of zero', () => {
-    expect(s.cost).toBeNull();
+    expect(s.filamentCost).toBeNull();
+    expect(s.electricityCost).toBeNull();
   });
 
   it('still lays out twelve months, so the chart has a shape', () => {
@@ -142,12 +143,20 @@ describe('most printed files', () => {
 });
 
 describe('cost', () => {
-  it('sums what the cost tool can price, and counts how many that is', () => {
-    const s = computeStats([entry({ grams: 10 }), entry({ grams: null })], {
-      now: NOW,
-      costOf: (e) => (e.grams === null ? null : 0.25),
-    });
-    expect(s.cost).toBe(0.25);
-    expect(s.costKnownFor).toBe(1);
+  const costOf = (e: LedgerEntry) => ({
+    filament: e.grams === null ? null : 0.25,
+    electricity: 0.1,
+  });
+
+  it('prices electricity for every print, since every print has a run time', () => {
+    const s = computeStats([entry({ grams: 10 }), entry({ grams: null })], { now: NOW, costOf });
+    expect(s.electricityCost).toBe(0.2);
+    expect(s.electricityCostKnownFor).toBe(2);
+  });
+
+  it('prices filament only where the weight is known, and says how many that is', () => {
+    const s = computeStats([entry({ grams: 10 }), entry({ grams: null })], { now: NOW, costOf });
+    expect(s.filamentCost).toBe(0.25);
+    expect(s.filamentCostKnownFor).toBe(1);
   });
 });

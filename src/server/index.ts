@@ -34,6 +34,7 @@ import { StatePersistence } from './state-persistence.js';
 import { initAuth, isWellFormedHash } from './auth.js';
 import { DryerService } from './dryer.js';
 import { LedgerService } from './ledger.js';
+import { WorkshopService } from './workshop.js';
 import { createWorkshopRouter } from './workshop-router.js';
 import { HomeAssistantService } from './home-assistant.js';
 import { PrintReportCollector } from './print-report-collector.js';
@@ -170,6 +171,9 @@ const dryer = new DryerService(store, bridge);
  */
 const ledger = new LedgerService(store, bridge);
 
+/* Prices, maintenance tasks and spools — the workshop tools' own state. */
+const workshop = new WorkshopService(ledger);
+
 /*
  * --- Home Assistant (optional) ---
  *
@@ -193,7 +197,7 @@ const restHandler = createRestRouter(
   homeAssistant,
   (req) => authGate.authenticate(req).ok,
 );
-const workshopHandler = createWorkshopRouter(ledger);
+const workshopHandler = createWorkshopRouter(ledger, workshop, store);
 const octoPrintHandler = createOctoPrintRouter(store, bridge, config);
 const moonrakerHandler = createMoonrakerRouter(store, bridge, config);
 
@@ -308,6 +312,11 @@ homeAssistant.on('readings', (state: Record<string, unknown>) => {
   wsTransport.broadcast({ type: 'home_assistant', ...state });
 });
 
+// A finished print changes statistics, maintenance hours and spool levels at once, so
+// the workshop says only that something changed and each open panel fetches its own view.
+// Cheaper than pushing four payloads to browsers that are mostly not looking at them.
+ledger.on('changed', () => wsTransport.broadcast({ type: 'workshop_changed' }));
+workshop.on('changed', () => wsTransport.broadcast({ type: 'workshop_changed' }));
 dryer.on('state', (state: Record<string, unknown>) => {
   wsTransport.broadcast({ type: 'dryer_state', ...state });
 });
@@ -394,6 +403,7 @@ async function start(): Promise<void> {
   // to go. A session that expired while the service was down is ended here, not resumed.
   await dryer.start();
   await ledger.start();
+  await workshop.start();
   homeAssistant.start();
 }
 

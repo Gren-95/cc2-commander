@@ -13,6 +13,7 @@
  *   total carries how many prints it actually covers.
  */
 
+import type { CostBreakdown } from './cost-core';
 import type { LedgerEntry } from './ledger-core';
 
 export interface MonthStats {
@@ -43,9 +44,14 @@ export interface Stats {
   grams: number;
   /** How many prints `grams` covers — the denominator nobody should have to guess. */
   gramsKnownFor: number;
-  /** Sum of the costs that could be worked out; `null` when none could. */
-  cost: number | null;
-  costKnownFor: number;
+  /**
+   * Money spent, as two figures with their own counts — see `cost-core.ts` for why they
+   * are not added together. `null` when no print could be priced.
+   */
+  filamentCost: number | null;
+  filamentCostKnownFor: number;
+  electricityCost: number | null;
+  electricityCostKnownFor: number;
   averageSeconds: number | null;
   longest: { filename: string; seconds: number } | null;
   months: MonthStats[];
@@ -89,8 +95,8 @@ export function computeStats(
   options: {
     now: number;
     tzOffsetMinutes?: number;
-    /** Cost of one print, or `null` if it cannot be worked out. Supplied by the cost tool. */
-    costOf?: (entry: LedgerEntry) => number | null;
+    /** Cost of one print. Supplied by the cost tool, which owns the prices. */
+    costOf?: (entry: LedgerEntry) => CostBreakdown;
   },
 ): Stats {
   const tz = options.tzOffsetMinutes ?? 0;
@@ -100,8 +106,10 @@ export function computeStats(
   let seconds = 0;
   let grams = 0;
   let gramsKnownFor = 0;
-  let cost = 0;
-  let costKnownFor = 0;
+  let filamentCost = 0;
+  let filamentCostKnownFor = 0;
+  let electricityCost = 0;
+  let electricityCostKnownFor = 0;
   let completedSeconds = 0;
   let longest: Stats['longest'] = null;
   let since: number | null = null;
@@ -124,10 +132,14 @@ export function computeStats(
       grams += e.grams;
       gramsKnownFor++;
     }
-    const c = options.costOf?.(e) ?? null;
-    if (c !== null) {
-      cost += c;
-      costKnownFor++;
+    const c = options.costOf?.(e);
+    if (c?.filament != null) {
+      filamentCost += c.filament;
+      filamentCostKnownFor++;
+    }
+    if (c?.electricity != null) {
+      electricityCost += c.electricity;
+      electricityCostKnownFor++;
     }
 
     if (e.outcome === 'completed') {
@@ -162,8 +174,10 @@ export function computeStats(
     hours: round1(seconds / 3600),
     grams: Math.round(grams),
     gramsKnownFor,
-    cost: costKnownFor > 0 ? Math.round(cost * 100) / 100 : null,
-    costKnownFor,
+    filamentCost: filamentCostKnownFor > 0 ? Math.round(filamentCost * 100) / 100 : null,
+    filamentCostKnownFor,
+    electricityCost: electricityCostKnownFor > 0 ? Math.round(electricityCost * 100) / 100 : null,
+    electricityCostKnownFor,
     averageSeconds: completed > 0 ? Math.round(completedSeconds / completed) : null,
     longest,
     months: [...months.values()].map((m) => ({
