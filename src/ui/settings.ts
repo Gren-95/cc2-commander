@@ -184,6 +184,11 @@ export function switchHelpSubtab(sub: HelpSubtab): void {
 /** Which main tab is showing. The focus rail belongs to the dashboard alone. */
 let activeTab: 'dashboard' | 'settings' | 'tools' | 'help' | 'debug' = 'dashboard';
 
+/** The tab on screen — which, at startup, is whatever a deep link asked for. */
+export function getActiveTab(): typeof activeTab {
+  return activeTab;
+}
+
 export function switchToTab(tab: 'dashboard' | 'settings' | 'tools' | 'help' | 'debug'): void {
   const connectDialog = document.getElementById('connect-dialog');
   const dashboard = document.getElementById('dashboard');

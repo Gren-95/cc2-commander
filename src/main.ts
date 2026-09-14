@@ -39,7 +39,7 @@ import {
   setPrinterLink,
   updateServiceStatus,
 } from './ui/service-status';
-import { applyCardLayout, switchToTab } from './ui/settings';
+import { applyCardLayout, getActiveTab, switchToTab } from './ui/settings';
 import { bindStructuredLogControls, renderStructuredLog } from './ui/structured-log';
 import {
   renderTimelapse,
@@ -170,12 +170,21 @@ function showDashboard(): void {
   $('connect-dialog').classList.add('hidden');
   // The tab bar, the header controls and the focus rail come back with the dashboard.
   setChromeVisible(true);
-  $('dashboard').classList.remove('hidden');
+  // Before `switchToTab`, whose dashboard branch shows the connect dialog until it sees this.
+  $('dashboard').dataset.connected = 'true';
+  /*
+   * Re-show whatever tab is active rather than the dashboard. This used to be
+   * `$('dashboard').classList.remove('hidden')`, and it runs when the socket connects —
+   * AFTER startup has already applied `?tab=`. So `?tab=tools` hid the dashboard, then
+   * this un-hid it a moment later, and the Tools panel sat below a full dashboard,
+   * off-screen. Clicking a tab never showed it, because by then this had already run
+   * and it only runs once.
+   */
+  switchToTab(getActiveTab());
   // `applyCardLayout` runs at startup, while the sign-in card is still up, so the rail
   // it would have drawn was suppressed. Draw it now that there is a session — hiding the
   // element is not enough on its own, because the rail is rebuilt rather than toggled.
   applyCardLayout();
-  $('dashboard').dataset.connected = 'true';
 
   if (!controlsBound) {
     controlsBound = true;
