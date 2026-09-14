@@ -18,10 +18,12 @@ Printer MQTT ←→ MqttBridge (singleton) ←→ StateStore
     (browsers)  (+camera)    (:7125)     (compat)    (bot)
 ```
 
-**This is a fork, and it has no issue tracker.** Upstream tracked work in an **ELEG**
-project reached over an MCP server on the original author's infrastructure; that config
-and its env vars are gone, because a fork cannot reach someone else's private portal and
-a token nobody here holds is not configuration, it is decoration.
+**Work is tracked in this fork's GitHub issues** (enabled 2026-09-14; GitHub turns them
+off on forks by default). Upstream tracked work in an **ELEG** project reached over an MCP
+server on the original author's infrastructure; that config and its env vars are gone,
+because a fork cannot reach someone else's private portal and a token nobody here holds
+is not configuration, it is decoration. An issue here is a record of what is left, not a
+branch to open: work still goes straight to `main` (see below).
 
 `ELEG-nn` references survive throughout this file and the deep dives. Read them as
 provenance — *why this code is shaped this way* — not as tickets to open. They are
@@ -336,7 +338,8 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   shows never came from the changelog anyway — `build-info.ts` stamps
   `git describe --tags --always --dirty` at install time.
 - **Commit straight to `main`. No topic branch, no PR.** This is a personal fork with
-  no issue tracker, no collaborators and nothing upstream to propose changes to, so the
+  no collaborators and nothing upstream to propose changes to (its issues are a to-do
+  list, not a review queue), so the
   branch → PR → merge cycle was ceremony: the same person opened and merged every PR,
   minutes apart, with no review in between. It also had a failure mode that bit —
   finished work sitting on an unmerged branch while `main` (and therefore the running
