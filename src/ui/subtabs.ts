@@ -53,6 +53,9 @@ export function switchSubtab(group: string, name: string): void {
     const on = btn.dataset.subtab === target;
     toggleState(btn, 'active', on);
     btn.setAttribute('aria-selected', String(on));
+    // A strip wider than a phone scrolls, and the remembered tab can be the one off the
+    // edge. `nearest` moves it only as far as needed, and not at all when it is in view.
+    if (on) btn.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
   }
   for (const n of names) {
     document.getElementById(`${group}-subtab-${n}`)?.classList.toggle('hidden', n !== target);

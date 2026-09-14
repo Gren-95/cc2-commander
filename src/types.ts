@@ -130,9 +130,16 @@ export interface FileEntry {
   type: string;
   size: number;
   create_time?: number;
+  /** Slicer's estimate, in seconds. Matches the `_37m53s` Elegoo writes into the name. */
   print_time?: number;
   layer?: number;
+  /**
+   * Filament the slicer expects the whole file to use, in GRAMS. Not millimetres: a
+   * 3DBenchy reports 11.71, which is its weight — in millimetres it would be ~4000.
+   */
   total_filament_used?: number;
+  /** One entry per slicer tool: its colour and material. Present on files from Elegoo's slicer. */
+  color_map?: Array<{ color: string; name: string; t: number }>;
 }
 
 // Machine status codes (We enum from official app)

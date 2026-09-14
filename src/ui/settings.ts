@@ -17,6 +17,7 @@ import {
 import { toast } from './toast';
 import { renderSpoolCalc } from './spool-calc';
 import { renderDryer } from './dryer-panel';
+import { renderWorkshopPanel } from './workshop';
 import { renderHelp } from './help';
 import { renderAbout } from './about';
 import { bindSubtabs, switchSubtab } from './subtabs';
@@ -242,9 +243,11 @@ export function switchToTab(tab: 'dashboard' | 'settings' | 'tools' | 'help' | '
      * that must keep running while the calculator is in front. Only the panels are
      * swapped.
      */
-    bindSubtabs('tools');
     renderSpoolCalc();
     renderDryer();
+    // The workshop panels fetch from the service, so they load when shown rather than
+    // all at once on every visit. `bindSubtabs` calls this for the remembered tab too.
+    bindSubtabs('tools', renderWorkshopPanel);
   } else if (tab === 'help' || tab === 'debug') {
     helpPage?.classList.remove('hidden');
     renderAbout();

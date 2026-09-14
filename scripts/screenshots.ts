@@ -42,6 +42,7 @@ const VIEWS = [
   { name: 'dashboard', query: '' },
   { name: 'tools-dryer', query: '?tab=tools&subtab=dryer' },
   { name: 'tools-spool', query: '?tab=tools&subtab=spool' },
+  { name: 'tools-stats', query: '?tab=tools&subtab=stats' },
   { name: 'settings', query: '?tab=settings' },
   { name: 'help-about', query: '?tab=help&subtab=about' },
   { name: 'help-help', query: '?tab=help&subtab=help' },

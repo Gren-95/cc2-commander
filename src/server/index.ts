@@ -33,6 +33,8 @@ import { TelegramIntegration } from './telegram.js';
 import { StatePersistence } from './state-persistence.js';
 import { initAuth, isWellFormedHash } from './auth.js';
 import { DryerService } from './dryer.js';
+import { LedgerService } from './ledger.js';
+import { createWorkshopRouter } from './workshop-router.js';
 import { HomeAssistantService } from './home-assistant.js';
 import { PrintReportCollector } from './print-report-collector.js';
 import { getBuildInfo } from './build-info.js';
@@ -160,6 +162,15 @@ const reportCollector = new PrintReportCollector(store, config);
 const dryer = new DryerService(store, bridge);
 
 /*
+ * --- Print ledger ---
+ *
+ * One row per finished print, with the filament weight captured while its file is still
+ * on the printer. Statistics, cost, maintenance hours and spool deductions read from it;
+ * see `workshop/ledger-core.ts` for why history alone cannot answer any of them.
+ */
+const ledger = new LedgerService(store, bridge);
+
+/*
  * --- Home Assistant (optional) ---
  *
  * Ambient temperature and humidity, which the printer cannot measure. Read-only, and
@@ -182,6 +193,7 @@ const restHandler = createRestRouter(
   homeAssistant,
   (req) => authGate.authenticate(req).ok,
 );
+const workshopHandler = createWorkshopRouter(ledger);
 const octoPrintHandler = createOctoPrintRouter(store, bridge, config);
 const moonrakerHandler = createMoonrakerRouter(store, bridge, config);
 
@@ -223,6 +235,25 @@ const nodeRouter: NodeHandler = (req, res) => {
   // nearly missed. A new endpoint is protected by existing, not by remembering.
   if (authGate.handle(req, res)) return;
   if (!authGate.require(req, res)) return;
+
+  // Workshop tools: statistics, cost, maintenance, inventory.
+  if (url.startsWith('/api/workshop/')) {
+    applyCors(
+      res,
+      corsHeaders(
+        config.corsPolicy,
+        req.headers.origin,
+        'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+        'Content-Type',
+      ),
+    );
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+    if (workshopHandler(req, res)) return;
+  }
 
   // OctoPrint compatibility API
   if (url === '/octoprint' || url.startsWith('/octoprint/') || url.startsWith('/octoprint?')) {
@@ -362,6 +393,7 @@ async function start(): Promise<void> {
   // After the bridge is up, so the off command a finished session sends has somewhere
   // to go. A session that expired while the service was down is ended here, not resumed.
   await dryer.start();
+  await ledger.start();
   homeAssistant.start();
 }
 

@@ -32,6 +32,13 @@ export const ICONS = {
   sidebar: 'layout-sidebar',
   close: 'x-lg',
   editLayout: 'grid-1x2',
+  // ── Workshop tools ──
+  stats: 'bar-chart-line',
+  cost: 'cash-coin',
+  maintenance: 'wrench-adjustable',
+  inventory: 'box-seam',
+  edit: 'pencil',
+  done: 'check2-circle',
   add: 'plus-lg',
   moveUp: 'chevron-up',
   moveDown: 'chevron-down',

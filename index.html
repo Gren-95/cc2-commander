@@ -711,9 +711,10 @@
     <!-- Tools tab (hidden by default) -->
     <div id="tools-tab-content" class="hidden h-[calc(100vh_-_var(--header-height))] overflow-y-auto p-5">
       <div class="max-w-200 mx-auto" style="max-width: 1000px">
-        <nav class="flex gap-1 mb-4 border-b border-line" data-subtab-group="tools" aria-label="Tools">
+        <nav class="flex gap-1 mb-4 border-b border-line overflow-x-auto" data-subtab-group="tools" aria-label="Tools">
           <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="dryer" aria-selected="false"><i class="bi bi-thermometer-half bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Filament Dryer<span id="dryer-running-dot" class="hidden ml-2 w-2 h-2 rounded-full bg-warn" title="A drying session is running"></span></button>
           <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="spool" aria-selected="false"><i class="bi bi-calculator bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Spool Calculator</button>
+          <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="stats" aria-selected="false"><i class="bi bi-bar-chart-line bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Statistics</button>
         </nav>
 
         <section id="tools-subtab-dryer">
@@ -726,6 +727,10 @@
 
         <section id="tools-subtab-spool" class="hidden">
           <div id="tools-content"></div>
+        </section>
+
+        <section id="tools-subtab-stats" class="hidden">
+          <div id="workshop-stats-content"></div>
         </section>
       </div>
     </div>

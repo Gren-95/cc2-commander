@@ -33,7 +33,7 @@
  * Pure, and free of DOM, network and clock, so the output can be asserted directly.
  */
 
-import { MAX_SAFE_C, clampMinutes, clampTemp } from './dryer-core.js';
+import { MAX_SAFE_C, clampMinutes, clampTemp } from './dryer-core';
 
 /** How long each dwell holds. Sets the worst-case delay on a cancel. */
 export const DWELL_SECONDS = 60;

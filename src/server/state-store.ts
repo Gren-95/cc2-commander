@@ -572,6 +572,14 @@ export class StateStore extends EventEmitter {
         if (fileList) this.files = fileList;
         break;
       }
+      case 1036: {
+        // Print history. Not stored here: the ledger owns it, and this store would only
+        // be a second copy that could disagree. Handed on raw, whoever asked for it —
+        // a browser's request answers the ledger's question too.
+        const tasks = (result.history_task_list ?? result.task_list) as unknown[] | undefined;
+        if (Array.isArray(tasks)) this.emit('history', tasks);
+        break;
+      }
       case 1045: {
         const errorCode = result.error_code as number | undefined;
         const thumb = result.thumbnail as string | undefined;
