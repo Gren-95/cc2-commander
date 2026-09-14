@@ -19,7 +19,6 @@ import {
   schedulePopoverClose,
 } from './file-popover';
 import { resetThumbnailQueue } from './file-thumbnails';
-import { reapplyBusyGuard } from './busy-guard';
 import { EMPTY } from './design';
 import { requestPrintDialog } from './print-dialog';
 import type { PrinterState } from '../printer-state';

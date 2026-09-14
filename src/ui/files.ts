@@ -1,12 +1,6 @@
 import { toggleState } from './state-classes';
 import { uploadFile } from './file-upload';
-import {
-  bindPopover,
-  closeFilePopover,
-  popoverFile,
-  schedulePopover,
-  schedulePopoverClose,
-} from './file-popover';
+import { bindPopover, closeFilePopover } from './file-popover';
 import {
   cachedThumbnail,
   fetchCachedStatus,
@@ -15,13 +9,7 @@ import {
   isFileCached,
   resetThumbnailQueue,
 } from './file-thumbnails';
-import {
-  currentFileDir,
-  currentFileSource,
-  filePathFor,
-  setFileDir,
-  setFileSource,
-} from './file-browsing';
+import { currentFileDir, currentFileSource, setFileSource } from './file-browsing';
 import { bindFileActions, ensureFileActions } from './file-actions';
 import { reapplyBusyGuard } from './busy-guard';
 import { positionSegmented } from './segmented';
@@ -39,7 +27,6 @@ import {
   THUMBNAIL_CLASS,
   THUMBNAIL_PLACEHOLDER_SRC,
 } from './helpers';
-import { requestPrintDialog } from './print-dialog';
 import { type ListControls, createListControls } from './list-controls';
 
 /** An icon-only action on a file row. Three of them have to fit beside a filename. */
