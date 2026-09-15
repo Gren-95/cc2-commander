@@ -5,8 +5,10 @@
  * panel in it. Each panel fetches its own data from `/api/workshop/*` when shown.
  */
 
+import { renderWorkshopCost } from './workshop-cost';
 import { renderWorkshopStats } from './workshop-stats';
 
 export function renderWorkshopPanel(name: string): void {
   if (name === 'stats') void renderWorkshopStats();
+  else if (name === 'cost') void renderWorkshopCost();
 }

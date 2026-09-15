@@ -15,7 +15,9 @@ import { EventEmitter } from 'node:events';
 import { join } from 'node:path';
 import {
   type CostBreakdown,
+  type CostedPrint,
   type CostSettings,
+  type FileCost,
   DEFAULT_COST_SETTINGS,
   costOf,
   electricityCost,
@@ -54,15 +56,6 @@ interface WorkshopState {
   pending: PendingUsage[];
   /** Ledger entry id → the spool it was taken off, so its cost can use that spool's price. */
   attributions: Record<string, string>;
-}
-
-export interface FileCost {
-  filename: string;
-  grams: number | null;
-  seconds: number | null;
-  materials: string[];
-  filament: number | null;
-  electricity: number | null;
 }
 
 export class WorkshopService extends EventEmitter {
@@ -158,6 +151,20 @@ export class WorkshopService extends EventEmitter {
 
   hasAnyPrice(): boolean {
     return hasAnyPrice(this.state.cost);
+  }
+
+  /** Every finished print, priced the same way `costOfEntry` prices one. */
+  costedHistory(entries: readonly LedgerEntry[]): CostedPrint[] {
+    return entries.map((e) => ({
+      id: e.id,
+      filename: e.filename,
+      endedAt: e.endedAt,
+      grams: e.grams,
+      gramsEstimated: e.gramsEstimated,
+      seconds: e.seconds,
+      outcome: e.outcome,
+      ...this.costOfEntry(e),
+    }));
   }
 
   /* ── Maintenance ──────────────────────────────────────────────────── */

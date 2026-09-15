@@ -126,6 +126,7 @@ export function createWorkshopRouter(
           settings: workshop.getCostSettings(),
           priced: workshop.hasAnyPrice(),
           files: workshop.costFiles(store.files),
+          history: workshop.costedHistory(ledger.getEntries()),
         }),
     },
     {
