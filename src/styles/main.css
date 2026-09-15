@@ -115,7 +115,14 @@
   --chart-above-avg: #ef5350;
   --chart-below-avg: #66bb6a;
   --chart-temp-fill: rgba(33, 150, 243, 0.3);
-  --gcode-bg: #1c1917;
+  /*
+   * A mid grey, not the near-black this used to be. A black or dark-grey filament —
+   * common colours, not edge cases — rendered as good as invisible against #1c1917,
+   * which was the whole model losing contrast rather than a corner case. Slicers
+   * (PrusaSlicer, Bambu Studio) use a mid-grey plate for exactly this reason: it sits
+   * roughly equidistant from both a black and a white filament, so neither disappears.
+   */
+  --gcode-bg: #475569;
   --gcode-extrusion: #2196f3;
   --gcode-travel: #57534e;
   --gcode-top-layer: #00ffff;
@@ -174,7 +181,7 @@
   --chart-above-avg: #c62828;
   --chart-below-avg: #2e7d32;
   --chart-temp-fill: rgba(25, 118, 210, 0.25);
-  --gcode-bg: #e7e5e4;
+  --gcode-bg: #cbd5e1;
   --gcode-extrusion: #1976d2;
   --gcode-travel: #a8a29e;
   --gcode-top-layer: #00838f;

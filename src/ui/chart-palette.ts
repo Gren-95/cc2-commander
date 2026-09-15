@@ -89,7 +89,7 @@ export const FALLBACK_PALETTE: ChartPalette = {
   aboveAvg: '#ef5350',
   belowAvg: '#66bb6a',
   tempFill: 'rgba(33, 150, 243, 0.3)',
-  gcodeBg: '#1c1917',
+  gcodeBg: '#475569',
   gcodeExtrusion: '#2196f3',
   gcodeTravel: '#57534e',
   gcodeTopLayer: '#00ffff',
