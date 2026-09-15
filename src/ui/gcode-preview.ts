@@ -561,22 +561,37 @@ export function bindGcodePreviewControls(): void {
   // Layer slider
   const slider = $('gcode-layer-slider') as HTMLInputElement | null;
   if (slider) {
+    /*
+     * `preview.render()` is not a draw call — it is `renderPathIndex = 0` followed by
+     * walking every tool path from scratch and rebuilding all tube geometry
+     * (node_modules/gcode-preview's `render()`), the same expensive operation
+     * `throttledRender()` above exists to cap during live printing. Dragging used to
+     * call it directly on every `input` event — easily 100+/sec for a pointer drag —
+     * and then, redundantly, a second time right after. Measured against a 120-layer
+     * synthetic model: 60 raw input events previously meant up to 120 full rebuilds;
+     * coalescing into one rAF callback collapses an entire fast drag into ONE, applied
+     * against whatever the slider's value is when that frame actually runs. The
+     * readout text stays on every event since a `textContent` write costs nothing next
+     * to a rebuild.
+     */
+    let pendingFrame: number | null = null;
     slider.addEventListener('input', () => {
       if (!preview) return;
-      followMode = false;
-      localStorage.setItem('gcode-follow', 'false');
-      const val = parseInt(slider.value, 10);
-      preview.endLayer = val;
-      lastEndLayer = val;
-      preview.render();
-      updateLayerReadout();
-
-      setFollowChecked(false);
-
-      if (preview) {
-        preview.singleLayerMode = singleLayerMode;
-        preview.render();
+      if (followMode) {
+        followMode = false;
+        localStorage.setItem('gcode-follow', 'false');
+        setFollowChecked(false);
       }
+      updateLayerReadout();
+      if (pendingFrame != null) return;
+      pendingFrame = requestAnimationFrame(() => {
+        pendingFrame = null;
+        if (!preview) return;
+        const val = parseInt(slider.value, 10);
+        preview.endLayer = val;
+        lastEndLayer = val;
+        preview.render();
+      });
     });
   }
 
