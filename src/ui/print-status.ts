@@ -13,7 +13,6 @@ import {
   powerLossState,
 } from '../types';
 import { maybeShowPowerLossDialog } from './power-loss-dialog';
-import { updatePosition3D } from './position-3d';
 import { $, formatTime, formatClock, fanPct, escapeHtml, applyDarkThumbnailCheck } from './helpers';
 import { loadUISettings, saveUISettings } from './ui-settings';
 
@@ -461,7 +460,6 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     $('pos-x').textContent = pos.x?.toFixed(1) ?? '--';
     $('pos-y').textContent = pos.y?.toFixed(1) ?? '--';
     $('pos-z').textContent = pos.z?.toFixed(1) ?? '--';
-    updatePosition3D(pos.x, pos.y, pos.z);
   }
 
   // Homing status

@@ -720,6 +720,7 @@
           <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="dryer" aria-selected="false"><i class="bi bi-thermometer-half bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Filament Dryer<span id="dryer-running-dot" class="hidden ml-2 w-2 h-2 rounded-full bg-warn" title="A drying session is running"></span></button>
           <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="spool" aria-selected="false"><i class="bi bi-calculator bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Spool Calculator</button>
           <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="stats" aria-selected="false"><i class="bi bi-bar-chart-line bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Statistics</button>
+          <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="cost" aria-selected="false"><i class="bi bi-cash-coin bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Cost</button>
         </nav>
 
         <section id="tools-subtab-dryer">
@@ -736,6 +737,14 @@
 
         <section id="tools-subtab-stats" class="hidden">
           <div id="workshop-stats-content"></div>
+        </section>
+
+        <section id="tools-subtab-cost" class="hidden">
+          <p class="text-[13px] text-fg-muted mb-4 max-w-[70ch]">
+            Every price starts empty — electricity and filament prices vary too much
+            between households for a guessed default to be worth trusting.
+          </p>
+          <div id="workshop-cost-content"></div>
         </section>
       </div>
     </div>
