@@ -49,6 +49,11 @@ export function gcodeCacheDir(): string {
   return join(dataDir, 'gcode-cache');
 }
 
+/** Timelapse videos downloaded from the printer once it finishes transcoding them. */
+export function timelapseCacheDir(): string {
+  return join(dataDir, 'timelapse-cache');
+}
+
 /**
  * Where `POST /api/debug/capture` writes, and where the capture list and reader look.
  * The same directory `initLogger` writes `service.log` into — deliberately, since both

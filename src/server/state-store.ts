@@ -616,13 +616,23 @@ export class StateStore extends EventEmitter {
         // endpoint, the same one gcode uses (see /api/timelapse/video in rest-api.ts).
         const errorCode = result.error_code as number | undefined;
         const url = result.url as string | undefined;
-        if (errorCode === 0 && url) this.videoUrl = url;
+        if (errorCode === 0 && url) {
+          this.videoUrl = url;
+          this.emit('timelapse_ready', { url });
+        }
         break;
       }
       case 1051: {
         const errorCode = result.error_code as number | undefined;
         const url = result.url as string | undefined;
-        if (errorCode === 0 && url) this.videoUrl = url;
+        if (errorCode === 0 && url) {
+          this.videoUrl = url;
+          // The transcode this method triggers just finished — archive it to server
+          // storage now rather than waiting for someone to press play (rest-api.ts
+          // precacheTimelapse), so it survives the printer going offline even if no
+          // one ever opens the Timelapse view for this print.
+          this.emit('timelapse_ready', { url });
+        }
         break;
       }
     }

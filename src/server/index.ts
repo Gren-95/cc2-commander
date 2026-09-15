@@ -23,7 +23,7 @@ import { loadConfig } from './config.js';
 import { MqttBridge } from './mqtt-bridge.js';
 import { StateStore } from './state-store.js';
 import { WebSocketTransport } from './ws-transport.js';
-import { createRestRouter, precacheGcode } from './rest-api.js';
+import { createRestRouter, precacheGcode, precacheTimelapse } from './rest-api.js';
 import { SessionStore, hashPassword } from './auth.js';
 import { AuthGate } from './auth-gate.js';
 import { createOctoPrintRouter } from './octoprint-compat.js';
@@ -138,6 +138,12 @@ store.on('print_event', (event: { type: string; filename?: string }) => {
   if (event.type === 'print_started' && event.filename) {
     precacheGcode(event.filename, config);
   }
+});
+
+// Archive a timelapse to server storage as soon as the printer finishes transcoding it
+// (method 1051 answering with a url), so it survives the printer going offline.
+store.on('timelapse_ready', (event: { url: string }) => {
+  precacheTimelapse(event.url, config);
 });
 
 // --- State Persistence ---

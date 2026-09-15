@@ -16,7 +16,7 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 import { request as httpRequest } from 'http';
 import { createHash } from 'crypto';
-import { writeFile, readdir, readFile, mkdir, stat, unlink } from 'fs/promises';
+import { writeFile, readdir, readFile, mkdir, stat, unlink, rename } from 'fs/promises';
 import { createReadStream, createWriteStream } from 'fs';
 import { join } from 'path';
 import { PassThrough } from 'stream';
@@ -30,7 +30,7 @@ import type { MqttBridge } from './mqtt-bridge.js';
 import { generateReportPDF } from './print-report-pdf.js';
 import { getBuildInfo } from './build-info.js';
 import { applyCors, corsHeaders } from './cors.js';
-import { captureLogDir, gcodeCacheDir } from './data-paths.js';
+import { captureLogDir, gcodeCacheDir, timelapseCacheDir } from './data-paths.js';
 import { getLogger } from './logger.js';
 import { writeSpaFallback } from './spa.js';
 import {
@@ -110,6 +110,175 @@ async function evictOldCache(): Promise<void> {
   } catch {
     /* ignore */
   }
+}
+
+// ── Timelapse cache ─────────────────────────────────────────────
+// Unlike the gcode cache above, this one is deliberately not evicted. A gcode is a
+// working cache for a print that is happening now; a timelapse is the whole reason this
+// exists — the printer's own storage is small and timelapses are exactly the kind of
+// file someone wants to keep after the print, and after the printer, are gone.
+
+function timelapseCacheKey(fileName: string): string {
+  return createHash('sha256').update(fileName).digest('hex').slice(0, 16) + '.mp4';
+}
+
+async function ensureTimelapseCacheDir(): Promise<void> {
+  await mkdir(timelapseCacheDir(), { recursive: true });
+}
+
+async function getCachedTimelapse(fileName: string): Promise<string | null> {
+  try {
+    const cached = join(timelapseCacheDir(), timelapseCacheKey(fileName));
+    const s = await stat(cached);
+    if (s.size > 0) return cached;
+  } catch {
+    /* not cached */
+  }
+  return null;
+}
+
+/**
+ * Download a transcoded timelapse to server storage, fire-and-forget.
+ *
+ * Called from `index.ts` once `StateStore` sees a transcode finish — method 1051 (or
+ * 1050) answering with `error_code: 0` and a `url`. Mirrors `precacheGcode` below, but
+ * with no eviction and its own cache directory: see the comment above this section for
+ * why the two caches behave differently.
+ */
+export function precacheTimelapse(fileName: string, config: ServiceConfig): void {
+  void precacheTimelapseAsync(fileName, config);
+}
+
+async function precacheTimelapseAsync(fileName: string, config: ServiceConfig): Promise<void> {
+  const cachePath = join(timelapseCacheDir(), timelapseCacheKey(fileName));
+  const tmpPath = `${cachePath}.part`;
+  try {
+    await ensureTimelapseCacheDir();
+    if (await getCachedTimelapse(fileName)) {
+      log.info(`Timelapse precache: ${fileName} already cached`);
+      return;
+    }
+    log.info(`Timelapse precache: downloading ${fileName}`);
+    await downloadToFile(fileName, config, tmpPath);
+    await rename(tmpPath, cachePath);
+    log.info(`Timelapse precache: cached ${fileName}`);
+  } catch (err) {
+    // Logged, not thrown: a transcode the service failed to archive should not take the
+    // MQTT event loop down with it. Nothing marks this as cached, so the next export or
+    // the next attempt to play it will simply try the download again.
+    log.warn(`Timelapse precache failed for ${fileName}: ${(err as Error).message}`);
+    await unlink(tmpPath).catch(() => {});
+  }
+}
+
+/** Stream a printer file straight to `destPath`. Shared by the two timelapse paths below. */
+function downloadToFile(fileName: string, config: ServiceConfig, destPath: string): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const proxyReq = httpRequest(
+      {
+        hostname: config.printerIp,
+        port: 80,
+        path: `/download?X-Token=${encodeURIComponent(config.printerPassword)}&file_name=${encodeURIComponent(fileName)}`,
+        method: 'GET',
+        timeout: 120_000,
+        // See handleFileDownload below — the printer's libhv sends both Content-Length
+        // and Transfer-Encoding: chunked, which Node's strict parser rejects.
+        insecureHTTPParser: true,
+      },
+      (proxyRes) => {
+        if (proxyRes.statusCode !== 200) {
+          proxyRes.resume();
+          reject(new Error(`Printer returned ${proxyRes.statusCode}`));
+          return;
+        }
+        const fileStream = createWriteStream(destPath);
+        proxyRes.pipe(fileStream);
+        fileStream.on('finish', () => resolve());
+        fileStream.on('error', reject);
+        proxyRes.on('error', reject);
+      },
+    );
+    proxyReq.on('error', reject);
+    proxyReq.on('timeout', () => {
+      proxyReq.destroy();
+      reject(new Error('Download timed out'));
+    });
+    proxyReq.end();
+  });
+}
+
+/**
+ * Proxy a timelapse live from the printer, teeing the response into the cache as it
+ * streams so this play also archives it. Written to a `.part` path and renamed only on
+ * a clean finish, so a play that is interrupted midway does not leave a truncated file
+ * behind that a later request would serve as if it were complete.
+ */
+function serveTimelapseLive(
+  res: ServerResponse,
+  fileName: string,
+  baseName: string,
+  config: ServiceConfig,
+): void {
+  const cachePath = join(timelapseCacheDir(), timelapseCacheKey(fileName));
+  const tmpPath = `${cachePath}.part`;
+  log.info(`Timelapse: proxying ${fileName} live (not yet in server storage)`);
+
+  const proxyReq = httpRequest(
+    {
+      hostname: config.printerIp,
+      port: 80,
+      path: `/download?X-Token=${encodeURIComponent(config.printerPassword)}&file_name=${encodeURIComponent(fileName)}`,
+      method: 'GET',
+      timeout: 120_000,
+      insecureHTTPParser: true,
+    },
+    (proxyRes) => {
+      if (proxyRes.statusCode !== 200) {
+        res.writeHead(proxyRes.statusCode ?? 502, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: `Printer returned ${proxyRes.statusCode}` }));
+        proxyRes.resume();
+        return;
+      }
+      proxyRes.socket?.setTimeout(120_000);
+      res.writeHead(200, {
+        'Content-Type': 'video/mp4',
+        'Content-Disposition': `inline; filename="${baseName}"`,
+        ...(proxyRes.headers['content-length']
+          ? { 'Content-Length': proxyRes.headers['content-length'] }
+          : {}),
+      });
+
+      const cacheStream = createWriteStream(tmpPath);
+      const tee = new PassThrough();
+      tee.pipe(res);
+      tee.pipe(cacheStream);
+      proxyRes.pipe(tee);
+      cacheStream.on('finish', () => {
+        rename(tmpPath, cachePath)
+          .then(() => log.info(`Timelapse: archived ${fileName} to server storage`))
+          .catch(() => {});
+      });
+      cacheStream.on('error', () => {
+        unlink(tmpPath).catch(() => {});
+      });
+    },
+  );
+  proxyReq.on('error', (err) => {
+    log.error(`Timelapse proxy error: ${(err as NodeJS.ErrnoException).code} ${err.message}`);
+    if (!res.headersSent) {
+      res.writeHead(502, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Failed to connect to printer' }));
+    }
+  });
+  proxyReq.on('timeout', () => {
+    log.error('Timelapse proxy timeout');
+    proxyReq.destroy();
+    if (!res.headersSent) {
+      res.writeHead(504, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Download timed out' }));
+    }
+  });
+  proxyReq.end();
 }
 
 /**
@@ -1157,7 +1326,8 @@ export function createRestRouter(
     }
 
     /**
-     * Stream a timelapse video from the printer.
+     * Stream a timelapse video — from server storage if it has already been archived
+     * there, otherwise live from the printer.
      *
      * The play button used to point a `<video>` at the bare path the printer reports —
      * `video/<name>.mp4` — which has no host, so the browser resolved it against the
@@ -1177,10 +1347,25 @@ export function createRestRouter(
         return;
       }
       const baseName = fileName.split('/').pop() || 'timelapse.mp4';
-      void handleFileDownload(res, fileName, baseName, 'local', false, config, {
-        contentType: 'video/mp4',
-        inline: true,
-      });
+
+      void (async () => {
+        const cached = await getCachedTimelapse(fileName);
+        if (cached) {
+          log.info(`Timelapse: serving ${fileName} from server storage`);
+          const s = await stat(cached);
+          res.writeHead(200, {
+            'Content-Type': 'video/mp4',
+            'Content-Disposition': `inline; filename="${baseName}"`,
+            'Content-Length': String(s.size),
+          });
+          createReadStream(cached).pipe(res);
+          return;
+        }
+        // Not archived yet — proxy live, and tee the response into the cache so this
+        // play also becomes the download `precacheTimelapse` failed to make (an export
+        // from before this cache existed, or a precache that errored).
+        serveTimelapseLive(res, fileName, baseName, config);
+      })();
       return;
     }
 

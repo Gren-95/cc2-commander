@@ -5,6 +5,7 @@ import {
   getDataDir,
   initDataPaths,
   resetDataPathsForTest,
+  timelapseCacheDir,
 } from '../data-paths.js';
 
 /**
@@ -40,6 +41,20 @@ describe('gcodeCacheDir', () => {
   it('handles a relative DATA_DIR without rewriting it', () => {
     initDataPaths('./custom-data');
     expect(gcodeCacheDir()).toBe('custom-data/gcode-cache');
+  });
+});
+
+describe('timelapseCacheDir', () => {
+  it('follows DATA_DIR rather than the working directory', () => {
+    initDataPaths('/srv/elegoo-data');
+    expect(timelapseCacheDir()).toBe('/srv/elegoo-data/timelapse-cache');
+  });
+
+  it('is a separate directory from the gcode cache', () => {
+    // The two caches have different eviction policies (rest-api.ts) — sharing a
+    // directory would make the gcode cache's eviction sweep up archived timelapses.
+    initDataPaths('/srv/elegoo-data');
+    expect(timelapseCacheDir()).not.toBe(gcodeCacheDir());
   });
 });
 
