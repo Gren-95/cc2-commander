@@ -6,6 +6,7 @@ import { ChartStore } from './chart-store';
 import { renderCanvas, setCanvasClient } from './ui/canvas';
 import { initCharts, registerChart } from './ui/charts';
 import { bindControls, onCommandResponse } from './ui/controls';
+import { initPosition3D } from './ui/position-3d';
 import { bindDebugPanel, renderDebugPanel, trackStateChanges } from './ui/debug-panel';
 import { applyDryerState, handleDryerFinished, setDryerClient } from './ui/dryer-panel';
 import { handleEventLog, loadEventLogHistory } from './ui/event-log';
@@ -189,6 +190,7 @@ function showDashboard(): void {
   if (!controlsBound) {
     controlsBound = true;
     bindControls(client!);
+    initPosition3D();
     bindLogControls(logStore);
     bindStructuredLogControls(logStore);
     bindFileControls(client!);
