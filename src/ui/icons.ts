@@ -42,6 +42,7 @@ export const ICONS = {
   add: 'plus-lg',
   moveUp: 'chevron-up',
   moveDown: 'chevron-down',
+  save: 'save',
 
   // ── Print control ──
   pause: 'pause-fill',
@@ -88,6 +89,7 @@ export const ICONS = {
   expand: 'arrows-angle-expand',
   collapse: 'arrows-angle-contract',
   fullscreen: 'arrows-fullscreen',
+  fullscreenExit: 'fullscreen-exit',
   vibration: 'activity',
   minus: 'dash-lg',
   plus: 'plus-lg',

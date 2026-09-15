@@ -13,10 +13,12 @@ import {
 } from 'three';
 import type { Object3D } from 'three';
 import type { PrinterState } from '../printer-state';
-import { $, fetchTimeout } from './helpers';
+import { $, fetchTimeout, toggleClasses } from './helpers';
 import { chartPalette } from './chart-palette';
 import { positionSegmented } from './segmented';
 import { onThemeChange } from './theme';
+import { iconSolo } from './icons';
+import { createFocusTrap } from './focus-trap';
 
 /** Internal fields of WebGLPreview we need to access to stop the animate loop */
 interface WebGLPreviewInternals {
@@ -47,6 +49,8 @@ let nozzleMesh: Object3D | null = null;
 let lastFilamentColor = '';
 /** Cached color map for re-init */
 let cachedColorMap: Array<{ t: number; color: string }> = [];
+/** Releases the focus trap held while the preview card is full screen. */
+let releaseGcodeFullscreenTrap: (() => void) | null = null;
 
 // CC2 Centauri Carbon 2 build volume (mm)
 /**
@@ -496,9 +500,52 @@ function shortName(path: string): string {
   return parts[parts.length - 1] || path;
 }
 
+/**
+ * Expand or restore the preview card as a full-screen overlay.
+ *
+ * A CSS overlay rather than the browser Fullscreen API: iOS Safari refuses
+ * `requestFullscreen` on anything but a `<video>` (see the camera modal in main.ts),
+ * and this card is a `<canvas>` inside ordinary flow, not one. `position: fixed` works
+ * everywhere the card already runs, including the mobile single-card layout.
+ *
+ * The canvas's own ResizeObserver (bound below) picks up the resulting size change and
+ * calls `preview.resize()` — nothing here has to.
+ */
+function setGcodeFullscreen(on: boolean): void {
+  const card = $('gcode-preview-card');
+  toggleClasses(
+    card,
+    'fixed inset-0 z-[9999] w-screen h-screen max-w-none overflow-y-auto rounded-none',
+    on,
+  );
+  card.classList.toggle('rounded-xl', !on);
+
+  const btn = $('btn-gcode-fullscreen');
+  btn.setAttribute('aria-pressed', String(on));
+  btn.setAttribute('title', on ? 'Exit full screen' : 'Full screen');
+  btn.setAttribute(
+    'aria-label',
+    on ? 'Exit the full-screen G-code preview' : 'Show the G-code preview full screen',
+  );
+  btn.innerHTML = iconSolo(on ? 'fullscreenExit' : 'fullscreen');
+
+  if (on) {
+    releaseGcodeFullscreenTrap = createFocusTrap(card, {
+      onEscape: () => setGcodeFullscreen(false),
+    });
+  } else {
+    releaseGcodeFullscreenTrap?.();
+    releaseGcodeFullscreenTrap = null;
+  }
+}
+
 /** Bind control event handlers — call once at startup */
 export function bindGcodePreviewControls(): void {
   onThemeChange(refreshGcodePreviewTheme);
+
+  $('btn-gcode-fullscreen').addEventListener('click', () => {
+    setGcodeFullscreen(!$('gcode-preview-card').classList.contains('fixed'));
+  });
 
   // `preview` starts null without ever being ASSIGNED null, so none of the call sites
   // below fire on a fresh load and the card opened showing an empty 350px canvas with
