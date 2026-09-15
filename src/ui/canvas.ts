@@ -49,8 +49,8 @@ export function spoolTile(unitId: number, tray: CanvasTray, isActive: boolean): 
   // else, so an active spool says so with the tile's border instead.
   const ring = isEmpty
     ? '<span class="block h-9 w-9 rounded-full border-2 border-dashed border-line"></span>'
-    : `<span class="grid h-9 w-9 place-items-center rounded-full border-[3px]" style="border-color:${escapeAttr(color)}">
-         <span class="h-3 w-3 rounded-full border border-line bg-card"></span>
+    : `<span class="grid h-9 w-9 place-items-center rounded-full border-[6px]" style="border-color:${escapeAttr(color)}">
+         <span class="h-2 w-2 rounded-full border border-line bg-card"></span>
        </span>`;
 
   const action = isActive
@@ -238,8 +238,8 @@ function renderMonoFilament(container: HTMLElement, info: Record<string, unknown
   container.innerHTML = `<div class="flex flex-col gap-2.5">
     <span class="text-[13px] font-semibold text-fg-soft">Direct drive</span>
     <div class="flex min-w-0 items-center gap-2.5 rounded-lg border border-line bg-surface p-2">
-      <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full border-[3px]" style="border-color:${escapeAttr(colorHex)}">
-        <span class="h-3 w-3 rounded-full border border-line bg-card"></span>
+      <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full border-[6px]" style="border-color:${escapeAttr(colorHex)}">
+        <span class="h-2 w-2 rounded-full border border-line bg-card"></span>
       </span>
       <span class="min-w-0 flex-1">
         <span class="block truncate text-xs font-medium text-fg">${escapeHtml(label)}</span>
