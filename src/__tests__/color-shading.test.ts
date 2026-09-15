@@ -9,8 +9,8 @@ import { ensureShadable } from '../ui/color-shading';
  * renderer, so the shading actually shows.
  */
 describe('ensureShadable', () => {
-  it('lifts true black to a neutral grey, since there is no hue to preserve', () => {
-    expect(ensureShadable('000000')).toBe('#383838');
+  it('lifts true black to a plainly visible mid grey, since there is no hue to preserve', () => {
+    expect(ensureShadable('000000')).toBe('#666666');
   });
 
   it('lifts a dark hue while keeping its color, not flattening it to grey', () => {
@@ -30,6 +30,6 @@ describe('ensureShadable', () => {
   });
 
   it('accepts a leading #', () => {
-    expect(ensureShadable('#000000')).toBe('#383838');
+    expect(ensureShadable('#000000')).toBe('#666666');
   });
 });

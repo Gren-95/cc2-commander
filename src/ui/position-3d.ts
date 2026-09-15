@@ -45,7 +45,10 @@ function pt([x, y]: Point): string {
 }
 
 function edge(a: Point, b: Point): string {
-  return `<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" class="stroke-line" stroke-width="1" stroke-dasharray="2.5 2.5" />`;
+  // Solid, not dashed, and fg-muted rather than the card-border line color: a dashed
+  // border-colored line reads as decoration you're not meant to look at closely — which
+  // is right for a card outline, wrong for the one thing this SVG exists to draw.
+  return `<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" class="stroke-fg-muted" stroke-width="1.5" stroke-linecap="round" />`;
 }
 
 function label(p: Point, text: string): string {
