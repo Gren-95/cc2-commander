@@ -19,6 +19,7 @@ import { positionSegmented } from './segmented';
 import { onThemeChange } from './theme';
 import { iconSolo } from './icons';
 import { createFocusTrap } from './focus-trap';
+import { ensureShadable } from './color-shading';
 
 /** Internal fields of WebGLPreview we need to access to stop the animate loop */
 interface WebGLPreviewInternals {
@@ -139,12 +140,12 @@ function updateNozzle(state: PrinterState): void {
 /** Build extrusionColor from colorMap — array for multi-color */
 function buildExtrusionColors(colorMap: Array<{ t: number; color: string }>): string | string[] {
   if (colorMap.length === 0) return chartPalette().gcodeExtrusion;
-  if (colorMap.length === 1) return `#${colorMap[0].color.replace(/^#/, '')}`;
+  if (colorMap.length === 1) return ensureShadable(colorMap[0].color.replace(/^#/, ''));
   // Multi-color: array indexed by tool number
   const maxTool = Math.max(...colorMap.map((c) => c.t));
   const colors: string[] = new Array(maxTool + 1).fill(chartPalette().gcodeUnknownTool);
   for (const entry of colorMap) {
-    colors[entry.t] = `#${entry.color.replace(/^#/, '')}`;
+    colors[entry.t] = ensureShadable(entry.color.replace(/^#/, ''));
   }
   return colors;
 }

@@ -403,49 +403,46 @@
         <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="toolhead-card">
           <h3><i class="bi bi-joystick" aria-hidden="true"></i>Control</h3>
 
-          <div class="flex flex-col gap-4 @min-[420px]:flex-row @min-[420px]:items-center">
-            <!-- Jog. The XY cross and the Z column share one grid so the keys line up;
-                 the pad has ONE home key, because the CC2 homes all axes whichever is
-                 pressed and two identical houses only looked like two different actions. -->
-            <div class="grid w-fit grid-cols-[repeat(3,3rem)_1.5rem_3rem] items-center gap-1.5">
+          <div class="flex flex-row flex-wrap items-center gap-4">
+            <!-- Jog. The XY cross and the Z column share one grid so the keys line up —
+                 Z+/Z- sit beside Y+/Y- rather than in a separate column, since jogging Z
+                 is reached from the same hand position as Y. The pad has ONE home key,
+                 because the CC2 homes all axes whichever is pressed and two identical
+                 houses only looked like two different actions. -->
+            <div class="grid w-fit grid-cols-[repeat(3,3rem)] items-center gap-1.5">
               <div></div>
               <button data-requires-idle class="move-btn inline-flex items-center justify-center h-10 w-full rounded-lg border border-line bg-surface font-mono text-xs font-semibold text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-40 disabled:cursor-not-allowed" data-axis="y" data-dir="1">Y+</button>
-              <div></div>
-              <div></div>
               <button data-requires-idle class="move-btn inline-flex items-center justify-center h-10 w-full rounded-lg border border-line bg-surface font-mono text-xs font-semibold text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-40 disabled:cursor-not-allowed" data-axis="z" data-dir="1">Z+</button>
 
               <button data-requires-idle class="move-btn inline-flex items-center justify-center h-10 w-full rounded-lg border border-line bg-surface font-mono text-xs font-semibold text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-40 disabled:cursor-not-allowed" data-axis="x" data-dir="-1">X-</button>
               <button data-requires-idle class="move-btn home-btn inline-flex items-center justify-center h-10 w-full rounded-lg border border-line bg-hover text-base text-fg cursor-pointer transition-colors hover:bg-surface hover:border-fg-muted disabled:opacity-40 disabled:cursor-not-allowed" id="btn-home-all" title="Home all axes" aria-label="Home all axes"><i class="bi bi-house" aria-hidden="true"></i></button>
               <button data-requires-idle class="move-btn inline-flex items-center justify-center h-10 w-full rounded-lg border border-line bg-surface font-mono text-xs font-semibold text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-40 disabled:cursor-not-allowed" data-axis="x" data-dir="1">X+</button>
-              <div></div>
-              <div></div>
 
               <div></div>
               <button data-requires-idle class="move-btn inline-flex items-center justify-center h-10 w-full rounded-lg border border-line bg-surface font-mono text-xs font-semibold text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-40 disabled:cursor-not-allowed" data-axis="y" data-dir="-1">Y-</button>
-              <div></div>
-              <div></div>
               <button data-requires-idle class="move-btn inline-flex items-center justify-center h-10 w-full rounded-lg border border-line bg-surface font-mono text-xs font-semibold text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-40 disabled:cursor-not-allowed" data-axis="z" data-dir="-1">Z-</button>
             </div>
 
-            <!-- Isometric build-volume indicator — src/ui/position-3d.ts draws and moves it. -->
-            <div class="flex flex-1 min-w-0 items-center justify-center">
-              <svg id="position-3d" viewBox="0 0 150 130" class="h-[130px] w-[150px] max-w-full" role="img" aria-label="Toolhead position within the build volume"></svg>
+            <!-- A static 3D representation of the machine's axes — src/ui/position-3d.ts
+                 draws it once. Not live: the coordinates beside it already update live. -->
+            <div class="flex shrink-0 items-center justify-center">
+              <svg id="position-3d" viewBox="0 0 150 130" class="h-[92px] w-[106px]" role="img" aria-hidden="true"></svg>
             </div>
-          </div>
 
-          <div class="grid grid-cols-3 gap-4 mt-4">
-              <div class="min-w-0">
-                <div class="text-xs text-fg-muted flex items-center gap-1.5"><span class="home-dot inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-bad transition-colors" id="home-x" title="X not homed"></span>X</div>
-                <div class="font-mono text-base tabular-nums leading-none text-fg-soft mt-1 truncate" id="pos-x">--</div>
+            <div class="flex flex-col gap-2 min-w-0">
+              <div class="flex min-w-0 items-baseline gap-2">
+                <span class="text-xs text-fg-muted flex w-4 shrink-0 items-center gap-1.5"><span class="home-dot inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-bad transition-colors" id="home-x" title="X not homed"></span>X</span>
+                <span class="font-mono text-base tabular-nums leading-none text-fg-soft truncate" id="pos-x">--</span>
               </div>
-              <div class="min-w-0">
-                <div class="text-xs text-fg-muted flex items-center gap-1.5"><span class="home-dot inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-bad transition-colors" id="home-y" title="Y not homed"></span>Y</div>
-                <div class="font-mono text-base tabular-nums leading-none text-fg-soft mt-1 truncate" id="pos-y">--</div>
+              <div class="flex min-w-0 items-baseline gap-2">
+                <span class="text-xs text-fg-muted flex w-4 shrink-0 items-center gap-1.5"><span class="home-dot inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-bad transition-colors" id="home-y" title="Y not homed"></span>Y</span>
+                <span class="font-mono text-base tabular-nums leading-none text-fg-soft truncate" id="pos-y">--</span>
               </div>
-              <div class="min-w-0">
-                <div class="text-xs text-fg-muted flex items-center gap-1.5"><span class="home-dot inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-bad transition-colors" id="home-z" title="Z not homed"></span>Z</div>
-                <div class="font-mono text-base tabular-nums leading-none text-fg-soft mt-1 truncate" id="pos-z">--</div>
+              <div class="flex min-w-0 items-baseline gap-2">
+                <span class="text-xs text-fg-muted flex w-4 shrink-0 items-center gap-1.5"><span class="home-dot inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-bad transition-colors" id="home-z" title="Z not homed"></span>Z</span>
+                <span class="font-mono text-base tabular-nums leading-none text-fg-soft truncate" id="pos-z">--</span>
               </div>
+            </div>
           </div>
 
           <div class="border-t border-line-soft my-3"></div>
