@@ -117,7 +117,7 @@ supplied by the publish workflow, not by `docker build`.
 ### Environment Variables
 
 | Variable | Default | Description |
-|----------|---------|-------------|
+| ---------- | --------- | ------------- |
 | `PRINTER_IP` | **required** | Printer IPv4 address. The service refuses to start without it |
 | `PRINTER_PASSWORD` | `123456` | Printer access code |
 | `PRINTER_SN` | — (discovered) | Printer serial number, e.g. `F01U3UD3798YT8K`. Normally discovered automatically and then cached in `<DATA_DIR>/printer-sn.json`, so this is rarely needed. Set it if a **first** start hangs at "registering": the printer only publishes while a client is registered, so a service that has never learned the serial has nothing to overhear |
@@ -225,7 +225,7 @@ printer's own error handling.
 All persistent data lives under `/app/data` inside the container:
 
 | Path | Contents |
-|------|----------|
+| ------ | ---------- |
 | `/app/data/state.json` | Persisted printer state (survives restarts) |
 | `/app/data/moonraker-db.json` | Moonraker compatibility database |
 | `/app/data/reports/` | Print reports with snapshots and PDFs |
@@ -278,7 +278,6 @@ Sessions live in memory only, so a restart signs you out. That is deliberate: a 
 token on disk is a credential at rest in the same `DATA_DIR` this service serves reports
 and camera stills from.
 
-
 ## Production Deployment
 
 Run the published image. `docker compose up -d` with the file from
@@ -304,4 +303,3 @@ There is no systemd installer any more. `contrib/` held one — `install.sh`,
 `uninstall.sh` and an `elegooweb.service` unit that deployed to `/opt/elegooweb` — and it
 was removed because this fork deploys as a container and nobody ran it. `git log` has it
 if a no-Docker install is ever wanted again.
-

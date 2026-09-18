@@ -78,4 +78,3 @@ bun run build
 Production output goes to `dist/`. The service serves it on port 8088 from Bun's static
 route table, which is built once at startup — so a rebuild needs a service restart to
 be picked up.
-

@@ -75,7 +75,7 @@ directory off your machine. See **[docs/development.md](docs/development.md)**.
 ## Documentation
 
 | | |
-|---|---|
+| --- | --- |
 | [Configuration](docs/configuration.md) | Docker, environment variables, auth, volumes, ports, deploying |
 | [Development](docs/development.md) | Prerequisites, the dev container, building |
 | [Architecture](docs/architecture.md) | How the pieces fit, and where a change belongs |

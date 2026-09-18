@@ -31,7 +31,6 @@ this table is CI's step list too. Add a gate here and CI picks it up with no wor
 Grep the log for `✗` to get the failing gate, then read upward for that check's own
 output.
 
-
 ## What the checks are scoped to, and the path-argument trap
 
 **`biome.json`'s `includes` is the only place the lint scope is written** (ELEG-79).

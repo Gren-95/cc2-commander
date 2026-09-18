@@ -198,4 +198,3 @@ src/
 └── styles/
     └── main.css           # Dark theme, two-panel layout, responsive
 ```
-

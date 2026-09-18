@@ -3,18 +3,21 @@
 ## How It Works
 
 The backend service (`src/server/`) runs on Bun and connects to the printer's MQTT broker over TCP:1883, acting as a bridge:
+
 - **WebSocket** (`/ws`): Real-time state updates pushed to all connected browsers
 - **REST API** (`/api/*`): Snapshots, file operations, camera proxy, commands
 - **Static files**: Serves the built `dist/` frontend in production (SPA fallback to `index.html`)
 - **Prometheus** (`/api/metrics`): Printer telemetry for monitoring
 
 The CC2 printer runs its own MQTT broker on two ports:
+
 - **Port 1883** — MQTT over TCP (used by the service)
 - **Port 9001** — MQTT over WebSocket (legacy direct-connect mode)
 
 ### Protocol
 
 Communication uses the CC2 MQTT protocol:
+
 1. **Discovery**: UDP broadcast on port 52700 (not available from browser — IP entered manually)
 2. **Connect**: MQTT 3.1.1 over WebSocket, auth `elegoo`/`123456` (or access code)
 3. **Register**: Publish to `elegoo/<sn>/api_register`
@@ -23,7 +26,6 @@ Communication uses the CC2 MQTT protocol:
 6. **Heartbeat**: PING every 10 seconds to maintain connection
 
 See [CC2 Protocol Documentation](https://github.com/danielcherubini/elegoo-homeassistant/blob/main/docs/CC2_PROTOCOL.md) for the full protocol reference.
-
 
 ## Supported Printers
 
@@ -54,11 +56,10 @@ Resin printers (Mars, Saturn) use a different protocol (SDCP over WebSocket) and
 Server-side toolhead zone tracking based on `gcode_move.x/y` coordinates:
 
 | Zone | Center | Boundary | Purpose |
-|------|--------|----------|---------|
+| ------ | -------- | ---------- | --------- |
 | `cutter_area` | X=254, Y≈3.5 | X:245-265, Y:-5-15 | Filament cutter |
 | `purge_area` | X=52.5, Y=264 | X:40-65, Y:257-275 | Purge/poop area |
 | `print_area` | — | X:0-256, Y:0-256 | Normal printing |
 | `outside` | — | everything else | Fallback |
 
 Used to suppress false filament runout events during Canvas filament changes.
-
