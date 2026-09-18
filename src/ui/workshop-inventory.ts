@@ -54,7 +54,43 @@ function swatchHtml(color: string): string {
   return `<span class="inline-block w-4 h-4 rounded-full border border-line-soft shrink-0" style="background:${escapeAttr(color)}" aria-hidden="true"></span>`;
 }
 
+/**
+ * A 3- or 6-digit hex expanded to the 6-digit form `<input type="color">` requires.
+ * `null` for anything else, so the picker is left showing its last valid colour
+ * rather than snapping to black while a #RGB shorthand or a partial value is typed.
+ */
+function toPickerHex(raw: string): string | null {
+  const hex = raw.trim().replace(/^#/, '');
+  if (/^[0-9a-fA-F]{6}$/.test(hex)) return `#${hex.toLowerCase()}`;
+  if (/^[0-9a-fA-F]{3}$/.test(hex)) {
+    return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`.toLowerCase();
+  }
+  return null;
+}
+
+/**
+ * Keeps a colour picker and its hex text field showing the same colour, in whichever
+ * direction the person just edited. Called after every render that creates one of
+ * these pairs — `addFormHtml`'s fields are replaced wholesale after a successful add,
+ * so a listener bound once would be bound to elements no longer in the document.
+ */
+function bindColorFields(root: ParentNode): void {
+  for (const wrap of root.querySelectorAll<HTMLElement>('[data-color-field]')) {
+    const picker = wrap.querySelector<HTMLInputElement>('[data-spool-color-picker]');
+    const text = wrap.querySelector<HTMLInputElement>('[data-spool-color]');
+    if (!picker || !text) continue;
+    picker.addEventListener('input', () => {
+      text.value = picker.value.toUpperCase();
+    });
+    text.addEventListener('input', () => {
+      const hex = toPickerHex(text.value);
+      if (hex) picker.value = hex;
+    });
+  }
+}
+
 function spoolFieldsHtml(s?: Spool): string {
+  const pickerHex = toPickerHex(s?.color ?? '') ?? '#888888';
   return `
     <div class="flex flex-wrap items-end gap-2">
       <div class="flex flex-col gap-1">
@@ -69,10 +105,11 @@ function spoolFieldsHtml(s?: Spool): string {
       </div>
       <div class="flex flex-col gap-1">
         <label class="${LABEL}">Colour</label>
-        <div class="flex items-center gap-1.5">
-          ${swatchHtml(s?.color ?? '#888888')}
+        <div class="flex items-center gap-1.5" data-color-field>
+          <input type="color" data-spool-color-picker value="${pickerHex}" aria-label="Pick a colour"
+            class="h-8 w-10 rounded-lg border border-line bg-input cursor-pointer p-0.5">
           <input type="text" data-spool-color value="${escapeAttr(s?.color ?? '')}"
-            placeholder="#RRGGBB" maxlength="7" class="${FIELD} w-24 font-mono">
+            placeholder="#RRGGBB or #RGB" maxlength="7" class="${FIELD} w-28 font-mono">
         </div>
       </div>
       <div class="flex flex-col gap-1">
@@ -148,7 +185,10 @@ async function addSpool(): Promise<void> {
       return;
     }
     toast('Spool added', 'success');
-    if (fields) fields.innerHTML = spoolFieldsHtml();
+    if (fields) {
+      fields.innerHTML = spoolFieldsHtml();
+      bindColorFields(fields);
+    }
     await fetchAndRender();
   } catch {
     toast('Not connected to the service', 'error');
@@ -371,6 +411,7 @@ function renderAddForm(): void {
   const host = document.getElementById('inventory-add');
   if (!host) return;
   host.innerHTML = addFormHtml();
+  bindColorFields(host);
   document.getElementById('inventory-add-save')?.addEventListener('click', () => void addSpool());
 }
 
@@ -393,6 +434,7 @@ function renderSpoolList(): void {
   // Never redraw under someone's fingers, mid-edit — see the module comment.
   if (hasFocusedField(host)) return;
   host.innerHTML = spoolListHtml(data);
+  bindColorFields(host);
 }
 
 function renderPendingList(): void {
