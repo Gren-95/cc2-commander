@@ -140,8 +140,9 @@ supplied by the publish workflow, not by `docker build`.
 | `PROGRESS_INTERVAL` | `25` | Notify every N% progress |
 | `DATA_DIR` | `./data` | Data directory for state, reports, logs |
 | `HOMEASSISTANT_URL` | — | Home Assistant base URL, e.g. `http://homeassistant.local:8123` |
-| `HOMEASSISTANT_TOKEN` | — | Long-lived access token. **Read-only use** — this service issues nothing but `GET /api/states/…` |
+| `HOMEASSISTANT_TOKEN` | — | Long-lived access token. Almost entirely read-only — see below for the one write |
 | `HOMEASSISTANT_ENTITIES` | — | Comma-separated entity ids, e.g. `sensor.dry_box_humidity,sensor.workshop_temperature` |
+| `HOMEASSISTANT_BUZZER_ENTITY` | — | Optional, and independent of the three above: an entity to ring on a critical error or a failed print, e.g. `switch.printer_buzzer`. Needs only `HOMEASSISTANT_URL` and `HOMEASSISTANT_TOKEN`, not `HOMEASSISTANT_ENTITIES` |
 
 ### Passwords, and staying logged in
 
@@ -192,13 +193,32 @@ bands, since this is someone else's sensor and not a control input.
 
 Make the token under your Home Assistant profile → Security → **Long-lived access
 tokens**. It carries the permissions of the account that made it, so prefer an account
-with little access: this service only ever issues `GET /api/states/<entity>` and never
-writes, but the token itself does not know that. It is read from the environment, never
-logged, and never sent to the browser — `/api/home-assistant` returns readings only.
+with little access: reading issues nothing but `GET /api/states/<entity>`, and the one
+write this service makes — ringing `HOMEASSISTANT_BUZZER_ENTITY`, below — calls exactly
+two generic services against exactly that one entity, never anything named by a reading
+or by anything outside this service. The token itself does not enforce any of that, so
+the account it comes from is still what actually limits the blast radius of a bug here.
+It is read from the environment, never logged, and never sent to the browser —
+`/api/home-assistant` returns readings only.
 
 Entities are polled once a minute. Home Assistant being down, or a renamed entity, shows
 as "Home Assistant unreachable" on that row and changes nothing else: a thermometer on
 another machine is not a reason for a printer dashboard to stop working.
+
+#### Ringing a buzzer on error
+
+Set `HOMEASSISTANT_BUZZER_ENTITY` to a switch, siren, script or any other entity that
+answers to Home Assistant's generic `turn_on`/`turn_off` services, and this service
+turns it on for ten seconds — not configurable, deliberately, so a failure that leaves
+the off command unsent cannot leave a siren running forever — on a failed print or a new
+exception this app's own `CRITICAL_EXCEPTIONS` list treats as one. A routine pause, like
+a filament-change prompt, does not ring it; that list is the same one the browser's own
+audible alert uses, so the two agree on what counts as serious.
+
+Needs only `HOMEASSISTANT_URL` and `HOMEASSISTANT_TOKEN` — not `HOMEASSISTANT_ENTITIES`,
+which is for sensors this has nothing to do with. A Home Assistant outage, an unreachable
+host or a rejected call is logged and otherwise ignored: it never blocks or fails the
+printer's own error handling.
 
 ### Volumes
 

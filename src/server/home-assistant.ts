@@ -1,30 +1,58 @@
 /**
- * Ambient temperature and humidity, read from Home Assistant.
+ * Ambient temperature and humidity, read from Home Assistant — and, optionally, a
+ * buzzer this service can ring on a critical error or a failed print.
  *
  * The printer reports its own chamber, nozzle and bed. What it cannot tell you is the
  * humidity of the room the filament is sitting in — and that is the number that decides
  * whether PLA prints cleanly or strings, and whether a drying session was worth running.
  * Home Assistant usually already has a sensor for it.
  *
- * ## Read-only, and deliberately so
+ * ## One write, and deliberately narrow
  *
- * This polls `GET /api/states/<entity>` and never writes. A long-lived access token in
- * Home Assistant carries the permissions of the user who made it, which for most people
- * is an administrator — so a bug here could otherwise unlock a door. Nothing in this
- * file issues anything but GET.
+ * Reading polls `GET /api/states/<entity>` and never writes — that part of this file
+ * used to be the whole of it, and the reasoning still holds: a long-lived access token
+ * in Home Assistant carries the permissions of the user who made it, which for most
+ * people is an administrator, so a bug here could otherwise unlock a door. `ringBuzzer`
+ * is the one exception, and it stays as narrow as the risk allows: it calls exactly two
+ * generic services (`homeassistant.turn_on`, `homeassistant.turn_off`) against exactly
+ * one entity, `HOMEASSISTANT_BUZZER_ENTITY` — never an entity named by anything this
+ * service reads elsewhere, and never a service name that arrives from outside this file.
+ * There is no general "call any service" method here, and there should not be one.
  *
  * ## Never breaks the dashboard
  *
  * Home Assistant is someone else's service on the same LAN: it reboots, it updates, its
  * token expires. Every failure degrades to `reachable: false` and a message, and the
  * rest of the dashboard carries on — a printer dashboard that goes dark because a
- * thermometer is unreachable would be a poor trade.
+ * thermometer is unreachable would be a poor trade. `ringBuzzer` holds to the same rule:
+ * every failure is logged and swallowed, never thrown, so a Home Assistant outage can
+ * never take the printer's own error handling down with it.
  */
 
 import { EventEmitter } from 'events';
+import { CRITICAL_EXCEPTIONS } from '../types.js';
 import { getLogger } from './logger.js';
 
 const log = getLogger('HomeAssistant');
+
+/**
+ * Whether a `print_event` is worth ringing the buzzer for: a failed print, or a new
+ * exception `CRITICAL_EXCEPTIONS` agrees is one — not every warning-level exception, or
+ * a routine filament-change pause would set it off.
+ *
+ * Pure, and exported, for the same reason `ui/alert-sound.ts`'s `alertForEvent` is: a
+ * unit test can reach it without a fake Home Assistant. It reproduces that function's
+ * severity rule rather than importing it — that file lives in the browser-bundled half
+ * of the tree, this one in the server half, and the two halves resolve modules
+ * differently (CLAUDE.md's import convention). `CRITICAL_EXCEPTIONS` is still the one
+ * shared list both read, so the two decisions cannot drift on what counts as critical,
+ * only (deliberately) on what to do about it.
+ */
+export function shouldRingBuzzer(event: { type: string; codes?: number[] }): boolean {
+  if (event.type === 'print_failed') return true;
+  if (event.type === 'error') return (event.codes ?? []).some((c) => CRITICAL_EXCEPTIONS.has(c));
+  return false;
+}
 
 /**
  * How often the entities are re-read.
@@ -46,6 +74,14 @@ const HISTORY_MAX = 720;
 
 /** A request that hangs must not wedge the poll loop behind it. */
 const TIMEOUT_MS = 5_000;
+
+/**
+ * How long the buzzer stays on before this turns it back off. Not configurable: a
+ * siren left on because the off command was never sent — a crash, a restart — would be
+ * a worse outcome than the alert it exists to give, so the window stays short and fixed
+ * rather than becoming one more thing a misconfiguration can get wrong.
+ */
+const BUZZER_ON_MS = 10_000;
 
 export interface HaReading {
   entityId: string;
@@ -151,6 +187,7 @@ export class HomeAssistantService extends EventEmitter {
     private readonly baseUrl: string,
     private readonly token: string,
     private readonly entities: string[],
+    private readonly buzzerEntity: string = '',
   ) {
     super();
     this.state = {
@@ -165,6 +202,10 @@ export class HomeAssistantService extends EventEmitter {
 
   private get enabled(): boolean {
     return Boolean(this.baseUrl && this.token && this.entities.length);
+  }
+
+  private get buzzerConfigured(): boolean {
+    return Boolean(this.baseUrl && this.token && this.buzzerEntity);
   }
 
   getState(): HaState {
@@ -187,6 +228,50 @@ export class HomeAssistantService extends EventEmitter {
     if (!this.timer) return;
     clearInterval(this.timer);
     this.timer = null;
+  }
+
+  private async callService(service: 'turn_on' | 'turn_off'): Promise<void> {
+    const url = `${this.baseUrl.replace(/\/+$/, '')}/api/services/homeassistant/${service}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ entity_id: this.buzzerEntity }),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    if (!res.ok) {
+      throw new Error(
+        `Home Assistant returned ${res.status} calling ${service} on ${this.buzzerEntity}`,
+      );
+    }
+  }
+
+  /**
+   * Ring the configured buzzer entity, on for `BUZZER_ON_MS` then off again. A no-op,
+   * not an error, when nothing is configured — every caller of this is a printer error
+   * path, and a missing buzzer must never become a second error on top of the first.
+   *
+   * `turn_on` and `turn_off` are two independent requests, and only the first is
+   * awaited by the caller; the second fires on its own timer regardless of what the
+   * caller does next. Both failures are logged and nothing more — see the module
+   * comment on why this never throws.
+   */
+  async ringBuzzer(): Promise<void> {
+    if (!this.buzzerConfigured) return;
+    try {
+      await this.callService('turn_on');
+      log.info(`Rang the buzzer (${this.buzzerEntity})`);
+    } catch (err) {
+      log.warn(`Could not ring the buzzer: ${(err as Error).message}`);
+      return;
+    }
+    setTimeout(() => {
+      void this.callService('turn_off').catch((err: Error) => {
+        log.warn(`Could not turn the buzzer back off: ${err.message}`);
+      });
+    }, BUZZER_ON_MS);
   }
 
   private async fetchEntity(entityId: string): Promise<HaReading | null> {

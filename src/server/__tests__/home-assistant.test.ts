@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it } from 'bun:test';
-import { parseEntity, parseEntityList } from '../home-assistant.js';
+import { parseEntity, parseEntityList, shouldRingBuzzer } from '../home-assistant.js';
 
 const entity = (over: Record<string, unknown> = {}) => ({
   entity_id: 'sensor.room_humidity',
@@ -77,5 +77,34 @@ describe('parseEntityList', () => {
 
   it('is empty for an unset variable, which is what makes the integration optional', () => {
     expect(parseEntityList('')).toEqual([]);
+  });
+});
+
+describe('shouldRingBuzzer', () => {
+  it('rings for a failed print', () => {
+    expect(shouldRingBuzzer({ type: 'print_failed' })).toBe(true);
+  });
+
+  it('rings for an error carrying a critical exception', () => {
+    expect(shouldRingBuzzer({ type: 'error', codes: [108] })).toBe(true);
+  });
+
+  it('stays quiet for an error whose codes are all non-critical', () => {
+    // 1301 (Spaghetti Detected) and 1300 (Print File Unavailable) are real codes this
+    // app names, neither in CRITICAL_EXCEPTIONS.
+    expect(shouldRingBuzzer({ type: 'error', codes: [1301, 1300] })).toBe(false);
+  });
+
+  it('stays quiet for a routine filament-change pause (code 109), not a runout error', () => {
+    expect(shouldRingBuzzer({ type: 'error', codes: [109] })).toBe(false);
+  });
+
+  it('stays quiet for an error with no codes at all', () => {
+    expect(shouldRingBuzzer({ type: 'error' })).toBe(false);
+  });
+
+  it('stays quiet for anything else — a status change is not a failure', () => {
+    expect(shouldRingBuzzer({ type: 'status_change' })).toBe(false);
+    expect(shouldRingBuzzer({ type: 'print_completed' })).toBe(false);
   });
 });

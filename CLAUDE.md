@@ -300,6 +300,17 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
     check a DIFFERENT folder's listing — whatever a browser happened to be browsing at
     that moment. `MqttBridge.sendCommand` returns the id it used for exactly this.
 
+- **`home-assistant.ts` is read-only except for one narrow write.** Everything else it
+  does is `GET /api/states/<entity>` — deliberately, since a Home Assistant long-lived
+  token usually carries an administrator's permissions, and a bug here could otherwise
+  reach far past a thermometer. Ringing `HOMEASSISTANT_BUZZER_ENTITY` on a critical error
+  or a failed print (`shouldRingBuzzer`, reusing `CRITICAL_EXCEPTIONS` so it agrees with
+  the browser's own audible alert on what counts as serious) is the one exception, and it
+  stays that narrow on purpose: exactly two generic services, `homeassistant.turn_on` and
+  `turn_off`, against exactly one configured entity — never a service name or an entity
+  id from anywhere else. Do not widen this into a general "call any Home Assistant
+  service" method; add a second narrow one instead, the same way this one was added.
+
 - **The phone dashboard shows ONE card at a time.** Below 700px a vertical rail down
   the right edge (`ui/mobile-focus.ts`) focuses a single card; `All` restores the
   scrolling dashboard. Two consequences for anything that touches the dashboard:
@@ -517,6 +528,7 @@ sanitise it — sanitising is a process that fails silently once.
 | Filament dryer | `src/dryer-core.ts`, `src/server/dryer.ts`, `src/ui/dryer-panel.ts` |
 | Scheduled prints | `src/schedule-core.ts`, `src/server/{schedule,schedule-router}.ts`, `src/ui/schedule-panel.ts` |
 | Workshop tools (cost, maintenance, inventory) | `src/workshop/*-core.ts`, `src/server/{workshop,workshop-router}.ts`, `src/ui/workshop-*.ts` |
+| Home Assistant (readings + buzzer) | `src/server/home-assistant.ts` |
 | Config / env parsing | `src/server/config.ts` |
 | Frontend entry | `src/main.ts`, `index.html` |
 | Frontend cards / views | `src/ui/*.ts` |

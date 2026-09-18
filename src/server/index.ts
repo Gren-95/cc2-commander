@@ -38,7 +38,7 @@ import { WorkshopService } from './workshop.js';
 import { createWorkshopRouter } from './workshop-router.js';
 import { ScheduleService } from './schedule.js';
 import { createScheduleRouter } from './schedule-router.js';
-import { HomeAssistantService } from './home-assistant.js';
+import { HomeAssistantService, shouldRingBuzzer } from './home-assistant.js';
 import { PrintReportCollector } from './print-report-collector.js';
 import { getBuildInfo } from './build-info.js';
 import { applyCors, corsHeaders } from './cors.js';
@@ -194,15 +194,23 @@ const scheduler = new ScheduleService(store, bridge);
 /*
  * --- Home Assistant (optional) ---
  *
- * Ambient temperature and humidity, which the printer cannot measure. Read-only, and
- * every failure degrades to "unreachable" — a thermometer on someone else's server is
- * not a reason for this dashboard to stop working.
+ * Ambient temperature and humidity, which the printer cannot measure. Reading is
+ * read-only, and every failure degrades to "unreachable" — a thermometer on someone
+ * else's server is not a reason for this dashboard to stop working. Ringing the
+ * configured buzzer entity on a critical error or a failed print is the one write; see
+ * `home-assistant.ts` for why it stays that narrow.
  */
 const homeAssistant = new HomeAssistantService(
   config.homeAssistant.url,
   config.homeAssistant.token,
   config.homeAssistant.entities,
+  config.homeAssistant.buzzerEntity,
 );
+
+// A no-op when no buzzer is configured; see `ringBuzzer` and `shouldRingBuzzer`.
+store.on('print_event', (event: { type: string; codes?: number[] }) => {
+  if (shouldRingBuzzer(event)) void homeAssistant.ringBuzzer();
+});
 
 // --- HTTP Server ---
 const restHandler = createRestRouter(

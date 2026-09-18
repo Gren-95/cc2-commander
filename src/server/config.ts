@@ -59,8 +59,10 @@ export interface ServiceConfig {
 
   /**
    * Home Assistant (optional): ambient temperature and humidity the printer cannot
-   * measure itself. Read-only — see the note in `home-assistant.ts` about what a
-   * long-lived token can do.
+   * measure itself, and optionally an entity to ring on a critical error or a failed
+   * print. Reading is unconditionally on once configured; ringing is the one write this
+   * service makes to Home Assistant — see the note in `home-assistant.ts` about what a
+   * long-lived token can do, and why that stays as narrow as one entity.
    */
   homeAssistant: {
     enabled: boolean;
@@ -68,6 +70,8 @@ export interface ServiceConfig {
     /** Long-lived access token. A SECRET: never logged, never sent to the browser. */
     token: string;
     entities: string[];
+    /** Empty when not configured — ringing the buzzer is then a no-op, not an error. */
+    buzzerEntity: string;
   };
 
   // AI monitoring (optional)
@@ -181,15 +185,24 @@ export function loadConfig(): ServiceConfig {
   const haUrl = env('HOMEASSISTANT_URL').trim().replace(/\/+$/, '');
   const haToken = env('HOMEASSISTANT_TOKEN').trim();
   const haEntities = parseEntityList(env('HOMEASSISTANT_ENTITIES'));
+  // Independent of the three above: a buzzer needs no sensors to read, and the sensor
+  // poll needs no buzzer, so neither is required for the other to work.
+  const haBuzzerEntity = env('HOMEASSISTANT_BUZZER_ENTITY').trim();
   if (haUrl && !/^https?:\/\//.test(haUrl)) {
     throw new Error(`Invalid HOMEASSISTANT_URL: "${haUrl}" (must start with http:// or https://)`);
   }
   // `sensor.living_room_humidity` — domain, dot, object id. A bare name is the usual
   // mistake and produces a 404 per poll that reads like the server is down.
-  const badEntity = haEntities.find((e) => !/^[a-z_]+\.[a-z0-9_]+$/.test(e));
+  const entityRe = /^[a-z_]+\.[a-z0-9_]+$/;
+  const badEntity = haEntities.find((e) => !entityRe.test(e));
   if (badEntity) {
     throw new Error(
       `Invalid HOMEASSISTANT_ENTITIES entry: "${badEntity}" (expected e.g. sensor.room_humidity)`,
+    );
+  }
+  if (haBuzzerEntity && !entityRe.test(haBuzzerEntity)) {
+    throw new Error(
+      `Invalid HOMEASSISTANT_BUZZER_ENTITY: "${haBuzzerEntity}" (expected e.g. switch.printer_buzzer)`,
     );
   }
 
@@ -214,6 +227,7 @@ export function loadConfig(): ServiceConfig {
       url: haUrl,
       token: haToken,
       entities: haEntities,
+      buzzerEntity: haUrl && haToken ? haBuzzerEntity : '',
     },
   };
 }
