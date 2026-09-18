@@ -18,12 +18,13 @@
 
 import type { BuildStampish } from '../types';
 import { UNKNOWN_VERSION_LABEL, buildVersionLabel } from '../types';
-import { escapeHtml } from './helpers';
+import { escapeAttr, escapeHtml } from './helpers';
 import { icon } from './icons';
 import { toast } from './toast';
 
-/** Where this code comes from. Upstream, not any particular fork. */
-const PROJECT_URL = 'https://github.com/Gren-95/cc2-commander';
+/** Where this code comes from. Upstream, not any particular fork. Also used by the
+ * service-status badge, which links its own Version row to the same commit. */
+export const PROJECT_URL = 'https://github.com/Gren-95/cc2-commander';
 
 const SUMMARY =
   'A web frontend and service for the Elegoo Centauri Carbon 2. One MQTT connection ' +
@@ -66,13 +67,19 @@ interface Fact {
   title?: string;
   /** Rendered in the muted colour: a real but unremarkable absence. */
   muted?: boolean;
+  /** When set, the value links out to this commit on GitHub instead of plain text. */
+  href?: string;
 }
 
 function factRow(f: Fact): string {
   const attr = f.title ? ` title="${escapeHtml(f.title)}"` : '';
+  const valueClass = `font-mono ${f.muted ? 'text-fg-muted' : 'text-fg'}`;
+  const valueHtml = f.href
+    ? `<a href="${escapeAttr(f.href)}" target="_blank" rel="noopener noreferrer" class="${valueClass} hover:underline"${attr}>${escapeHtml(f.value)}</a>`
+    : `<span class="${valueClass}"${attr}>${escapeHtml(f.value)}</span>`;
   return `<div class="flex justify-between gap-4 [padding:4px_0] text-[13px]">
       <span class="text-fg-muted">${escapeHtml(f.label)}</span>
-      <span class="font-mono ${f.muted ? 'text-fg-muted' : 'text-fg'}"${attr}>${escapeHtml(f.value)}</span>
+      ${valueHtml}
     </div>`;
 }
 
@@ -97,9 +104,15 @@ function buildFacts(stamp: BuildStampish | null | undefined): { facts: Fact[]; s
   const version = buildVersionLabel(stamp);
   const stamped = version !== UNKNOWN_VERSION_LABEL;
   const facts: Fact[] = [];
+  const commitHref = stamp?.commit ? `${PROJECT_URL}/commit/${stamp.commit}` : undefined;
 
   if (stamped) {
-    facts.push({ label: 'Version', value: version, title: stamp?.describe ?? undefined });
+    facts.push({
+      label: 'Version',
+      value: version,
+      title: stamp?.describe ?? undefined,
+      href: commitHref,
+    });
   } else {
     facts.push({
       label: 'Version',
@@ -111,7 +124,12 @@ function buildFacts(stamp: BuildStampish | null | undefined): { facts: Fact[]; s
     });
   }
   if (stamp?.shortCommit) {
-    facts.push({ label: 'Commit', value: stamp.shortCommit, title: stamp.commit ?? undefined });
+    facts.push({
+      label: 'Commit',
+      value: stamp.shortCommit,
+      title: stamp.commit ?? undefined,
+      href: commitHref,
+    });
   }
   const installed = formatInstalledAt(stamp?.installedAt);
   if (installed) {

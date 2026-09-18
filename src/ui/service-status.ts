@@ -2,12 +2,12 @@
 
 import { toggleState } from './state-classes';
 import { ICONS, type IconName, icon } from './icons';
-import { $, escapeHtml } from './helpers';
-import { type AboutStatus, setAboutStatus } from './about';
+import { $, escapeAttr, escapeHtml } from './helpers';
+import { type AboutStatus, PROJECT_URL, setAboutStatus } from './about';
 import type { PrinterState } from '../printer-state';
 import {
+  type BuildStampish,
   type MqttPhase,
-  type VersionStampish,
   UNKNOWN_VERSION_LABEL,
   buildVersionLabel,
   mqttBannerHeadline,
@@ -28,7 +28,7 @@ export interface ServiceStatus {
    * The deploy stamp (ELEG-48). Optional for the same reason as `mqttPhase`: a browser
    * can be holding a `service_status` from before this shipped.
    */
-  build?: VersionStampish | null;
+  build?: BuildStampish | null;
   printerSn: string | null;
   printerIp: string;
   wsClients: number;
@@ -216,6 +216,11 @@ export function renderServiceStatus(): void {
   // as a container, and an image built outside the publish workflow shows exactly this
   // (ELEG-48).
   const version = buildVersionLabel(s.build);
+  // Linked to the commit it was built from, when the deploy is stamped with one —
+  // same commit the About panel links, so both point at the exact code running.
+  const versionValueHtml = s.build?.commit
+    ? `<a href="${escapeAttr(`${PROJECT_URL}/commit/${s.build.commit}`)}" target="_blank" rel="noopener noreferrer" class="text-fg ml-auto font-medium hover:underline">${escapeHtml(version)}</a>`
+    : `<span class="text-fg ml-auto font-medium">${escapeHtml(version)}</span>`;
 
   // The banner used to fire on `broker_only && attempts >= 3`, which meant it could
   // never fire for the case that most needed it: when the printer never speaks, no SN is
@@ -238,7 +243,7 @@ export function renderServiceStatus(): void {
       <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(!!s.printerSn)}<span class="text-fg-muted whitespace-nowrap">Printer</span><span class="text-fg ml-auto font-medium">${s.printerSn || 'unknown'}</span></div>
       <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(true)}<span class="text-fg-muted whitespace-nowrap">WS Clients</span><span class="text-fg ml-auto font-medium">${s.wsClients}</span></div>
       <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(true)}<span class="text-fg-muted whitespace-nowrap">Uptime</span><span class="text-fg ml-auto font-medium">${formatUptime(s.uptime)}</span></div>
-      <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(version !== UNKNOWN_VERSION_LABEL)}<span class="text-fg-muted whitespace-nowrap">Version</span><span class="text-fg ml-auto font-medium">${escapeHtml(version)}</span></div>
+      <div class="svc-item flex items-center [gap:6px] [padding:6px_10px] bg-input rounded-chip text-[0.82rem]">${dotHtml(version !== UNKNOWN_VERSION_LABEL)}<span class="text-fg-muted whitespace-nowrap">Version</span>${versionValueHtml}</div>
     </div>
   `;
 }

@@ -32,6 +32,12 @@ export interface WsClientOptions {
   onHomeAssistant?: (data: Record<string, unknown>) => void;
   /** Called when a drying session ends, whatever ended it */
   onDryerFinished?: (reason: string, label: string) => void;
+  /**
+   * Called when a workshop tool (cost, maintenance, inventory) changed its own state —
+   * a save, a spool taken off, a task marked done. Carries no data: the frame only says
+   * something changed, and the open panel re-fetches its own `/api/workshop/*` route.
+   */
+  onWorkshopChanged?: () => void;
   /** Called with event log entries */
   onEventLog?: (entry: { ts: number; event: Record<string, unknown> }) => void;
   /** Called when server records a new layer time */
@@ -180,6 +186,11 @@ export class WsClient {
 
       case 'dryer_finished': {
         this.opts.onDryerFinished?.(String(msg.reason ?? ''), String(msg.label ?? ''));
+        break;
+      }
+
+      case 'workshop_changed': {
+        this.opts.onWorkshopChanged?.();
         break;
       }
 

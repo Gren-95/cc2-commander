@@ -12,7 +12,8 @@ import { applyDryerState, handleDryerFinished, setDryerClient } from './ui/dryer
 import { handleEventLog, loadEventLogHistory } from './ui/event-log';
 import { initAmbient, renderAmbient } from './ui/ambient';
 import { parseDeepLink } from './ui/deep-link';
-import { subtabNames, switchSubtab } from './ui/subtabs';
+import { savedSubtab, subtabNames, switchSubtab } from './ui/subtabs';
+import { renderWorkshopPanel } from './ui/workshop';
 import { currentFileDir, currentFileSource } from './ui/file-browsing';
 import { handleInlineThumbnail } from './ui/file-thumbnails';
 import { bindFileControls, renderFiles } from './ui/files';
@@ -28,12 +29,7 @@ import {
   setHistoryClient,
 } from './ui/print-history';
 import { bindReportControls, renderReports } from './ui/print-reports';
-import {
-  renderDashboard,
-  renderHeader,
-  setCameraOverlay,
-  syncCameraOverlayControl,
-} from './ui/print-status';
+import { renderDashboard, setCameraOverlay, syncCameraOverlayControl } from './ui/print-status';
 import {
   type PrinterLink,
   renderSystemInfo,
@@ -125,7 +121,6 @@ function scheduleRender(): void {
   requestAnimationFrame(() => {
     renderScheduled = false;
     if (client) {
-      renderHeader(state);
       renderDashboard(state, client);
       renderCanvas(state);
       renderSystemInfo(state);
@@ -656,6 +651,11 @@ function connectToService(): void {
     },
     onDryerFinished(reason, label) {
       handleDryerFinished(reason, label);
+    },
+    onWorkshopChanged() {
+      // Only the currently open panel re-fetches — the others pick up the change the
+      // next time someone opens them, same as every workshop tool's own comment says.
+      renderWorkshopPanel(savedSubtab('tools'));
     },
     onEventLog(entry) {
       handleEventLog(entry);

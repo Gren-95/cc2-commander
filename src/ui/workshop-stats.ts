@@ -31,6 +31,9 @@ const HOST_ID = 'workshop-stats-content';
 /** Shown on the first load only. A refetch keeps the last figures until new ones land. */
 let loaded = false;
 
+/** From the Cost tab's settings, fetched alongside the stats. `€` until anything answers. */
+let currency = '€';
+
 function fmtHours(h: number): string {
   return h >= 100 ? String(Math.round(h)) : h.toFixed(1);
 }
@@ -57,6 +60,20 @@ function tile(label: string, value: string, unit: string, sub: string, extra = '
       ${extra}
       <span class="${LABEL}">${sub}</span>
     </div>`;
+}
+
+/**
+ * A cost tile: the figure it names, or a dash while nothing is priced. Filament and
+ * electricity are known for different sets of prints — see `cost-core.ts` — so each
+ * carries its own "known for N of M" rather than one shared count.
+ */
+function costTile(label: string, value: number | null, knownFor: number, total: number): string {
+  return tile(
+    label,
+    value === null ? '—' : `${escapeHtml(currency)}${value.toFixed(2)}`,
+    '',
+    knownFor > 0 ? `Known for ${knownFor} of ${total} prints` : 'No price set in the Cost tab',
+  );
 }
 
 function tiles(s: Stats): string {
@@ -93,6 +110,8 @@ function tiles(s: Stats): string {
         s.gramsKnownFor ? g.unit : '',
         `Known for ${s.gramsKnownFor} of ${s.prints} prints`,
       )}
+      ${costTile('Filament cost', s.filamentCost, s.filamentCostKnownFor, s.prints)}
+      ${costTile('Electricity cost', s.electricityCost, s.electricityCostKnownFor, s.prints)}
     </div>`;
 }
 
@@ -253,9 +272,18 @@ export async function renderWorkshopStats(): Promise<void> {
 
   try {
     const tz = new Date().getTimezoneOffset();
-    const res = await fetchTimeout(`/api/workshop/stats?tz=${tz}`);
+    // The currency is the Cost tab's, not this endpoint's — fetched alongside rather
+    // than blocking on it, so a Cost fetch failure never keeps statistics from showing.
+    const [res, costRes] = await Promise.all([
+      fetchTimeout(`/api/workshop/stats?tz=${tz}`),
+      fetchTimeout('/api/workshop/cost').catch(() => null),
+    ]);
     const body = (await res.json()) as { data?: Stats };
     if (!res.ok || !body.data) throw new Error(String(res.status));
+    if (costRes?.ok) {
+      const costBody = (await costRes.json()) as { data?: { settings?: { currency?: string } } };
+      if (costBody.data?.settings?.currency) currency = costBody.data.settings.currency;
+    }
     host.innerHTML = view(body.data);
     bindTooltip(host, body.data);
     loaded = true;
