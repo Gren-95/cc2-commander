@@ -309,6 +309,7 @@ function bindSettingsForm(): void {
   });
 
   document.getElementById('cost-materials')?.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('[data-remove-material]')) return;
     (e.target as HTMLElement).closest('[data-material-row]')?.remove();
   });
 }
