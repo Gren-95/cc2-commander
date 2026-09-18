@@ -43,7 +43,7 @@ warning says so. Until ELEG-79 the gate ran `biome ci src/` while `includes` sai
 `src/**`, so the two agreed by accident and widening `includes` alone would have changed
 nothing. Measured at the time — with `"*.config.ts"` added to `includes`:
 
-```
+```text
 bunx biome ci src/   -> Checked 84 files, PASS   (path arg wins; config files unseen)
 bunx biome ci        -> Checked 87 files, FAIL   (real formatting drift in both)
 ```
@@ -79,7 +79,7 @@ vite build`) runs only that config. So `bun run build` passing says **nothing** 
 backend. Measured, by appending `const __probe: number = "not a number"` to
 `src/server/config.ts`:
 
-```
+```text
 bunx tsc        -> PASS   (the browser config never sees src/server)
 bun run build           -> PASS   (same config, so also blind)
 bun run service:check   -> FAIL   caught
@@ -113,7 +113,7 @@ which restarted and threw again.
 
 Bun resolves both forms. Measured on 1.4.2, with `dep.ts` on disk:
 
-```
+```text
 import { x } from './dep'      -> resolves
 import { x } from './dep.js'   -> resolves
 ```
@@ -250,7 +250,7 @@ biome is not the only gate that warns without failing. **`vite build` exits 0 wh
 printing warnings about your config**, so a green `bun run gates` says nothing about
 whether `vite.config.ts` still loads under the loader vite is moving to:
 
-```
+```text
 (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`,
     which is planned to become the default in a future major version of Vite:
   - `__dirname` (vite.config.ts:25:29). Use `import.meta.dirname` instead
@@ -294,7 +294,7 @@ What remains true: `biome.json` scopes `files.includes` to `src/**` and `*.confi
 `!**/*.md`, so no markdown in this repo is formatted at all, including `CLAUDE.md` and `docs/**`. Confirmed
 rather than assumed:
 
-```
+```console
 $ bunx biome check docs/gates.md
 Checked 0 files in 782µs.
   × No files were processed in the specified paths.
@@ -446,7 +446,7 @@ would not have caught the two known cases is not worth adding. Both were restore
 the commit **before** each deletion (`git checkout 1fbb3d0^ -- src/telegram`,
 `git checkout dd31334^ -- src/ui/system-info.ts`) and knip run against the result:
 
-```
+```text
 Unused files (8)
 src/telegram/allowlist.ts
 src/telegram/bot.ts

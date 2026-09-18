@@ -260,7 +260,7 @@ Two credentials, because there are two kinds of client:
 A slicer cannot log in and hold a cookie, and a browser should not carry a bearer token in
 JavaScript, so each gets the mechanism native to it. Machine clients send either header:
 
-```
+```http
 X-Api-Key: <AUTH_API_KEY>
 Authorization: Bearer <AUTH_API_KEY>
 ```

@@ -26,7 +26,7 @@ that reason. This file is for what has no single home, or what spans several.
 ## Canvas/AMS Filament Swap Behavior (Fixed 2026-04-12)
 
 ### Observed Event Sequence (fw 01.03.01.89)
-```
+```text
 machine_status stays 2 (Printing) throughout swap
 sub_status: 2075 → 1045 → 1066 → 2075 (repeats per color change)
 Exception 1211 (Canvas Filament Runout) fires at swap start

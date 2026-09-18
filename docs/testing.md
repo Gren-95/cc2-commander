@@ -267,7 +267,7 @@ interpret it. See [`CLAUDE.md`](../CLAUDE.md).
 Production runs on this same machine (see [deployment.md](deployment.md)), and it holds
 **both** service ports:
 
-```
+```text
 LISTEN 0.0.0.0:8088      cc2-commander   (SERVICE_PORT)
 LISTEN 0.0.0.0:7125      cc2-commander   (MOONRAKER_PORT)
 ```
@@ -282,7 +282,7 @@ not in your dev window.
 checkout's `.env` holds the **production** `TELEGRAM_BOT_TOKEN`, and a bot token supports
 exactly one long-poller. Start the service locally and grammy dies with:
 
-```
+```text
 GrammyError: Call to 'getUpdates' failed! (409: Conflict: terminated by other getUpdates
 request; make sure that only one bot instance is running)
 ```

@@ -3,7 +3,7 @@
 One MQTT connection to the printer, fanned out to six consumers. Everything else
 follows from that.
 
-```
+```text
               ┌──────────────── printer (CC2) ────────────────┐
               │  MQTT/TCP :1883   ·   MQTT/WS :9001            │
               │  camera MJPEG :8080  ·  UDP discovery :52700   │
@@ -143,7 +143,7 @@ above must tolerate them being `null`:
 
 ## Project Structure
 
-```
+```text
 src/
 ├── main.ts              # Entry point, WsClient, render loop, sidebar resize
 ├── ws-client.ts         # WebSocket client (connects to service, not printer)

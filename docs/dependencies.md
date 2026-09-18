@@ -123,7 +123,7 @@ bun why three
 
 One version heading with both requirers under it is the healthy state:
 
-```
+```text
 three@0.178.0
   ├─ cc2-commander (requires 0.178.0)
   └─ gcode-preview@3.0.0-alpha.4 (requires 0.178.0)

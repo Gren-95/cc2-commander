@@ -10,7 +10,7 @@ A web frontend **and** a Node backend service for an **Elegoo Centauri Carbon 2
 (CC2)** FDM printer. The service holds **one** MQTT connection to the printer and
 fans that single state stream out to every consumer:
 
-```
+```text
 Printer MQTT ←→ MqttBridge (singleton) ←→ StateStore
                                              ↓
         ┌──────────┬──────────┬───────────┬──────────┐
