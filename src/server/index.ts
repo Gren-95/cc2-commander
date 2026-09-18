@@ -36,6 +36,8 @@ import { DryerService } from './dryer.js';
 import { LedgerService } from './ledger.js';
 import { WorkshopService } from './workshop.js';
 import { createWorkshopRouter } from './workshop-router.js';
+import { ScheduleService } from './schedule.js';
+import { createScheduleRouter } from './schedule-router.js';
 import { HomeAssistantService } from './home-assistant.js';
 import { PrintReportCollector } from './print-report-collector.js';
 import { getBuildInfo } from './build-info.js';
@@ -181,6 +183,15 @@ const ledger = new LedgerService(store, bridge);
 const workshop = new WorkshopService(ledger);
 
 /*
+ * --- Scheduled prints ---
+ *
+ * Owned here for the same reason as the dryer: firing a print at a chosen time has to
+ * happen whether or not a browser is open. See `schedule.ts` for the skip-never-guess
+ * checks a schedule passes before it is allowed to send `1020`.
+ */
+const scheduler = new ScheduleService(store, bridge);
+
+/*
  * --- Home Assistant (optional) ---
  *
  * Ambient temperature and humidity, which the printer cannot measure. Read-only, and
@@ -204,6 +215,7 @@ const restHandler = createRestRouter(
   (req) => authGate.authenticate(req).ok,
 );
 const workshopHandler = createWorkshopRouter(ledger, workshop, store);
+const scheduleHandler = createScheduleRouter(scheduler);
 const octoPrintHandler = createOctoPrintRouter(store, bridge, config);
 const moonrakerHandler = createMoonrakerRouter(store, bridge, config);
 
@@ -265,6 +277,25 @@ const nodeRouter: NodeHandler = (req, res) => {
     if (workshopHandler(req, res)) return;
   }
 
+  // Scheduled prints
+  if (url.startsWith('/api/schedule/')) {
+    applyCors(
+      res,
+      corsHeaders(
+        config.corsPolicy,
+        req.headers.origin,
+        'GET, POST, DELETE, OPTIONS',
+        'Content-Type',
+      ),
+    );
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+    if (scheduleHandler(req, res)) return;
+  }
+
   // OctoPrint compatibility API
   if (url === '/octoprint' || url.startsWith('/octoprint/') || url.startsWith('/octoprint?')) {
     applyCors(
@@ -323,6 +354,9 @@ homeAssistant.on('readings', (state: Record<string, unknown>) => {
 // Cheaper than pushing four payloads to browsers that are mostly not looking at them.
 ledger.on('changed', () => wsTransport.broadcast({ type: 'workshop_changed' }));
 workshop.on('changed', () => wsTransport.broadcast({ type: 'workshop_changed' }));
+// Fired or skipped are both a change to the same list a panel would refetch to see, so
+// one event covers created, cancelled, fired and skipped alike.
+scheduler.on('changed', () => wsTransport.broadcast({ type: 'schedule_changed' }));
 dryer.on('state', (state: Record<string, unknown>) => {
   wsTransport.broadcast({ type: 'dryer_state', ...state });
 });
@@ -410,6 +444,7 @@ async function start(): Promise<void> {
   await dryer.start();
   await ledger.start();
   await workshop.start();
+  await scheduler.start();
   homeAssistant.start();
 }
 
@@ -420,6 +455,7 @@ function shutdown(): void {
   // deliberately: a restart resumes it, and turning a heater off because a process is
   // cycling would end a four-hour job on a `systemctl restart`.
   dryer.stop();
+  scheduler.stop();
   homeAssistant.stop();
   persistence.stop();
   moonrakerServer.stop();

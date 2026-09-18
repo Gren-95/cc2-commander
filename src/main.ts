@@ -14,6 +14,7 @@ import { initAmbient, renderAmbient } from './ui/ambient';
 import { parseDeepLink } from './ui/deep-link';
 import { savedSubtab, subtabNames, switchSubtab } from './ui/subtabs';
 import { renderWorkshopPanel } from './ui/workshop';
+import { renderSchedulePanel } from './ui/schedule-panel';
 import { currentFileDir, currentFileSource } from './ui/file-browsing';
 import { handleInlineThumbnail } from './ui/file-thumbnails';
 import { bindFileControls, renderFiles } from './ui/files';
@@ -657,6 +658,9 @@ function connectToService(): void {
       // Only the currently open panel re-fetches — the others pick up the change the
       // next time someone opens them, same as every workshop tool's own comment says.
       renderWorkshopPanel(savedSubtab('tools'));
+    },
+    onScheduleChanged() {
+      if (savedSubtab('tools') === 'schedule') void renderSchedulePanel();
     },
     onEventLog(entry) {
       handleEventLog(entry);

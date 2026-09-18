@@ -379,13 +379,21 @@ export class MqttBridge extends EventEmitter {
     }
   }
 
-  sendCommand(method: number, params: Record<string, unknown>): void {
-    if (!this.client || !this.sn) return;
+  /**
+   * @returns the request id the printer's response will echo back in its own `id`
+   *   field — for the rare caller (`schedule.ts`'s file-list re-check) that needs to
+   *   tell its own answer apart from another consumer's request for the same method
+   *   landing on the shared `response` event at the same time. `null` when nothing was
+   *   sent, so such a caller does not wait on a request that never went out.
+   */
+  sendCommand(method: number, params: Record<string, unknown>): number | null {
+    if (!this.client || !this.sn) return null;
     this.commandId++;
     const topic = `elegoo/${this.sn}/${this.clientId}/api_request`;
     const msg = { id: this.commandId, method, params };
     this.client.publish(topic, JSON.stringify(msg));
     this.emit('raw', 'sent', topic, msg);
+    return this.commandId;
   }
 
   /** Force a reconnect by tearing down the old client and calling connect() again */

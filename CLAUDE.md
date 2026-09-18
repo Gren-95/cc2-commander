@@ -253,8 +253,8 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   with one strip and wrong the moment there were two — picking a tool would have
   deactivated Help and Debug.
   About, Help & API and Debug are the three sub-tabs of the About page. Under Tools:
-  Filament Dryer, Spool Calculator, Statistics, Cost, Maintenance and Inventory. The
-  strip scrolls sideways, and the selected tab is scrolled into view.
+  Filament Dryer, Spool Calculator, Statistics, Cost, Maintenance, Inventory and
+  Schedule. The strip scrolls sideways, and the selected tab is scrolled into view.
 
 
 - **The filament dryer heats the bed on a timer, and that makes it the one tool in
@@ -275,6 +275,30 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
     The hole left is the service itself dying mid-session; `src/dryer-gcode.ts` is the
     start of closing it (a cycle the printer runs as a job), unwired until someone
     confirms the printer will run a file with no motion in it.
+
+- **Scheduled prints are the other tool that commands the printer on a timer, and the
+  one that can start a job with nobody watching it happen.** `src/schedule-core.ts`
+  holds validation and "what is due now" (shared with the browser for its own light
+  checks); `src/server/schedule.ts` is the only place that sends `1020` for a schedule,
+  on a `setInterval` that outlives any browser tab, the same fix the dryer needed.
+  Three properties must survive any change:
+
+  - **It fires at most once.** `pending` → `fired` or `skipped`, never retried — a
+    schedule that could re-fire is a job that can start a second and third time with
+    nobody there to notice the first went wrong.
+  - **Skip, never guess, and always say why.** Firing re-checks three things fresh, at
+    the moment they matter rather than whatever was true when the schedule was made:
+    the MQTT connection, whether the printer is genuinely idle (not just "not
+    printing" — leveling, homing and a self-check all count as busy), and — via a live
+    `1044` for the file's own folder, never the ambient `StateStore.files` cache
+    another browser's folder click could have overwritten — whether the file is still
+    there. Any of the three failing skips with a recorded reason instead of sending
+    `1020` on a guess.
+  - **A response is matched by its own request id when the printer sends one, not by
+    method alone.** The `response` event is shared by every consumer of the one MQTT
+    connection; matching a `1044` by method alone would sometimes hand the file-list
+    check a DIFFERENT folder's listing — whatever a browser happened to be browsing at
+    that moment. `MqttBridge.sendCommand` returns the id it used for exactly this.
 
 - **The phone dashboard shows ONE card at a time.** Below 700px a vertical rail down
   the right edge (`ui/mobile-focus.ts`) focuses a single card; `All` restores the
@@ -490,6 +514,9 @@ sanitise it — sanitising is a process that fails silently once.
 | REST API + camera proxy | `src/server/rest-api.ts` |
 | Moonraker / OctoPrint compat | `src/server/{moonraker-compat,moonraker-server,octoprint-compat}.ts` |
 | Telegram bot | `src/server/telegram.ts`, `src/server/allowlist.ts` |
+| Filament dryer | `src/dryer-core.ts`, `src/server/dryer.ts`, `src/ui/dryer-panel.ts` |
+| Scheduled prints | `src/schedule-core.ts`, `src/server/{schedule,schedule-router}.ts`, `src/ui/schedule-panel.ts` |
+| Workshop tools (cost, maintenance, inventory) | `src/workshop/*-core.ts`, `src/server/{workshop,workshop-router}.ts`, `src/ui/workshop-*.ts` |
 | Config / env parsing | `src/server/config.ts` |
 | Frontend entry | `src/main.ts`, `index.html` |
 | Frontend cards / views | `src/ui/*.ts` |

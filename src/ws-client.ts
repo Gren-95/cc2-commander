@@ -38,6 +38,12 @@ export interface WsClientOptions {
    * something changed, and the open panel re-fetches its own `/api/workshop/*` route.
    */
   onWorkshopChanged?: () => void;
+  /**
+   * Called when a scheduled print was created, cancelled, fired or skipped. Same
+   * carries-no-data shape as `onWorkshopChanged` — the open Schedule panel re-fetches
+   * `/api/schedule/`.
+   */
+  onScheduleChanged?: () => void;
   /** Called with event log entries */
   onEventLog?: (entry: { ts: number; event: Record<string, unknown> }) => void;
   /** Called when server records a new layer time */
@@ -191,6 +197,11 @@ export class WsClient {
 
       case 'workshop_changed': {
         this.opts.onWorkshopChanged?.();
+        break;
+      }
+
+      case 'schedule_changed': {
+        this.opts.onScheduleChanged?.();
         break;
       }
 

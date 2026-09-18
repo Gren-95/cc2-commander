@@ -37,6 +37,7 @@ export const ICONS = {
   cost: 'cash-coin',
   maintenance: 'wrench-adjustable',
   inventory: 'box-seam',
+  schedule: 'calendar-event',
   edit: 'pencil',
   done: 'check2-circle',
   add: 'plus-lg',
