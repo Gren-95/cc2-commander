@@ -6,9 +6,11 @@
  */
 
 import { renderWorkshopCost } from './workshop-cost';
+import { renderWorkshopMaintenance } from './workshop-maintenance';
 import { renderWorkshopStats } from './workshop-stats';
 
 export function renderWorkshopPanel(name: string): void {
   if (name === 'stats') void renderWorkshopStats();
   else if (name === 'cost') void renderWorkshopCost();
+  else if (name === 'maintenance') void renderWorkshopMaintenance();
 }

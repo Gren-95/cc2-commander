@@ -720,6 +720,7 @@
           <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="spool" aria-selected="false"><i class="bi bi-calculator bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Spool Calculator</button>
           <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="stats" aria-selected="false"><i class="bi bi-bar-chart-line bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Statistics</button>
           <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="cost" aria-selected="false"><i class="bi bi-cash-coin bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Cost</button>
+          <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="maintenance" aria-selected="false"><i class="bi bi-wrench-adjustable bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Maintenance</button>
         </nav>
 
         <section id="tools-subtab-dryer">
@@ -744,6 +745,15 @@
             between households for a guessed default to be worth trusting.
           </p>
           <div id="workshop-cost-content"></div>
+        </section>
+
+        <section id="tools-subtab-maintenance" class="hidden">
+          <p class="text-[13px] text-fg-muted mb-4 max-w-[70ch]">
+            Tracked by print hours, not calendar time — a printer idle for a month has
+            not worn its rails. These intervals are starting points, not figures from
+            Elegoo; edit them to fit your filament and environment.
+          </p>
+          <div id="workshop-maintenance-content"></div>
         </section>
       </div>
     </div>
