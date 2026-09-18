@@ -51,7 +51,7 @@ function money(v: number | null, currency: string): string {
 function materialRowHtml(name: string, price: number | ''): string {
   return `
     <div class="flex items-center gap-2" data-material-row>
-      <input type="text" data-material-name value="${escapeAttr(name)}" aria-label="Material name"
+      <input type="text" data-material-name data-material-picker value="${escapeAttr(name)}" aria-label="Material name"
         placeholder="Material, e.g. PLA" class="${FIELD} flex-1 min-w-0">
       <input type="number" data-material-price min="0" max="10000" step="0.01" value="${price}"
         aria-label="Price per kg" placeholder="Price/kg" class="${FIELD} w-24">

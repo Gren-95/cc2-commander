@@ -48,6 +48,7 @@ import { toast } from './ui/toast';
 import { renderLog, bindLogControls } from './ui/log';
 import { installThumbnailFallback } from './ui/helpers';
 import { initDashboardEdit } from './ui/dashboard-edit';
+import { initMaterialPickers } from './ui/material-picker';
 import { initSegmented } from './ui/segmented';
 import { initSteppers } from './ui/stepper';
 import {
@@ -785,6 +786,7 @@ void initAmbient();
   if (link.group && link.subtab) switchSubtab(link.group, link.subtab);
 }
 initSteppers();
+initMaterialPickers();
 
 void boot();
 

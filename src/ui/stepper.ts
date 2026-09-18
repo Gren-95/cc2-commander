@@ -79,6 +79,30 @@ function nudge(input: HTMLInputElement, direction: 1 | -1): void {
   syncDisabled(input);
 }
 
+/**
+ * Pull a typed value back into `[min, max]` once the field is left, at the step's
+ * precision. `min`/`max`/`step` stop the +/- buttons from ever leaving the range, but
+ * they do nothing to a value the keyboard typed directly — a number input still accepts
+ * `-5` in a field whose min is 0, and only refuses to submit it inside a `<form>`, which
+ * none of these fields are in. An empty field is left alone: several forms use it as a
+ * meaningful "unset" state, and clamping it to `min` would invent a value nobody chose.
+ */
+function clampTyped(input: HTMLInputElement): void {
+  if (input.value === '') return;
+  const n = Number(input.value);
+  if (!Number.isFinite(n)) return;
+
+  const step = Number(input.step) || 1;
+  const min = input.min === '' ? Number.NEGATIVE_INFINITY : Number(input.min);
+  const max = input.max === '' ? Number.POSITIVE_INFINITY : Number(input.max);
+  const clamped = Math.min(max, Math.max(min, n));
+  if (clamped === n) return;
+
+  input.value = clamped.toFixed(decimalsOf(step));
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
 /** Grey the button that cannot do anything, so a clamped field says so. */
 function syncDisabled(input: HTMLInputElement): void {
   const group = input.closest('.stepper');
@@ -146,6 +170,12 @@ function enhance(input: HTMLInputElement): void {
   input.replaceWith(group);
   group.append(makeButton(input, -1), input, makeButton(input, 1));
   input.addEventListener('input', () => syncDisabled(input));
+  input.addEventListener('blur', () => clampTyped(input));
+  // A finer keypad than "numeric" wherever the step allows a fraction, so the decimal
+  // point is on the keyboard instead of missing on the phones that offer both.
+  if (!input.inputMode || input.inputMode === 'text') {
+    input.inputMode = decimalsOf(Number(input.step) || 1) > 0 ? 'decimal' : 'numeric';
+  }
   syncDisabled(input);
 }
 

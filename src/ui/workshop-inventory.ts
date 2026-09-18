@@ -100,8 +100,8 @@ function spoolFieldsHtml(s?: Spool): string {
       </div>
       <div class="flex flex-col gap-1">
         <label class="${LABEL}">Material</label>
-        <input type="text" data-spool-material value="${escapeAttr(s?.material ?? '')}"
-          placeholder="PLA" class="${FIELD} w-24">
+        <input type="text" data-spool-material data-material-picker value="${escapeAttr(s?.material ?? '')}"
+          placeholder="PLA" class="${FIELD} w-32">
       </div>
       <div class="flex flex-col gap-1">
         <label class="${LABEL}">Colour</label>
