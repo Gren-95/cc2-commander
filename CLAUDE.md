@@ -253,9 +253,8 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   with one strip and wrong the moment there were two — picking a tool would have
   deactivated Help and Debug.
   About, Help & API and Debug are the three sub-tabs of the About page. Under Tools:
-  Filament Dryer, Spool Calculator, Statistics, Cost and Maintenance, with Inventory to
-  come: its service and `/api/workshop/*` routes exist, and the panel is GitHub issue
-  #6. The strip scrolls sideways, and the selected tab is scrolled into view.
+  Filament Dryer, Spool Calculator, Statistics, Cost, Maintenance and Inventory. The
+  strip scrolls sideways, and the selected tab is scrolled into view.
 
 
 - **The filament dryer heats the bed on a timer, and that makes it the one tool in

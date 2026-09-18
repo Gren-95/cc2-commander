@@ -721,6 +721,7 @@
           <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="stats" aria-selected="false"><i class="bi bi-bar-chart-line bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Statistics</button>
           <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="cost" aria-selected="false"><i class="bi bi-cash-coin bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Cost</button>
           <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="maintenance" aria-selected="false"><i class="bi bi-wrench-adjustable bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Maintenance</button>
+          <button class="subtab text-fg-muted inline-flex items-center [padding:8px_14px] border-0 border-b-2 border-transparent rounded-none bg-transparent text-[13px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap hover:text-fg" data-subtab="inventory" aria-selected="false"><i class="bi bi-box-seam bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i>Inventory</button>
         </nav>
 
         <section id="tools-subtab-dryer">
@@ -754,6 +755,14 @@
             Elegoo; edit them to fit your filament and environment.
           </p>
           <div id="workshop-maintenance-content"></div>
+        </section>
+
+        <section id="tools-subtab-inventory" class="hidden">
+          <p class="text-[13px] text-fg-muted mb-4 max-w-[70ch]">
+            A finished print is deducted automatically when exactly one spool matches
+            its colour and material; anything else waits here for a tap.
+          </p>
+          <div id="workshop-inventory-content"></div>
         </section>
       </div>
     </div>
