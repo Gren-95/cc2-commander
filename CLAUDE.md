@@ -256,7 +256,6 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   Filament Dryer, Spool Calculator, Statistics, Cost, Maintenance, Inventory and
   Schedule. The strip scrolls sideways, and the selected tab is scrolled into view.
 
-
 - **The filament dryer heats the bed on a timer, and that makes it the one tool in
   here with a physical failure mode.** The SERVICE owns the session, not a tab:
   `src/dryer-core.ts` holds the presets, clamps and schedule maths (shared with the
