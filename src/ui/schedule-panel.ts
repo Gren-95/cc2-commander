@@ -14,6 +14,11 @@
  * so a stale or mistyped name never silently starts the wrong thing — it skips, and
  * says why.
  *
+ * The Start Print dialog is the other way in: its Later choice schedules through
+ * `postSchedule`, the same request this form makes, so there is one place that decides
+ * what a schedule request looks like. This form sends no options — a schedule made here
+ * starts as it always has — while the dialog sends everything it collected.
+ *
  * ## One static sibling, one freely-drawn list
  *
  * The add form is bound once and never rebuilt from fetched data, matching
@@ -22,7 +27,7 @@
  * of its own (a Cancel button holds no typed state), so it redraws freely.
  */
 
-import type { ScheduledPrint, ScheduleStatus } from '../schedule-core';
+import type { PrintOptions, ScheduledPrint, ScheduleStatus } from '../schedule-core';
 import { BTN_ICON, BTN_PRIMARY, EMPTY, FIELD, LABEL } from './design';
 import { escapeAttr, escapeHtml, fetchTimeout } from './helpers';
 import { type IconName, icon, iconSolo } from './icons';
@@ -55,7 +60,7 @@ const STATUS_ICON: Record<ScheduleStatus, IconName> = {
 
 /** `<input type="datetime-local">`'s own format, in local time, a minute from now — so
  *  the field's `min` refuses the past without refusing "right now". */
-function minLocalDateTime(): string {
+export function minLocalDateTime(): string {
   const d = new Date(Date.now() + 60_000);
   d.setSeconds(0, 0);
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -86,6 +91,40 @@ function addFormHtml(): string {
     </div>`;
 }
 
+/**
+ * Ask the service to start `filename` once, at `runAt`.
+ *
+ * Says why on failure — a toast, from here, so every caller reads the same — and returns
+ * whether the schedule was created. `filename` is the path 1020 wants (`benchy.gcode`,
+ * `misc/benchy.gcode`); the folder is worked out from it so the service can re-list
+ * exactly that folder before firing. `options` is what to start it with; `null` for none.
+ */
+export async function postSchedule(
+  filename: string,
+  runAt: number,
+  options: PrintOptions | null = null,
+): Promise<boolean> {
+  const lastSlash = filename.lastIndexOf('/');
+  const dir = lastSlash === -1 ? '' : filename.slice(0, lastSlash);
+  try {
+    const res = await fetchTimeout('/api/schedule/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename, dir, runAt, options }),
+    });
+    const body = (await res.json()) as { error?: { message?: string } };
+    if (!res.ok) {
+      toast(body.error?.message ?? 'Could not schedule this print', 'error');
+      return false;
+    }
+    toast('Scheduled', 'success');
+    return true;
+  } catch {
+    toast('Not connected to the service', 'error');
+    return false;
+  }
+}
+
 async function addSchedule(): Promise<void> {
   const filenameEl = document.getElementById('schedule-filename') as HTMLInputElement | null;
   const whenEl = document.getElementById('schedule-when') as HTMLInputElement | null;
@@ -101,28 +140,13 @@ async function addSchedule(): Promise<void> {
     return;
   }
 
-  const lastSlash = filename.lastIndexOf('/');
-  const dir = lastSlash === -1 ? '' : filename.slice(0, lastSlash);
-
   const btn = document.getElementById('schedule-add') as HTMLButtonElement | null;
   if (btn) btn.disabled = true;
   try {
-    const res = await fetchTimeout('/api/schedule/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename, dir, runAt }),
-    });
-    const body = (await res.json()) as { error?: { message?: string } };
-    if (!res.ok) {
-      toast(body.error?.message ?? 'Could not schedule this print', 'error');
-      return;
-    }
-    toast('Scheduled', 'success');
+    if (!(await postSchedule(filename, runAt))) return;
     if (filenameEl) filenameEl.value = '';
     if (whenEl) whenEl.value = '';
     await fetchAndRender();
-  } catch {
-    toast('Not connected to the service', 'error');
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -142,6 +166,21 @@ async function cancelSchedule(id: string): Promise<void> {
   }
 }
 
+/** What a pending job will start with — the point of keeping the settings is that you can
+ *  see them before nobody is there to. Empty for a schedule made with none. */
+function optionsSummary(o: PrintOptions | null): string {
+  if (!o) return '';
+  const parts = [
+    o.bedType === 'A' ? 'Textured plate' : 'Smooth plate',
+    `timelapse ${o.timelapse ? 'on' : 'off'}`,
+    `bed leveling ${o.bedLeveling ? 'on' : 'off'}`,
+  ];
+  if (o.spools.length) {
+    parts.push(`spools ${o.spools.map((x) => `C${x.canvas_id + 1}:T${x.tray_id + 1}`).join(', ')}`);
+  }
+  return parts.join(' · ');
+}
+
 function scheduleRowHtml(s: ScheduledPrint): string {
   const when = new Date(s.runAt).toLocaleString();
   const sub =
@@ -159,6 +198,7 @@ function scheduleRowHtml(s: ScheduledPrint): string {
       <div class="flex-1 min-w-0">
         <div class="font-medium text-fg truncate">${escapeHtml(s.filename)}</div>
         <div class="${LABEL}">${s.status === 'pending' ? `Runs ${when}` : escapeHtml(sub)}</div>
+        ${s.status === 'pending' && s.options ? `<div class="${LABEL}">${escapeHtml(optionsSummary(s.options))}</div>` : ''}
       </div>
       <span class="inline-flex items-center gap-1.5 text-[13px] font-medium ${STATUS_COLOR[s.status]}">${icon(STATUS_ICON[s.status])}${STATUS_LABEL[s.status]}</span>
       ${cancel}

@@ -8,12 +8,13 @@
  * 1. **It only ever fires once.** A schedule is `pending` until its moment, then becomes
  *    `fired` or `skipped` and never fires again — see `schedule-core.ts` for why a retry
  *    loop is the wrong shape for a feature that starts unattended jobs.
- * 2. **Skip, never guess.** Firing checks three things fresh, at the moment it matters,
+ * 2. **Skip, never guess.** Firing checks its facts fresh, at the moment they matter,
  *    not whatever was true when the schedule was created: the MQTT connection, whether
- *    the printer is actually idle, and — via a live re-list of the file's directory,
- *    never the ambient `StateStore.files` cache another browser's folder click could have
- *    overwritten — whether the file is still there. Any of the three failing skips with a
- *    reason instead of sending `1020` on a guess.
+ *    the printer is actually idle, whether the file is still there (via a live re-list of
+ *    its directory, never the ambient `StateStore.files` cache another browser's folder
+ *    click could have overwritten) and, when the schedule carries a filament mapping, whether each chosen spool still holds what was chosen (a reel
+ *    swapped overnight must skip the print, not run it in the wrong filament). Any of them
+ *    failing skips with a reason instead of sending `1020` on a guess.
  * 3. **A tick that outlives any browser.** `setInterval` here, not a tab's timer, so a
  *    schedule fires whether or not anyone is looking — the same fix the dryer needed.
  */
@@ -28,6 +29,8 @@ import {
   normaliseStored,
   pruneHistory,
   sortedSchedules,
+  spoolMismatch,
+  startConfig,
 } from '../schedule-core.js';
 import type { FileEntry } from '../types.js';
 import { getDataDir } from './data-paths.js';
@@ -40,6 +43,8 @@ const log = getLogger('Schedule');
 
 /** `Start print`. */
 const START_PRINT = 1020;
+/** `Set auto refill`, the same command the print dialog sends. */
+const SET_AUTO_REFILL = 2004;
 /** `Get file list`. */
 const GET_FILE_LIST = 1044;
 /** `machine_status.status` when the printer is doing nothing. */
@@ -175,19 +180,27 @@ export class ScheduleService extends EventEmitter {
       return;
     }
 
+    // The Canvas is read now, not when the schedule was made: this is the check that
+    // stops a reel swapped overnight from being printed in.
+    const mismatch = spoolMismatch(entry.options?.spools ?? [], this.store.canvas);
+    if (mismatch) {
+      await this.skip(entry, mismatch);
+      return;
+    }
+
     entry.status = 'fired';
     entry.firedAt = Date.now();
     log.info(`Starting scheduled print: ${entry.filename}`);
+    // Auto-refill first, as the dialog does, and only when it differs from what the
+    // printer has now — it is a printer setting, and this is what the user chose.
+    const autoRefill = entry.options?.autoRefill ?? null;
+    if (autoRefill !== null && autoRefill !== (this.store.canvas?.auto_refill ?? false)) {
+      this.bridge.sendCommand(SET_AUTO_REFILL, { auto_refill: autoRefill });
+    }
     this.bridge.sendCommand(START_PRINT, {
       storage_media: 'local',
       filename: entry.filename,
-      config: {
-        delay_video: true,
-        printer_check: false,
-        print_layout: 'A',
-        bedlevel_force: false,
-        slot_map: [],
-      },
+      config: startConfig(entry.options),
     });
     await this.save();
     this.emit('fired', entry);

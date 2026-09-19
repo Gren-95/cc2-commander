@@ -66,6 +66,7 @@ export const STATE_UTILITIES: Record<string, Record<string, StateDelta>> = {
     'list-sort-btn': CHIP_ACTIVE,
     'log-tab': CHIP_ACTIVE,
     'print-bed-btn': CHIP_ACTIVE,
+    'print-when-btn': CHIP_ACTIVE,
     'speed-btn': SEGMENT_ACTIVE,
     'temp-preset-btn': CHIP_ACTIVE,
     'timelapse-play-btn': CHIP_ACTIVE,

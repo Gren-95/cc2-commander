@@ -6,6 +6,19 @@
  * 2. Auto-map gcode colors to Canvas trays (exact color match, then closest match)
  * 3. User can reassign mappings via dropdown
  * 4. On confirm: send method 1020 with slot_map
+ *
+ * ## Now or Later
+ *
+ * "Later" does not send 1020 from here: it hands the file to the service's scheduler
+ * (`schedule-panel.ts`'s `postSchedule`), which starts it once, at the chosen time, if the
+ * printer is idle and the file is still there. Everything this dialog collects goes with
+ * it — plate, timelapse, bed leveling, auto-refill and the spool chosen for each colour —
+ * and the service starts the job with exactly those. The spools are saved with what each
+ * tray holds now, and the service checks them again when it fires, skipping rather than
+ * printing in a filament nobody chose (`schedule-core.ts`'s `spoolMismatch`). It is
+ * offered for the printer's own storage only, because the service checks and fires against
+ * `local`: a USB file scheduled anyway would start, or be skipped for, whatever local file
+ * shares its name.
  */
 
 import { toggleState } from './state-classes';
@@ -23,6 +36,8 @@ import {
 } from './helpers';
 import { toast } from './toast';
 import { currentFileSource } from './file-browsing';
+import { CHIP, FIELD, LABEL } from './design';
+import { minLocalDateTime, postSchedule } from './schedule-panel';
 
 /** Format bytes to human-readable size */
 function formatSize(bytes: number): string {
@@ -214,6 +229,17 @@ function showDialog(
   const mappings = isMultiColor ? autoMap(colorMap, canvas) : [];
   const autoRefill = canvas?.auto_refill ?? false;
 
+  // Later is for the printer's own storage only — see the header note.
+  const canSchedule = currentFileSource() === 'local';
+  const laterTitle = canSchedule
+    ? 'Start at a chosen time'
+    : 'Scheduled prints only start files stored on the printer, not on the USB drive';
+  const laterNote = `Starts once, at that time, if the printer is idle and the file is still there.${
+    isMultiColor
+      ? ' The spools you chose are checked again then; if one has been swapped or has run out, the print is skipped and the schedule says why.'
+      : ''
+  }`;
+
   // Build dialog HTML
   const overlay = document.createElement('div');
   overlay.id = 'print-dialog-overlay';
@@ -239,7 +265,7 @@ function showDialog(
   overlay.innerHTML = `
     <div class="bg-card border border-line rounded-[8px] w-full max-w-110 max-h-[90vh] flex flex-col [box-shadow:0_8px_32px_rgba(0,_0,_0,_0.5)]">
       <div class="flex justify-between items-center [padding:12px_16px] border-b border-line font-semibold text-[14px] text-fg">
-        <span>Start Print</span>
+        <span id="print-dialog-title">Start Print</span>
         <button class="bg-transparent border-0 text-fg-soft text-[20px] cursor-pointer [padding:0_4px] leading-[1] hover:text-fg" id="print-dialog-cancel-x">&times;</button>
       </div>
       <div class="p-4 overflow-y-auto flex-1">
@@ -254,6 +280,20 @@ function showDialog(
           <div class="flex-1 min-w-0">
             <div class="font-semibold text-[13px] text-fg [word-break:break-word] [margin-bottom:6px]">${escapeHtml(filename)}</div>
             ${metaParts.length ? `<div class="text-fg-soft text-[12px] [&_span_+_span::before]:content-['_·_']">${metaParts.map((p) => `<span>${escapeHtml(p)}</span>`).join(' · ')}</div>` : ''}
+          </div>
+        </div>
+        <div class="[margin-bottom:14px]">
+          <div class="text-[11px] uppercase tracking-[0.3px] text-fg-muted mb-2 font-semibold">Start</div>
+          <div class="flex items-center gap-2">
+            <button type="button" class="print-when-btn ${CHIP}" data-when="now">Now</button>
+            <button type="button" class="print-when-btn ${CHIP} disabled:opacity-50 disabled:cursor-not-allowed" data-when="later"${canSchedule ? '' : ' disabled'} title="${escapeAttr(laterTitle)}">${iconSolo('schedule')}<span class="[margin-left:6px]">Later</span></button>
+          </div>
+          <div id="print-when-later" class="hidden [margin-top:12px]">
+            <div class="flex flex-col gap-2">
+              <label class="${LABEL}" for="print-when">Start at</label>
+              <input type="datetime-local" id="print-when" min="${minLocalDateTime()}" class="${FIELD} w-full">
+              <p class="text-[12px] text-fg-soft">${laterNote}</p>
+            </div>
           </div>
         </div>
         ${mappingHtml}
@@ -304,6 +344,29 @@ function showDialog(
     });
   });
 
+  // Now / Later. Only the time field, the title and the button change: the mapping and
+  // settings stay, because a schedule keeps them.
+  let startLater = false;
+  const confirmButton = document.getElementById('print-dialog-confirm') as HTMLButtonElement;
+  const whenInput = document.getElementById('print-when') as HTMLInputElement;
+  const whenButtons = [...overlay.querySelectorAll<HTMLButtonElement>('.print-when-btn')];
+  const setStart = (later: boolean): void => {
+    if (later && !canSchedule) return;
+    startLater = later;
+    for (const btn of whenButtons)
+      toggleState(btn, 'active', (btn.dataset.when === 'later') === later);
+    document.getElementById('print-when-later')!.classList.toggle('hidden', !later);
+    document.getElementById('print-dialog-title')!.textContent = later
+      ? 'Schedule Print'
+      : 'Start Print';
+    confirmButton.innerHTML = later ? `${icon('schedule')} Schedule` : `${icon('play')} Print`;
+    if (later) whenInput.focus();
+  };
+  setStart(false);
+  for (const btn of whenButtons) {
+    btn.addEventListener('click', () => setStart(btn.dataset.when === 'later'));
+  }
+
   // Close handlers
   const close = () => overlay.remove();
   document.getElementById('print-dialog-cancel')!.addEventListener('click', close);
@@ -331,6 +394,39 @@ function showDialog(
     const slotMap = isMultiColor
       ? mappings.map((m) => ({ t: m.t, canvas_id: m.canvasId, tray_id: m.trayId }))
       : [];
+
+    // Later: no precache and no 1020 from here. The service starts it, once, at the time
+    // chosen, with what was chosen above — and checks the spools again when it does.
+    if (startLater) {
+      if (!canSchedule) return;
+      const runAt = whenInput.value ? new Date(whenInput.value).getTime() : NaN;
+      if (!Number.isFinite(runAt) || runAt <= Date.now()) {
+        toast('Pick a time in the future', 'error');
+        return;
+      }
+      const autoRefillEl = document.getElementById(
+        'print-opt-auto-refill',
+      ) as HTMLInputElement | null;
+      confirmButton.disabled = true;
+      const created = await postSchedule(fullPath, runAt, {
+        bedType: bedType === 'B' ? 'B' : 'A',
+        timelapse,
+        bedLeveling: leveling,
+        autoRefill: isMultiColor && autoRefillEl ? autoRefillEl.checked : null,
+        spools: isMultiColor
+          ? mappings.map((m) => ({
+              t: m.t,
+              canvas_id: m.canvasId,
+              tray_id: m.trayId,
+              filament_type: m.mappedType,
+              filament_color: m.mappedColor,
+            }))
+          : [],
+      });
+      if (created) close();
+      else confirmButton.disabled = false;
+      return;
+    }
 
     const confirmBtn = document.getElementById('print-dialog-confirm') as HTMLButtonElement;
     const cancelBtn = document.getElementById('print-dialog-cancel') as HTMLButtonElement;

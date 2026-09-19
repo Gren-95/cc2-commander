@@ -285,19 +285,40 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   - **It fires at most once.** `pending` → `fired` or `skipped`, never retried — a
     schedule that could re-fire is a job that can start a second and third time with
     nobody there to notice the first went wrong.
-  - **Skip, never guess, and always say why.** Firing re-checks three things fresh, at
+  - **Skip, never guess, and always say why.** Firing re-checks its facts fresh, at
     the moment they matter rather than whatever was true when the schedule was made:
     the MQTT connection, whether the printer is genuinely idle (not just "not
-    printing" — leveling, homing and a self-check all count as busy), and — via a live
+    printing" — leveling, homing and a self-check all count as busy), — via a live
     `1044` for the file's own folder, never the ambient `StateStore.files` cache
     another browser's folder click could have overwritten — whether the file is still
-    there. Any of the three failing skips with a recorded reason instead of sending
-    `1020` on a guess.
+    there, and, when the schedule carries a filament mapping, whether each chosen spool
+    still holds what it held when it was chosen (`spoolMismatch`, against the live
+    Canvas state; an unknown Canvas counts as a failure, not a pass). Any of them
+    failing skips with a recorded reason instead of sending `1020` on a guess.
   - **A response is matched by its own request id when the printer sends one, not by
     method alone.** The `response` event is shared by every consumer of the one MQTT
     connection; matching a `1044` by method alone would sometimes hand the file-list
     check a DIFFERENT folder's listing — whatever a browser happened to be browsing at
     that moment. `MqttBridge.sendCommand` returns the id it used for exactly this.
+
+  The Start Print dialog (Files card → Print) has a Now / Later choice. Later posts to
+  `/api/schedule/` through `postSchedule` — the same request as Tools → Schedule — and
+  **never sends `1020` from the page**; the service starts the job.
+
+  **A schedule carries what the dialog collected** — `options` on the entry: plate,
+  timelapse, bed leveling, Canvas auto-refill, and the spool chosen for each colour, each
+  saved with what its tray held at the time. `startConfig` turns them into the `1020`
+  `config`; auto-refill is sent first, only when it differs from the printer, as the
+  dialog does. An entry with `options: null` — anything typed into Tools → Schedule, and
+  anything saved before options existed — starts as schedules always did (`UNCHOSEN`:
+  textured plate, timelapse on, no leveling, no mapping). Options present but unreadable
+  are **skipped with a reason, never repaired into defaults**, and a malformed request is
+  refused outright, because this is what an unattended job is started with.
+
+  It is **disabled for USB files, because the service re-checks and fires against
+  `storage_media: 'local'` only**: a USB file scheduled anyway would start, or be skipped
+  for, whatever local file shares its name. If `schedule.ts` ever learns a second
+  storage, that rule in the dialog changes with it.
 
 - **`home-assistant.ts` is read-only except for one narrow write.** Everything else it
   does is `GET /api/states/<entity>` — deliberately, since a Home Assistant long-lived
