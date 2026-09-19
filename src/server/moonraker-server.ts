@@ -46,6 +46,14 @@ import {
 } from './compat-auth.js';
 import type { FanInfo } from '../types.js';
 import { MOONRAKER_VERSION, AVAILABLE_OBJECTS, queryObjects } from './moonraker-compat.js';
+import {
+  cancelPrint,
+  emergencyStop,
+  pausePrint,
+  resumePrint,
+  runGcodeScript,
+  startPrint as startPrintOn,
+} from './moonraker-commands.js';
 import { createOctoPrintRouter } from './octoprint-compat.js';
 import { getLogger } from './logger.js';
 import { cacheGcodeBuffer } from './rest-api.js';
@@ -664,61 +672,36 @@ export class MoonrakerServer {
         // also the medium the file is genuinely on.
         const filename = params.filename as string;
         if (filename) {
-          this.bridge.sendCommand(1020, { filename, storage_media: 'local' });
+          startPrintOn(this.bridge, filename);
         }
         client.ws.send(rpcResult(msg.id, 'ok'));
         break;
       }
 
       case 'printer.print.pause':
-        this.bridge.sendCommand(1021, {});
+        pausePrint(this.bridge);
         client.ws.send(rpcResult(msg.id, 'ok'));
         break;
 
       case 'printer.print.resume':
-        this.bridge.sendCommand(1023, {});
+        resumePrint(this.bridge);
         client.ws.send(rpcResult(msg.id, 'ok'));
         break;
 
       case 'printer.print.cancel':
-        this.bridge.sendCommand(1022, {});
+        cancelPrint(this.bridge);
         client.ws.send(rpcResult(msg.id, 'ok'));
         break;
 
       case 'printer.emergency_stop':
-        this.bridge.sendCommand(1022, {});
+        emergencyStop(this.bridge);
         client.ws.send(rpcResult(msg.id, 'ok'));
         break;
 
       // ── GCode ──
       case 'printer.gcode.script': {
-        const script = ((params.script as string) || '').trim().toUpperCase();
+        const script = runGcodeScript(this.bridge, params.script);
         log.info(`GCode script: ${script}`);
-        if (script === 'G28' || script.startsWith('G28 ')) {
-          this.bridge.sendCommand(1026, { axes: ['x', 'y', 'z'] });
-        } else if (script.startsWith('M104 ')) {
-          const m = script.match(/S(\d+)/);
-          if (m) this.bridge.sendCommand(1028, { extruder: parseInt(m[1]) });
-        } else if (script.startsWith('M140 ')) {
-          const m = script.match(/S(\d+)/);
-          if (m) this.bridge.sendCommand(1028, { heater_bed: parseInt(m[1]) });
-        } else if (script === 'M112') {
-          this.bridge.sendCommand(1022, {});
-        } else if (script.startsWith('SET_HEATER_TEMPERATURE')) {
-          const heater = script.match(/HEATER=(\S+)/)?.[1]?.toLowerCase();
-          const target = script.match(/TARGET=(\d+)/)?.[1];
-          if (heater && target !== undefined) {
-            const temp = parseInt(target);
-            if (heater === 'heater_bed') {
-              this.bridge.sendCommand(1028, { heater_bed: temp });
-            } else {
-              this.bridge.sendCommand(1028, { extruder: temp });
-            }
-          }
-        } else if (script === 'TURN_OFF_HEATERS') {
-          this.bridge.sendCommand(1028, { extruder: 0 });
-          this.bridge.sendCommand(1028, { heater_bed: 0 });
-        }
         client.ws.send(rpcResult(msg.id, 'ok'));
         // Also notify gcode response
         if (client.ws.readyState === WS_OPEN) {
@@ -1405,14 +1388,14 @@ export class MoonrakerServer {
     if (urlPath === '/printer/print/start' && method === 'POST') {
       const filename = query.filename;
       if (filename) {
-        this.bridge.sendCommand(1020, { filename, storage_media: 'local' });
+        startPrintOn(this.bridge, filename);
         jsonResult(res, 'ok');
       } else {
         readBody(req)
           .then((body) => {
             const parsed = JSON.parse(body);
             if (parsed.filename) {
-              this.bridge.sendCommand(1020, { filename: parsed.filename, storage_media: 'local' });
+              startPrintOn(this.bridge, parsed.filename);
               jsonResult(res, 'ok');
             } else {
               jsonError(res, 'filename required');
@@ -1423,24 +1406,24 @@ export class MoonrakerServer {
       return;
     }
     if (urlPath === '/printer/print/pause' && method === 'POST') {
-      this.bridge.sendCommand(1021, {});
+      pausePrint(this.bridge);
       jsonResult(res, 'ok');
       return;
     }
     if (urlPath === '/printer/print/resume' && method === 'POST') {
-      this.bridge.sendCommand(1023, {});
+      resumePrint(this.bridge);
       jsonResult(res, 'ok');
       return;
     }
     if (urlPath === '/printer/print/cancel' && method === 'POST') {
-      this.bridge.sendCommand(1022, {});
+      cancelPrint(this.bridge);
       jsonResult(res, 'ok');
       return;
     }
 
     // --- POST /printer/emergency_stop ---
     if (urlPath === '/printer/emergency_stop' && method === 'POST') {
-      this.bridge.sendCommand(1022, {});
+      emergencyStop(this.bridge);
       jsonResult(res, 'ok');
       return;
     }
@@ -1450,32 +1433,7 @@ export class MoonrakerServer {
       readBody(req)
         .then((body) => {
           const parsed = JSON.parse(body);
-          const script = ((parsed.script as string) || '').trim().toUpperCase();
-          if (script === 'G28' || script.startsWith('G28 ')) {
-            this.bridge.sendCommand(1026, { axes: ['x', 'y', 'z'] });
-          } else if (script.startsWith('M104 ')) {
-            const m = script.match(/S(\d+)/);
-            if (m) this.bridge.sendCommand(1028, { extruder: parseInt(m[1]) });
-          } else if (script.startsWith('M140 ')) {
-            const m = script.match(/S(\d+)/);
-            if (m) this.bridge.sendCommand(1028, { heater_bed: parseInt(m[1]) });
-          } else if (script === 'M112') {
-            this.bridge.sendCommand(1022, {});
-          } else if (script.startsWith('SET_HEATER_TEMPERATURE')) {
-            const heater = script.match(/HEATER=(\S+)/)?.[1]?.toLowerCase();
-            const target = script.match(/TARGET=(\d+)/)?.[1];
-            if (heater && target !== undefined) {
-              const temp = parseInt(target);
-              if (heater === 'heater_bed') {
-                this.bridge.sendCommand(1028, { heater_bed: temp });
-              } else {
-                this.bridge.sendCommand(1028, { extruder: temp });
-              }
-            }
-          } else if (script === 'TURN_OFF_HEATERS') {
-            this.bridge.sendCommand(1028, { extruder: 0 });
-            this.bridge.sendCommand(1028, { heater_bed: 0 });
-          }
+          runGcodeScript(this.bridge, parsed.script);
           jsonResult(res, 'ok');
         })
         .catch(() => jsonError(res, 'Invalid JSON'));
@@ -2399,7 +2357,7 @@ export class MoonrakerServer {
 
         // Start print if requested
         if (startPrint) {
-          this.bridge.sendCommand(1020, { filename: fileName, storage_media: 'local' });
+          startPrintOn(this.bridge, fileName);
         }
 
         jsonResult(res, {

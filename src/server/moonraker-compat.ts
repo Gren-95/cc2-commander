@@ -16,6 +16,14 @@ import type { MqttBridge } from './mqtt-bridge.js';
 import type { ServiceConfig } from './config.js';
 import type { FanInfo } from '../types.js';
 import { getLogger } from './logger.js';
+import {
+  cancelPrint,
+  emergencyStop,
+  pausePrint,
+  resumePrint,
+  runGcodeScript,
+  startPrint,
+} from './moonraker-commands.js';
 import { loadavg, freemem } from 'os';
 
 const _log = getLogger('Moonraker');
@@ -364,10 +372,7 @@ export function createMoonrakerRouter(
           .then((body) => {
             const parsed = JSON.parse(body);
             if (parsed.filename) {
-              bridge.sendCommand(1020, {
-                filename: parsed.filename,
-                storage_media: 'local',
-              });
+              startPrint(bridge, parsed.filename);
               json(res, 'ok');
             } else {
               errorResponse(res, 'filename required');
@@ -375,7 +380,7 @@ export function createMoonrakerRouter(
           })
           .catch(() => errorResponse(res, 'Invalid JSON'));
       } else {
-        bridge.sendCommand(1020, { filename, storage_media: 'local' });
+        startPrint(bridge, filename);
         json(res, 'ok');
       }
       return true;
@@ -383,28 +388,28 @@ export function createMoonrakerRouter(
 
     // --- POST /printer/print/pause ---
     if (path === '/printer/print/pause' && method === 'POST') {
-      bridge.sendCommand(1021, {});
+      pausePrint(bridge);
       json(res, 'ok');
       return true;
     }
 
     // --- POST /printer/print/resume ---
     if (path === '/printer/print/resume' && method === 'POST') {
-      bridge.sendCommand(1023, {});
+      resumePrint(bridge);
       json(res, 'ok');
       return true;
     }
 
     // --- POST /printer/print/cancel ---
     if (path === '/printer/print/cancel' && method === 'POST') {
-      bridge.sendCommand(1022, {});
+      cancelPrint(bridge);
       json(res, 'ok');
       return true;
     }
 
     // --- POST /printer/emergency_stop ---
     if (path === '/printer/emergency_stop' && method === 'POST') {
-      bridge.sendCommand(1022, {}); // CC2 doesn't have true e-stop, use cancel
+      emergencyStop(bridge);
       json(res, 'ok');
       return true;
     }
@@ -414,26 +419,7 @@ export function createMoonrakerRouter(
       readBody(req)
         .then((body) => {
           const parsed = JSON.parse(body);
-          const script = (parsed.script || '').trim().toUpperCase();
-          // Handle common gcodes
-          if (script === 'G28' || script.startsWith('G28 ')) {
-            bridge.sendCommand(1026, { axes: ['x', 'y', 'z'] });
-          } else if (script.startsWith('M104 ')) {
-            const match = script.match(/S(\d+)/);
-            if (match) {
-              bridge.sendCommand(1028, { target: 'extruder', temperature: parseInt(match[1]) });
-            }
-          } else if (script.startsWith('M140 ')) {
-            const match = script.match(/S(\d+)/);
-            if (match) {
-              bridge.sendCommand(1028, { target: 'heater_bed', temperature: parseInt(match[1]) });
-            }
-          } else if (script === 'M112') {
-            bridge.sendCommand(1022, {});
-          } else if (script === 'TURN_OFF_HEATERS') {
-            bridge.sendCommand(1028, { target: 'extruder', temperature: 0 });
-            bridge.sendCommand(1028, { target: 'heater_bed', temperature: 0 });
-          }
+          runGcodeScript(bridge, parsed.script);
           json(res, 'ok');
         })
         .catch(() => errorResponse(res, 'Invalid JSON'));
