@@ -3,7 +3,8 @@
  * which Mainsail and Fluidd keep their settings in). Moved out of moonraker-server.ts.
  */
 
-import { readFile as fsRead, writeFile as fsWrite, mkdir } from 'fs/promises';
+import { readFile as fsRead, mkdir } from 'fs/promises';
+import { writeJson } from './json-file.js';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { getLogger } from './logger.js';
@@ -46,8 +47,10 @@ export class MoonrakerDatabase {
       const obj: Record<string, Record<string, unknown>> = {};
       for (const [ns, entries] of this.namespaces) obj[ns] = entries;
       await mkdir(join(this.filePath, '..'), { recursive: true });
-      await fsWrite(this.filePath, JSON.stringify(obj, null, 2));
-      this.dirty = false;
+      // Whole or not at all: this is where Mainsail and Fluidd keep their settings, and a
+      // crash half way through a plain write left a truncated file that loaded as empty.
+      // A failed save leaves `dirty` set, so the next tick tries again.
+      if (await writeJson(this.filePath, obj)) this.dirty = false;
     } catch (e: unknown) {
       log.warn('Failed to save database:', (e as Error).message);
     }

@@ -33,7 +33,8 @@
  */
 
 import { EventEmitter } from 'events';
-import { readFile, writeFile, rm } from 'fs/promises';
+import { readFile, rm } from 'fs/promises';
+import { writeJson } from './json-file.js';
 import { join } from 'path';
 import {
   type DryerSession,
@@ -79,6 +80,8 @@ export class DryerService extends EventEmitter {
   private timer: ReturnType<typeof setInterval> | null = null;
   private lastCorrectionAt: number | null = null;
   private readonly file: string;
+  /** The save in flight, so the next waits for it: see `persist`. */
+  private saving: Promise<void> = Promise.resolve();
 
   constructor(
     private store: StateStore,
@@ -109,13 +112,26 @@ export class DryerService extends EventEmitter {
     }
   }
 
-  private async persist(): Promise<void> {
-    try {
-      if (this.session) await writeFile(this.file, JSON.stringify(this.session), 'utf-8');
-      else await rm(this.file, { force: true });
-    } catch (err) {
-      log.error(`Could not write ${this.file}: ${(err as Error).message}`);
-    }
+  /**
+   * Save the session, or remove the file when there is none.
+   *
+   * Written whole or not at all (`writeJson`): this file is what tells a restarted service
+   * that the bed is being held hot, and a crash half way through a plain write left a
+   * truncated file that read as "no session", so nothing would ever turn the bed off.
+   * Saves are chained so an older one can never finish after a newer one.
+   */
+  private persist(): Promise<void> {
+    const session = this.session;
+    this.saving = this.saving.then(async () => {
+      if (session) {
+        await writeJson(this.file, session);
+        return;
+      }
+      await rm(this.file, { force: true }).catch((err) =>
+        log.error(`Could not remove ${this.file}: ${(err as Error).message}`),
+      );
+    });
+    return this.saving;
   }
 
   /* ── Commands ─────────────────────────────────────────────────────── */

@@ -12,7 +12,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { mkdtempSync, rmSync, writeFileSync, existsSync, readFileSync } from 'fs';
+import { mkdtempSync, readdirSync, rmSync, writeFileSync, existsSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
@@ -193,5 +193,24 @@ describe('what is persisted', () => {
     const stored = JSON.parse(readFileSync(sessionFile(), 'utf-8')) as { startedAt: number };
     expect(stored.startedAt).toBeGreaterThanOrEqual(before);
     expect(stored.startedAt).toBeLessThanOrEqual(Date.now());
+  });
+});
+
+describe('the session file', () => {
+  it('is gone after a session that was started and stopped straight away', async () => {
+    // The file is what a restarted service trusts about the bed. Saves are chained, so the
+    // start's write can never land after the stop's removal and leave a stale session.
+    const started = dryer.begin({ presetId: 'pla' });
+    const stopped = dryer.finish('stopped');
+    await Promise.all([started, stopped]);
+    await new Promise((r) => setTimeout(r, 50));
+    expect(existsSync(sessionFile())).toBe(false);
+  });
+
+  it('holds the whole session while one runs, and no temporary file', async () => {
+    expect(await dryer.begin({ presetId: 'pla' })).toBeNull();
+    const saved = JSON.parse(readFileSync(sessionFile(), 'utf-8'));
+    expect(saved.presetId).toBe('pla');
+    expect(readdirSync(dir).filter((n) => n.endsWith('.tmp'))).toEqual([]);
   });
 });

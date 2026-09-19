@@ -11,7 +11,7 @@
  * made reusable rather than copied a third time.
  */
 
-import { readFile, rename, writeFile } from 'node:fs/promises';
+import { readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { getLogger } from './logger.js';
 
 const log = getLogger('JsonFile');
@@ -30,12 +30,24 @@ export async function readJson(path: string): Promise<unknown> {
   }
 }
 
-export async function writeJson(path: string, data: unknown): Promise<void> {
-  const tmp = `${path}.tmp`;
+let tmpCounter = 0;
+
+/**
+ * Replace `path` with `data`, all or nothing. Returns whether it was written, so a caller
+ * that tracks unsaved changes can keep them and try again rather than forget them.
+ *
+ * Each write gets its own temporary name: two overlapping writes to one file used to share
+ * `<path>.tmp`, and the second could rename away the first's half-written file.
+ */
+export async function writeJson(path: string, data: unknown): Promise<boolean> {
+  const tmp = `${path}.${process.pid}.${++tmpCounter}.tmp`;
   try {
     await writeFile(tmp, JSON.stringify(data, null, 2), 'utf-8');
     await rename(tmp, path);
+    return true;
   } catch (err) {
     log.error(`Could not write ${path}: ${(err as Error).message}`);
+    await rm(tmp, { force: true }).catch(() => {});
+    return false;
   }
 }

@@ -259,7 +259,9 @@ export class ScheduleService extends EventEmitter {
   private save(): Promise<void> {
     this.schedules = pruneHistory(this.schedules, Date.now());
     const snapshot = [...this.schedules];
-    this.writing = this.writing.then(() => writeJson(this.file, snapshot));
+    this.writing = this.writing.then(async () => {
+      await writeJson(this.file, snapshot);
+    });
     this.emit('changed');
     return this.writing;
   }
