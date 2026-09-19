@@ -70,6 +70,7 @@ services:
       # PRINTER_PASSWORD: "123456"       # Access code (default: 123456)
       # SERVICE_PORT: "8088"             # Web UI port (default: 8088)
       # MOONRAKER_PORT: "7125"           # Moonraker compat port (default: 7125)
+      # BIND_ADDRESS: "0.0.0.0"          # Interface both servers bind to (default: 0.0.0.0)
       # CAMERA_ENABLED: "true"           # Camera proxy (default: true)
       # CAMERA_URL: ""                   # Override (default: http://<PRINTER_IP>:8080)
 
@@ -123,6 +124,7 @@ supplied by the publish workflow, not by `docker build`.
 | `PRINTER_SN` | — (discovered) | Printer serial number, e.g. `F01U3UD3798YT8K`. Normally discovered automatically and then cached in `<DATA_DIR>/printer-sn.json`, so this is rarely needed. Set it if a **first** start hangs at "registering": the printer only publishes while a client is registered, so a service that has never learned the serial has nothing to overhear |
 | `SERVICE_PORT` | `8088` | Web UI / API / WebSocket port |
 | `MOONRAKER_PORT` | `7125` | Moonraker compatibility API port |
+| `BIND_ADDRESS` | `0.0.0.0` | Interface both HTTP servers listen on. IPv4 only; anything else refuses to start. **Not the knob for Docker:** on bridge networking, `127.0.0.1` inside the container is the container's own loopback, so the published port stops answering. To keep a containerised service off the LAN, narrow the mapping instead (`"127.0.0.1:8088:8088"`). Meant for a bare-metal `bun run` service |
 | `CAMERA_ENABLED` | `true` | Enable camera MJPEG proxy |
 | `CAMERA_URL` | `http://<PRINTER_IP>:8080` | Override camera URL |
 | `CORS_ALLOWED_ORIGINS` | — (same-origin) | Comma-separated origins allowed to make cross-origin requests to `/api/*`, `/moonraker/*`, `/octoprint/*` and `:7125`. Unset means **no cross-origin access**. `*` restores the old allow-everything behaviour |

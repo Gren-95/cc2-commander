@@ -25,6 +25,10 @@ somewhere else, and **whether it is, is decided outside this repo** (a proxy or 
 configured in the `~/ansible` repo; the specifics for a given deployment belong in the
 tracker, not in this public repository).
 
+`BIND_ADDRESS` (default `0.0.0.0`) sets the interface both HTTP servers listen on. It does
+not narrow anything by itself — it is the knob, not the decision — and under Docker it is
+the wrong knob (narrow the published port; see [configuration.md](configuration.md)).
+
 ## What an unauthenticated request can do
 
 Not just read. The control surface is complete:

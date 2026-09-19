@@ -348,7 +348,7 @@ export class MoonrakerServer {
 
     this.server = Bun.serve({
       port: this.config.moonrakerPort,
-      hostname: '0.0.0.0',
+      hostname: this.config.bindAddress,
       // Long file uploads and downloads share this port with the JSON-RPC socket.
       idleTimeout: 255,
 
@@ -581,7 +581,7 @@ export class MoonrakerServer {
       case 'server.config':
         client.ws.send(
           rpcResult(msg.id, {
-            config: { server: { host: '0.0.0.0', port: this.config.moonrakerPort } },
+            config: { server: { host: this.config.bindAddress, port: this.config.moonrakerPort } },
             orig: {},
             files: [],
           }),
@@ -1343,7 +1343,7 @@ export class MoonrakerServer {
     // --- GET /server/config ---
     if (urlPath === '/server/config' && method === 'GET') {
       jsonResult(res, {
-        config: { server: { host: '0.0.0.0', port: this.config.moonrakerPort } },
+        config: { server: { host: this.config.bindAddress, port: this.config.moonrakerPort } },
         orig: {},
         files: [],
       });

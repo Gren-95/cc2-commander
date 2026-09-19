@@ -72,7 +72,7 @@ log.info(
 log.info(
   `Printer: ${config.printerIp}${knownSn ? ` (SN ${knownSn}${config.printerSn ? ', from PRINTER_SN' : ', cached'})` : ' (SN not yet known)'}`,
 );
-log.info(`Service: http://0.0.0.0:${config.servicePort}`);
+log.info(`Service: http://${config.bindAddress}:${config.servicePort}`);
 log.info(`Camera:  ${config.cameraEnabled ? config.cameraUrl : 'disabled'}`);
 log.info(`Data:    ${config.dataDir}`);
 // Hash `AUTH_PASSWORD` before anything can authenticate. A hash always wins over a
@@ -118,7 +118,7 @@ if (config.homeAssistant.enabled) {
 if (config.telegramEnabled) {
   log.info(`Telegram: enabled (progress every ${config.progressInterval}%)`);
 }
-log.info(`Moonraker: http://0.0.0.0:${config.moonrakerPort}`);
+log.info(`Moonraker: http://${config.bindAddress}:${config.moonrakerPort}`);
 if (config.auth.enabled) {
   log.info(`Auth:    enabled (API key ${config.auth.apiKey ? 'set' : 'NOT set'})`);
 } else {
@@ -398,7 +398,7 @@ async function start(): Promise<void> {
   // persisted state is back and the report collector is initialised.
   server = Bun.serve({
     port: config.servicePort,
-    hostname: '0.0.0.0',
+    hostname: config.bindAddress,
 
     // dist/**, answered from Bun's route table without running any of our code.
     routes: buildStaticRoutes(),

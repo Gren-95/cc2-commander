@@ -35,6 +35,14 @@ export interface ServiceConfig {
 
   // Service
   servicePort: number;
+  /**
+   * The interface both HTTP servers (the main service and the separate Moonraker `:7125`
+   * one) bind to. Defaults to `0.0.0.0`, which is what they always did: who *should* be
+   * able to reach a service that drives a physical machine is the operator's decision,
+   * not this default's. Also reported back to Moonraker clients in `server.config`,
+   * since that is what real Moonraker does.
+   */
+  bindAddress: string;
 
   // Camera
   cameraEnabled: boolean;
@@ -86,6 +94,26 @@ const IP_RE = /^(\d{1,3}\.){3}\d{1,3}$/;
 function validatePort(value: number, name: string): void {
   if (!Number.isFinite(value) || value < 1 || value > 65535) {
     throw new Error(`Invalid ${name}: ${value} (must be 1-65535)`);
+  }
+}
+
+/**
+ * Validates a dotted-quad IPv4 address, for `PRINTER_IP` and `BIND_ADDRESS`. Throws an
+ * actionable message at startup rather than letting a bad value reach `listen()`, where a
+ * malformed address surfaces as an opaque `EADDRNOTAVAIL`.
+ *
+ * IPv6 (`::`, `::1`) is deliberately refused rather than half-supported: every example
+ * and fixture here is IPv4, and `0.0.0.0` / `127.0.0.1` already cover the binds anyone
+ * has asked for.
+ */
+function validateIPv4(value: string, name: string): void {
+  if (!IP_RE.test(value)) {
+    throw new Error(
+      `Invalid ${name}: "${value}" (must be a valid IPv4 address; IPv6 is not supported)`,
+    );
+  }
+  if (value.split('.').some((octet) => Number(octet) > 255)) {
+    throw new Error(`Invalid ${name}: "${value}" (octet out of range)`);
   }
 }
 
@@ -145,16 +173,13 @@ export function loadConfig(): ServiceConfig {
         'PRINTER_IP=192.168.1.150 (see .env.example).',
     );
   }
-  if (!IP_RE.test(printerIp)) {
-    throw new Error(`Invalid PRINTER_IP: "${printerIp}" (must be a valid IPv4 address)`);
-  }
-  const octets = printerIp.split('.').map(Number);
-  if (octets.some((o) => o > 255)) {
-    throw new Error(`Invalid PRINTER_IP: "${printerIp}" (octet out of range)`);
-  }
+  validateIPv4(printerIp, 'PRINTER_IP');
 
   const servicePort = parseInt(env('SERVICE_PORT', '8088'), 10);
   validatePort(servicePort, 'SERVICE_PORT');
+
+  const bindAddress = env('BIND_ADDRESS', '0.0.0.0');
+  validateIPv4(bindAddress, 'BIND_ADDRESS');
 
   const moonrakerPort = parseInt(env('MOONRAKER_PORT', '7125'), 10);
   validatePort(moonrakerPort, 'MOONRAKER_PORT');
@@ -212,6 +237,7 @@ export function loadConfig(): ServiceConfig {
     printerPassword: env('PRINTER_PASSWORD', '123456'),
     printerSn: env('PRINTER_SN', '').trim(),
     servicePort,
+    bindAddress,
     cameraEnabled: env('CAMERA_ENABLED') !== 'false',
     cameraUrl: env('CAMERA_URL') || `http://${printerIp}:8080`,
     corsPolicy: parseCorsPolicy(env('CORS_ALLOWED_ORIGINS')),
