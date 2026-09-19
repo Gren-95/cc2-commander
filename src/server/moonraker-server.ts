@@ -12,14 +12,6 @@ import { request as httpRequest, type IncomingMessage, type ServerResponse } fro
 import type { ServerWebSocket, WebSocketHandler } from 'bun';
 import { runNodeHandler } from './node-compat.js';
 import type { AuthGate } from './auth-gate.js';
-
-/** A Moonraker JSON-RPC client socket. Bun owns it; `ClientState` hangs off the map. */
-type MoonrakerSocket = ServerWebSocket<{ readonly connectionId: number }>;
-
-const WS_OPEN = 1;
-import { readFile as fsRead, writeFile as fsWrite, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
 import { createHash } from 'crypto';
 import {
   cpus,
@@ -44,7 +36,6 @@ import {
   sessionsMessage,
   MOONRAKER_NO_API_KEY_CODE,
 } from './compat-auth.js';
-import type { FanInfo } from '../types.js';
 import { MOONRAKER_VERSION, AVAILABLE_OBJECTS, queryObjects } from './moonraker-compat.js';
 import {
   cancelPrint,
@@ -57,194 +48,27 @@ import {
 import { createOctoPrintRouter } from './octoprint-compat.js';
 import { getLogger } from './logger.js';
 import { cacheGcodeBuffer } from './gcode-cache.js';
+import {
+  type JsonRpcRequest,
+  formatSize,
+  jsonError,
+  jsonResult,
+  parseMultipartParts,
+  parseQuery,
+  readBody,
+  readBodyRaw,
+  rpcError,
+  rpcNotify,
+  rpcResult,
+} from './moonraker-protocol.js';
+import { MoonrakerDatabase } from './moonraker-database.js';
+
+/** A Moonraker JSON-RPC client socket. Bun owns it; `ClientState` hangs off the map. */
+type MoonrakerSocket = ServerWebSocket<{ readonly connectionId: number }>;
+
+const WS_OPEN = 1;
 
 const log = getLogger('MoonrakerSrv');
-
-// ── Helpers ──────────────────────────────────────────────────────
-
-function jsonResult(res: ServerResponse, data: unknown, status = 200): void {
-  const body = JSON.stringify({ result: data });
-  res.writeHead(status, {
-    'Content-Type': 'application/json',
-  });
-  res.end(body);
-}
-
-function jsonError(res: ServerResponse, message: string, code = 400): void {
-  res.writeHead(code, {
-    'Content-Type': 'application/json',
-  });
-  res.end(JSON.stringify({ error: { code, message } }));
-}
-
-function readBody(req: IncomingMessage): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    req.on('data', (c: Buffer) => chunks.push(c));
-    req.on('end', () => resolve(Buffer.concat(chunks).toString()));
-    req.on('error', reject);
-  });
-}
-
-function readBodyRaw(req: IncomingMessage, maxBytes: number): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    let total = 0;
-    req.on('data', (c: Buffer) => {
-      total += c.length;
-      if (total > maxBytes) {
-        req.destroy();
-        reject(new Error('Body too large'));
-        return;
-      }
-      chunks.push(c);
-    });
-    req.on('end', () => resolve(Buffer.concat(chunks)));
-    req.on('error', reject);
-  });
-}
-
-function parseQuery(url: string): Record<string, string> {
-  const idx = url.indexOf('?');
-  if (idx < 0) return {};
-  const params: Record<string, string> = {};
-  for (const pair of url.slice(idx + 1).split('&')) {
-    const [k, v] = pair.split('=');
-    if (k) params[decodeURIComponent(k)] = v ? decodeURIComponent(v) : '';
-  }
-  return params;
-}
-
-const _fanPct = (f?: FanInfo) => (f ? f.speed / 255 : 0);
-
-// ── Simple file-backed key/value database ────────────────────────
-
-class MoonrakerDatabase {
-  private namespaces = new Map<string, Record<string, unknown>>();
-  private filePath: string;
-  private dirty = false;
-  private saveTimer: ReturnType<typeof setInterval> | null = null;
-
-  constructor(dataDir: string) {
-    this.filePath = join(dataDir, 'moonraker-db.json');
-  }
-
-  async load(): Promise<void> {
-    try {
-      if (existsSync(this.filePath)) {
-        const raw = await fsRead(this.filePath, 'utf-8');
-        const data = JSON.parse(raw) as Record<string, Record<string, unknown>>;
-        for (const [ns, entries] of Object.entries(data)) {
-          this.namespaces.set(ns, entries);
-        }
-        log.info(`Database loaded (${this.namespaces.size} namespaces)`);
-      }
-    } catch (e: unknown) {
-      log.warn('Failed to load database:', (e as Error).message);
-    }
-    // Auto-save every 10s when dirty
-    this.saveTimer = setInterval(() => {
-      if (this.dirty) void this.save();
-    }, 10_000);
-  }
-
-  async save(): Promise<void> {
-    try {
-      const obj: Record<string, Record<string, unknown>> = {};
-      for (const [ns, entries] of this.namespaces) obj[ns] = entries;
-      await mkdir(join(this.filePath, '..'), { recursive: true });
-      await fsWrite(this.filePath, JSON.stringify(obj, null, 2));
-      this.dirty = false;
-    } catch (e: unknown) {
-      log.warn('Failed to save database:', (e as Error).message);
-    }
-  }
-
-  stop(): void {
-    if (this.saveTimer) clearInterval(this.saveTimer);
-    if (this.dirty) void this.save();
-  }
-
-  listNamespaces(): string[] {
-    return Array.from(this.namespaces.keys());
-  }
-
-  getItem(namespace: string, key?: string): { namespace: string; key?: string; value: unknown } {
-    const ns = this.namespaces.get(namespace);
-    if (!ns) return { namespace, key, value: key ? undefined : {} };
-    if (!key) return { namespace, value: ns };
-    // Support dotted key paths (e.g. "uiSettings.general")
-    const parts = key.split('.');
-    let current: unknown = ns;
-    for (const part of parts) {
-      if (current == null || typeof current !== 'object')
-        return { namespace, key, value: undefined };
-      current = (current as Record<string, unknown>)[part];
-    }
-    return { namespace, key, value: current };
-  }
-
-  postItem(
-    namespace: string,
-    key: string,
-    value: unknown,
-  ): { namespace: string; key: string; value: unknown } {
-    if (!this.namespaces.has(namespace)) this.namespaces.set(namespace, {});
-    const ns = this.namespaces.get(namespace)!;
-    // Support dotted key paths for nested writes
-    const parts = key.split('.');
-    if (parts.length === 1) {
-      ns[key] = value;
-    } else {
-      let current: Record<string, unknown> = ns;
-      for (let i = 0; i < parts.length - 1; i++) {
-        if (!(parts[i] in current) || typeof current[parts[i]] !== 'object') {
-          current[parts[i]] = {};
-        }
-        current = current[parts[i]] as Record<string, unknown>;
-      }
-      current[parts[parts.length - 1]] = value;
-    }
-    this.dirty = true;
-    return { namespace, key, value };
-  }
-
-  deleteItem(namespace: string, key?: string): { namespace: string; key?: string; value: unknown } {
-    if (!key) {
-      const value = this.namespaces.get(namespace) ?? {};
-      this.namespaces.delete(namespace);
-      this.dirty = true;
-      return { namespace, value };
-    }
-    const ns = this.namespaces.get(namespace);
-    if (!ns) return { namespace, key, value: undefined };
-    const value = ns[key];
-    delete ns[key];
-    this.dirty = true;
-    return { namespace, key, value };
-  }
-}
-
-// ── JSON-RPC types ───────────────────────────────────────────────
-
-interface JsonRpcRequest {
-  jsonrpc: '2.0';
-  method: string;
-  params?: Record<string, unknown>;
-  id?: number | string | null;
-}
-
-function rpcResult(id: number | string | null | undefined, result: unknown): string {
-  return JSON.stringify({ jsonrpc: '2.0', result, id: id ?? null });
-}
-
-function rpcError(id: number | string | null | undefined, code: number, message: string): string {
-  return JSON.stringify({ jsonrpc: '2.0', error: { code, message }, id: id ?? null });
-}
-
-function rpcNotify(method: string, params: unknown[]): string {
-  return JSON.stringify({ jsonrpc: '2.0', method, params });
-}
 
 // ── Per-client subscription state ────────────────────────────────
 
@@ -2445,55 +2269,4 @@ export class MoonrakerServer {
       req.end();
     });
   }
-}
-
-/* ── Multipart parsing ────────────────────────────────────────────── */
-
-interface MultipartPart {
-  name: string;
-  filename?: string;
-  data: Buffer;
-}
-
-function parseMultipartParts(body: Buffer, boundary: string): MultipartPart[] {
-  const sep = Buffer.from(`--${boundary}`);
-  const parts: MultipartPart[] = [];
-  let start = body.indexOf(sep);
-  if (start === -1) return parts;
-
-  while (start !== -1) {
-    start += sep.length;
-    // Skip \r\n after boundary
-    if (body[start] === 0x0d && body[start + 1] === 0x0a) start += 2;
-    // Check for closing boundary (--)
-    if (body[start] === 0x2d && body[start + 1] === 0x2d) break;
-
-    const headerEnd = body.indexOf(Buffer.from('\r\n\r\n'), start);
-    if (headerEnd === -1) break;
-
-    const headers = body.subarray(start, headerEnd).toString('utf-8');
-    const nameMatch = headers.match(/name="([^"]+)"/);
-    const filenameMatch = headers.match(/filename="([^"]+)"/);
-
-    if (nameMatch) {
-      const dataStart = headerEnd + 4;
-      const nextBoundary = body.indexOf(sep, dataStart);
-      // -2 for \r\n before the next boundary
-      const dataEnd = nextBoundary !== -1 ? nextBoundary - 2 : body.length;
-      parts.push({
-        name: nameMatch[1],
-        filename: filenameMatch?.[1],
-        data: body.subarray(dataStart, dataEnd),
-      });
-    }
-
-    start = body.indexOf(sep, headerEnd);
-  }
-  return parts;
-}
-
-function formatSize(bytes: number): string {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
