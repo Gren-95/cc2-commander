@@ -106,12 +106,6 @@ function updateFan(prefix: string, speed: number, toggleId: string, rpm?: number
 }
 
 let overlayEnabled = loadUISettings().cameraOverlay;
-let cameraLive = loadUISettings().cameraLive;
-/** What the printer last said about having a camera, so the switch can redraw on its own. */
-let printerHasCamera = false;
-
-/** The two places the live-view switch lives: the camera's own card, and the fans card. */
-const CAMERA_LIVE_CONTROLS = ['camera-live-btn', 'camera-live-toggle'] as const;
 
 function getCameraStreamUrl(): string {
   return overlayEnabled ? '/api/stream/overlay' : '/api/stream';
@@ -144,55 +138,17 @@ export function syncCameraOverlayControl(): void {
   if (box) box.checked = overlayEnabled;
 }
 
-/**
- * Turn the live view on or off in this browser.
- *
- * Both switches call this rather than each other, so there is one place that decides and
- * one stored value: two controls holding their own state is how the label and the stream
- * came to disagree for the overlay switch.
- */
-export function setCameraLive(on: boolean): void {
-  cameraLive = on;
-  saveUISettings({ cameraLive });
-  updateCamera(printerHasCamera);
-}
-
-/** Put both switches where the setting says, and say why one cannot be used. */
-function syncCameraLiveControls(): void {
-  for (const id of CAMERA_LIVE_CONTROLS) {
-    const box = $(id) as HTMLInputElement | null;
-    if (!box) continue;
-    box.checked = cameraLive;
-    // No camera, nothing to switch. The choice is kept, so it applies when one appears.
-    box.disabled = !printerHasCamera;
-    const control = box.closest('label');
-    if (control) {
-      control.title = printerHasCamera ? 'Show the live camera view' : 'No camera detected';
-    }
-  }
-}
-
-/** Draw the switches for the stored setting, at load. */
-export function initCameraLiveControls(): void {
-  syncCameraLiveControls();
-}
-
-export function updateCamera(hasCamera: boolean): void {
-  printerHasCamera = hasCamera;
-  // Present, and wanted. Off by choice closes the stream; off because there is none says so.
-  const live = hasCamera && cameraLive;
+function updateCamera(hasCamera: boolean, _printerIp: string): void {
   const img = $('camera-feed') as HTMLImageElement;
   const overlay = $('camera-overlay');
-
-  syncCameraLiveControls();
 
   // Snapshot and enlarge both need a frame to work on, so they follow the feed.
   for (const id of ['camera-snapshot-btn', 'camera-expand-btn']) {
     const btn = $(id) as HTMLButtonElement | null;
-    if (btn) btn.disabled = !live;
+    if (btn) btn.disabled = !hasCamera;
   }
 
-  if (live) {
+  if (hasCamera) {
     const src = getCameraStreamUrl();
     if (!img.src.endsWith(new URL(src, location.href).pathname)) {
       img.src = src;
@@ -204,15 +160,12 @@ export function updateCamera(hasCamera: boolean): void {
   } else {
     img.classList.add('hidden');
     img.alt = 'Camera off';
-    // Drop the source, not just the element: a hidden image keeps its connection open, and
-    // the whole point of switching the view off is that nothing is being streamed.
-    img.removeAttribute('src');
     overlay.classList.remove('hidden');
     // Drops the aspect ratio so the card is the size of its message, not of the video
     // it is not showing.
     $('camera-wrap')?.classList.add('camera-off');
     // Only the text node — `overlay.textContent = …` would take the icon with it.
-    $('camera-overlay-text').textContent = hasCamera ? 'Camera off' : 'Camera not connected';
+    $('camera-overlay-text').textContent = 'Camera not connected';
   }
 }
 
@@ -572,7 +525,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   ($('led-toggle') as HTMLInputElement).checked = ledOn;
 
   // Camera
-  updateCamera(s.external_device?.camera ?? false);
+  updateCamera(s.external_device?.camera ?? false, client.printerIp);
 
   // Exception banner
   renderExceptions(machineStatus?.exception_status ?? []);

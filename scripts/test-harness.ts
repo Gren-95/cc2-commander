@@ -26,7 +26,6 @@ const EXPOSED = {
   storageMigration: 'src/ui/storage-migration.ts',
   dryerPanel: 'src/ui/dryer-panel.ts',
   printDialog: 'src/ui/print-dialog.ts',
-  printStatus: 'src/ui/print-status.ts',
   segmented: 'src/ui/segmented.ts',
   stepper: 'src/ui/stepper.ts',
   stateClasses: 'src/ui/state-classes.ts',
