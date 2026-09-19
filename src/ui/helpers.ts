@@ -1,5 +1,20 @@
+/**
+ * The element with this id, which must exist.
+ *
+ * It used to return `getElementById(id)!`: the `!` told the compiler an element was there
+ * and did nothing at runtime, so a renamed or removed id surfaced later as "cannot read
+ * properties of null" on some unrelated line. It says which id now. Use `$optional` for an
+ * element that is allowed to be missing.
+ */
 export function $(id: string): HTMLElement {
-  return document.getElementById(id)!;
+  const el = document.getElementById(id);
+  if (!el) throw new Error(`No element with id "${id}"`);
+  return el;
+}
+
+/** The element with this id, or `null`: for markup that is legitimately not always there. */
+export function $optional(id: string): HTMLElement | null {
+  return document.getElementById(id);
 }
 
 /** Byte count in the largest unit that keeps it readable. */

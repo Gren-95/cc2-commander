@@ -2,7 +2,7 @@
 
 import { icon } from './icons';
 import { EMPTY } from './design';
-import { $, escapeHtml } from './helpers';
+import { $, $optional, escapeHtml } from './helpers';
 import { timestampSpan } from './relative-time';
 
 interface EventLogEntry {
@@ -141,7 +141,7 @@ export function loadEventLogHistory(
 
 /** Render the event log panel */
 export function renderEventLog(): void {
-  const container = $('event-log-entries');
+  const container = $optional('event-log-entries');
   if (!container) return;
 
   if (entries.length === 0) {

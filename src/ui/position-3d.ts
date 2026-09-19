@@ -10,7 +10,7 @@
  * labels, giving the flat X/Y/Z figures a visual home.
  */
 
-import { $ } from './helpers';
+import { $, $optional } from './helpers';
 
 /** Same volume the gcode preview builds its scene against (src/ui/gcode-preview.ts). */
 const BUILD = { x: 256, y: 256, z: 256 };
@@ -60,7 +60,7 @@ let built = false;
 /** Draw the wireframe cube once. Safe to call more than once; purely decorative. */
 export function initPosition3D(): void {
   if (built) return;
-  const svg = $('position-3d') as unknown as SVGSVGElement | null;
+  const svg = $optional('position-3d') as unknown as SVGSVGElement | null;
   if (!svg) return;
   built = true;
 

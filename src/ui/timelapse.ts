@@ -12,7 +12,7 @@
 import { icon, iconSolo, iconText } from './icons';
 import type { CommandSender } from '../ws-client';
 import type { PrinterState } from '../printer-state';
-import { $, escapeHtml, escapeAttr, formatBytes } from './helpers';
+import { $, $optional, escapeHtml, escapeAttr, formatBytes } from './helpers';
 import { type ListControls, createListControls } from './list-controls';
 import { nonZero } from './list-sort';
 
@@ -84,7 +84,7 @@ function ensureTimelapseControls(): ListControls<TimelapseEntry> {
 }
 
 export function renderTimelapse(state: PrinterState): void {
-  const container = $('timelapse-list');
+  const container = $optional('timelapse-list');
   if (!container) return;
   lastTimelapseState = state;
 
@@ -169,8 +169,8 @@ function _formatDuration(seconds: number): string {
  * and, crucially, gives it a content type the printer itself does not send.
  */
 export function showTimelapsePlayer(url: string): void {
-  const player = $('timelapse-player') as HTMLVideoElement;
-  const container = $('timelapse-player-wrap');
+  const player = $optional('timelapse-player') as HTMLVideoElement;
+  const container = $optional('timelapse-player-wrap');
   if (!player || !container) return;
 
   player.src = `/api/timelapse/video?file=${encodeURIComponent(url)}`;

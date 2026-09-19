@@ -1,7 +1,7 @@
 import { icon, iconSolo } from './icons';
 import type { CommandSender } from '../ws-client';
 import type { PrinterState } from '../printer-state';
-import { $, escapeHtml, escapeAttr, formatTime } from './helpers';
+import { $, $optional, escapeHtml, escapeAttr, formatTime } from './helpers';
 import { toast } from './toast';
 import { type ListControls, createListControls } from './list-controls';
 import { nonZero, spanSeconds } from './list-sort';
@@ -72,7 +72,7 @@ function ensureHistoryControls(): ListControls<HistoryItem> {
 }
 
 export function renderPrintHistory(state: PrinterState): void {
-  const container = $('print-history-entries');
+  const container = $optional('print-history-entries');
   if (!container) return;
   lastHistoryState = state;
 
@@ -138,7 +138,7 @@ export function renderPrintHistory(state: PrinterState): void {
 
 /** The printer's own total, which is not the same number as the filtered count. */
 function updateHistoryTotal(state: PrinterState): void {
-  const totalEl = $('print-history-total');
+  const totalEl = $optional('print-history-total');
   if (totalEl) {
     totalEl.textContent = `${state.printHistoryTotal} prints`;
   }

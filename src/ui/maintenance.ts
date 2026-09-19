@@ -1,7 +1,7 @@
 import { icon } from './icons';
 import type { CommandSender } from '../ws-client';
 import type { PrinterState } from '../printer-state';
-import { $, escapeHtml } from './helpers';
+import { $, $optional, escapeHtml } from './helpers';
 import { toast } from './toast';
 
 let maintenanceClient: CommandSender | null = null;
@@ -77,7 +77,7 @@ export function bindMaintenanceControls(): void {
 }
 
 export function renderMaintenance(state: PrinterState): void {
-  const statusEl = $('maintenance-status');
+  const statusEl = $optional('maintenance-status');
   if (!statusEl) return;
 
   const s = state.status;
@@ -115,7 +115,7 @@ export function renderMaintenance(state: PrinterState): void {
     'btn-maintenance-pid',
   ];
   for (const id of btns) {
-    const btn = $(id) as HTMLButtonElement;
+    const btn = $optional(id) as HTMLButtonElement;
     if (btn) btn.disabled = isBusy;
   }
 }

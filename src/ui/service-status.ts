@@ -2,7 +2,7 @@
 
 import { toggleState } from './state-classes';
 import { ICONS, type IconName, icon } from './icons';
-import { $, escapeAttr, escapeHtml } from './helpers';
+import { $, $optional, escapeAttr, escapeHtml } from './helpers';
 import { type AboutStatus, PROJECT_URL, setAboutStatus } from './about';
 import type { PrinterState } from '../printer-state';
 import {
@@ -151,17 +151,17 @@ function dotHtml(ok: boolean): string {
 }
 
 export function renderServiceStatus(): void {
-  const badge = $('svc-header-badge');
-  const dotsEl = $('svc-header-dots');
-  const countEl = $('svc-header-count');
-  const dropdown = $('service-status');
+  const badge = $optional('svc-header-badge');
+  const dotsEl = $optional('svc-header-dots');
+  const countEl = $optional('svc-header-count');
+  const dropdown = $optional('service-status');
 
   if (!badge || !dotsEl || !countEl) return;
 
   // Bind dropdown toggle once
   if (!dropdownBound) {
     dropdownBound = true;
-    const wrap = $('svc-header-wrap');
+    const wrap = $optional('svc-header-wrap');
     const dd = $('svc-dropdown');
     if (wrap && dd) {
       badge.addEventListener('click', (e) => {
@@ -262,7 +262,7 @@ export function renderServiceStatus(): void {
 let lastSysKey = '';
 
 export function renderSystemInfo(state: PrinterState): void {
-  const container = $('system-info');
+  const container = $optional('system-info');
   if (!container) return;
 
   const attrs = state.attributes;

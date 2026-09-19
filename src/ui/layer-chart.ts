@@ -2,7 +2,7 @@
 
 import type { PrinterState } from '../printer-state';
 import { type LayerTimeEntry, trailingLayerRun } from '../types';
-import { $ } from './helpers';
+import { $, $optional } from './helpers';
 import { chartPalette } from './chart-palette';
 
 const PADDING = { top: 10, right: 12, bottom: 28, left: 48 };
@@ -89,7 +89,7 @@ function bindHover(canvas: HTMLCanvasElement): void {
 }
 
 export function renderLayerTimeChart(state: PrinterState): void {
-  const canvas = $('chart-layer-time') as HTMLCanvasElement | null;
+  const canvas = $optional('chart-layer-time') as HTMLCanvasElement | null;
   if (!canvas) return;
 
   bindHover(canvas);

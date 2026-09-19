@@ -4,7 +4,7 @@ import { updateDeepLink } from './deep-link';
 import { savedSubtab } from './subtabs';
 import { toggleState } from './state-classes';
 import { readMigrated } from './storage-migration';
-import { $, fetchTimeout } from './helpers';
+import { $, $optional, fetchTimeout } from './helpers';
 import {
   CARD_WIDTHS,
   CARD_WIDTH_UTILITIES,
@@ -427,7 +427,7 @@ function buildSettingsHTML(content: HTMLElement): void {
 }
 
 async function loadTelegramStatus(): Promise<void> {
-  const container = $('settings-telegram-status');
+  const container = $optional('settings-telegram-status');
   if (!container) return;
 
   try {

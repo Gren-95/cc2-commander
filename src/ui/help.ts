@@ -1,10 +1,10 @@
 import { icon } from './icons';
-import { $ } from './helpers';
+import { $, $optional } from './helpers';
 
 let helpRendered = false;
 
 export function renderHelp(): void {
-  const container = $('help-content');
+  const container = $optional('help-content');
   if (!container || helpRendered) return;
   helpRendered = true;
 

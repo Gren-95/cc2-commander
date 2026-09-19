@@ -19,7 +19,7 @@ import { currentFileDir, currentFileSource } from './ui/file-browsing';
 import { handleInlineThumbnail } from './ui/file-thumbnails';
 import { bindFileControls, renderFiles } from './ui/files';
 import { bindGcodePreviewControls, renderGcodePreview } from './ui/gcode-preview';
-import { fetchTimeout } from './ui/helpers';
+import { $optional, fetchTimeout } from './ui/helpers';
 import { renderLayerTimeChart } from './ui/layer-chart';
 import { bindMaintenanceControls, renderMaintenance, setMaintenanceClient } from './ui/maintenance';
 import { handleFileDetailForPrint } from './ui/print-dialog';
@@ -227,7 +227,7 @@ function showDashboard(): void {
     const cameraWrap = $('camera-wrap');
     const cameraModal = $('camera-modal');
     const cameraModalImg = $('camera-modal-img') as HTMLImageElement;
-    const cameraFeed = $('camera-feed') as HTMLImageElement;
+    const cameraFeed = $optional('camera-feed') as HTMLImageElement;
     // ELEG-41. The overlay covers the dashboard but the dashboard stays interactive, so
     // without a trap Tab walks focus onto the move, temperature and stop controls the
     // user cannot see: controls that drive a physical machine. The trap also owns
@@ -746,7 +746,7 @@ async function signInThenConnect(): Promise<void> {
     // Never leave the password in a field that survives in the DOM.
     field.value = '';
     authState = { ...authState, authenticated: true };
-    $('btn-sign-out')?.classList.remove('hidden');
+    $optional('btn-sign-out')?.classList.remove('hidden');
   }
 
   connectToService();
@@ -757,11 +757,11 @@ $('connect-btn').addEventListener('click', () => {
 });
 
 // Enter submits, because a single password field that needs a mouse is a small insult.
-$('auth-password')?.addEventListener('keydown', (event) => {
+$optional('auth-password')?.addEventListener('keydown', (event) => {
   if ((event as KeyboardEvent).key === 'Enter') void signInThenConnect();
 });
 
-$('btn-sign-out')?.addEventListener('click', () => {
+$optional('btn-sign-out')?.addEventListener('click', () => {
   void logout().then(() => location.reload());
 });
 
@@ -776,7 +776,10 @@ async function boot(): Promise<void> {
   authState = await fetchAuthState();
   // Only when there is a session to end: on the sign-in card it would be a button
   // that signs you out of nothing.
-  $('btn-sign-out')?.classList.toggle('hidden', !(authState.required && authState.authenticated));
+  $optional('btn-sign-out')?.classList.toggle(
+    'hidden',
+    !(authState.required && authState.authenticated),
+  );
   if (authState.authenticated) {
     connectToService();
     return;

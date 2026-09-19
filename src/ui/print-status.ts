@@ -13,7 +13,15 @@ import {
   powerLossState,
 } from '../types';
 import { maybeShowPowerLossDialog } from './power-loss-dialog';
-import { $, formatTime, formatClock, fanPct, escapeHtml, applyDarkThumbnailCheck } from './helpers';
+import {
+  $,
+  $optional,
+  formatTime,
+  formatClock,
+  fanPct,
+  escapeHtml,
+  applyDarkThumbnailCheck,
+} from './helpers';
 import { showLight } from './light-switches';
 import { loadUISettings, saveUISettings } from './ui-settings';
 
@@ -99,7 +107,7 @@ function updateFan(prefix: string, speed: number, rpm?: number): void {
   // has not spun up yet, so the value being written is the OLD one.
   if (range && document.activeElement !== range) range.value = String(pct);
   $(`${prefix}-value`).textContent = `${pct}%`;
-  const rpmEl = $(`${prefix}-rpm`);
+  const rpmEl = $optional(`${prefix}-rpm`);
   if (rpmEl) {
     rpmEl.textContent = rpm != null && rpm > 0 ? `${rpm} RPM` : '';
   }
@@ -122,29 +130,29 @@ export function setCameraOverlay(on: boolean): void {
   overlayEnabled = on;
   saveUISettings({ cameraOverlay: overlayEnabled });
 
-  const box = $('camera-overlay-btn') as HTMLInputElement | null;
+  const box = $optional('camera-overlay-btn') as HTMLInputElement | null;
   if (box) box.checked = overlayEnabled;
 
-  const img = $('camera-feed') as HTMLImageElement;
+  const img = $optional('camera-feed') as HTMLImageElement;
   if (img && !img.classList.contains('hidden')) img.src = getCameraStreamUrl();
 
-  const modalImg = $('camera-modal-img') as HTMLImageElement;
+  const modalImg = $optional('camera-modal-img') as HTMLImageElement;
   if (modalImg?.src) modalImg.src = getCameraStreamUrl();
 }
 
 /** Put the switch where the stored setting says, at load. */
 export function syncCameraOverlayControl(): void {
-  const box = $('camera-overlay-btn') as HTMLInputElement | null;
+  const box = $optional('camera-overlay-btn') as HTMLInputElement | null;
   if (box) box.checked = overlayEnabled;
 }
 
 function updateCamera(hasCamera: boolean, _printerIp: string): void {
-  const img = $('camera-feed') as HTMLImageElement;
+  const img = $optional('camera-feed') as HTMLImageElement;
   const overlay = $('camera-overlay');
 
   // Snapshot and enlarge both need a frame to work on, so they follow the feed.
   for (const id of ['camera-snapshot-btn', 'camera-expand-btn']) {
-    const btn = $(id) as HTMLButtonElement | null;
+    const btn = $optional(id) as HTMLButtonElement | null;
     if (btn) btn.disabled = !hasCamera;
   }
 
@@ -156,14 +164,14 @@ function updateCamera(hasCamera: boolean, _printerIp: string): void {
     img.alt = 'Live camera feed';
     overlay.classList.add('hidden');
     img.classList.remove('hidden');
-    $('camera-wrap')?.classList.remove('camera-off');
+    $optional('camera-wrap')?.classList.remove('camera-off');
   } else {
     img.classList.add('hidden');
     img.alt = 'Camera off';
     overlay.classList.remove('hidden');
     // Drops the aspect ratio so the card is the size of its message, not of the video
     // it is not showing.
-    $('camera-wrap')?.classList.add('camera-off');
+    $optional('camera-wrap')?.classList.add('camera-off');
     // Only the text node: `overlay.textContent = …` would take the icon with it.
     $('camera-overlay-text').textContent = 'Camera not connected';
   }

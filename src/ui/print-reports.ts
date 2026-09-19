@@ -4,7 +4,7 @@
 
 import { icon, iconSolo } from './icons';
 import { EMPTY } from './design';
-import { $, escapeHtml, formatTime, fetchTimeout } from './helpers';
+import { $, $optional, escapeHtml, formatTime, fetchTimeout } from './helpers';
 import { type ListControls, createListControls } from './list-controls';
 import { nonZero } from './list-sort';
 
@@ -75,14 +75,14 @@ function ensureReportControls(): ListControls<ReportSummary> {
 }
 
 export function renderReports(): void {
-  const container = $('print-reports-entries');
+  const container = $optional('print-reports-entries');
   if (!container) return;
   if (reportsLoaded) return;
   loadReports();
 }
 
 async function loadReports(): Promise<void> {
-  const container = $('print-reports-entries');
+  const container = $optional('print-reports-entries');
   if (!container) return;
 
   try {
@@ -98,7 +98,7 @@ async function loadReports(): Promise<void> {
 
 /** Renders whatever was last fetched, through the current sort and filter. */
 function renderReportList(): void {
-  const container = $('print-reports-entries');
+  const container = $optional('print-reports-entries');
   const data = reportData;
   if (!container || !data) return;
 

@@ -14,7 +14,7 @@
 
 import { setDryerHumidity } from './dryer-panel';
 import type { Sample } from './sparkline';
-import { $, escapeHtml, fetchTimeout } from './helpers';
+import { $, $optional, escapeHtml, fetchTimeout } from './helpers';
 import { icon } from './icons';
 
 interface Reading {
@@ -137,7 +137,7 @@ export function renderAmbient(state: Record<string, unknown>): void {
  * reason.
  */
 export async function initAmbient(): Promise<void> {
-  $('ambient-row')?.classList.add('hidden');
+  $optional('ambient-row')?.classList.add('hidden');
   try {
     const res = await fetchTimeout('/api/home-assistant');
     if (!res.ok) return;

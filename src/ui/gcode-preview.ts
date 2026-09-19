@@ -13,7 +13,7 @@ import {
 } from 'three';
 import type { Object3D } from 'three';
 import type { PrinterState } from '../printer-state';
-import { $, fetchTimeout, toggleClasses } from './helpers';
+import { $, $optional, fetchTimeout, toggleClasses } from './helpers';
 import { chartPalette } from './chart-palette';
 import { positionSegmented } from './segmented';
 import { onThemeChange } from './theme';
@@ -206,13 +206,13 @@ function onOrbitChange(): void {
  * to one that failed to load.
  */
 function setPreviewEmpty(empty: boolean): void {
-  $('gcode-preview-empty')?.classList.toggle('hidden', !empty);
+  $optional('gcode-preview-empty')?.classList.toggle('hidden', !empty);
   // The canvas reserves 350px (the tallest single element on the dashboard) and with
   // nothing loaded that is 350px of nothing behind a one-line message. Collapsing it
   // rather than overlaying the message is most of the difference between the card
   // looking "empty" and looking "broken".
-  $('gcode-preview-canvas')?.classList.toggle('hidden', empty);
-  $('gcode-layer-slider')?.parentElement?.classList.toggle('hidden', empty);
+  $optional('gcode-preview-canvas')?.classList.toggle('hidden', empty);
+  $optional('gcode-layer-slider')?.parentElement?.classList.toggle('hidden', empty);
 }
 
 export function renderGcodePreview(state: PrinterState): void {
@@ -251,7 +251,7 @@ export function renderGcodePreview(state: PrinterState): void {
     throttledRender();
 
     // Sync slider
-    const slider = $('gcode-layer-slider') as HTMLInputElement | null;
+    const slider = $optional('gcode-layer-slider') as HTMLInputElement | null;
     if (slider) {
       slider.value = String(currentLayer);
       updateLayerReadout();
@@ -265,7 +265,7 @@ export function renderGcodePreview(state: PrinterState): void {
 /** Initialize the 3D preview on the canvas */
 function initPreview(colorMap?: Array<{ t: number; color: string }>): WebGLPreview | null {
   const pal = chartPalette();
-  const canvas = $('gcode-preview-canvas') as HTMLCanvasElement | null;
+  const canvas = $optional('gcode-preview-canvas') as HTMLCanvasElement | null;
   if (!canvas) return null;
 
   // Dispose previous instance
@@ -355,8 +355,8 @@ function applyShading(p: WebGLPreview): void {
 export async function loadGcode(filename: string, source = 'local'): Promise<void> {
   if (loading) return;
 
-  const statusEl = $('gcode-preview-status');
-  const loadBtn = $('btn-load-gcode') as HTMLButtonElement | null;
+  const statusEl = $optional('gcode-preview-status');
+  const loadBtn = $optional('btn-load-gcode') as HTMLButtonElement | null;
 
   try {
     loading = true;
@@ -409,7 +409,7 @@ export async function loadGcode(filename: string, source = 'local'): Promise<voi
 
     // Set layer slider range
     const totalLayers = preview.countLayers;
-    const slider = $('gcode-layer-slider') as HTMLInputElement | null;
+    const slider = $optional('gcode-layer-slider') as HTMLInputElement | null;
     if (slider) {
       slider.max = String(totalLayers);
       slider.value = String(totalLayers);
@@ -461,7 +461,7 @@ function syncViewButtons(): void {
 
 /** Update the info bar below the 3D view */
 function updateInfo(state: PrinterState): void {
-  const infoEl = $('gcode-preview-info');
+  const infoEl = $optional('gcode-preview-info');
   if (!infoEl) return;
 
   const s = state.status;
@@ -559,7 +559,7 @@ export function bindGcodePreviewControls(): void {
   setFollowChecked(followMode);
 
   // Layer slider
-  const slider = $('gcode-layer-slider') as HTMLInputElement | null;
+  const slider = $optional('gcode-layer-slider') as HTMLInputElement | null;
   if (slider) {
     /*
      * `preview.render()` is not a draw call: it is `renderPathIndex = 0` followed by
@@ -617,7 +617,7 @@ export function bindGcodePreviewControls(): void {
   }
 
   // Follow, as a switch. Same reasoning: a checkbox shows its own state.
-  const followBox = $('btn-gcode-follow') as HTMLInputElement | null;
+  const followBox = $optional('btn-gcode-follow') as HTMLInputElement | null;
   if (followBox) {
     followBox.addEventListener('change', () => {
       followMode = followBox.checked;
@@ -628,16 +628,16 @@ export function bindGcodePreviewControls(): void {
   }
 
   // Load button
-  const loadBtn = $('btn-load-gcode');
+  const loadBtn = $optional('btn-load-gcode');
   if (loadBtn) {
     loadBtn.addEventListener('click', () => {
-      const input = $('gcode-file-input') as HTMLInputElement | null;
+      const input = $optional('gcode-file-input') as HTMLInputElement | null;
       if (input) input.click();
     });
   }
 
   // Hidden file input for manual drag/load
-  const fileInput = $('gcode-file-input') as HTMLInputElement | null;
+  const fileInput = $optional('gcode-file-input') as HTMLInputElement | null;
   if (fileInput) {
     fileInput.addEventListener('change', () => {
       const file = fileInput.files?.[0];
@@ -651,13 +651,13 @@ export function bindGcodePreviewControls(): void {
         await preview.processGCode(gcode);
         applyShading(preview);
         loadedFile = file.name;
-        const slider = $('gcode-layer-slider') as HTMLInputElement | null;
+        const slider = $optional('gcode-layer-slider') as HTMLInputElement | null;
         if (slider) {
           slider.max = String(preview.countLayers);
           slider.value = String(preview.countLayers);
           updateLayerReadout();
         }
-        const statusEl = $('gcode-preview-status');
+        const statusEl = $optional('gcode-preview-status');
         if (statusEl) statusEl.textContent = `${preview.countLayers} layers · ${file.name}`;
       };
       reader.readAsText(file);
@@ -666,7 +666,7 @@ export function bindGcodePreviewControls(): void {
   }
 
   // Handle canvas resize
-  const canvas = $('gcode-preview-canvas') as HTMLCanvasElement | null;
+  const canvas = $optional('gcode-preview-canvas') as HTMLCanvasElement | null;
   if (canvas) {
     const ro = new ResizeObserver(() => {
       if (preview) preview.resize();
