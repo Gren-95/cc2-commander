@@ -17,7 +17,7 @@
 
 import type { ServerWebSocket, WebSocketHandler } from 'bun';
 import type { StateStore, EventLogEntry } from './state-store.js';
-import { getCameraHealth } from './rest-api.js';
+import { getCameraHealth } from './camera-proxy.js';
 import type { MqttBridge } from './mqtt-bridge.js';
 import type { TelegramIntegration } from './telegram.js';
 import { getLogger } from './logger.js';

@@ -56,7 +56,7 @@ import {
 } from './moonraker-commands.js';
 import { createOctoPrintRouter } from './octoprint-compat.js';
 import { getLogger } from './logger.js';
-import { cacheGcodeBuffer } from './rest-api.js';
+import { cacheGcodeBuffer } from './gcode-cache.js';
 
 const log = getLogger('MoonrakerSrv');
 

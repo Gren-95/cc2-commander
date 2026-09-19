@@ -11,7 +11,7 @@ import { mkdir, writeFile, readdir, readFile, rm } from 'fs/promises';
 import { join } from 'path';
 import type { StateStore, ChartPoint, PrintEvent, FilamentUsage } from './state-store.js';
 import type { ServiceConfig } from './config.js';
-import { getSnapshot } from './rest-api.js';
+import { getSnapshot } from './camera-proxy.js';
 import { getLogger } from './logger.js';
 
 const log = getLogger('Report');

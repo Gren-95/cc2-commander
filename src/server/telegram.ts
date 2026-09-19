@@ -8,7 +8,7 @@ import type { Context } from 'grammy';
 import type { StateStore, PrintEvent } from './state-store.js';
 import type { MqttBridge } from './mqtt-bridge.js';
 import type { ServiceConfig } from './config.js';
-import { getSnapshot } from './rest-api.js';
+import { getSnapshot } from './camera-proxy.js';
 import { CRITICAL_EXCEPTIONS } from '../types.js';
 import { isAllowedSender } from './allowlist.js';
 import { getLogger } from './logger.js';
