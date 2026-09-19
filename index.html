@@ -155,6 +155,10 @@
                   <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 py-8 text-center text-xs text-fg-muted [&>i]:text-2xl [&>i]:opacity-40" id="camera-overlay"><i class="bi bi-camera-video-off" aria-hidden="true"></i><span id="camera-overlay-text">Camera not available</span></div>
                 </div>
                 <div class="absolute right-2 top-2 flex items-center gap-1.5">
+                  <label class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/25 bg-black/55 text-white cursor-pointer transition-colors hover:bg-black/75 has-[:checked]:border-accent has-[:checked]:bg-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent has-[:disabled]:opacity-50" title="Overhead light">
+                    <input type="checkbox" id="led-toggle-camera" class="peer sr-only" aria-label="Overhead light">
+                    <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                  </label>
                   <label class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/25 bg-black/55 text-white cursor-pointer transition-colors hover:bg-black/75 has-[:checked]:border-accent has-[:checked]:bg-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent" title="Burn the print status into the stream">
                     <input type="checkbox" id="camera-overlay-btn" class="peer sr-only" aria-label="Burn the print status into the stream">
                     <i class="bi bi-card-text" aria-hidden="true"></i>
@@ -517,6 +521,15 @@
               <span class="text-[10px] text-fg-muted shrink-0 tabular-nums" id="fan-case-rpm"></span>
               <label class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
                 <input type="checkbox" id="fan-case-toggle" class="peer sr-only">
+                <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
+              </label>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="bi bi-lightbulb text-fg-muted shrink-0" aria-hidden="true"></i>
+              <span class="text-xs text-fg w-16 shrink-0 truncate">Light</span>
+              <span class="min-w-0 flex-1 truncate text-[11px] text-fg-muted">Overhead</span>
+              <label class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
+                <input type="checkbox" id="led-toggle-fans" class="peer sr-only" aria-label="Overhead light">
                 <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
               </label>
             </div>

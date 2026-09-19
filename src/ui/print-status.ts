@@ -14,6 +14,7 @@ import {
 } from '../types';
 import { maybeShowPowerLossDialog } from './power-loss-dialog';
 import { $, formatTime, formatClock, fanPct, escapeHtml, applyDarkThumbnailCheck } from './helpers';
+import { showLight } from './light-switches';
 import { loadUISettings, saveUISettings } from './ui-settings';
 
 let lastThumbnailFile = '';
@@ -520,9 +521,8 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   const speedTrack = document.querySelector('.speed-btn')?.closest<HTMLElement>('.segmented');
   if (speedTrack) positionSegmented(speedTrack);
 
-  // LED toggle
-  const ledOn = s.led?.status === 1;
-  ($('led-toggle') as HTMLInputElement).checked = ledOn;
+  // Light — every switch for it, not just one
+  showLight(s.led?.status === 1);
 
   // Camera
   updateCamera(s.external_device?.camera ?? false, client.printerIp);

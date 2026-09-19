@@ -3,6 +3,7 @@ import { toggleState } from './state-classes';
 import { iconText } from './icons';
 import type { CommandSender } from '../ws-client';
 import { $, fetchTimeout } from './helpers';
+import { bindLightSwitches } from './light-switches';
 import { toast } from './toast';
 
 let controlsBound = false;
@@ -213,11 +214,9 @@ export function bindControls(client: CommandSender): void {
     });
   });
 
-  // LED toggle
-  $('led-toggle').addEventListener('change', (e) => {
-    const on = (e.target as HTMLInputElement).checked;
-    guardedSend(client, 1029, { power: on ? 1 : 0 }, e.target as HTMLElement);
-  });
+  // Light. One light, three switches (`light-switches.ts`); every one is held while the
+  // command is in flight, so two cannot be flipped against each other.
+  bindLightSwitches((on, boxes) => guardedSend(client, 1029, { power: on ? 1 : 0 }, ...boxes));
 
   // Temperature presets
   document.querySelectorAll('.temp-preset-btn').forEach((btn) => {
