@@ -10,6 +10,13 @@ export interface UISettings {
   chartWindows: Record<string, number>;
   /** Camera overlay enabled */
   cameraOverlay: boolean;
+  /**
+   * Whether this browser shows the live camera view. Off closes the stream — nothing is
+   * requested from the service, and so nothing is pulled from the printer's camera — until
+   * it is switched back on. Per browser, like the overlay: two people watching the same
+   * printer do not decide for each other.
+   */
+  cameraLive: boolean;
   /** Structured log direction filter */
   slogDirection: string;
   /** Structured log type filter */
@@ -52,6 +59,8 @@ export interface UISettings {
 const defaults: UISettings = {
   chartWindows: {},
   cameraOverlay: false,
+  // On, because that is what the dashboard has always done.
+  cameraLive: true,
   slogDirection: 'all',
   slogType: 'all',
   slogMethod: 'all',

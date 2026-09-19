@@ -37,6 +37,7 @@ describe('the camera, inside the print card', () => {
     'camera-overlay',
     'camera-overlay-text',
     'camera-overlay-btn',
+    'camera-live-btn',
     'camera-snapshot-btn',
     'camera-expand-btn',
   ];
@@ -62,5 +63,18 @@ describe('the camera, inside the print card', () => {
       expect(idAt(id)).toBeGreaterThan(start);
       expect(idAt(id)).toBeLessThan(nextCard);
     }
+  });
+});
+
+describe('the live-view switch on the fans card', () => {
+  // The same setting as the pill on the camera. It lives in the fans card because that
+  // card is where the other on/off rows are — and it must stay there, once.
+  const start = idAt('fans-card');
+  const nextCard = html.indexOf('class="card @container', html.indexOf('>', start));
+
+  it('is inside the fans card, once', () => {
+    expect(count('camera-live-toggle')).toBe(1);
+    expect(idAt('camera-live-toggle')).toBeGreaterThan(start);
+    expect(idAt('camera-live-toggle')).toBeLessThan(nextCard);
   });
 });

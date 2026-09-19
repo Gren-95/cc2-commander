@@ -30,7 +30,13 @@ import {
   setHistoryClient,
 } from './ui/print-history';
 import { bindReportControls, renderReports } from './ui/print-reports';
-import { renderDashboard, setCameraOverlay, syncCameraOverlayControl } from './ui/print-status';
+import {
+  initCameraLiveControls,
+  renderDashboard,
+  setCameraLive,
+  setCameraOverlay,
+  syncCameraOverlayControl,
+} from './ui/print-status';
 import {
   type PrinterLink,
   renderSystemInfo,
@@ -296,6 +302,13 @@ function showDashboard(): void {
     const overlayBox = $('camera-overlay-btn') as HTMLInputElement;
     overlayBox.addEventListener('change', () => setCameraOverlay(overlayBox.checked));
     syncCameraOverlayControl();
+
+    // Live view switch — one setting, two controls (the camera's card and the fans card).
+    for (const id of ['camera-live-btn', 'camera-live-toggle']) {
+      const box = $(id) as HTMLInputElement;
+      box.addEventListener('change', () => setCameraLive(box.checked));
+    }
+    initCameraLiveControls();
 
     // Camera snapshot download with retry (max 3 attempts, exponential backoff)
     const snapshotBtn = $('camera-snapshot-btn') as HTMLButtonElement;
