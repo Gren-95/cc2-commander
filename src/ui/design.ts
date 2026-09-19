@@ -281,3 +281,39 @@ export const RANGE = [
   '[&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0',
   '[&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent',
 ].join(' ');
+
+/*
+ * Tokens used only by index.html, which cannot import: `scripts/build.ts` fills each
+ * `{{NAME}}` in the document from these exports, and `{{NAME state}}` with the token after
+ * that state's delta from `state-classes.ts`. They sit here so each element's utilities are
+ * written once, not once per copy (twelve cards, three tabs, three fan sliders).
+ */
+
+/** The outer class of every dashboard card: the `.card` hook, its container, and `CARD`. */
+export const CARD_SHELL = `card @container flex flex-col ${CARD}`;
+
+/** A main navigation tab. Its selected look is `{{MAIN_TAB active}}`, derived, not copied. */
+export const MAIN_TAB = [
+  'main-tab inline-flex items-center justify-center [padding:6px_14px] bg-transparent',
+  'border-0 rounded-[calc(var(--radius)_-_3px)] text-fg-muted text-[12px] font-medium',
+  'cursor-pointer [transition:all_0.15s] whitespace-nowrap',
+  'max-[800px]:[padding:5px_10px] min-[701px]:max-[800px]:text-[11px]',
+  'max-[700px]:flex-1 max-[700px]:flex-col max-[700px]:[gap:2px] max-[700px]:min-w-0',
+  'max-[700px]:h-[var(--bottom-nav-height)] max-[700px]:[padding:6px_2px]',
+  'max-[700px]:rounded-none max-[700px]:text-[10px] max-[700px]:leading-[1.1]',
+  'hover:text-fg hover:bg-[rgba(255,_255,_255,_0.04)] max-[700px]:hover:bg-transparent',
+].join(' ');
+
+/** A fan speed slider, with its thumb and track drawn by hand for both engines. */
+export const FAN_RANGE = [
+  'fan-range flex-1 min-w-0 cursor-pointer appearance-none bg-transparent',
+  '[&::-webkit-slider-runnable-track]:h-1',
+  '[&::-webkit-slider-runnable-track]:rounded-full',
+  '[&::-webkit-slider-runnable-track]:bg-line [&::-webkit-slider-thumb]:appearance-none',
+  '[&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-4',
+  '[&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full',
+  '[&::-webkit-slider-thumb]:bg-accent [&::-moz-range-track]:h-1',
+  '[&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line',
+  '[&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0',
+  '[&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent',
+].join(' ');

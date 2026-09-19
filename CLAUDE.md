@@ -215,7 +215,7 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
 
   | | |
   | --- | --- |
-  | `ui/state-classes.ts` | `toggleState(el, 'active', on)`: the utilities a state implies, per base component. GENERATED from the old stylesheet; edit it directly. |
+  | `ui/state-classes.ts` | `toggleState(el, 'active', on)`: applies the table in `ui/state-utilities.ts`, the utilities a state implies per base component. GENERATED from the old stylesheet; edit the table directly. It is DOM-free because the build reads it too. |
   | `ui/card-layout.ts` | `CARD_WIDTH_UTILITIES`: the grid span each card width means. |
   | `helpers.ts` | `toggleClasses(el, 'hook a b c', on)` for one-off runtime states. |
 
@@ -226,7 +226,11 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   mono, actuators (what you tell it) are bordered and grouped) and the two rules that
   follow: **the accent colour means "this control is engaged" and nothing else**, and a
   physical quantity keeps the printer's own colour (nozzle red, bed amber). `index.html`
-  cannot import, so it carries the strings literally; the render modules import them.
+  cannot import, so it names them instead: `class="{{CARD_SHELL}}"`, and
+  `{{MAIN_TAB active}}` for a token with a state's delta applied. `scripts/build.ts`
+  fills them from `ui/design.ts` (and `ui/state-utilities.ts`) and stops on an unknown
+  name, so an element repeated in the markup is written once. Anything not yet a token is
+  still literal; make it one rather than pasting a second copy.
 
   **Never put two utilities for one CSS property on one element.** Tailwind guarantees
   no order between them, so which wins is whatever the generated sheet happens to emit

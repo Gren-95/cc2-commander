@@ -33,6 +33,7 @@
  * until someone restarted it.
  */
 
+import { fillDesignTokens } from './fill-design-tokens';
 import { createHash } from 'node:crypto';
 import { cp, mkdir, readdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -113,7 +114,7 @@ async function buildCss(): Promise<string> {
  * exactly as written.
  */
 async function buildHtml(js: string, css: string): Promise<void> {
-  let html = await Bun.file(join(ROOT, 'index.html')).text();
+  let html = fillDesignTokens(await Bun.file(join(ROOT, 'index.html')).text());
 
   const before = html;
   html = html.replace('<link rel="stylesheet" href="/src/styles/main.css">', `<link rel="stylesheet" href="/assets/${css}">`);

@@ -63,10 +63,10 @@
     </div>
     <div id="main-tabs-bar" class="flex items-center min-w-0 max-[700px]:fixed max-[700px]:[inset:auto_0_0_0] max-[700px]:z-[200] max-[700px]:bg-surface max-[700px]:border-t max-[700px]:border-line max-[700px]:[padding-bottom:env(safe-area-inset-bottom,_0)]">
       <nav class="flex [gap:1px] bg-input rounded-card [padding:3px] max-[700px]:flex max-[700px]:w-full max-[700px]:gap-0 max-[700px]:p-0 max-[700px]:rounded-none max-[700px]:bg-transparent" id="main-tabs">
-        <button class="main-tab active inline-flex items-center justify-center [padding:6px_14px] bg-accent border-0 rounded-[calc(var(--radius)_-_3px)] text-white text-[12px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap max-[800px]:[padding:5px_10px] min-[701px]:max-[800px]:text-[11px] max-[700px]:flex-1 max-[700px]:flex-col max-[700px]:[gap:2px] max-[700px]:min-w-0 max-[700px]:h-[var(--bottom-nav-height)] max-[700px]:[padding:6px_2px] max-[700px]:rounded-none max-[700px]:text-[10px] max-[700px]:leading-[1.1] hover:text-fg hover:bg-[rgba(255,_255,_255,_0.04)] max-[700px]:bg-transparent max-[700px]:text-accent max-[700px]:[box-shadow:inset_0_2px_0_0_var(--accent)] max-[700px]:hover:bg-transparent" data-tab="dashboard"><i class="bi bi-printer bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i><span class="max-[700px]:max-w-full max-[700px]:overflow-hidden max-[700px]:text-ellipsis max-[700px]:whitespace-nowrap">Dashboard</span></button>
-        <button class="main-tab inline-flex items-center justify-center [padding:6px_14px] bg-transparent border-0 rounded-[calc(var(--radius)_-_3px)] text-fg-muted text-[12px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap max-[800px]:[padding:5px_10px] min-[701px]:max-[800px]:text-[11px] max-[700px]:flex-1 max-[700px]:flex-col max-[700px]:[gap:2px] max-[700px]:min-w-0 max-[700px]:h-[var(--bottom-nav-height)] max-[700px]:[padding:6px_2px] max-[700px]:rounded-none max-[700px]:text-[10px] max-[700px]:leading-[1.1] hover:text-fg hover:bg-[rgba(255,_255,_255,_0.04)] max-[700px]:hover:bg-transparent" data-tab="tools"><i class="bi bi-calculator bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i><span class="max-[700px]:max-w-full max-[700px]:overflow-hidden max-[700px]:text-ellipsis max-[700px]:whitespace-nowrap">Tools</span></button>
-        <button class="main-tab inline-flex items-center justify-center [padding:6px_14px] bg-transparent border-0 rounded-[calc(var(--radius)_-_3px)] text-fg-muted text-[12px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap max-[800px]:[padding:5px_10px] min-[701px]:max-[800px]:text-[11px] max-[700px]:flex-1 max-[700px]:flex-col max-[700px]:[gap:2px] max-[700px]:min-w-0 max-[700px]:h-[var(--bottom-nav-height)] max-[700px]:[padding:6px_2px] max-[700px]:rounded-none max-[700px]:text-[10px] max-[700px]:leading-[1.1] hover:text-fg hover:bg-[rgba(255,_255,_255,_0.04)] max-[700px]:hover:bg-transparent" data-tab="settings"><i class="bi bi-gear bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i><span class="max-[700px]:max-w-full max-[700px]:overflow-hidden max-[700px]:text-ellipsis max-[700px]:whitespace-nowrap">Settings</span></button>
-        <button class="main-tab inline-flex items-center justify-center [padding:6px_14px] bg-transparent border-0 rounded-[calc(var(--radius)_-_3px)] text-fg-muted text-[12px] font-medium cursor-pointer [transition:all_0.15s] whitespace-nowrap max-[800px]:[padding:5px_10px] min-[701px]:max-[800px]:text-[11px] max-[700px]:flex-1 max-[700px]:flex-col max-[700px]:[gap:2px] max-[700px]:min-w-0 max-[700px]:h-[var(--bottom-nav-height)] max-[700px]:[padding:6px_2px] max-[700px]:rounded-none max-[700px]:text-[10px] max-[700px]:leading-[1.1] hover:text-fg hover:bg-[rgba(255,_255,_255,_0.04)] max-[700px]:hover:bg-transparent" data-tab="help"><i class="bi bi-info-circle bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i><span class="max-[700px]:max-w-full max-[700px]:overflow-hidden max-[700px]:text-ellipsis max-[700px]:whitespace-nowrap">About</span></button>
+        <button class="{{MAIN_TAB active}}" data-tab="dashboard"><i class="bi bi-printer bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i><span class="max-[700px]:max-w-full max-[700px]:overflow-hidden max-[700px]:text-ellipsis max-[700px]:whitespace-nowrap">Dashboard</span></button>
+        <button class="{{MAIN_TAB}}" data-tab="tools"><i class="bi bi-calculator bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i><span class="max-[700px]:max-w-full max-[700px]:overflow-hidden max-[700px]:text-ellipsis max-[700px]:whitespace-nowrap">Tools</span></button>
+        <button class="{{MAIN_TAB}}" data-tab="settings"><i class="bi bi-gear bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i><span class="max-[700px]:max-w-full max-[700px]:overflow-hidden max-[700px]:text-ellipsis max-[700px]:whitespace-nowrap">Settings</span></button>
+        <button class="{{MAIN_TAB}}" data-tab="help"><i class="bi bi-info-circle bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i><span class="max-[700px]:max-w-full max-[700px]:overflow-hidden max-[700px]:text-ellipsis max-[700px]:whitespace-nowrap">About</span></button>
       </nav>
     </div>
     <div id="header-actions" class="flex items-center gap-2 min-w-0 max-[700px]:[flex:0_0_auto] max-[700px]:[gap:6px]">
@@ -248,7 +248,7 @@
           </div>
 
         <!-- Temperatures -->
-        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="temps-card">
+        <div class="{{CARD_SHELL}}" id="temps-card">
           <h3><i class="bi bi-thermometer-half bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Temperatures</h3>
           <div class="flex flex-col gap-4">
 
@@ -341,7 +341,7 @@
         </div>
 
         <!-- Canvas / AMS -->
-        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="canvas-card">
+        <div class="{{CARD_SHELL}}" id="canvas-card">
           <h3><i class="bi bi-palette bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Canvas &amp; AMS</h3>
           <div id="canvas-status" class="flex flex-1 flex-col gap-3">
             <div class="flex flex-col items-center justify-center gap-2 px-4 py-8 text-center text-xs text-fg-muted [&>i]:text-2xl [&>i]:opacity-40"><i class="bi bi-plug" aria-hidden="true"></i>Not connected</div>
@@ -349,7 +349,7 @@
         </div>
 
         <!-- Event Log -->
-        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="event-log-card">
+        <div class="{{CARD_SHELL}}" id="event-log-card">
           <h3><i class="bi bi-journal-text bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Event log</h3>
           <div id="event-log-entries" class="flex-1 min-h-40 max-h-100 overflow-y-auto flex flex-col [gap:2px]">
             <div class="flex flex-col items-center justify-center gap-2 px-4 py-8 text-center text-xs text-fg-muted [&>i]:text-2xl [&>i]:opacity-40"><i class="bi bi-list-ul" aria-hidden="true"></i>No events yet</div>
@@ -358,7 +358,7 @@
 
         <!-- Maintenance / Self-Check -->
         <!-- Gcode Preview -->
-        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="gcode-preview-card">
+        <div class="{{CARD_SHELL}}" id="gcode-preview-card">
           <div class="card-header flex items-center justify-between mb-3 @max-[420px]:flex-wrap @max-[420px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
             <h3><i class="bi bi-bounding-box bi-lead [margin-inline-end:0.4em]" aria-hidden="true"></i> G-code preview</h3>
             <div class="flex items-center gap-1.5">
@@ -402,7 +402,7 @@
         </div>
 
         <!-- Control -->
-        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="toolhead-card">
+        <div class="{{CARD_SHELL}}" id="toolhead-card">
           <h3><i class="bi bi-joystick" aria-hidden="true"></i>Control</h3>
 
           <div class="flex flex-row flex-wrap items-center gap-4">
@@ -477,28 +477,28 @@
         </div>
 
         <!-- Fans -->
-        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="fans-card">
+        <div class="{{CARD_SHELL}}" id="fans-card">
           <h3><i class="bi bi-fan" aria-hidden="true"></i>Fans &amp; light</h3>
 
           <div class="flex flex-col gap-2">
             <div class="flex items-center gap-2">
               <i class="bi bi-fan text-fg-muted shrink-0" aria-hidden="true"></i>
               <span class="text-xs text-fg w-16 shrink-0 truncate">Model</span>
-              <input type="range" min="0" max="100" step="5" value="0" id="fan-model-range" data-fan="fan" class="fan-range flex-1 min-w-0 cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-line [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent" aria-label="Model fan speed">
+              <input type="range" min="0" max="100" step="5" value="0" id="fan-model-range" data-fan="fan" class="{{FAN_RANGE}}" aria-label="Model fan speed">
               <span class="font-mono text-xs tabular-nums leading-none text-fg shrink-0 w-9 text-right" id="fan-model-value">--%</span>
               <span class="text-[10px] text-fg-muted shrink-0 tabular-nums" id="fan-model-rpm"></span>
             </div>
             <div class="flex items-center gap-2">
               <i class="bi bi-fan text-fg-muted shrink-0" aria-hidden="true"></i>
               <span class="text-xs text-fg w-16 shrink-0 truncate">Assistance</span>
-              <input type="range" min="0" max="100" step="5" value="0" id="fan-aux-range" data-fan="aux_fan" class="fan-range flex-1 min-w-0 cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-line [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent" aria-label="Assistance fan speed">
+              <input type="range" min="0" max="100" step="5" value="0" id="fan-aux-range" data-fan="aux_fan" class="{{FAN_RANGE}}" aria-label="Assistance fan speed">
               <span class="font-mono text-xs tabular-nums leading-none text-fg shrink-0 w-9 text-right" id="fan-aux-value">--%</span>
               <span class="text-[10px] text-fg-muted shrink-0 tabular-nums" id="fan-aux-rpm"></span>
             </div>
             <div class="flex items-center gap-2">
               <i class="bi bi-fan text-fg-muted shrink-0" aria-hidden="true"></i>
               <span class="text-xs text-fg w-16 shrink-0 truncate">Case</span>
-              <input type="range" min="0" max="100" step="5" value="0" id="fan-case-range" data-fan="box_fan" class="fan-range flex-1 min-w-0 cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-line [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent" aria-label="Case fan speed">
+              <input type="range" min="0" max="100" step="5" value="0" id="fan-case-range" data-fan="box_fan" class="{{FAN_RANGE}}" aria-label="Case fan speed">
               <span class="font-mono text-xs tabular-nums leading-none text-fg shrink-0 w-9 text-right" id="fan-case-value">--%</span>
               <span class="text-[10px] text-fg-muted shrink-0 tabular-nums" id="fan-case-rpm"></span>
             </div>
@@ -524,7 +524,7 @@
         </div>
 
         <!-- Speed & Flow -->
-        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="speed-flow-card">
+        <div class="{{CARD_SHELL}}" id="speed-flow-card">
           <h3><i class="bi bi-speedometer2" aria-hidden="true"></i>Speed &amp; flow</h3>
           <div class="grid grid-cols-2 gap-x-4 gap-y-3 @min-[560px]:grid-cols-4">
             <div class="min-w-0">
@@ -555,7 +555,7 @@
         </div>
 
         <!-- Print History -->
-        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="print-history-card">
+        <div class="{{CARD_SHELL}}" id="print-history-card">
           <div class="card-header flex items-center justify-between mb-3 @max-[420px]:flex-wrap @max-[420px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
             <h3><i class="bi bi-clock-history bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Print history</h3>
             <button id="btn-history-refresh" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Refresh print history"><i class="bi bi-arrow-repeat bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Refresh</button>
@@ -570,7 +570,7 @@
         </div>
 
         <!-- Print Reports -->
-        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="print-reports-card">
+        <div class="{{CARD_SHELL}}" id="print-reports-card">
           <div class="card-header flex items-center justify-between mb-3 @max-[420px]:flex-wrap @max-[420px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
             <h3><i class="bi bi-bar-chart bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Print reports</h3>
             <button id="btn-reports-refresh" class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" title="Refresh reports"><i class="bi bi-arrow-repeat bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Refresh</button>
@@ -583,7 +583,7 @@
         </div>
 
         <!-- Files -->
-        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="files-card">
+        <div class="{{CARD_SHELL}}" id="files-card">
           <div class="files-header flex items-center justify-between mb-3 @max-[460px]:flex-wrap max-[800px]:gap-2 @max-[420px]:flex-wrap @max-[420px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
             <h3><i class="bi bi-folder bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Files</h3>
             <div class="flex items-center gap-2">
@@ -611,7 +611,7 @@
         </div>
 
         <!-- Timelapse -->
-        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="timelapse-card">
+        <div class="{{CARD_SHELL}}" id="timelapse-card">
           <div class="files-header flex items-center justify-between mb-3 @max-[460px]:flex-wrap max-[800px]:gap-2 @max-[420px]:flex-wrap @max-[420px]:min-w-0 [&_h3]:mb-0 [.card>&]:relative">
             <h3><i class="bi bi-film bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Timelapse</h3>
             <button class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" id="timelapse-refresh"><i class="bi bi-arrow-repeat bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Refresh</button>
@@ -628,7 +628,7 @@
         </div>
 
         <!-- Log -->
-        <div class="card @container flex flex-col bg-card rounded-xl border border-line p-4 min-w-0 [&_h3]:mb-3 [&_h3]:flex [&_h3]:items-center [&_h3]:gap-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:text-fg-muted" id="log-card">
+        <div class="{{CARD_SHELL}}" id="log-card">
           <div class="log-header flex items-center gap-3 flex-wrap mb-2 @max-[420px]:flex-wrap @max-[420px]:min-w-0 [&_h3]:m-0 [&_h3]:flex-1 [.card>&]:relative">
             <h3><i class="bi bi-list-columns bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> MQTT log</h3>
             <div class="flex [gap:2px] bg-input rounded-chip [padding:2px]">

@@ -11,9 +11,11 @@
 import { describe, expect, it } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fillDesignTokens } from '../../scripts/fill-design-tokens';
 import { ALL_CARD_IDS } from '../ui/card-layout';
 
-const html = readFileSync(join(import.meta.dir, '../../index.html'), 'utf8');
+// As served: the build fills the design tokens (`{{CARD_SHELL}}`) in first.
+const html = fillDesignTokens(readFileSync(join(import.meta.dir, '../../index.html'), 'utf8'));
 
 const idAt = (id: string) => html.indexOf(`id="${id}"`);
 const count = (id: string) => html.split(`id="${id}"`).length - 1;

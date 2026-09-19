@@ -26,7 +26,7 @@ import {
   JOG,
   SWITCH_TRACK,
 } from '../ui/design';
-import { STATE_UTILITIES } from '../ui/state-classes';
+import { STATE_UTILITIES } from '../ui/state-utilities';
 
 /** Which CSS property a utility sets, for the ones that collide in practice. */
 function property(utility: string): string | null {
