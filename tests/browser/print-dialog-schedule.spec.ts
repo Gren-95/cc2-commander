@@ -187,6 +187,40 @@ test.describe('the Start choice', () => {
   });
 });
 
+test.describe('the dialog layout', () => {
+  // Sizes are measured in the real app, not here: this page has no stylesheet. These pin
+  // what the compact layout must not have lost on the way.
+  test('shows the file details with one separator between each, not two', async ({ page }) => {
+    await openDialog(page);
+    const dialog = page.locator('#print-dialog-overlay');
+    await expect(dialog).toContainText('1h00m · 120 layers · 12.5g');
+    await expect(dialog).not.toContainText('· ·');
+  });
+
+  test('lists each colour’s four slots in order, keeping an empty slot in place', async ({
+    page,
+  }) => {
+    await openDialog(page, { needsMapping: true });
+    const titles = await page
+      .locator('#print-dialog-mappings [data-idx="0"] .print-spool')
+      .evaluateAll((els) => els.map((e) => e.getAttribute('title')));
+    expect(titles).toEqual(['PLA (C1:T1)', 'Empty (C1:T2)', 'Empty (C1:T3)', 'Empty (C1:T4)']);
+  });
+
+  test('an empty slot cannot be chosen', async ({ page }) => {
+    const calls = await stubScheduler(page);
+    await openDialog(page, { needsMapping: true });
+    await page.locator('.print-spool-empty').first().click();
+    await page.locator(LATER).click();
+    await page.locator('#print-when').fill('2099-01-01T08:30');
+    await page.locator('#print-dialog-confirm').click();
+    await expect(page.locator('#print-dialog-overlay')).toHaveCount(0);
+    // Still the one loaded spool: clicking a placeholder neither deselected it nor took it.
+    expect(calls[0].options.spools).toHaveLength(1);
+    expect(calls[0].options.spools[0].tray_id).toBe(0);
+  });
+});
+
 test.describe('the USB drive', () => {
   test('Later is disabled, and says why', async ({ page }) => {
     await openDialog(page, { source: 'u-disk' });

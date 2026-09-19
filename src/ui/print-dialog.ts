@@ -208,6 +208,9 @@ function autoMap(
   });
 }
 
+/** A labelled checkbox in the settings row. Drawn by hand: the native box cannot be styled. */
+const CHECKBOX_LABEL = `flex items-center gap-2 cursor-pointer text-[12px] text-fg select-none [&_input[type="checkbox"]]:appearance-none [&_input[type="checkbox"]]:[-webkit-appearance:none] [&_input[type="checkbox"]]:w-[18px] [&_input[type="checkbox"]]:h-[18px] [&_input[type="checkbox"]]:border-2 [&_input[type="checkbox"]]:border-line [&_input[type="checkbox"]]:rounded-[4px] [&_input[type="checkbox"]]:bg-surface [&_input[type="checkbox"]]:cursor-pointer [&_input[type="checkbox"]]:relative [&_input[type="checkbox"]]:shrink-0 [&_input[type="checkbox"]]:[transition:background_0.15s,_border-color_0.15s] [&_input[type="checkbox"]:checked]:bg-accent [&_input[type="checkbox"]:checked]:border-accent [&_input[type="checkbox"]:hover]:border-accent [&_input[type="checkbox"]:checked::after]:content-[''] [&_input[type="checkbox"]:checked::after]:absolute [&_input[type="checkbox"]:checked::after]:left-1 [&_input[type="checkbox"]:checked::after]:top-[1px] [&_input[type="checkbox"]:checked::after]:w-[6px] [&_input[type="checkbox"]:checked::after]:h-[10px] [&_input[type="checkbox"]:checked::after]:[border:solid_#fff] [&_input[type="checkbox"]:checked::after]:[border-width:0_2px_2px_0] [&_input[type="checkbox"]:checked::after]:[transform:rotate(45deg)]`;
+
 /** Show the print confirmation dialog */
 function showDialog(
   filename: string,
@@ -269,49 +272,43 @@ function showDialog(
         <button class="bg-transparent border-0 text-fg-soft text-[20px] cursor-pointer [padding:0_4px] leading-[1] hover:text-fg" id="print-dialog-cancel-x">&times;</button>
       </div>
       <div class="p-4 overflow-y-auto flex-1">
-        <div class="flex gap-3 mb-4">
-          <div class="w-24 h-24 shrink-0 rounded-[6px] overflow-hidden bg-surface flex items-center justify-center [&_img]:w-full [&_img]:h-full [&_img]:object-cover" id="print-dialog-thumb">
+        <div class="flex gap-3 [margin-bottom:12px]">
+          <div class="w-20 h-20 shrink-0 rounded-[6px] overflow-hidden bg-surface flex items-center justify-center [&_img]:w-full [&_img]:h-full [&_img]:object-cover" id="print-dialog-thumb">
             ${
               detail?.thumbnail || state.thumbnail
                 ? `<img src="data:image/png;base64,${detail?.thumbnail || state.thumbnail}" alt="Preview" id="print-dialog-thumb-img" class="${THUMBNAIL_CLASS}">`
                 : '<div class="text-fg-muted text-[11px] text-center">No preview</div>'
             }
           </div>
-          <div class="flex-1 min-w-0">
-            <div class="font-semibold text-[13px] text-fg [word-break:break-word] [margin-bottom:6px]">${escapeHtml(filename)}</div>
-            ${metaParts.length ? `<div class="text-fg-soft text-[12px] [&_span_+_span::before]:content-['_·_']">${metaParts.map((p) => `<span>${escapeHtml(p)}</span>`).join(' · ')}</div>` : ''}
+          <div class="flex-1 min-w-0 flex flex-col justify-between">
+            <div>
+              <div class="font-semibold text-[13px] text-fg [word-break:break-word]">${escapeHtml(filename)}</div>
+              ${metaParts.length ? `<div class="text-fg-soft text-[12px] [margin-top:2px]">${escapeHtml(metaParts.join(' · '))}</div>` : ''}
+            </div>
+            <div class="flex items-center gap-2" role="group" aria-label="Start">
+              <button type="button" class="print-when-btn ${CHIP}" data-when="now">Now</button>
+              <button type="button" class="print-when-btn ${CHIP} disabled:opacity-50 disabled:cursor-not-allowed" data-when="later"${canSchedule ? '' : ' disabled'} title="${escapeAttr(laterTitle)}">${iconSolo('schedule')}<span class="[margin-left:6px]">Later</span></button>
+            </div>
           </div>
         </div>
-        <div class="[margin-bottom:14px]">
-          <div class="text-[11px] uppercase tracking-[0.3px] text-fg-muted mb-2 font-semibold">Start</div>
-          <div class="flex items-center gap-2">
-            <button type="button" class="print-when-btn ${CHIP}" data-when="now">Now</button>
-            <button type="button" class="print-when-btn ${CHIP} disabled:opacity-50 disabled:cursor-not-allowed" data-when="later"${canSchedule ? '' : ' disabled'} title="${escapeAttr(laterTitle)}">${iconSolo('schedule')}<span class="[margin-left:6px]">Later</span></button>
-          </div>
-          <div id="print-when-later" class="hidden [margin-top:12px]">
-            <div class="flex flex-col gap-2">
-              <label class="${LABEL}" for="print-when">Start at</label>
-              <input type="datetime-local" id="print-when" min="${minLocalDateTime()}" class="${FIELD} w-full">
-              <p class="text-[12px] text-fg-soft">${laterNote}</p>
-            </div>
+        <div id="print-when-later" class="hidden [margin-bottom:12px]">
+          <div class="flex flex-col gap-2">
+            <label class="${LABEL}" for="print-when">Start at</label>
+            <input type="datetime-local" id="print-when" min="${minLocalDateTime()}" class="${FIELD} w-full">
+            <p class="text-[12px] text-fg-soft">${laterNote}</p>
           </div>
         </div>
         ${mappingHtml}
-        <div class="[margin-bottom:14px]">
-          <div class="text-[11px] uppercase tracking-[0.3px] text-fg-muted mb-2 font-semibold">Print Settings</div>
-          <div class="flex flex-col [gap:10px]">
-            <div class="[&_label:first-child]:text-[12px] [&_label:first-child]:text-fg-soft [&_label:first-child]:[margin-bottom:6px] [&_label:first-child]:block">
-              <label>Build Plate</label>
-              <div class="flex gap-0 rounded-[6px] overflow-hidden border border-line">
-                <button type="button" class="print-bed-btn active flex-1 [padding:8px_12px] border-0 bg-accent text-white text-[12px] font-semibold cursor-pointer [transition:background_0.15s,_color_0.15s] hover:bg-hover hover:text-fg [&:not(:last-child)]:border-r [&:not(:last-child)]:border-line" data-bed="A">Textured (A)</button>
-                <button type="button" class="print-bed-btn flex-1 [padding:8px_12px] border-0 bg-surface text-fg-soft text-[12px] font-semibold cursor-pointer [transition:background_0.15s,_color_0.15s] hover:bg-hover hover:text-fg [&:not(:last-child)]:border-r [&:not(:last-child)]:border-line" data-bed="B">Smooth (B)</button>
-              </div>
-            </div>
-            <div class="flex gap-3 flex-wrap">
-              <label class="flex items-center gap-2 cursor-pointer text-[12px] text-fg select-none [&_input[type="checkbox"]]:appearance-none [&_input[type="checkbox"]]:[-webkit-appearance:none] [&_input[type="checkbox"]]:w-[18px] [&_input[type="checkbox"]]:h-[18px] [&_input[type="checkbox"]]:border-2 [&_input[type="checkbox"]]:border-line [&_input[type="checkbox"]]:rounded-[4px] [&_input[type="checkbox"]]:bg-surface [&_input[type="checkbox"]]:cursor-pointer [&_input[type="checkbox"]]:relative [&_input[type="checkbox"]]:shrink-0 [&_input[type="checkbox"]]:[transition:background_0.15s,_border-color_0.15s] [&_input[type="checkbox"]:checked]:bg-accent [&_input[type="checkbox"]:checked]:border-accent [&_input[type="checkbox"]:hover]:border-accent [&_input[type="checkbox"]:checked::after]:content-[''] [&_input[type="checkbox"]:checked::after]:absolute [&_input[type="checkbox"]:checked::after]:left-1 [&_input[type="checkbox"]:checked::after]:top-[1px] [&_input[type="checkbox"]:checked::after]:w-[6px] [&_input[type="checkbox"]:checked::after]:h-[10px] [&_input[type="checkbox"]:checked::after]:[border:solid_#fff] [&_input[type="checkbox"]:checked::after]:[border-width:0_2px_2px_0] [&_input[type="checkbox"]:checked::after]:[transform:rotate(45deg)]"><input type="checkbox" id="print-opt-timelapse" checked><span>Timelapse</span></label>
-              <label class="flex items-center gap-2 cursor-pointer text-[12px] text-fg select-none [&_input[type="checkbox"]]:appearance-none [&_input[type="checkbox"]]:[-webkit-appearance:none] [&_input[type="checkbox"]]:w-[18px] [&_input[type="checkbox"]]:h-[18px] [&_input[type="checkbox"]]:border-2 [&_input[type="checkbox"]]:border-line [&_input[type="checkbox"]]:rounded-[4px] [&_input[type="checkbox"]]:bg-surface [&_input[type="checkbox"]]:cursor-pointer [&_input[type="checkbox"]]:relative [&_input[type="checkbox"]]:shrink-0 [&_input[type="checkbox"]]:[transition:background_0.15s,_border-color_0.15s] [&_input[type="checkbox"]:checked]:bg-accent [&_input[type="checkbox"]:checked]:border-accent [&_input[type="checkbox"]:hover]:border-accent [&_input[type="checkbox"]:checked::after]:content-[''] [&_input[type="checkbox"]:checked::after]:absolute [&_input[type="checkbox"]:checked::after]:left-1 [&_input[type="checkbox"]:checked::after]:top-[1px] [&_input[type="checkbox"]:checked::after]:w-[6px] [&_input[type="checkbox"]:checked::after]:h-[10px] [&_input[type="checkbox"]:checked::after]:[border:solid_#fff] [&_input[type="checkbox"]:checked::after]:[border-width:0_2px_2px_0] [&_input[type="checkbox"]:checked::after]:[transform:rotate(45deg)]"><input type="checkbox" id="print-opt-leveling"><span>Bed Leveling</span></label>
-              ${isMultiColor ? `<label class="flex items-center gap-2 cursor-pointer text-[12px] text-fg select-none [&_input[type="checkbox"]]:appearance-none [&_input[type="checkbox"]]:[-webkit-appearance:none] [&_input[type="checkbox"]]:w-[18px] [&_input[type="checkbox"]]:h-[18px] [&_input[type="checkbox"]]:border-2 [&_input[type="checkbox"]]:border-line [&_input[type="checkbox"]]:rounded-[4px] [&_input[type="checkbox"]]:bg-surface [&_input[type="checkbox"]]:cursor-pointer [&_input[type="checkbox"]]:relative [&_input[type="checkbox"]]:shrink-0 [&_input[type="checkbox"]]:[transition:background_0.15s,_border-color_0.15s] [&_input[type="checkbox"]:checked]:bg-accent [&_input[type="checkbox"]:checked]:border-accent [&_input[type="checkbox"]:hover]:border-accent [&_input[type="checkbox"]:checked::after]:content-[''] [&_input[type="checkbox"]:checked::after]:absolute [&_input[type="checkbox"]:checked::after]:left-1 [&_input[type="checkbox"]:checked::after]:top-[1px] [&_input[type="checkbox"]:checked::after]:w-[6px] [&_input[type="checkbox"]:checked::after]:h-[10px] [&_input[type="checkbox"]:checked::after]:[border:solid_#fff] [&_input[type="checkbox"]:checked::after]:[border-width:0_2px_2px_0] [&_input[type="checkbox"]:checked::after]:[transform:rotate(45deg)]"><input type="checkbox" id="print-opt-auto-refill" ${autoRefill ? 'checked' : ''}><span>Auto Refill</span></label>` : ''}
-            </div>
+        <div class="flex flex-col [gap:10px]">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-[12px] text-fg-soft">Build plate</span>
+            <button type="button" class="print-bed-btn ${CHIP}" data-bed="A">Textured (A)</button>
+            <button type="button" class="print-bed-btn ${CHIP}" data-bed="B">Smooth (B)</button>
+          </div>
+          <div class="flex gap-x-4 gap-y-2 flex-wrap">
+            <label class="${CHECKBOX_LABEL}"><input type="checkbox" id="print-opt-timelapse" checked><span>Timelapse</span></label>
+            <label class="${CHECKBOX_LABEL}"><input type="checkbox" id="print-opt-leveling"><span>Bed Leveling</span></label>
+            ${isMultiColor ? `<label class="${CHECKBOX_LABEL}"><input type="checkbox" id="print-opt-auto-refill" ${autoRefill ? 'checked' : ''}><span>Auto Refill</span></label>` : ''}
           </div>
         </div>
       </div>
@@ -336,7 +333,8 @@ function showDialog(
     bindMappingDropdowns(mappings, trays);
   }
 
-  // Bind bed plate toggle buttons
+  // Bind bed plate toggle buttons. Textured is the printer's usual, so it starts selected.
+  toggleState(overlay.querySelector('.print-bed-btn[data-bed="A"]')!, 'active', true);
   overlay.querySelectorAll('.print-bed-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       overlay.querySelectorAll('.print-bed-btn').forEach((b) => toggleState(b, 'active', false));
@@ -539,18 +537,22 @@ function renderMappings(mappings: ColorMapping[], trays: FlatTray[]): string {
       const gcColor = m.gcodeColor;
       const gcContrast = contrastColor(gcColor);
 
-      // Render a 2×2 spool grid for each canvas unit
-      // Physical layout CCW from top-left: tray 0=TL, 1=BL, 2=BR, 3=TR
-      // CSS grid row-major: pos0=TL, pos1=TR, pos2=BL, pos3=BR
-      const gridOrder = [0, 3, 1, 2]; // maps grid position → tray index
+      // One row of four slots per canvas unit, in slot order. This used to mimic the
+      // physical 2×2 (tray 0 top-left, going counter-clockwise), which made every colour
+      // three times as tall for the same information: each tile carries its own number,
+      // so the layout of the machine is not needed to find a spool.
+      const slotOrder = [0, 1, 2, 3];
 
       let gridsHtml = '';
       for (const [canvasId, unitTrays] of canvasUnits) {
-        const spoolsHtml = gridOrder
+        const spoolsHtml = slotOrder
           .map((trayIdx) => {
             const ft = unitTrays.find((t) => t.tray.tray_id === trayIdx);
-            if (!ft)
-              return '<div class="print-spool print-spool-empty w-11 h-11 rounded-[6px] cursor-default flex flex-col items-center justify-center border-2 border-transparent [transition:border-color_0.15s,_transform_0.15s] relative overflow-hidden opacity-[0.3] hover:[&:not(.print-spool-empty)]:[transform:scale(1.1)] hover:[&:not(.print-spool-empty)]:border-fg-soft"></div>';
+            if (!ft) {
+              // No spool here (empty, or not loaded). Kept in place, and visible, so slot
+              // numbers stay where they are and a gap does not look like a missing tile.
+              return `<div class="print-spool print-spool-empty flex-1 min-w-11 h-11 rounded-[6px] cursor-default flex items-center justify-center border-2 border-dashed border-line text-[13px] text-fg-muted opacity-70" title="Empty (C${canvasId + 1}:T${trayIdx + 1})" aria-label="Empty slot ${trayIdx + 1}">${trayIdx + 1}</div>`;
+            }
 
             const color = ft.tray.filament_color.startsWith('#')
               ? ft.tray.filament_color
@@ -562,7 +564,7 @@ function renderMappings(mappings: ColorMapping[], trays: FlatTray[]): string {
             const trayNum = ft.tray.tray_id + 1;
             const labelContrast = contrastColor(spoolColor);
 
-            return `<div class="print-spool w-11 h-11 rounded-[6px] cursor-pointer flex flex-col items-center justify-center border-2 border-transparent [transition:border-color_0.15s,_transform_0.15s] relative overflow-hidden hover:[&:not(.print-spool-empty)]:[transform:scale(1.1)] hover:[&:not(.print-spool-empty)]:border-fg-soft ${isEmpty ? 'print-spool-empty cursor-default opacity-[0.3]' : ''} ${isSelected ? 'border-accent [box-shadow:0_0_8px_var(--accent)] [transform:scale(1.05)]' : ''}"
+            return `<div class="print-spool flex-1 min-w-11 h-11 rounded-[6px] cursor-pointer flex flex-col items-center justify-center border-2 border-transparent [transition:border-color_0.15s,_transform_0.15s] relative overflow-hidden hover:[&:not(.print-spool-empty)]:[transform:scale(1.1)] hover:[&:not(.print-spool-empty)]:border-fg-soft ${isEmpty ? 'print-spool-empty cursor-default opacity-[0.3]' : ''} ${isSelected ? 'border-accent [box-shadow:0_0_8px_var(--accent)] [transform:scale(1.05)]' : ''}"
           data-idx="${idx}" data-canvas="${ft.canvasId}" data-tray="${ft.tray.tray_id}"
           style="--spool-color: ${escapeAttr(spoolColor)}"
           title="${escapeAttr(typeLabel)} (C${canvasId + 1}:T${trayNum})">
@@ -573,16 +575,21 @@ function renderMappings(mappings: ColorMapping[], trays: FlatTray[]): string {
           })
           .join('');
 
-        gridsHtml += `<div class="grid grid-cols-[1fr_1fr] [grid-template-rows:1fr_1fr] gap-1 shrink-0" data-canvas="${canvasId}">${spoolsHtml}</div>`;
+        // A label only when there is more than one unit to tell apart.
+        const unitLabel =
+          canvasUnits.size > 1
+            ? `<span class="self-center text-[11px] text-fg-muted [margin-right:2px]">C${canvasId + 1}</span>`
+            : '';
+        gridsHtml += `<div class="flex gap-1 flex-1 min-w-[188px]" data-canvas="${canvasId}">${unitLabel}${spoolsHtml}</div>`;
       }
 
       return `
       <div class="flex items-center gap-2" data-idx="${idx}">
-        <div class="w-20 [padding:4px_8px] rounded-[4px] text-[11px] font-semibold text-center shrink-0" style="background:${escapeAttr(gcColor)};color:${gcContrast}">
+        <div class="w-16 [padding:4px_6px] rounded-[4px] text-[11px] font-semibold text-center shrink-0" style="background:${escapeAttr(gcColor)};color:${gcContrast}">
           ${escapeHtml(m.gcodeType)}
         </div>
         <div class="text-fg-muted text-[14px] shrink-0">${iconSolo('changeTo')}</div>
-        <div class="flex gap-2 flex-1">
+        <div class="flex flex-wrap gap-x-3 gap-y-1 flex-1 min-w-0">
           ${gridsHtml}
         </div>
       </div>`;
