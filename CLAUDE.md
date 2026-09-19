@@ -422,8 +422,28 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   a **container** from `ghcr.io/gren-95/cc2-commander`, which is **not a git checkout**,
   and nothing pulls it for you. A commit on `main` builds and publishes a new `:latest`
   (see the publish note above), and changes nothing that is *running* until someone
-  pulls it. See [`docs/deployment.md`](docs/deployment.md) — performing the deploy is
-  operator work.
+  pulls it. See [`docs/deployment.md`](docs/deployment.md).
+
+  **On this host, though, production is `cc2-commander:local`: built from this checkout by
+  `docker-compose.yml`, with only `elegoo-data/` mounted in.** Standing instruction from
+  the repo owner (2026-09-19): **after every committed change to what runs — code,
+  config, dependencies; a docs-only commit needs none — rebuild and recreate that one
+  container**, and say what happened:
+
+  ```bash
+  docker compose up -d --build cc2-commander
+  ```
+
+  A plain `docker restart` deploys **nothing** — the code is in the image, not mounted —
+  so it is never the right command. Compose builds before it recreates, so a failed build
+  leaves the old container running. Boundaries: only that service (never the `dev` or
+  `probe` profiles, never `down`, never anything that touches `elegoo-data/`); look first
+  at `elegoo-data/dryer.json` and `schedule.json` and mention anything mid-run (a drying
+  session resumes by design and a print carries on, on the printer, so neither blocks it);
+  and **verify afterwards** rather than trusting the exit code — the container's start
+  time, `/api/health`, and that the served `/assets/main-*.js` is byte-identical to
+  `dist/`. Pulling the published image, `docker compose down`, and every printer command
+  stay with the operator.
 
   The local dev service is the other half of this: it serves `dist/`, and `spa.ts`
   snapshots those filenames at startup. A rebuild without a restart therefore 404s every
@@ -444,7 +464,9 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
 
   | Action | Who runs it |
   | --- | --- |
-  | shell on this host, `docker compose pull`/`up`/`restart`, reading container logs | **them** — give exact commands, ask for output |
+  | `docker compose up -d --build cc2-commander` after a commit (standing instruction, above) | **you**, then verify |
+  | anything else in the shell on this host — `docker compose pull`/`down`/`restart`, other services | **them** — give exact commands, ask for output |
+  | reading container logs, `docker ps`, `/api/health` | **you** |
   | a printer command (temps, motion, print start/stop, emergency stop) | **them**, at or near the machine |
 
   And the distinction that decides most of these: **stopping something is not the same

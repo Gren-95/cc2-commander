@@ -68,8 +68,11 @@ network position, not code.
 
 ## Operator commands
 
-An agent may read (`ps`, `logs`, `curl`) but does not pull images or restart the
-service. These are the ones worth pasting into an `OPERATOR:` issue.
+An agent may read (`ps`, `logs`, `curl`), and — by a standing instruction recorded in
+[`CLAUDE.md`](../CLAUDE.md) — rebuilds and recreates the one production container after
+each committed change (`docker compose up -d --build cc2-commander`, then verifies). It
+does not pull images, run `down` or `restart`, or touch any other service. The commands
+below are the ones worth pasting into an `OPERATOR:` issue.
 
 ```bash
 # what is running, and since when
