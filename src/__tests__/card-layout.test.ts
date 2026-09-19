@@ -65,11 +65,11 @@ describe('normaliseCardLayout', () => {
       order: [...DEFAULT_ORDER],
       hidden: ['files-card'],
       collapsed: ['temps-card'],
-      width: { 'camera-card': 'full' },
+      width: { 'gcode-preview-card': 'full' },
     });
     expect(layout.hidden).toEqual(['files-card']);
     expect(layout.collapsed).toEqual(['temps-card']);
-    expect(layout.width['camera-card']).toBe('full');
+    expect(layout.width['gcode-preview-card']).toBe('full');
   });
 
   it('drops the widths of a layout saved before they were uniform', () => {
@@ -81,26 +81,26 @@ describe('normaliseCardLayout', () => {
       order: [...DEFAULT_ORDER],
       hidden: ['files-card'],
       collapsed: ['temps-card'],
-      width: { 'camera-card': 'full', 'log-card': 'full' },
+      width: { 'gcode-preview-card': 'full', 'log-card': 'full' },
     });
-    expect(layout.width['camera-card']).toBe(defaultWidthFor('camera-card'));
+    expect(layout.width['gcode-preview-card']).toBe(defaultWidthFor('gcode-preview-card'));
     expect(layout.width['log-card']).toBe(defaultWidthFor('log-card'));
     expect(layout.hidden).toEqual(['files-card']);
     expect(layout.collapsed).toEqual(['temps-card']);
   });
 
   it('stamps the version, so the width reset happens exactly once', () => {
-    const first = normaliseCardLayout({ width: { 'camera-card': 'full' } });
+    const first = normaliseCardLayout({ width: { 'gcode-preview-card': 'full' } });
     expect(first.v).toBe(2);
     // Feeding the result back in is what a save-then-load does. A resize made after the
     // reset must survive it.
-    const resized = { ...first, width: { ...first.width, 'camera-card': 'full' as const } };
-    expect(normaliseCardLayout(resized).width['camera-card']).toBe('full');
+    const resized = { ...first, width: { ...first.width, 'gcode-preview-card': 'full' as const } };
+    expect(normaliseCardLayout(resized).width['gcode-preview-card']).toBe('full');
   });
 
   it('drops an unrecognised width instead of rendering an unknown class', () => {
-    const layout = normaliseCardLayout({ width: { 'camera-card': 'enormous' } });
-    expect(layout.width['camera-card']).toBe(defaultWidthFor('camera-card'));
+    const layout = normaliseCardLayout({ width: { 'gcode-preview-card': 'enormous' } });
+    expect(layout.width['gcode-preview-card']).toBe(defaultWidthFor('gcode-preview-card'));
   });
 
   it('backfills a card added after the layout was saved (ELEG-44)', () => {
@@ -149,14 +149,14 @@ describe('migrating older saved layouts', () => {
     // Reading order is what the user actually arranged, so it has to survive.
     const layout = normaliseCardLayout({
       sidebar: ['temps-card', 'fans-card'],
-      main: ['camera-card', 'files-card'],
+      main: ['gcode-preview-card', 'files-card'],
       hidden: ['log-card'],
       collapsed: ['fans-card'],
     });
     expect(layout.order.slice(0, 4)).toEqual([
       'temps-card',
       'fans-card',
-      'camera-card',
+      'gcode-preview-card',
       'files-card',
     ]);
     expect(layout.hidden).toEqual(['log-card']);
@@ -168,7 +168,7 @@ describe('migrating older saved layouts', () => {
     // decides anything: position and width are independent, and the width is uniform.
     const layout = normaliseCardLayout({
       sidebar: ['temps-card', 'fans-card'],
-      main: ['camera-card'],
+      main: ['gcode-preview-card'],
     });
     const widths = new Set(layout.order.map((id) => layout.width[id]));
     expect([...widths]).toEqual([defaultWidthFor('temps-card')]);
@@ -187,7 +187,7 @@ describe('widthOf', () => {
     // One default for every card, rather than a table of exceptions by identity.
     expect(widthOf(layout, 'temps-card')).toBe('compact');
     expect(widthOf(layout, 'log-card')).toBe('compact');
-    expect(widthOf(layout, 'camera-card')).toBe('compact');
+    expect(widthOf(layout, 'gcode-preview-card')).toBe('compact');
   });
 
   it('prefers what the layout says', () => {
@@ -234,12 +234,12 @@ describe('focus rail', () => {
   });
 
   it('honours a saved card that is still visible', () => {
-    expect(resolveFocus(layout(), 'camera-card')).toBe('camera-card');
+    expect(resolveFocus(layout(), 'gcode-preview-card')).toBe('gcode-preview-card');
   });
 
   it('falls back when the saved card has since been hidden', () => {
-    const l = layout({ hidden: ['camera-card'] });
-    expect(resolveFocus(l, 'camera-card')).toBe(l.order[0]);
+    const l = layout({ hidden: ['gcode-preview-card'] });
+    expect(resolveFocus(l, 'gcode-preview-card')).toBe(l.order[0]);
   });
 
   it('falls back when the saved card no longer exists', () => {
@@ -261,5 +261,74 @@ describe('focus rail', () => {
     for (const id of ALL_CARD_IDS) {
       expect(CARD_ICONS[id], `${id} has no rail icon`).toBeTruthy();
     }
+  });
+});
+
+describe('the camera folded into the print card', () => {
+  it('is no longer a card of its own', () => {
+    expect(ALL_CARD_IDS).not.toContain('camera-card');
+    expect(CARD_NAMES['camera-card']).toBeUndefined();
+    expect(CARD_ICONS['camera-card']).toBeUndefined();
+  });
+
+  it('is still findable: the print card is named for what it now holds', () => {
+    expect(CARD_NAMES['print-status-bar']).toContain('Camera');
+  });
+
+  it('is dropped from a layout saved while it was a card, keeping everything else in place', () => {
+    const layout = normaliseCardLayout({
+      order: ['temps-card', 'camera-card', 'files-card', 'print-status-bar'],
+      collapsed: ['camera-card', 'fans-card'],
+      width: { 'camera-card': 'full', 'temps-card': 'wide' },
+      v: 2,
+    });
+    for (const list of [layout.order, layout.hidden, layout.collapsed]) {
+      expect(list).not.toContain('camera-card');
+    }
+    expect(layout.width['camera-card']).toBeUndefined();
+    // The neighbours keep their relative order and their own settings.
+    expect(layout.order.slice(0, 3)).toEqual(['temps-card', 'files-card', 'print-status-bar']);
+    expect(layout.collapsed).toEqual(['fans-card']);
+    expect(layout.width['temps-card']).toBe('wide');
+  });
+
+  it('is dropped from the two-panel format too', () => {
+    const layout = normaliseCardLayout({ sidebar: ['temps-card'], main: ['camera-card'] });
+    expect(layout.order).not.toContain('camera-card');
+  });
+
+  it('does not carry a hidden camera over as a hidden print card', () => {
+    // The camera is part of the print card now; someone who hid the old camera card has
+    // not asked to hide the job's status.
+    const layout = normaliseCardLayout({ hidden: ['camera-card'], v: 2 });
+    expect(layout.hidden).toEqual([]);
+    expect(focusableCards(layout)).toContain('print-status-bar');
+  });
+
+  it('leaves the rest of the tolerance for unknown cards alone', () => {
+    // Only the named retirement is dropped; a card from a newer build is still kept.
+    const layout = normaliseCardLayout({ order: ['ghost-card', 'camera-card'] });
+    expect(layout.order).toContain('ghost-card');
+  });
+});
+
+describe('a saved order that holds an id this build does not have', () => {
+  // `normaliseCardLayout` keeps unknown ids (a layout from a newer build), so one can sit
+  // in a saved order. It has no name, icon or element, and must never be focusable.
+  const withGhost = () => normaliseCardLayout({ order: ['ghost-card', ...DEFAULT_ORDER], v: 2 });
+
+  it('is not focusable', () => {
+    expect(focusableCards(withGhost())).not.toContain('ghost-card');
+  });
+
+  it('is not honoured as a saved focus — that would be an empty screen on a phone', () => {
+    const l = withGhost();
+    expect(resolveFocus(l, 'ghost-card')).toBe(focusableCards(l)[0]);
+  });
+
+  it('covers a phone whose saved focus was the old camera card', () => {
+    // The case that motivated this: focus saved on `camera-card`, layout from before.
+    const l = normaliseCardLayout({ order: ['temps-card', 'camera-card'], v: 2 });
+    expect(resolveFocus(l, 'camera-card')).toBe(focusableCards(l)[0]);
   });
 });

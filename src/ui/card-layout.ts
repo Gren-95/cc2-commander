@@ -78,7 +78,6 @@ export const DEFAULT_ORDER = [
   'fans-card',
   'toolhead-card',
   'speed-flow-card',
-  'camera-card',
   'gcode-preview-card',
   'files-card',
   'print-history-card',
@@ -90,6 +89,19 @@ export const DEFAULT_ORDER = [
 
 /** All known card IDs. */
 export const ALL_CARD_IDS = [...DEFAULT_ORDER];
+
+/**
+ * Cards that no longer exist because they were folded into another, dropped from a saved
+ * layout by `normaliseCardLayout`.
+ *
+ * `camera-card` is now part of `print-status-bar`: the camera sits at the top of the print
+ * card, so a separate card for it was a second place to look at the same job. This is
+ * deliberately a list of *named* retirements and not "drop anything unrecognised" — an
+ * unknown card is otherwise kept, so a layout saved by a newer build survives a visit from
+ * an older one. A hidden `camera-card` is not carried over: the camera is part of the print
+ * card now, and shows or hides with it.
+ */
+const RETIRED_CARDS: readonly string[] = ['camera-card'];
 
 /**
  * The width every card gets unless it has been resized.
@@ -128,10 +140,9 @@ export function defaultWidthFor(_id: string): CardWidth {
 
 /** Display names for cards, as **HTML fragments** — each carries a Bootstrap Icon. */
 export const CARD_NAMES: Record<string, string> = {
-  'print-status-bar': `${icon('print')} Print Status`,
+  'print-status-bar': `${icon('print')} Print & Camera`,
   'temps-card': `${icon('temperature')} Temperatures`,
   'canvas-card': `${icon('canvas')} Canvas / AMS`,
-  'camera-card': `${icon('camera')} Camera`,
   'event-log-card': `${icon('eventLog')} Event Log`,
   'gcode-preview-card': `${icon('gcode')} Layer Preview`,
   'toolhead-card': `${icon('toolhead')} Toolhead`,
@@ -168,7 +179,6 @@ export const CARD_ICONS: Record<string, IconName> = {
   'print-status-bar': 'print',
   'temps-card': 'temperature',
   'canvas-card': 'canvas',
-  'camera-card': 'camera',
   'event-log-card': 'eventLog',
   'gcode-preview-card': 'gcode',
   'toolhead-card': 'toolhead',
@@ -195,13 +205,12 @@ export const CARD_ICONS: Record<string, IconName> = {
  * violet, the print-history/reports pair both teal — so the rail groups by eye.
  */
 export const CARD_ACCENTS: Record<string, string> = {
-  'print-status-bar': '#3b82f6', // blue — the job itself
+  'print-status-bar': '#3b82f6', // blue — the job itself, and the view of it
   'temps-card': '#ef4444', // red — heat
   'canvas-card': '#f97316', // orange — filament
   'fans-card': '#06b6d4', // cyan — air
   'toolhead-card': '#8b5cf6', // violet — motion
   'speed-flow-card': '#eab308', // amber — rate
-  'camera-card': '#ec4899', // pink — vision
   'gcode-preview-card': '#22c55e', // green — geometry
   'files-card': '#0ea5e9', // sky — storage
   'print-history-card': '#14b8a6', // teal — records
@@ -214,9 +223,15 @@ export const CARD_ACCENTS: Record<string, string> = {
 /** Shown when every card is visible at once, i.e. the scrolling dashboard. */
 export const FOCUS_ALL = 'all';
 
-/** The cards a user can actually focus: layout order, minus the hidden ones. */
+/**
+ * The cards a user can actually focus: layout order, minus the hidden ones — and minus
+ * anything that is not a card this build has. A saved order keeps ids it does not
+ * recognise (see `normaliseCardLayout`), and one of those has no name, icon or element:
+ * it would be a blank button on the rail, and a saved focus on it would show an empty
+ * screen on a phone.
+ */
 export function focusableCards(layout: CardLayout): string[] {
-  return layout.order.filter((id) => !layout.hidden.includes(id));
+  return layout.order.filter((id) => ALL_CARD_IDS.includes(id) && !layout.hidden.includes(id));
 }
 
 /**
@@ -308,11 +323,15 @@ export function normaliseCardLayout(parsed: unknown): CardLayout {
   // survives, since the version is stamped below.
   const stale = fields.v !== LAYOUT_VERSION;
 
+  const live = (id: string) => !RETIRED_CARDS.includes(id);
+  const width = stale ? {} : widthMap(fields.width);
+  for (const id of RETIRED_CARDS) delete width[id];
+
   const layout: CardLayout = {
-    order,
-    hidden: stringArray(fields.hidden) ?? [],
-    collapsed: stringArray(fields.collapsed) ?? [],
-    width: stale ? {} : widthMap(fields.width),
+    order: order.filter(live),
+    hidden: (stringArray(fields.hidden) ?? []).filter(live),
+    collapsed: (stringArray(fields.collapsed) ?? []).filter(live),
+    width,
     v: LAYOUT_VERSION,
   };
 
