@@ -78,3 +78,22 @@ bun run build
 Production output goes to `dist/`. The service serves it on port 8088 from Bun's static
 route table, which is built once at startup — so a rebuild needs a service restart to
 be picked up.
+
+## The README pictures
+
+`docs/images/` holds each README picture twice, `<name>-light.png` and `<name>-dark.png`,
+and the README picks between them with `prefers-color-scheme`. Regenerate the lot with:
+
+```bash
+bun run screenshots --readme            # needs AUTH_PASSWORD (or --password) if auth is on
+```
+
+It photographs a **running service with a real printer behind it** — an empty dashboard
+is all `--` — so point it at production (`--url`) or a dev service, never at a second
+service beside production: that would be a second MQTT connection. It only loads pages;
+it presses nothing, and it stops with an error rather than shoot the dryer if a drying
+session is running.
+
+Look at every picture before committing: the script checks that each one really rendered
+in the theme it was asked for, but it cannot tell whether the printer was mid-print, or
+whether a sensor name from Home Assistant is now in a public README.

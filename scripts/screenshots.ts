@@ -12,6 +12,7 @@
  *   bun scripts/screenshots.ts --cards              each dashboard card on its own
  *   bun scripts/screenshots.ts --url http://host:8088 --out ./shots
  *   bun scripts/screenshots.ts --password hunter2           when auth is on
+ *   bun scripts/screenshots.ts --readme                     the README's pictures, light and dark
  *
  * Navigation goes through `?tab=`/`?subtab=`, not by clicking: a deep link lands on the
  * view in one load, with no guessing about when a click has finished. That is half the
@@ -149,7 +150,98 @@ async function signIn(browser: Browser): Promise<StorageState | undefined> {
   return state;
 }
 
+const THEMES = ['light', 'dark'] as const;
+
+/**
+ * The three pictures the README shows, once per theme, into `docs/images/`.
+ *
+ * They are viewport-sized rather than full-page — a README picture is a front door, not
+ * an inventory — which is why the general mode above cannot make them, and why they used
+ * to be cropped by hand. Each name becomes `<name>-<theme>.png`, and the README picks
+ * between the pair with `prefers-color-scheme`.
+ *
+ * The theme is forced through the browser's colour scheme rather than by writing the
+ * `theme` setting: the app's default is `auto`, which is what a visitor gets, and
+ * `index.html` resolves it from `prefers-color-scheme` before the bundle runs. The shot
+ * is checked against `data-theme` afterwards, because a dark picture that is really the
+ * light theme would ship without anyone noticing.
+ *
+ * Read-only against the service: page loads, no commands. It does not press Start on the
+ * dryer — it photographs the form.
+ */
+async function readmeShots(): Promise<void> {
+  const out = flag('out', 'docs/images');
+  await mkdir(out, { recursive: true });
+
+  const browser = await chromium.launch();
+  const storageState = await signIn(browser);
+
+  for (const theme of THEMES) {
+    const shoot = async (
+      name: string,
+      viewport: { width: number; height: number },
+      query: string,
+      take: (page: Page, file: string) => Promise<void>,
+    ): Promise<void> => {
+      const context = await browser.newContext({
+        viewport,
+        deviceScaleFactor: 2,
+        colorScheme: theme,
+        storageState,
+      });
+      const page = await context.newPage();
+      await page.goto(`${BASE}/${query}`, { waitUntil: 'domcontentloaded' });
+      await settle(page);
+
+      const applied = await page.evaluate(`document.documentElement.getAttribute('data-theme')`);
+      if (applied !== theme) {
+        throw new Error(`Asked for the ${theme} theme but the page rendered ${applied}.`);
+      }
+
+      const file = join(out, `${name}-${theme}.png`);
+      await take(page, file);
+      console.log(`  ${file}`);
+      await context.close();
+    };
+
+    await shoot('dashboard', { width: 1440, height: 1000 }, '', async (page, path) => {
+      await page.screenshot({ path });
+    });
+
+    // The rail opens on the print-status card, which on an idle printer is two thirds
+    // empty. Temperatures fills the screen and shows what the phone layout is for.
+    await shoot('phone', { width: 390, height: 844 }, '', async (page, path) => {
+      await page.locator('#mobile-focus-rail button[data-focus="temps-card"]').click();
+      await page.waitForTimeout(400);
+      await page.screenshot({ path });
+    });
+
+    // A strip of the Tools tab: from the sub-tab strip down to the Start button, at a
+    // width where the form is not stretched across a whole monitor.
+    await shoot('filament-dryer', { width: 1100, height: 900 }, '?tab=tools&subtab=dryer', async (page, path) => {
+      const strip = await page.locator('[data-subtab-group="tools"]').boundingBox();
+      const start = await page.locator('#dryer-start').boundingBox();
+      if (!strip || !start) {
+        throw new Error(
+          'The dryer form is not showing — a session may be running, which is a different picture.',
+        );
+      }
+      // 16px above, not more: the sticky header's bottom border sits just over the strip
+      // and reads as a stray line at the top of the picture if the clip reaches it.
+      const top = Math.max(0, strip.y - 16);
+      await page.screenshot({
+        path,
+        clip: { x: 0, y: top, width: 1100, height: start.y + start.height + 24 - top },
+      });
+    });
+  }
+
+  await browser.close();
+}
+
 async function main(): Promise<void> {
+  if (has('readme')) return readmeShots();
+
   await rm(OUT, { recursive: true, force: true });
 
   const viewports = Object.entries(VIEWPORTS).filter(

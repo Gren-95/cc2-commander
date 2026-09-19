@@ -4,7 +4,10 @@ A self-hosted web dashboard for the **Elegoo Centauri Carbon 2**. One Bun servic
 the printer's single MQTT slot and fans it out: to browsers over a WebSocket, to
 Mainsail or Fluidd over a Moonraker-compatible API, and to Prometheus.
 
-![The dashboard](docs/images/dashboard.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/dashboard-dark.png">
+  <img src="docs/images/dashboard-light.png" alt="The dashboard">
+</picture>
 
 ## What it does
 
@@ -26,8 +29,14 @@ Mainsail or Fluidd over a Moonraker-compatible API, and to Prometheus.
 
 <table>
 <tr>
-<td width="38%"><img src="docs/images/phone.png" alt="The phone layout"></td>
-<td><img src="docs/images/filament-dryer.png" alt="The filament dryer"><br>
+<td width="38%"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/phone-dark.png">
+  <img src="docs/images/phone-light.png" alt="The phone layout">
+</picture></td>
+<td><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/filament-dryer-dark.png">
+  <img src="docs/images/filament-dryer-light.png" alt="The filament dryer">
+</picture><br>
 <sub>The phone gets a one-card focus rail instead of the grid. The dryer runs in the
 service rather than in a tab, so closing the page does not leave the bed hot.</sub></td>
 </tr>
