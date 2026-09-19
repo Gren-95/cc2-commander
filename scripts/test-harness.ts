@@ -27,6 +27,8 @@ const EXPOSED = {
   dryerPanel: 'src/ui/dryer-panel.ts',
   printDialog: 'src/ui/print-dialog.ts',
   lightSwitches: 'src/ui/light-switches.ts',
+  charts: 'src/ui/charts.ts',
+  chartStore: 'src/chart-store.ts',
   segmented: 'src/ui/segmented.ts',
   stepper: 'src/ui/stepper.ts',
   stateClasses: 'src/ui/state-classes.ts',

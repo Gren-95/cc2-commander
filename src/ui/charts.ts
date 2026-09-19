@@ -2,7 +2,7 @@
 
 import { positionSegmented } from './segmented';
 import { toggleState } from './state-classes';
-import { icon } from './icons';
+import { wheelZoom, zoomIndicator } from './chart-zoom';
 import type { ChartStore, Series } from '../chart-store';
 import { saveChartWindow, getChartWindow } from './ui-settings';
 import { chartPalette } from './chart-palette';
@@ -118,13 +118,14 @@ function bindChartInteractions(): void {
 
     const inter = interactions.get(canvasId)!;
 
-    // Wheel to zoom
+    // Ctrl/⌘ + wheel (or a pinch) to zoom. A plain wheel is the page's: see `chart-zoom.ts`.
     canvas.addEventListener(
       'wheel',
       (e) => {
+        const next = wheelZoom(inter.zoomFactor, e);
+        if (next === null) return;
         e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.8 : 1.25; // scroll down = zoom out, up = zoom in
-        inter.zoomFactor = Math.max(0.1, Math.min(10, inter.zoomFactor * delta));
+        inter.zoomFactor = next;
       },
       { passive: false },
     );
@@ -403,14 +404,14 @@ function drawChart(config: ChartConfig): void {
 
   // Show zoom/pan indicator if not at defaults
   if (inter && (inter.zoomFactor !== 1.0 || inter.panOffset !== 0)) {
-    ctx.fillStyle = pal.tempFill;
-    ctx.font = '9px sans-serif';
+    // The same colour as the axis labels: the fill it had before is the series colour at
+    // low alpha, which is close to unreadable on a dark theme.
+    ctx.fillStyle = pal.label;
+    ctx.font = '10px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
-    const zoomLabel = `${inter.zoomFactor.toFixed(1)}x`;
-    const panLabel = inter.panOffset !== 0 ? ` pan:${(inter.panOffset / 1000).toFixed(0)}s` : '';
     ctx.fillText(
-      `${icon('singleLayer')} ${zoomLabel}${panLabel} (dblclick to reset)`,
+      zoomIndicator(inter.zoomFactor, inter.panOffset),
       PADDING.left + 4,
       PADDING.top + 2,
     );

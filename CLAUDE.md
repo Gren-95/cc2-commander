@@ -151,6 +151,14 @@ Actions minutes (the private siblings do not, hence their self-hosted runners).
   | `iconSolo(name)` | same, but the glyph is the element's whole content | no trailing gap, or icon-only buttons render off-centre |
   | `iconText(el, name, text)` | replacing an `el.textContent = …` | appends the text as a **text node**. Those sites interpolate filenames and printer error strings; switching one to `innerHTML` to fit a glyph in turns a crafted filename into script execution |
 
+  **`icon()` and `iconSolo()` return HTML, so they are only right where HTML is parsed.**
+  Anywhere that shows text — a canvas's `fillText`, `textContent`, a `title`/`aria-label`,
+  a toast, a native dialog — prints the markup itself: the charts did exactly that, painting
+  `<i class="bi bi-search …">` across their top edge whenever zoomed, because an emoji (which
+  is text, and worked in all of these) was replaced by an icon without anyone looking at the
+  sinks that were not `innerHTML`. `src/__tests__/icon-sinks.test.ts` reads whole statements
+  of source for it; use plain text there, or a glyph drawn from the font by codepoint.
+
   Add the glyph to the `ICONS` map rather than writing `bi-…` inline, so one name is
   swapped in one place. Every icon is `aria-hidden`: the accessible name belongs on the
   button (`aria-label`) or the text beside it.
