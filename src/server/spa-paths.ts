@@ -3,7 +3,7 @@
  *
  * Split out of `spa.ts` because it is pure string logic and needs to be testable, and
  * `spa.ts` is not importable from a test: the browser tsconfig excludes `src/server`,
- * but `exclude` only filters the initial file set — an import from a covered file pulls
+ * but `exclude` only filters the initial file set, an import from a covered file pulls
  * the module in anyway, and then `Bun` and `node:fs` are undefined names. This file has
  * no imports at all, so it typechecks the same in either half.
  */
@@ -11,7 +11,7 @@
 /**
  * Does this path want the SPA document, or a file that should have existed?
  *
- * The fallback exists for client-side routes — `/settings`, `/files/foo` — which have no
+ * The fallback exists for client-side routes (`/settings`, `/files/foo`) which have no
  * file behind them and must be answered with index.html. It must NOT answer a request
  * for an asset that way. When it does, a browser asking for `/assets/index-abc123.js`
  * gets HTML with a 200 and a `text/html` content type, refuses to execute it as a module,
@@ -21,7 +21,7 @@
  * That state is reachable in one ordinary step, because the route table is built once at
  * startup (see the note at the top of this file): rebuild the frontend without restarting
  * the service and every hashed filename the running process advertises is gone from disk.
- * A 404 makes that loud — a failed asset in the network tab — instead of a page that
+ * A 404 makes that loud (a failed asset in the network tab) instead of a page that
  * loads and silently does nothing.
  */
 /**
@@ -29,7 +29,7 @@
  *
  * A browser navigates with GET (and HEAD for a preflight-ish probe). Nothing else is a
  * navigation, so a POST/PUT/DELETE to an unmatched path is an API call to something that
- * does not exist — and answering it with the app's HTML at 200 is the same silent
+ * does not exist, and answering it with the app's HTML at 200 is the same silent
  * failure as serving HTML for a missing script: the caller gets a success it cannot use.
  *
  * Found when an endpoint was removed. Every POST to every unknown path answered 200 with
@@ -46,7 +46,7 @@ export function isNavigation(method: string | undefined): boolean {
  * Prefixes that belong to a server, not to the app's router.
  *
  * A path under one of these is an API call to something that does not exist, and the
- * right answer is 404. Without this, `GET /api/canvas` — a typo for `/api/status` —
+ * right answer is 404. Without this, `GET /api/canvas` (a typo for `/api/status`)
  * answered **200 with the dashboard's HTML**: `res.ok` is true, `res.json()` then throws
  * a parse error about an unexpected `<`, and the actual problem (no such route) appears
  * nowhere. Every unknown path under every compat layer did the same.
@@ -65,7 +65,7 @@ const SERVER_PREFIXES = [
 ];
 
 /**
- * Endpoints, not trees — matched exactly.
+ * Endpoints, not trees: matched exactly.
  *
  * `startsWith('/metrics')` would also claim `/metrics-dashboard`, a perfectly good
  * client-side route. The auth gate's public-path list is exact for the same reason, and

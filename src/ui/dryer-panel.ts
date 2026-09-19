@@ -1,8 +1,8 @@
 /**
- * Filament dryer — the panel, and the only place that drives the heater.
+ * Filament dryer: the panel, and the only place that drives the heater.
  *
  * The maths, the presets and the safety clamps are in `dryer.ts`; this file is the DOM,
- * the timer tick and the two commands (heat on, heat off). Read that file first — the
+ * the timer tick and the two commands (heat on, heat off). Read that file first: the
  * reasoning about why this is riskier than the rest of the UI lives there.
  *
  * ## The three rules this panel enforces
@@ -14,7 +14,7 @@
  *    user is already looking at. This one walks away and leaves a heater on, so it asks.
  * 3. **Always able to stop.** The session is persisted with an absolute start time, so a
  *    tab reopened hours later resolves it, turns the bed off if it has finished, and
- *    says so. Closing the tab mid-session is the one case nothing can cover — the panel
+ *    says so. Closing the tab mid-session is the one case nothing can cover: the panel
  *    says that in as many words rather than pretending otherwise.
  */
 
@@ -44,7 +44,7 @@ let ticker: ReturnType<typeof setInterval> | null = null;
  * What the printer last reported, or nulls before the first status arrives.
  *
  * The panel used to show only a countdown, which said nothing about whether the bed was
- * actually hot — the one fact that decides whether the filament is drying at all. The
+ * actually hot: the one fact that decides whether the filament is drying at all. The
  * keepalive needs `bedTarget` anyway to tell a correction from a no-op, so the rest
  * comes along at no cost and is worth showing.
  */
@@ -61,13 +61,13 @@ let temps: DryerTemps = { bed: null, bedTarget: null, chamber: null, nozzle: nul
  * Room humidity, when Home Assistant is reporting one.
  *
  * **This measures the room, not the filament.** Nothing here can tell you how wet a
- * spool is — that needs a scale and a before/after weighing. What it does tell you is
+ * spool is: that needs a scale and a before/after weighing. What it does tell you is
  * the two things worth knowing either side of a session: whether the air was damp
  * enough to make the spool wet in the first place, and whether putting it back out
  * afterwards will simply undo the work.
  *
  * Null when Home Assistant is unconfigured or unreachable, and the panel then shows
- * nothing rather than a dash — an install without it should see no trace.
+ * nothing rather than a dash: an install without it should see no trace.
  */
 let roomHumidity: number | null = null;
 /** The sensor's own name and when it last changed, for the label and the staleness. */
@@ -96,7 +96,7 @@ export function setDryerHumidity(
   // Patch the two spans in place rather than re-rendering.
   //
   // The idle view is a form: a full render once a minute would wipe a half-typed
-  // temperature or hour count out from under whoever was entering it — the same hazard
+  // temperature or hour count out from under whoever was entering it, the same hazard
   // that keeps list filters in a static sibling of their list. A reading arriving while
   // someone types must change the number and nothing else.
   const values = document.querySelectorAll<HTMLElement>('.dryer-humidity-value');
@@ -120,7 +120,7 @@ export function setDryerHumidity(
   }
 
   // Appearing for the first time, or going away, changes the panel's shape rather than
-  // its text — so that needs a real render. Never while a field is focused.
+  // its text, so that needs a real render. Never while a field is focused.
   const host = document.getElementById('dryer-content');
   const typing = host?.contains(document.activeElement) && document.activeElement !== document.body;
   if (had !== (value !== null) && host && !typing) renderDryer();
@@ -159,7 +159,7 @@ export function setDryerPrinting(value: boolean): void {
  */
 let session: DryerSession | null = null;
 
-/** Take a state frame from the service — a WS broadcast, or a REST reply. */
+/** Take a state frame from the service: a WS broadcast, or a REST reply. */
 export function applyDryerState(state: {
   session?: unknown;
   bedTarget?: number | null;
@@ -179,7 +179,7 @@ async function refreshFromService(): Promise<void> {
     if (body.data) applyDryerState(body.data);
   } catch {
     // Offline. The panel keeps showing the last frame it had, which is the honest
-    // answer — the service is still running the session either way.
+    // answer: the service is still running the session either way.
   }
 }
 
@@ -200,7 +200,7 @@ function humidityTone(value: number): string {
  * One line of plain advice for the band.
  *
  * Deliberately says nothing about WHERE the sensor is. It was written for one in a
- * room, and then the sensor moved into the printer — at which point "damp room" was
+ * room, and then the sensor moved into the printer: at which point "damp room" was
  * simply false. The configuration names an entity and nothing else, so the panel cannot
  * know, and the honest copy is about the air the number describes rather than a place.
  */
@@ -219,7 +219,7 @@ function humidityAdvice(value: number): string {
  *
  * Worth showing because a battery sensor goes quiet in two ways that look identical on
  * a dashboard: nothing has changed, or nothing is being heard. Putting one inside a
- * printer makes the second much more likely — an enclosure is a metal box, and Zigbee
+ * printer makes the second much more likely: an enclosure is a metal box, and Zigbee
  * and BLE both struggle to get out of one. A number that has not moved for an hour
  * beside a 45 °C bed is a disconnected sensor, and without an age it reads as a fact.
  */
@@ -313,7 +313,7 @@ function idleView(): string {
 /**
  * The live temperatures, with the plate first and stated against its target.
  *
- * "3h 37m left" is not evidence that anything is drying — the bed can be cold, off, or
+ * "3h 37m left" is not evidence that anything is drying: the bed can be cold, off, or
  * still climbing, and the countdown reads identically in all three cases. The plate row
  * therefore carries a *state* rather than only a number, and the one state worth
  * shouting about is a target of 0 while a session runs: that is the failure the
@@ -323,7 +323,7 @@ function idleView(): string {
  * The humidity trace for this session.
  *
  * Moisture leaving filament has to go somewhere, and in a closed chamber it goes into
- * the air — so a session that is doing something shows humidity RISING first and then
+ * the air, so a session that is doing something shows humidity RISING first and then
  * settling back as it vents. A flat line from the start means the filament was already
  * dry, or nothing is reaching the sensor. The number alone cannot tell those apart.
  *
@@ -614,7 +614,7 @@ function bindRunning(current: DryerSession): void {
 /**
  * The service says a session ended.
  *
- * Announcing only — the bed was turned off by `server/dryer.ts` before this frame was
+ * Announcing only: the bed was turned off by `server/dryer.ts` before this frame was
  * sent. A page that also sent an off command here would be a second writer to a heater,
  * which is the arrangement this whole change exists to remove.
  */
@@ -671,12 +671,12 @@ export function renderDryer(): void {
   if (!host) return;
 
   // No expiry check here any more. A session that has run out is the service's problem,
-  // and it has already turned the bed off by the time this page hears about it — the
+  // and it has already turned the bed off by the time this page hears about it: the
   // page used to do that itself, which only worked if someone had it open.
 
   /*
    * A dot on the Tools sub-tab while a session runs, so the timer is visible from the
-   * spool calculator — the whole point of sub-tabs is that only one is on screen, and a
+   * spool calculator: the whole point of sub-tabs is that only one is on screen, and a
    * running heater should not be the thing you have to remember to go and check.
    */
   document.getElementById('dryer-running-dot')?.classList.toggle('hidden', !session);

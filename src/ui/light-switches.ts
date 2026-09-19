@@ -1,5 +1,5 @@
 /**
- * The overhead light has two switches — on the Fans & light card, and on the camera (you
+ * The overhead light has two switches, on the Fans & light card, and on the camera (you
  * want the light on when you are looking at the print). There used to be a third in the
  * Control card; one light in three places was one too many.
  *
@@ -24,7 +24,7 @@ export function showLight(on: boolean): void {
  * Call `send` when any switch is used, after mirroring its choice onto the rest.
  *
  * `send` is handed every switch, so the caller can hold them all while the command is in
- * flight — otherwise a second switch could be flipped against the first before the printer
+ * flight: otherwise a second switch could be flipped against the first before the printer
  * has answered.
  */
 export function bindLightSwitches(send: (on: boolean, boxes: HTMLInputElement[]) => void): void {

@@ -3,7 +3,7 @@
  *
  * `card-layout.ts` says which cards exist; `index.html` is what draws them, and nothing
  * else ties the two together. A card in one and not the other renders as a blank rail
- * button or a phantom entry in the settings list — and merging the camera into the print
+ * button or a phantom entry in the settings list, and merging the camera into the print
  * card is exactly the kind of change that leaves one of them behind. Read as text: this
  * runner has no DOM, and ids and their order are all that is being asked.
  */
@@ -67,7 +67,7 @@ describe('the camera, inside the print card', () => {
 
 describe('the two switches for the one light', () => {
   // Same light, two places: the fans card and the camera. Each must be in its own card,
-  // once, or a switch is missing or doubled — and the Control card's is gone for good.
+  // once, or a switch is missing or doubled, and the Control card's is gone for good.
   const within = (card: string, id: string) => {
     const start = idAt(card);
     const nextCard = html.indexOf('class="card @container', html.indexOf('>', start));

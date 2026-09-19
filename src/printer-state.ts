@@ -128,7 +128,7 @@ export class PrinterState {
       ) as unknown as PrinterStatus;
     }
 
-    // Track layer changes for layer-time chart — handled server-side now
+    // Track layer changes for layer-time chart: handled server-side now
 
     // Capture mono filament info if present in delta
     const monoInfo = data.mono_filament_info as Record<string, unknown> | undefined;
@@ -282,7 +282,7 @@ export class PrinterState {
         //
         // So `result.url` is never present and this branch has never fired. It is left in
         // place rather than deleted because 1051 (export) does appear to answer with one,
-        // and the two share this field — but nothing should rely on 1050 filling it.
+        // and the two share this field, but nothing should rely on 1050 filling it.
         //
         // What the token is for is unknown; the timelapse player does not need it. A
         // video comes down the ordinary `/download?X-Token=<printer password>&file_name=`
@@ -383,7 +383,7 @@ export class PrinterState {
   /**
    * Restore layer data from persistence (init snapshot from server).
    *
-   * Sanitised on the way in, the same way the server does it (ELEG-18) — an older service
+   * Sanitised on the way in, the same way the server does it (ELEG-18): an older service
    * can still send a series carrying an entry from a previous print, and anything reading
    * `layerTimes` directly rather than going through the chart would inherit it.
    */
@@ -409,7 +409,7 @@ export class PrinterState {
     const reportId = data.auto_report_id as number | undefined;
     if (reportId != null) {
       if (this.lastAutoReportId != null && reportId !== this.lastAutoReportId + 1) {
-        // Gap detected — request full status refresh
+        // Gap detected: request full status refresh
         console.warn(
           `Auto-report gap: expected ${this.lastAutoReportId + 1}, got ${reportId}. Requesting full refresh.`,
         );

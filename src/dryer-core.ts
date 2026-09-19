@@ -1,5 +1,5 @@
 /**
- * Filament dryer — the pure half.
+ * Filament dryer: the pure half.
  *
  * Drying is done on the printer's own heated bed with the lid closed: the bed is held
  * a little below the filament's glass transition for a few hours, which drives moisture
@@ -39,7 +39,7 @@ export interface DryingPreset {
  * A hard ceiling, applied to presets and to anything typed by hand.
  *
  * 80 °C is already above every preset here. The point is not to pick the best drying
- * temperature — it is that no combination of typing and rounding can ask the bed for
+ * temperature: it is that no combination of typing and rounding can ask the bed for
  * something that would melt a spool onto it.
  */
 export const MAX_SAFE_C = 80;
@@ -53,7 +53,7 @@ export const MAX_MINUTES = 24 * 60;
 /**
  * Conservative bed temperatures and times.
  *
- * Each sits ~10–15 °C under the material's glass transition — hot enough to move water,
+ * Each sits ~10–15 °C under the material's glass transition: hot enough to move water,
  * cool enough to leave the coil rigid. Times are for a spool that is damp rather than
  * soaked; a badly wet spool wants a second session rather than a hotter one.
  */
@@ -169,7 +169,7 @@ export function sessionFromPreset(
 export interface DryerProgress {
   elapsedMin: number;
   remainingMin: number;
-  /** 0..1, clamped — a session that overran still reports 1 rather than >1. */
+  /** 0..1, clamped, a session that overran still reports 1 rather than >1. */
   fraction: number;
   done: boolean;
   /** Minutes until the next rotation reminder, or null when rotation is off/finished. */
@@ -181,7 +181,7 @@ export interface DryerProgress {
 /**
  * Where a session has got to.
  *
- * `now` is passed in rather than read from the clock so the caller — and the tests —
+ * `now` is passed in rather than read from the clock so the caller (and the tests)
  * decide what time it is.
  */
 export function progressOf(session: DryerSession, now: number): DryerProgress {
@@ -207,7 +207,7 @@ export function progressOf(session: DryerSession, now: number): DryerProgress {
   return { elapsedMin, remainingMin, fraction, done, nextRotationInMin, rotationsDue };
 }
 
-/** True when a stored session's end time has already passed — the reopened-tab case. */
+/** True when a stored session's end time has already passed: the reopened-tab case. */
 export function hasExpired(session: DryerSession, now: number): boolean {
   return progressOf(session, now).done;
 }

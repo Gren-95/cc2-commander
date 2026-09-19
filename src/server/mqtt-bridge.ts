@@ -1,5 +1,5 @@
 /**
- * Singleton MQTT bridge — single connection to the CC2 printer.
+ * Singleton MQTT bridge: single connection to the CC2 printer.
  * Emits raw events for consumers (state store, WebSocket, etc.)
  */
 
@@ -85,7 +85,7 @@ export class MqttBridge extends EventEmitter {
   /**
    * The five-state phase, which is what a human should be shown. `isConnected` and
    * `brokerConnected` are kept because the coarse `broker_only` contract on `/api/health`
-   * and `/ws` still reports them — see ELEG-59.
+   * and `/ws` still reports them: see ELEG-59.
    */
   get phase(): MqttPhase {
     return mqttPhase({
@@ -119,7 +119,7 @@ export class MqttBridge extends EventEmitter {
     this.client.on('connect', () => {
       log.info('Connected, discovering printer...');
       this._brokerConnected = true;
-      // Subscribe broadly for SN discovery — printer may not publish
+      // Subscribe broadly for SN discovery: printer may not publish
       // api_status until a client registers, so catch any elegoo topic
       // Still subscribed broadly even when the SN is known: it is the fallback if the
       // remembered SN is stale because the printer was swapped.
@@ -143,7 +143,7 @@ export class MqttBridge extends EventEmitter {
     });
 
     this.client.on('close', () => {
-      // `close` fires on every FAILED RECONNECT ATTEMPT, not just on a real drop —
+      // `close` fires on every FAILED RECONNECT ATTEMPT, not just on a real drop:
       // mqtt.js retries every `reconnectPeriod` (5s) and each cycle lands here. Emitting
       // unconditionally turned that into one `disconnected` event every ~5 seconds for as
       // long as the printer was off, and Telegram sends one urgent message per event:
@@ -154,7 +154,7 @@ export class MqttBridge extends EventEmitter {
       //
       // Fixed here rather than in telegram.ts on purpose: the same storm reaches the
       // WebSocket broadcast and the event log, so one guard covers every consumer. The UI
-      // loses nothing — ws-transport rebroadcasts service_status on its own 5s timer.
+      // loses nothing: ws-transport rebroadcasts service_status on its own 5s timer.
       const wasUp = this._connected || this._brokerConnected;
       this._connected = false;
       this._brokerConnected = false;
@@ -168,7 +168,7 @@ export class MqttBridge extends EventEmitter {
       this.stopRegisterRetry();
       this.stopSlowRegisterRetry();
       this.stopSilenceWatch();
-      // Never connected in the first place? Then there is no disconnection to report —
+      // Never connected in the first place? Then there is no disconnection to report,
       // which is also the case when the printer is simply off when the service starts.
       if (wasUp) this.emit('disconnected');
     });
@@ -286,7 +286,7 @@ export class MqttBridge extends EventEmitter {
    * Say out loud that the printer has not spoken (ELEG-59).
    *
    * The failure this exists for produces **no log line at all**: the broker accepts the
-   * connection, `elegoo/#` is subscribed, and then nothing ever arrives — so the most
+   * connection, `elegoo/#` is subscribed, and then nothing ever arrives, so the most
    * informative thing in the journal is the absence of a line, which is indistinguishable
    * from "still trying". One timer turns that silence into a sentence.
    */
@@ -323,7 +323,7 @@ export class MqttBridge extends EventEmitter {
     }
   }
 
-  /** Slow retry for when registration is rejected (code 3 — too many clients) */
+  /** Slow retry for when registration is rejected (code 3: too many clients) */
   private startSlowRegisterRetry(): void {
     this.stopSlowRegisterRetry();
     this.slowRegisterTimer = setInterval(() => {
@@ -381,7 +381,7 @@ export class MqttBridge extends EventEmitter {
 
   /**
    * @returns the request id the printer's response will echo back in its own `id`
-   *   field — for the rare caller (`schedule.ts`'s file-list re-check) that needs to
+   *   field, for the rare caller (`schedule.ts`'s file-list re-check) that needs to
    *   tell its own answer apart from another consumer's request for the same method
    *   landing on the shared `response` event at the same time. `null` when nothing was
    *   sent, so such a caller does not wait on a request that never went out.

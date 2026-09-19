@@ -1,8 +1,8 @@
 /**
  * The print ledger's merge.
  *
- * The fixtures are the real shapes a CC2 (firmware 02.01.00.00) sends — a `1036` task and
- * a `1044` file entry — so a test that passes here is one about the printer, not about a
+ * The fixtures are the real shapes a CC2 (firmware 02.01.00.00) sends (a `1036` task and
+ * a `1044` file entry) so a test that passes here is one about the printer, not about a
  * shape somebody imagined.
  */
 

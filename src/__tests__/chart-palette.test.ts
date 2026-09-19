@@ -21,7 +21,7 @@ describe('resolvePalette', () => {
 
   it('falls back for a property the stylesheet does not define', () => {
     // getPropertyValue returns '' for an unknown property. Assigning that to fillStyle
-    // silently keeps the *previous* colour, which is a miserable bug to chase — so an
+    // silently keeps the *previous* colour, which is a miserable bug to chase, so an
     // empty value must fall back rather than be used.
     expect(resolvePalette(() => '')).toEqual(FALLBACK_PALETTE);
     expect(resolvePalette(() => undefined)).toEqual(FALLBACK_PALETTE);

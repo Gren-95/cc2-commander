@@ -3,7 +3,7 @@
  *
  * The printer has twelve states and only one of them is Idle. Homing, levelling, a PID
  * run, a resonance test, a self-check, a firmware update and a file transfer are all as
- * busy as printing — and until now the jog pad and every maintenance button stayed live
+ * busy as printing, and until now the jog pad and every maintenance button stayed live
  * through all of them. Pressing one either did nothing, or did something that ruined
  * whatever was in progress; the only feedback was a toast after the fact, and only
  * because ELEG-40 added one.
@@ -11,14 +11,14 @@
  * ## Declarative, so the list cannot drift
  *
  * A control that needs an idle machine says so in the markup with `data-requires-idle`,
- * and this disables every one of them together. The alternative — a list of ids in here
- * — is a second place to remember, and the first thing anyone adding a button forgets.
+ * and this disables every one of them together. The alternative, a list of ids in here,
+ * is a second place to remember, and the first thing anyone adding a button forgets.
  *
  * ## What is deliberately NOT marked
  *
  * Pause, Resume, Stop and the emergency stop are the controls you reach for *because*
  * the printer is busy; disabling them would be exactly backwards. Temperature, fan,
- * speed and the light are all valid mid-print — tuning a print while it runs is normal.
+ * speed and the light are all valid mid-print: tuning a print while it runs is normal.
  * Only motion, maintenance and starting a print need the machine to be doing nothing.
  */
 
@@ -34,8 +34,8 @@ export function isPrinterIdle(status: number | undefined): boolean {
 /**
  * The last status the dashboard saw.
  *
- * Cards render on their own schedule — a file listing arrives from `1044`, the Canvas
- * from `2005` — and each replaces its markup wholesale, handing back freshly ENABLED
+ * Cards render on their own schedule (a file listing arrives from `1044`, the Canvas
+ * from `2005`) and each replaces its markup wholesale, handing back freshly ENABLED
  * buttons after the guard has already run. Rather than have every renderer thread the
  * status through, they call `reapplyBusyGuard()` and this remembers it.
  */
@@ -50,7 +50,7 @@ export function reapplyBusyGuard(): void {
  * Apply the current state to every `[data-requires-idle]` control.
  *
  * The title says which state is blocking rather than a generic "printer busy": "Auto
- * Leveling — wait until the printer is idle" tells you how long to expect to wait, and
+ * Leveling, wait until the printer is idle" tells you how long to expect to wait, and
  * that nothing is wrong.
  */
 export function applyBusyGuard(status: number | undefined): void {

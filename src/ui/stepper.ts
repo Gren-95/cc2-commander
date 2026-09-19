@@ -3,14 +3,14 @@
  *
  * The browser's own spinner is two 8px arrows stacked inside the field. They are
  * unhittable on a touchscreen, they appear only on hover in Chrome, they are absent
- * entirely on iOS, and they look different in every browser — which is the one thing a
+ * entirely on iOS, and they look different in every browser, which is the one thing a
  * design system is for. This replaces them with a bordered group: minus, the field,
  * plus.
  *
  * ## Enhancement, not markup
  *
  * Applied at runtime rather than written into the twenty call sites, because half of
- * them live inside `innerHTML` templates that re-render wholesale — the spool calculator
+ * them live inside `innerHTML` templates that re-render wholesale: the spool calculator
  * rebuilds its whole form on every keystroke. Markup would have to be kept in step by
  * hand in four files; a MutationObserver cannot fall behind.
  *
@@ -19,7 +19,7 @@
  *
  * ## The buttons dispatch both events
  *
- * `input` for anything watching keystrokes and `change` for anything that commits — the
+ * `input` for anything watching keystrokes and `change` for anything that commits: the
  * fan sliders draw that distinction deliberately (live label on `input`, one command on
  * `change`), and a stepper that fired only one of them would be invisible to half the
  * app.
@@ -82,7 +82,7 @@ function nudge(input: HTMLInputElement, direction: 1 | -1): void {
 /**
  * Pull a typed value back into `[min, max]` once the field is left, at the step's
  * precision. `min`/`max`/`step` stop the +/- buttons from ever leaving the range, but
- * they do nothing to a value the keyboard typed directly — a number input still accepts
+ * they do nothing to a value the keyboard typed directly: a number input still accepts
  * `-5` in a field whose min is 0, and only refuses to submit it inside a `<form>`, which
  * none of these fields are in. An empty field is left alone: several forms use it as a
  * meaningful "unset" state, and clamping it to `min` would invent a value nobody chose.
@@ -136,7 +136,7 @@ function makeButton(input: HTMLInputElement, direction: 1 | -1): HTMLButtonEleme
 
   btn.addEventListener('pointerdown', () => {
     nudge(input, direction);
-    // Hold to repeat, the way the native spinner does — without it, setting a bed from
+    // Hold to repeat, the way the native spinner does, without it, setting a bed from
     // 0 to 60 in steps of 5 is twelve separate clicks.
     timer = setTimeout(() => {
       repeat = setInterval(() => nudge(input, direction), REPEAT_EVERY_MS);

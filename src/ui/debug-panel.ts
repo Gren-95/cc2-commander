@@ -1,5 +1,5 @@
 /**
- * Debug Panel — live view of ALL printer state variables with change tracking.
+ * Debug Panel: live view of ALL printer state variables with change tracking.
  *
  * Features:
  * - Tree view of entire printer state (attributes, status, canvas, etc.)
@@ -38,7 +38,7 @@ let prevSnapshot: Record<string, unknown> = {};
 const recentChanges = new Map<string, number>();
 const HIGHLIGHT_DURATION = 3000; // 3 seconds
 
-// Watched paths — these are always logged even when global logging is off
+// Watched paths: these are always logged even when global logging is off
 const WATCHED_PATHS_KEY = 'debug-watched-paths';
 const watchedPaths = new Set<string>(loadWatchedPaths());
 
@@ -278,7 +278,7 @@ function typeClass(val: unknown): string {
 
 // ---- Change detection (runs on EVERY state change, regardless of tab visibility) ----
 
-/** Track state changes — must be called on every state update to avoid missing intermediate values */
+/** Track state changes: must be called on every state update to avoid missing intermediate values */
 export function trackStateChanges(state: PrinterState): void {
   const snapshot = getStateSnapshot(state);
   const flatNew = flattenObject(snapshot);
@@ -487,7 +487,7 @@ export function bindDebugPanel(): void {
     });
   }
 
-  // Watched list — click to remove
+  // Watched list: click to remove
   const watchedList = document.getElementById('debug-watched-list');
   if (watchedList) {
     watchedList.addEventListener('click', (e) => {

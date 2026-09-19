@@ -3,12 +3,12 @@
  *
  * Hours rather than days because wear follows use: a printer idle for a month has not
  * worn its rails, and one that ran around the clock for a week has. The hours come from
- * the print ledger — every print, whatever its outcome, since a stopped print still ran
+ * the print ledger: every print, whatever its outcome, since a stopped print still ran
  * the machine.
  *
  * ## The intervals are starting points, not specifications
  *
- * The defaults below are round numbers for a typical enclosed FDM printer, chosen here —
+ * The defaults below are round numbers for a typical enclosed FDM printer, chosen here,
  * not figures from Elegoo, which publishes none this code has been able to check. They
  * are meant to be edited: abrasive filament wears a nozzle in a fraction of the time
  * PLA does, and a printer in a dusty room wants its fans cleaned sooner. The panel says
@@ -92,7 +92,7 @@ function slug(label: string): string {
 /**
  * Accept a task list from disk or over HTTP.
  *
- * Drops anything malformed, clamps intervals to a sane range, and makes ids unique —
+ * Drops anything malformed, clamps intervals to a sane range, and makes ids unique:
  * a duplicate id would make "mark done" ambiguous about which task it meant.
  */
 export function normaliseTasks(raw: unknown): MaintenanceTask[] {

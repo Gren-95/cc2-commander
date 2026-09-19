@@ -1,7 +1,7 @@
 /**
  * The dashboard layout model.
  *
- * Pure by design — no DOM, no localStorage — so the decisions can be tested directly.
+ * Pure by design (no DOM, no localStorage) so the decisions can be tested directly.
  * The cases that matter most are the MIGRATIONS: this model is on its third shape, and
  * every user upgrading has a layout saved in one of the first two. Getting that wrong
  * silently rearranges a dashboard someone has arranged to their liking, which is a
@@ -73,8 +73,8 @@ describe('normaliseCardLayout', () => {
   });
 
   it('drops the widths of a layout saved before they were uniform', () => {
-    // Widths used to be assigned by card identity — the old sidebar six were quarters,
-    // two log cards full width, the rest halves — which is why a fresh dashboard looked
+    // Widths used to be assigned by card identity (the old sidebar six were quarters,
+    // two log cards full width, the rest halves) which is why a fresh dashboard looked
     // arbitrary. A layout with no version has those dropped once so the uniform default
     // applies; everything a person actually chose is kept.
     const layout = normaliseCardLayout({
@@ -212,7 +212,7 @@ describe('CARD_NAMES', () => {
 /**
  * The mobile focus rail's decisions.
  *
- * Pure half only — the rail itself is DOM. What is worth pinning here is the stale-
+ * Pure half only: the rail itself is DOM. What is worth pinning here is the stale-
  * choice handling: a focused card can be hidden in Settings or removed from the app
  * between sessions, and honouring a stale id would show an empty dashboard on a phone
  * with no obvious way out.
@@ -247,7 +247,7 @@ describe('focus rail', () => {
     expect(resolveFocus(l, 'a-card-from-a-newer-build')).toBe(l.order[0]);
   });
 
-  it('passes FOCUS_ALL through — it is the way back to the scrolling dashboard', () => {
+  it('passes FOCUS_ALL through: it is the way back to the scrolling dashboard', () => {
     expect(resolveFocus(layout(), FOCUS_ALL)).toBe(FOCUS_ALL);
     // …even when every card is hidden, which would otherwise have nothing to fall to.
     expect(resolveFocus(layout({ hidden: [...ALL_CARD_IDS] }), FOCUS_ALL)).toBe(FOCUS_ALL);
@@ -321,7 +321,7 @@ describe('a saved order that holds an id this build does not have', () => {
     expect(focusableCards(withGhost())).not.toContain('ghost-card');
   });
 
-  it('is not honoured as a saved focus — that would be an empty screen on a phone', () => {
+  it('is not honoured as a saved focus: that would be an empty screen on a phone', () => {
     const l = withGhost();
     expect(resolveFocus(l, 'ghost-card')).toBe(focusableCards(l)[0]);
   });

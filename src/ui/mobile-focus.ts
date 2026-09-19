@@ -1,5 +1,5 @@
 /**
- * Mobile focus rail — one dashboard card at a time.
+ * Mobile focus rail: one dashboard card at a time.
  *
  * On a phone the dashboard is one column, so fifteen cards become a very long scroll
  * and reaching the MQTT log means passing everything above it. The alternative used to
@@ -10,7 +10,7 @@
  * first entry and restores the scrolling dashboard, so nothing is taken away.
  *
  * Phone only, dashboard only. Above the breakpoint the rail is not rendered and the
- * focus is not applied — a desktop shows the grid it always did.
+ * focus is not applied: a desktop shows the grid it always did.
  */
 
 import {
@@ -47,7 +47,7 @@ export function currentFocus(layout: CardLayout): string {
 /**
  * Should this card render?
  *
- * Asked by `applyCardLayout`, which owns visibility — putting the decision here rather
+ * Asked by `applyCardLayout`, which owns visibility: putting the decision here rather
  * than letting this module set `style.display` itself means there is still exactly one
  * place that decides whether a card is on screen, and a layout change cannot silently
  * undo a focus (or the other way round).
@@ -68,7 +68,7 @@ function labelFor(id: string): string {
  * A rail button, tinted with its card's hue.
  *
  * Colour is set inline rather than as a utility because the hue is per card and read
- * from a map at runtime — Tailwind only generates the classes it can see in the source,
+ * from a map at runtime: Tailwind only generates the classes it can see in the source,
  * so `bg-[${accent}]` would produce nothing at all.
  *
  * Idle is the hue at 18% over the card background with a coloured glyph; focused is the
@@ -105,13 +105,13 @@ function button(
 /**
  * Draw (or remove) the rail.
  *
- * Rebuilt wholesale on every call — it is fifteen buttons and it has to track the
+ * Rebuilt wholesale on every call: it is fifteen buttons and it has to track the
  * layout's order, hides and focus. Cheap enough not to warrant diffing.
  */
 export function renderFocusRail(layout: CardLayout, visible: boolean): void {
   let rail = document.getElementById(RAIL_ID);
 
-  // Signed out, the rail is thirteen buttons to places you cannot go — and on a phone it
+  // Signed out, the rail is thirteen buttons to places you cannot go, and on a phone it
   // sits on top of the sign-in card and clips the password field.
   if (!visible || !isPhone() || isSignedOut()) {
     rail?.remove();
@@ -140,7 +140,7 @@ export function renderFocusRail(layout: CardLayout, visible: boolean): void {
   const focus = currentFocus(layout);
   rail.innerHTML = [
     /*
-     * `All` gets the app accent and a grid glyph — not a card, so it should look like
+     * `All` gets the app accent and a grid glyph, not a card, so it should look like
      * neither one. It also must not reuse `dashboard`, which is the same printer glyph
      * the Print Status card already has: two identical buttons at the top of the rail.
      */
@@ -157,14 +157,14 @@ export function renderFocusRail(layout: CardLayout, visible: boolean): void {
   ].join('');
 
   /*
-   * The rail floats over the grid, so the grid needs room for it — without this the
+   * The rail floats over the grid, so the grid needs room for it, without this the
    * right-hand edge of every card (the camera's Expand button, a chart's last label)
    * sits underneath and cannot be reached.
    *
    * Set inline, and measured from the rail itself rather than hardcoded. A utility
    * class does not work here: the grid already carries a `padding` SHORTHAND from the
    * 480px breakpoint, and a shorthand beats a longhand `pr-*` whenever Tailwind emits
-   * it later — which it did, leaving the padding at 6px and the cards still under the
+   * it later, which it did, leaving the padding at 6px and the cards still under the
    * rail. An inline style has no such argument to lose.
    */
   const grid = document.getElementById('dashboard-grid');
@@ -186,7 +186,7 @@ export function renderFocusRail(layout: CardLayout, visible: boolean): void {
  * Re-apply the layout when the viewport crosses the phone breakpoint.
  *
  * Without this, rotating a phone or dragging a desktop window narrow leaves the rail
- * absent while the focus is still hiding fourteen cards — a dashboard with one card on
+ * absent while the focus is still hiding fourteen cards: a dashboard with one card on
  * it and no way to get the rest back.
  */
 export function watchBreakpoint(reapply: () => void): void {

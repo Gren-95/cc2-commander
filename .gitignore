@@ -8,7 +8,7 @@ data/
 .env
 .cache/
 
-# Claude Code — per-machine state only.
+# Claude Code: per-machine state only.
 # CLAUDE.md IS committed: it is the agent instruction file for this repo, with the
 # topic detail in docs/. AGENTS.md, .agents/ and .mcp.json were folded into it and
 # deleted. .claude/ now holds nothing but the per-machine files listed below.
@@ -21,7 +21,7 @@ data/
 test-results/
 /playwright-report/
 
-# Output of `bun run screenshots` — pictures for a person, not an artefact.
+# Output of `bun run screenshots`: pictures for a person, not an artefact.
 screenshots/
 
 # Runtime data for the production compose service (see docker-compose.yml).

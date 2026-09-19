@@ -15,7 +15,7 @@
  * mean two fixture formats and a converter between them. Matching the existing one
  * means anything already able to read a capture can read an export.
  *
- * `data` is the **full parsed message** (`LogEntry.raw`), not `LogEntry.payload` — the
+ * `data` is the **full parsed message** (`LogEntry.raw`), not `LogEntry.payload`: the
  * latter is truncated to 500 characters for display and is useless as a fixture.
  */
 
@@ -68,7 +68,7 @@ export function downloadJson(filename: string, payload: unknown): void {
 /**
  * Export the entries a view is currently showing.
  *
- * **Filtered, not the whole buffer** — the filter is how you found the interesting
+ * **Filtered, not the whole buffer**: the filter is how you found the interesting
  * thing, and an unfiltered dump is what people already cannot read.
  */
 export function exportLogEntries(entries: readonly LogEntry[], view: string): number {

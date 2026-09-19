@@ -3,7 +3,7 @@ import { alertForEvent } from '../ui/alert-sound';
 import { CRITICAL_EXCEPTIONS } from '../types';
 
 /**
- * ELEG-46. Only the decision half is testable — whether a sound actually reaches
+ * ELEG-46. Only the decision half is testable, whether a sound actually reaches
  * speakers needs a browser, a user gesture and an `AudioContext`, and no gate here has
  * any of those. What IS testable is which events should sound, and that is where the
  * rules that could silently drift live.

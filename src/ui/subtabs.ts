@@ -3,7 +3,7 @@
  *
  * Extracted when Tools gained a second tool. The original version queried `.subtab`
  * across the whole document, which was fine while About was the only strip and wrong
- * the moment there were two — clicking a tool would have deactivated Help and Debug.
+ * the moment there were two: clicking a tool would have deactivated Help and Debug.
  * Every lookup here is scoped to a group.
  *
  * ## Markup contract
@@ -79,7 +79,7 @@ export function savedSubtab(group: string): string {
 /**
  * Wire a group's buttons and show its remembered panel.
  *
- * Idempotent — called every time the parent tab opens, because the panels may not have
+ * Idempotent: called every time the parent tab opens, because the panels may not have
  * existed when the page loaded.
  */
 export function bindSubtabs(group: string, onSwitch?: (name: string) => void): void {

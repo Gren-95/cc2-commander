@@ -12,7 +12,7 @@ export interface ServiceConfig {
   printerPassword: string;
   /**
    * Optional serial-number override. Normally discovered and then cached, but a
-   * printer that is silent at startup can never be discovered — so this lets a first
+   * printer that is silent at startup can never be discovered, so this lets a first
    * start register immediately (ELEG-60). Empty means "discover it".
    */
   printerSn: string;
@@ -69,7 +69,7 @@ export interface ServiceConfig {
    * Home Assistant (optional): ambient temperature and humidity the printer cannot
    * measure itself, and optionally an entity to ring on a critical error or a failed
    * print. Reading is unconditionally on once configured; ringing is the one write this
-   * service makes to Home Assistant — see the note in `home-assistant.ts` about what a
+   * service makes to Home Assistant: see the note in `home-assistant.ts` about what a
    * long-lived token can do, and why that stays as narrow as one entity.
    */
   homeAssistant: {
@@ -78,7 +78,7 @@ export interface ServiceConfig {
     /** Long-lived access token. A SECRET: never logged, never sent to the browser. */
     token: string;
     entities: string[];
-    /** Empty when not configured — ringing the buzzer is then a no-op, not an error. */
+    /** Empty when not configured, ringing the buzzer is then a no-op, not an error. */
     buzzerEntity: string;
   };
 
@@ -129,7 +129,7 @@ const HOURS = 60 * 60 * 1000;
  *
  * `AUTH_PASSWORD_HASH` is the supported form. `AUTH_PASSWORD` exists because asking
  * someone to run a hashing command before they can turn on a login is how a security
- * feature ends up switched off — it is hashed at startup and never stored, but it is a
+ * feature ends up switched off: it is hashed at startup and never stored, but it is a
  * plaintext credential in a file, so it warns and points at the generator.
  */
 function loadAuthConfig(): ServiceConfig['auth'] {
@@ -141,7 +141,7 @@ function loadAuthConfig(): ServiceConfig['auth'] {
   const idleHours = parseInt(env('AUTH_IDLE_HOURS', '168'), 10) || 168;
 
   return {
-    // `passwordHash` is filled in by `initAuth()` when only AUTH_PASSWORD was given —
+    // `passwordHash` is filled in by `initAuth()` when only AUTH_PASSWORD was given:
     // hashing is async and config loading is not. That function has to be CALLED; when
     // it was only described in this comment, a plaintext password enabled auth with an
     // empty hash and locked the owner out silently.
@@ -159,7 +159,7 @@ function loadAuthConfig(): ServiceConfig['auth'] {
 
 export function loadConfig(): ServiceConfig {
   // No default. It used to fall back to a real address on the maintainer's own LAN,
-  // which shipped in a public image (ELEG-73) — so a user who forgot to set this got a
+  // which shipped in a public image (ELEG-73), so a user who forgot to set this got a
   // service that started cleanly and then dialled a machine they had never heard of.
   //
   // Required rather than a placeholder: without a printer the service cannot do anything
@@ -216,7 +216,7 @@ export function loadConfig(): ServiceConfig {
   if (haUrl && !/^https?:\/\//.test(haUrl)) {
     throw new Error(`Invalid HOMEASSISTANT_URL: "${haUrl}" (must start with http:// or https://)`);
   }
-  // `sensor.living_room_humidity` — domain, dot, object id. A bare name is the usual
+  // `sensor.living_room_humidity`, domain, dot, object id. A bare name is the usual
   // mistake and produces a 404 per poll that reads like the server is down.
   const entityRe = /^[a-z_]+\.[a-z0-9_]+$/;
   const badEntity = haEntities.find((e) => !entityRe.test(e));

@@ -4,7 +4,7 @@
  *
  * Builds `dist/`, starts the service, and rebuilds-and-restarts when anything under
  * `src/` or `index.html` changes. The service serves the built SPA itself, so there is
- * one port (`SERVICE_PORT`, default 8088) rather than vite's 5173 proxying to it — which
+ * one port (`SERVICE_PORT`, default 8088) rather than vite's 5173 proxying to it, which
  * also means the dev setup now matches production instead of approximating it, and the
  * proxy table for `/ws`, `/api`, `/octoprint` and `/moonraker` is gone with it.
  *
@@ -16,7 +16,7 @@
  * merely acknowledged.
  *
  * The restart is not optional: `spa.ts` walks `dist/` once at startup by design, so a
- * rebuild without one leaves the service serving filenames that no longer exist — the
+ * rebuild without one leaves the service serving filenames that no longer exist, the
  * failure that cost an afternoon on 2026-09-13 and now 404s loudly instead of silently
  * serving HTML as JavaScript.
  */
@@ -53,7 +53,7 @@ async function rebuild(reason: string): Promise<void> {
     return;
   }
   rebuilding = true;
-  console.log(`\n· ${reason} — rebuilding`);
+  console.log(`\n· ${reason}, rebuilding`);
 
   const build = Bun.spawn(['bun', 'scripts/build.ts'], {
     cwd: ROOT,
@@ -64,7 +64,7 @@ async function rebuild(reason: string): Promise<void> {
   if (code !== 0) {
     // Leave the old service running: a syntax error should cost you a refresh, not the
     // dashboard you were looking at.
-    console.error('· build failed — the previous build is still being served');
+    console.error('· build failed, the previous build is still being served');
   } else {
     await stopService();
     startService();
@@ -92,7 +92,7 @@ watch(join(ROOT, 'src'), { recursive: true }, (_event, file) => {
 });
 watch(join(ROOT, 'index.html'), () => schedule('index.html'));
 
-console.log('· watching src/ and index.html — edit and refresh the browser');
+console.log('· watching src/ and index.html: edit and refresh the browser');
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {

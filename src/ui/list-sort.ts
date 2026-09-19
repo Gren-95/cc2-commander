@@ -1,5 +1,5 @@
 /**
- * List sorting and filtering — the pure half (ELEG-49).
+ * List sorting and filtering: the pure half (ELEG-49).
  *
  * Deliberately free of DOM and localStorage so it can be unit-tested directly (the
  * test runner here is `bun test`, which has no document). `ui/list-controls.ts` owns the
@@ -18,7 +18,7 @@ export type SortDirection = 'asc' | 'desc';
 
 /** What a single sortable column extracts from a row. */
 export interface SortColumn<T> {
-  /** Stable identifier — persisted, so renaming one resets that view's saved sort. */
+  /** Stable identifier: persisted, so renaming one resets that view's saved sort. */
   key: string;
   /** Button label in the control bar. */
   label: string;
@@ -36,7 +36,7 @@ export interface SortState {
   dir: SortDirection;
 }
 
-/** A value with nothing to order by — `undefined`, or the empty string. */
+/** A value with nothing to order by: `undefined`, or the empty string. */
 function isMissing(value: string | number | undefined): boolean {
   return value === undefined || value === '';
 }
@@ -60,7 +60,7 @@ export interface SortOptions<T> {
   /**
    * A grouping rank applied *before* the column and **never** reversed by direction.
    * This is how Files keeps folders first no matter which column is sorted, or which
-   * way — folders-first is a grouping rule, not a sort key.
+   * way: folders-first is a grouping rule, not a sort key.
    */
   group?: (item: T) => number;
 }
@@ -93,7 +93,7 @@ export function sortItems<T>(
     const av = column.value(a);
     const bv = column.value(b);
     // Missing-last is decided *before* the direction is applied, or flipping to
-    // descending would drag every row with no value to the top — a file with no print
+    // descending would drag every row with no value to the top: a file with no print
     // time leading the "longest print first" list is not what anyone asked for.
     if (isMissing(av) || isMissing(bv)) return compareValues(av, bv);
 
@@ -110,7 +110,7 @@ export function matchesQuery(query: string, text: string): boolean {
 
 /**
  * Keep the rows whose searchable text matches `query`. `text` may return several
- * strings per row (filename *and* job name, say) — a match in any of them keeps the row.
+ * strings per row (filename *and* job name, say): a match in any of them keeps the row.
  */
 export function filterItems<T>(
   items: readonly T[],
@@ -158,7 +158,7 @@ export function normaliseSortState(
  * Treat 0 as "no value" (ELEG-50).
  *
  * The printer sends `0` for a timestamp, size or duration it did not record, and 0 is a
- * perfectly good number — sorted as one it means 1970, which puts every unrecorded row
+ * perfectly good number: sorted as one it means 1970, which puts every unrecorded row
  * at the top of "newest first". Mapping it to `undefined` hands it to the missing-last
  * rule instead, where it belongs. Also catches NaN, which `Number()` on a bad field
  * produces and which silently poisons a comparator.

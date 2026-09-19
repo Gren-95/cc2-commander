@@ -145,7 +145,7 @@ function $(id: string): HTMLElement {
 
 /**
  * The printer link now lives in the service-status badge rather than in a pill of its
- * own — see `setPrinterLink`. Kept as a named function because two call sites feed it
+ * own: see `setPrinterLink`. Kept as a named function because two call sites feed it
  * and the indirection is where the "which of the two connections is this?" question
  * gets answered: this is the PRINTER link, not the browser's socket to the service.
  */
@@ -172,7 +172,7 @@ function showDashboard(): void {
   $('dashboard').dataset.connected = 'true';
   /*
    * Re-show whatever tab is active rather than the dashboard. This used to be
-   * `$('dashboard').classList.remove('hidden')`, and it runs when the socket connects —
+   * `$('dashboard').classList.remove('hidden')`, and it runs when the socket connects:
    * AFTER startup has already applied `?tab=`. So `?tab=tools` hid the dashboard, then
    * this un-hid it a moment later, and the Tools panel sat below a full dashboard,
    * off-screen. Clicking a tab never showed it, because by then this had already run
@@ -180,7 +180,7 @@ function showDashboard(): void {
    */
   switchToTab(getActiveTab());
   // `applyCardLayout` runs at startup, while the sign-in card is still up, so the rail
-  // it would have drawn was suppressed. Draw it now that there is a session — hiding the
+  // it would have drawn was suppressed. Draw it now that there is a session: hiding the
   // element is not enough on its own, because the rail is rebuilt rather than toggled.
   applyCardLayout();
 
@@ -230,7 +230,7 @@ function showDashboard(): void {
     const cameraFeed = $('camera-feed') as HTMLImageElement;
     // ELEG-41. The overlay covers the dashboard but the dashboard stays interactive, so
     // without a trap Tab walks focus onto the move, temperature and stop controls the
-    // user cannot see — controls that drive a physical machine. The trap also owns
+    // user cannot see: controls that drive a physical machine. The trap also owns
     // Escape and restores focus to the opener on close.
     let releaseCameraTrap: (() => void) | null = null;
 
@@ -257,7 +257,7 @@ function showDashboard(): void {
      */
     const openModal = (fullscreen = false) => {
       // `hidden` is what `updateCamera` actually toggles. The guard used to read
-      // `alt === 'Camera off'` — the alt text was never changed off its placeholder,
+      // `alt === 'Camera off'`: the alt text was never changed off its placeholder,
       // so every enlarge, from the feed and from the button, returned here silently.
       if (!cameraFeed.src || cameraFeed.classList.contains('hidden')) return;
       cameraModalImg.src = cameraFeed.src;
@@ -269,7 +269,7 @@ function showDashboard(): void {
     };
 
     // Escape in full screen is taken by the browser to exit it, and never reaches the
-    // focus trap — without this, leaving full screen would strand the overlay open over
+    // focus trap, without this, leaving full screen would strand the overlay open over
     // the dashboard and need a second Escape.
     document.addEventListener('fullscreenchange', () => {
       if (!document.fullscreenElement) closeModal();
@@ -286,7 +286,7 @@ function showDashboard(): void {
     // The header button goes to full screen; clicking the feed itself opens the same
     // overlay without it, so there is still a way to enlarge the picture that does not
     // take over the display. The button used to toggle a `camera-expanded` class that
-    // raised the img to 60vh — inside a grid cell whose width it could not change.
+    // raised the img to 60vh: inside a grid cell whose width it could not change.
     $('camera-expand-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       openModal(true);
@@ -370,12 +370,12 @@ function onPrinterConnected(_sn: string): void {
  *
  * Before ELEG-40 a refused command produced nothing at all: `guardedSend` re-enabled the
  * button on its timer and the user reasonably concluded it had worked. `busy` is a
- * warning rather than an error because it is not a failure — the printer simply could
+ * warning rather than an error because it is not a failure: the printer simply could
  * not take the command this instant.
  *
  * **Nothing is retried automatically, deliberately.** These are writes to a physical
- * machine, and a re-sent `move` that lands thirty seconds later — after the user has
- * given up and put a hand on the bed — is worse than one that visibly did nothing. The
+ * machine, and a re-sent `move` that lands thirty seconds later (after the user has
+ * given up and put a hand on the bed) is worse than one that visibly did nothing. The
  * user is told they can press it again; pressing it is theirs to decide.
  */
 function reportCommandOutcome(method: number, data: unknown): CommandOutcome {
@@ -418,7 +418,7 @@ function connectToService(): void {
         ($('connect-btn') as HTMLButtonElement).textContent = 'Connect';
         // Name the address that failed. "Ensure the service is running" is not actionable
         // when the service IS running somewhere else, or when something else has taken
-        // its port — an unrelated nginx container answering on 8088 produces exactly this
+        // its port: an unrelated nginx container answering on 8088 produces exactly this
         // screen, and without the URL there is nothing to go on.
         $('connect-error').textContent =
           `Cannot reach the CC2 Commander service at ${serviceUrl}. It may not be running, ` +
@@ -482,7 +482,7 @@ function connectToService(): void {
         );
       }
 
-      // Always show dashboard when service responds — even if printer MQTT is down
+      // Always show dashboard when service responds, even if printer MQTT is down
       showDashboard();
       const printerConnected = initData.connected as boolean;
       if (!printerConnected) {
@@ -528,7 +528,7 @@ function connectToService(): void {
         requestAnimationFrame(() => renderFiles(state, client!));
       }
       if (method === 1045) {
-        // 'popup' went with the popover's Preview button — it opened a second floating
+        // 'popup' went with the popover's Preview button: it opened a second floating
         // layer holding the same thumbnail the popover was already showing, and the
         // G-code card renders the actual model. 'print' is handled in printer-state.ts.
         if (state._lastThumbnailPurpose === 'inline') {
@@ -638,7 +638,7 @@ function connectToService(): void {
         | number
         | undefined;
       if (subStatus === 3021 || subStatus === 3022) {
-        // Timelapse generation complete/failed — refresh history to get updated URLs
+        // Timelapse generation complete/failed: refresh history to get updated URLs
         toast(
           subStatus === 3021 ? 'Timelapse video ready' : 'Timelapse export failed',
           subStatus === 3021 ? 'success' : 'error',
@@ -665,7 +665,7 @@ function connectToService(): void {
       handleDryerFinished(reason, label);
     },
     onWorkshopChanged() {
-      // Only the currently open panel re-fetches — the others pick up the change the
+      // Only the currently open panel re-fetches: the others pick up the change the
       // next time someone opens them, same as every workshop tool's own comment says.
       renderWorkshopPanel(savedSubtab('tools'));
     },
@@ -714,8 +714,8 @@ function connectToService(): void {
 /**
  * Sign in, then connect.
  *
- * The two are one action from the user's side — the button says "Sign in" and the
- * dashboard appears — but they are separate over the wire: a password buys a session
+ * The two are one action from the user's side (the button says "Sign in" and the
+ * dashboard appears) but they are separate over the wire: a password buys a session
  * cookie, and the WebSocket upgrade then carries that cookie like any same-origin
  * request. A service with no password configured skips straight to the connect.
  */
@@ -768,8 +768,8 @@ $('btn-sign-out')?.addEventListener('click', () => {
 /**
  * Decide, before anything else runs, whether to show the dashboard or the sign-in card.
  *
- * A session that is already valid connects with no interaction, so the common case —
- * reopening the tab — looks exactly as it did before auth existed.
+ * A session that is already valid connects with no interaction, so the common case
+ * (reopening the tab) looks exactly as it did before auth existed.
  */
 async function boot(): Promise<void> {
   installUnauthorizedHandler();
@@ -793,7 +793,7 @@ initSegmented();
 void initAmbient();
 
 // Open whatever `?tab=` and `?subtab=` ask for. Read ONCE, at startup: the URL is an
-// address, not a channel the app watches — see ui/deep-link.ts.
+// address, not a channel the app watches, see ui/deep-link.ts.
 {
   const link = parseDeepLink(location.search, subtabNames);
   if (link.tab) switchToTab(link.tab);
@@ -846,7 +846,7 @@ window.addEventListener('unhandledrejection', (e) => {
 // Tab navigation
 document.querySelectorAll('.main-tab').forEach((btn) => {
   btn.addEventListener('click', () => {
-    // No 'debug' here any more — it is a section of the About page, not a tab.
+    // No 'debug' here any more: it is a section of the About page, not a tab.
     // `switchToTab` still accepts it, for callers that deep-link to the debug view.
     const tab = (btn as HTMLElement).dataset.tab as 'dashboard' | 'settings' | 'tools' | 'help';
     switchToTab(tab);
@@ -857,7 +857,7 @@ document.querySelectorAll('.main-tab').forEach((btn) => {
 applyCardLayout();
 
 /*
- * The sidebar resize handle and toggle used to live here — about 55 lines of drag
+ * The sidebar resize handle and toggle used to live here: about 55 lines of drag
  * maths plus two localStorage keys (`elegoo-web-sidebar-width`,
  * `elegoo-web-sidebar-hidden`, named before the rename). Both went with the sidebar itself: the dashboard is one
  * grid now and a card's width is a per-card setting rather than a property of which
@@ -875,7 +875,7 @@ if ('serviceWorker' in navigator) {
     .register('/sw.js')
     .then((registration) => {
       /*
-       * Tell the user a new build is cached — do NOT reload for them.
+       * Tell the user a new build is cached: do NOT reload for them.
        *
        * This page is usually left open watching a 14-hour print. Swapping it out from
        * under someone mid-job to pick up a CSS change is the wrong trade, so the update

@@ -12,7 +12,7 @@
  * its own.
  *
  * Kept pure and separate from grammy, so the boundary is unit-testable without a
- * Telegram connection — see `src/server/__tests__/telegram-allowlist.test.ts`.
+ * Telegram connection: see `src/server/__tests__/telegram-allowlist.test.ts`.
  */
 
 /**
@@ -20,7 +20,7 @@
  *
  * Ids are matched as **strings** deliberately: Telegram ids can exceed
  * `Number.MAX_SAFE_INTEGER`, and a channel id is negative. Anything that is not a
- * well-formed id is dropped rather than silently widening the gate — a typo should cost
+ * well-formed id is dropped rather than silently widening the gate: a typo should cost
  * you access, not hand it out.
  */
 export function parseAllowedChatIds(raw: string | undefined, fallback = ''): string[] {

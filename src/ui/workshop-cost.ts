@@ -8,7 +8,7 @@
  *
  * ## Two static siblings, not one re-rendered panel
  *
- * The file list refetches on every `workshop_changed` frame — a print finishing changes
+ * The file list refetches on every `workshop_changed` frame: a print finishing changes
  * nothing here, but another browser tab saving new prices does, and there is no way to
  * tell those apart from this side. If the settings form were rebuilt along with it, a
  * price half-typed into a field would vanish out from under whoever was typing it, same
@@ -141,7 +141,7 @@ function filesListHtml(d: CostData): string {
     </div>`;
 }
 
-/** Kept outside the render function — see `list-controls.ts` on why that matters. */
+/** Kept outside the render function: see `list-controls.ts` on why that matters. */
 let historyControls: ListControls<CostedPrint> | null = null;
 
 function ensureHistoryControls(): ListControls<CostedPrint> {
@@ -318,7 +318,7 @@ function renderSettingsForm(): void {
   if (!data) return;
   const formHost = document.getElementById('cost-settings-form');
   if (!formHost) return;
-  // Never redraw under someone's fingers — see the module comment.
+  // Never redraw under someone's fingers, see the module comment.
   if (formHost.contains(document.activeElement) && document.activeElement !== document.body) return;
   formHost.innerHTML = settingsFormHtml(data.settings);
   bindSettingsForm();

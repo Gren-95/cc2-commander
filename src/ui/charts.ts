@@ -1,4 +1,4 @@
-/** Lightweight canvas-based live line chart — no dependencies */
+/** Lightweight canvas-based live line chart: no dependencies */
 
 import { positionSegmented } from './segmented';
 import { toggleState } from './state-classes';
@@ -220,7 +220,7 @@ function drawEndLabels(
   ctx.restore();
 }
 
-/** Start chart draw timer — 10 FPS is plenty for 1 Hz data */
+/** Start chart draw timer: 10 FPS is plenty for 1 Hz data */
 function startDrawTimer(): void {
   if (drawTimer) clearInterval(drawTimer);
   drawTimer = setInterval(() => {
@@ -239,14 +239,14 @@ function startDrawTimer(): void {
  *
  * Hides the canvas and the range chips beside it, and shows a single quiet line in
  * their place. Everything is found relative to the canvas rather than by id, so a new
- * chart gets this behaviour by being a chart — there is no list to keep in step.
+ * chart gets this behaviour by being a chart: there is no list to keep in step.
  */
 function setChartEmpty(canvasId: string, empty: boolean): void {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
   canvas.classList.toggle('hidden', empty);
-  // The range picker steers a chart that is not being shown, so it goes with it — the
+  // The range picker steers a chart that is not being shown, so it goes with it: the
   // whole labelled row, not just the track, or a stray "Range" label is left behind.
   for (const chip of document.querySelectorAll(`.chart-time-btn[data-chart="${canvasId}"]`)) {
     chip.closest('.segmented')?.parentElement?.classList.toggle('hidden', empty);
@@ -359,7 +359,7 @@ function drawChart(config: ChartConfig): void {
     ctx.fillText(label + (config.unit ?? ''), PADDING.left - 4, y);
   }
 
-  // Grid lines (X) — time labels
+  // Grid lines (X): time labels
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   // At least ~95px per tick: a time label is ~46px wide, and with the end labels aligned
@@ -428,7 +428,7 @@ function drawChart(config: ChartConfig): void {
     for (const key of config.averageKeys) {
       const s = allSeries.find((sr) => store!.getSeries(key) === sr);
       if (!s) continue;
-      // Compute average over ALL data (not just visible window) — represents whole print
+      // Compute average over ALL data (not just visible window): represents whole print
       const allData = s.data.filter((p) => p.v > 0);
       if (allData.length < 2) continue;
       const avg = allData.reduce((sum, p) => sum + p.v, 0) / allData.length;

@@ -1,7 +1,7 @@
 /**
  * `toggleState` finds its base class, or does nothing at all.
  *
- * The lookup is `el.classList.contains(base)` — **classes only, never the id**. So a
+ * The lookup is `el.classList.contains(base)`: **classes only, never the id**. So a
  * state-table key that names an element's id matches nothing, the delta is never
  * applied, and the call is a silent no-op: no error, no warning, no visual change. That
  * is what the upload button did, and `camera-overlay-btn`, and the Canvas connection
@@ -46,7 +46,7 @@ test.beforeEach(async ({ page }) => {
 test.describe('toggleState applies a delta, not just the state class', () => {
   test('the upload button actually disables', async ({ page }) => {
     // It carried `file-upload-label` as an id only, so the table key never matched and
-    // the button stayed live through an upload — a second file could be started on top
+    // the button stayed live through an upload: a second file could be started on top
     // of the one in flight.
     const { after } = await applyState(page, 'file-upload-label', 'disabled');
     expect(after).toContain('disabled');

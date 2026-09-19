@@ -4,12 +4,12 @@
  * This is the first test in the repo that stands up a real `StateStore`. It needs no
  * printer and opens no connection: the constructor only registers listeners on the bridge
  * it is handed, so an EventEmitter stub satisfies it. It *does* start a chart-sampling
- * interval, hence the `destroy()` in afterEach — without it vitest never exits.
+ * interval, hence the `destroy()` in afterEach, without it vitest never exits.
  *
  * What is being pinned: a `data/state.json` written before ELEG-16 can carry an entry
  * from a previous print, and `StatePersistence.load()` accepts a snapshot up to 24h old.
- * Everything downstream reads `store.layerTimes` raw — `/api/metrics`' average and
- * `computeLayerStats` in the report collector — so if the corruption gets past this
+ * Everything downstream reads `store.layerTimes` raw (`/api/metrics`' average and
+ * `computeLayerStats` in the report collector) so if the corruption gets past this
  * boundary it reaches all of them.
  */
 

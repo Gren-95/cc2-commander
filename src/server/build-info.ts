@@ -1,5 +1,5 @@
 /**
- * Deploy stamp — which commit is actually running.
+ * Deploy stamp, which commit is actually running.
  *
  * Production is a container, which is not a git checkout and carries no git metadata,
  * so the image's last layer writes `build-info.json` at the app root and this reads it
@@ -7,8 +7,8 @@
  * about which image is running.
  *
  * An absent stamp is normal, not an error: `bun run dev` runs from the checkout, and a
- * local `docker build` without the publish workflow's `BUILD_*` args has no values. Every failure — missing, unreadable,
- * malformed, wrong shape — degrades to `UNKNOWN_BUILD_INFO`, so the caller never has
+ * local `docker build` without the publish workflow's `BUILD_*` args has no values. Every failure (missing, unreadable,
+ * malformed, wrong shape) degrades to `UNKNOWN_BUILD_INFO`, so the caller never has
  * to guard and `/api/health` never 500s over a version string.
  */
 
@@ -47,7 +47,7 @@ export const UNKNOWN_BUILD_INFO: BuildInfo = {
 
 /**
  * Install root. This file is `<root>/src/server/build-info.ts` in the checkout and in
- * production alike, so resolving from the module beats `process.cwd()` — the image
+ * production alike, so resolving from the module beats `process.cwd()`: the image
  * happens to set `WORKDIR /app`, but that is a property of the
  * unit file, and a `cd` anywhere would break a cwd-relative path silently.
  */
@@ -58,7 +58,7 @@ export const BUILD_INFO_PATH = join(
   'build-info.json',
 );
 
-/** Non-empty strings only — `""` and `null` from the stamp both mean "unknown". */
+/** Non-empty strings only, `""` and `null` from the stamp both mean "unknown". */
 function str(value: unknown): string | null {
   return typeof value === 'string' && value.length > 0 ? value : null;
 }
@@ -74,7 +74,7 @@ export function readBuildInfo(path: string = BUILD_INFO_PATH): BuildInfo {
   try {
     raw = readFileSync(path, 'utf8');
   } catch {
-    // Absent is the expected case in development — not worth a warning.
+    // Absent is the expected case in development, not worth a warning.
     return { ...UNKNOWN_BUILD_INFO };
   }
 

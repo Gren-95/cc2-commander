@@ -7,7 +7,7 @@
 # working tree, so an editor edits real files and git sees them normally.
 #
 # WHAT MOVES INTO VOLUMES: every generated directory, each one overlaid ON TOP of the
-# bind mount at the same path. That is the whole trick — a named volume mounted at
+# bind mount at the same path. That is the whole trick: a named volume mounted at
 # `/app/node_modules` hides whatever the bind mount has there (including nothing), so
 # the container gets its own and the host directory is never created.
 #
@@ -19,7 +19,7 @@
 #     test-results, playwright-report
 #
 # ONE REAL COST: with node_modules only inside the container, an editor's TypeScript
-# server on the host has no types — no autocomplete, no go-to-definition, and every
+# server on the host has no types, no autocomplete, no go-to-definition, and every
 # import underlined. Fix it by running the editor in the container too (VS Code Dev
 # Containers, or JetBrains remote), which is the point of `.devcontainer` if you want
 # one. There is no way to have both an empty host and a host language server.
@@ -29,10 +29,10 @@ services:
   #
   # `build`, not `image`: if you have the repo you have the source, and building what is
   # in front of you is the thing that cannot be stale. The published image is for people
-  # who do NOT have a checkout — that form is in README.md, and it is the same file with
+  # who do NOT have a checkout: that form is in README.md, and it is the same file with
   # `image: ghcr.io/gren-95/cc2-commander:latest` in place of these two lines.
   #
-  # No `target`, so this is the last stage of the Dockerfile — the production image, the
+  # No `target`, so this is the last stage of the Dockerfile, the production image, the
   # same one `publish.yml` builds.
   cc2-commander:
     build:
@@ -59,8 +59,8 @@ services:
       target: dev
     container_name: cc2-dev
     profiles: [dev]
-    # Match the host user so files the container writes into the bind mount — bun.lock
-    # after an install, anything a script emits — are not left owned by root.
+    # Match the host user so files the container writes into the bind mount (bun.lock
+    # after an install, anything a script emits) are not left owned by root.
     user: "${UID:-1000}:${GID:-1000}"
     ports:
       - "8088:8088" # Web UI + API + WebSocket

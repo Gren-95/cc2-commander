@@ -145,7 +145,7 @@ describe('SessionStore', () => {
     const store = new SessionStore({ absoluteTtlMs: 10 * HOUR, idleTtlMs: 10 * HOUR });
     const t0 = 1_000_000;
     const session = store.create(t0);
-    // Used constantly, so the idle clock never fires — the absolute cap still must.
+    // Used constantly, so the idle clock never fires, the absolute cap still must.
     for (let t = t0; t < t0 + 10 * HOUR; t += HOUR) {
       expect(store.validate(session.token, t)).not.toBeNull();
     }
@@ -210,7 +210,7 @@ describe('cookies', () => {
 
   it('only sets Secure over TLS', () => {
     // A Secure cookie on a plain-HTTP LAN is silently dropped, which presents as
-    // "login does nothing" — the least debuggable failure available.
+    // "login does nothing": the least debuggable failure available.
     expect(sessionCookie('tok', true, 60)).toContain('; Secure');
     expect(sessionCookie('tok', false, 60)).not.toContain('; Secure');
   });
@@ -288,8 +288,8 @@ describe('public paths', () => {
 });
 
 describe('isWellFormedHash', () => {
-  // The failure this catches is silent and total: Bun expands $VAR when it loads .env —
-  // inside single AND double quotes — so an unescaped scrypt hash arrives as the bare
+  // The failure this catches is silent and total: Bun expands $VAR when it loads .env
+  // (inside single AND double quotes) so an unescaped scrypt hash arrives as the bare
   // word "scrypt", every login answers 401, and nothing says why.
   const good = 'scrypt$65536$8$1$2DjPAhXY6f-n6wjU1Js3fw$fAaCQgdd2GMtegGYHbvcupGIyurl';
 
@@ -338,12 +338,12 @@ describe('signed sessions (AUTH_SECRET)', () => {
   it('survives a restart: a fresh store believes a token it has never seen', () => {
     const before = new SessionStore(TTL, SECRET);
     const { token } = before.create();
-    // A restart is exactly this — a new process with an empty map.
+    // A restart is exactly this, a new process with an empty map.
     const after = new SessionStore(TTL, SECRET);
     expect(after.validate(token)).not.toBeNull();
   });
 
-  it('without a secret, a restart signs you out — the behaviour it replaces', () => {
+  it('without a secret, a restart signs you out: the behaviour it replaces', () => {
     const before = new SessionStore(TTL);
     const { token } = before.create();
     expect(new SessionStore(TTL).validate(token)).toBeNull();

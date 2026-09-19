@@ -6,7 +6,7 @@
  *
  * - **Finish rate, not success rate.** `stopped` covers every print that did not run to
  *   the end, and most of those on a real machine are a first layer somebody cancelled
- *   and restarted. That is not a failure of the print — calling the ratio "success"
+ *   and restarted. That is not a failure of the print: calling the ratio "success"
  *   would read a cautious operator as an unreliable printer.
  * - **Filament is a partial sum.** A weight can only be recorded while its file is still
  *   on the printer, so history from before the ledger existed mostly has none. Every
@@ -42,10 +42,10 @@ export interface Stats {
   hours: number;
   /** Sum of the weights that are known. */
   grams: number;
-  /** How many prints `grams` covers — the denominator nobody should have to guess. */
+  /** How many prints `grams` covers, the denominator nobody should have to guess. */
   gramsKnownFor: number;
   /**
-   * Money spent, as two figures with their own counts — see `cost-core.ts` for why they
+   * Money spent, as two figures with their own counts, see `cost-core.ts` for why they
    * are not added together. `null` when no print could be priced.
    */
   filamentCost: number | null;
@@ -66,7 +66,7 @@ const TOP_FILES = 5;
 /**
  * A timestamp's month in the viewer's time zone.
  *
- * `tzOffsetMinutes` is what `Date.prototype.getTimezoneOffset` returns in the browser —
+ * `tzOffsetMinutes` is what `Date.prototype.getTimezoneOffset` returns in the browser:
  * positive west of UTC, so UTC+3 is -180. Without it the container's clock, which is
  * UTC, would put a print that ended at 01:00 local on the 1st into the previous month.
  */

@@ -5,7 +5,7 @@
  *
  * The camera fullscreen overlay covers the dashboard, but the dashboard is still there
  * and still interactive. Without a trap, Tab walks focus out of the overlay and onto the
- * move, temperature and stop controls — which the user **cannot see**, and which
+ * move, temperature and stop controls, which the user **cannot see**, and which
  * **command a physical machine with heaters and motors**. A keyboard user could press
  * one without ever knowing it was there.
  *
@@ -19,7 +19,7 @@
  * `:not([disabled])` and the negative-tabindex exclusion matter: a disabled button and a
  * `tabindex="-1"` container are both programmatically focusable but are **not** in the
  * Tab order, so including them would make the wrap land somewhere the user cannot reach
- * by tabbing — which looks exactly like a broken trap.
+ * by tabbing, which looks exactly like a broken trap.
  */
 const FOCUSABLE = [
   'a[href]',
@@ -33,8 +33,8 @@ const FOCUSABLE = [
 /**
  * The focusable elements inside `root`, in Tab order.
  *
- * Filters on **explicit** hiding only — `inert`, `aria-hidden`, the `hidden` attribute,
- * and the repo's own `.hidden` class — deliberately *not* on geometry. `offsetParent`
+ * Filters on **explicit** hiding only (`inert`, `aria-hidden`, the `hidden` attribute,
+ * and the repo's own `.hidden` class) deliberately *not* on geometry. `offsetParent`
  * and `getClientRects()` are the usual visibility test, but jsdom has no layout engine
  * and reports every element as having none, so a geometry check would exclude
  * everything under test and the trap would look broken exactly where it is verified.
@@ -67,7 +67,7 @@ function ancestorChain(el: HTMLElement): HTMLElement[] {
  *
  * Walks the ancestor chain and marks each ancestor's *other* children, so the overlay's
  * own subtree stays reachable however deeply it is nested. Marking only `body`'s
- * children would not work here — the camera modal is not a direct child of `body`.
+ * children would not work here: the camera modal is not a direct child of `body`.
  *
  * Both `inert` and `aria-hidden` are set: `inert` removes it from the tab order in
  * browsers that support it, and `aria-hidden` makes assistive technology agree with what
@@ -83,7 +83,7 @@ function makeBackgroundInert(container: HTMLElement): () => void {
     for (const sibling of Array.from(parent.children)) {
       if (sibling === node || !(sibling instanceof HTMLElement)) continue;
       // Never clobber an element that was already inert or aria-hidden for its own
-      // reasons — restoring it to "not hidden" on close would be a new bug.
+      // reasons: restoring it to "not hidden" on close would be a new bug.
       if (sibling.hasAttribute('inert') || sibling.hasAttribute('aria-hidden')) continue;
       sibling.setAttribute('inert', '');
       sibling.setAttribute('aria-hidden', 'true');
@@ -107,7 +107,7 @@ export interface FocusTrapOptions {
 /**
  * Trap Tab and Shift+Tab inside `container` until the returned release function runs.
  *
- * Release also restores focus to whatever had it when the trap was created — otherwise a
+ * Release also restores focus to whatever had it when the trap was created: otherwise a
  * keyboard user is dumped at the top of the document and has to tab all the way back to
  * where they were.
  */
@@ -128,7 +128,7 @@ export function createFocusTrap(
 
     const focusable = focusableWithin(container);
     if (focusable.length === 0) {
-      // Nothing to tab to — keep focus on the container rather than letting it escape
+      // Nothing to tab to: keep focus on the container rather than letting it escape
       // to the controls behind, which is the case this whole module exists to prevent.
       e.preventDefault();
       container.focus();

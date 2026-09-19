@@ -19,7 +19,7 @@ const inFlight = new Map<
 const THROTTLE_MS = 100;
 const lastSentAt = new Map<number, number>();
 
-/** Called when a command response is received — re-enables all guarded buttons for that method */
+/** Called when a command response is received: re-enables all guarded buttons for that method */
 export function onCommandResponse(method: number): void {
   for (const [id, entry] of inFlight) {
     if (entry.method !== method) continue;
@@ -54,14 +54,14 @@ function guardedSend(
 
   // Per-method timeouts (official app values)
   const timeouts: Record<number, number> = {
-    1024: 300_000, // Feed — 5 min
-    1025: 300_000, // Retreat — 5 min
-    1026: 50_000, // Home — 50s
-    1027: 25_000, // Move — 25s
-    1032: 300_000, // AutoLevel — 5 min
-    1033: 300_000, // VibrationOptimize — 5 min
-    1034: 300_000, // PID — 5 min
-    1035: 7_200_000, // SelfCheck — 2h
+    1024: 300_000, // Feed (5 min
+    1025: 300_000, // Retreat) 5 min
+    1026: 50_000, // Home (50s
+    1027: 25_000, // Move) 25s
+    1032: 300_000, // AutoLevel (5 min
+    1033: 300_000, // VibrationOptimize) 5 min
+    1034: 300_000, // PID (5 min
+    1035: 7_200_000, // SelfCheck) 2h
   };
   const timeout = timeouts[method] ?? 10_000;
 
@@ -101,7 +101,7 @@ export function bindControls(client: CommandSender): void {
   const btnEStop = $('btn-estop') as HTMLButtonElement;
   btnEStop.addEventListener('click', () => {
     // The one emoji left in the frontend, and deliberately: this is the browser's
-    // native confirm(), which renders plain text only — a <i class="bi max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]"> here would
+    // native confirm(), which renders plain text only, a <i class="bi max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]"> here would
     // show as literal markup. Given what the button does, losing the visual warning
     // entirely was the worse option.
     if (confirm('⚠️ EMERGENCY STOP\nThis immediately halts all motion and heaters.\nContinue?')) {
@@ -134,7 +134,7 @@ export function bindControls(client: CommandSender): void {
     guardedSend(client, 1028, { heater_bed: 0 }, btnOffBed);
   });
 
-  // Move buttons — XY pad and Z column
+  // Move buttons: XY pad and Z column
   document.querySelectorAll('.move-btn:not(.home-btn)').forEach((btn) => {
     btn.addEventListener('click', () => {
       const el = btn as HTMLElement;
@@ -179,7 +179,7 @@ export function bindControls(client: CommandSender): void {
   //
   // These replaced a read-only bar flanked by -/+ buttons that stepped by 13 (~5% of
   // 255). Two rows per fan became one, and a value you could only walk towards became
-  // one you can point at — while keeping the keyboard path a native range gives for
+  // one you can point at, while keeping the keyboard path a native range gives for
   // free, which the old buttons only had because they were buttons.
   document.querySelectorAll('.fan-range').forEach((el) => {
     const input = el as HTMLInputElement;

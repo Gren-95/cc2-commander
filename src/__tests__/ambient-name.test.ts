@@ -1,6 +1,6 @@
 /**
  * Home Assistant names an entity "<device> <kind>", and the dashboard shows it beside an
- * icon that already says the kind — so it read "Efe Temp Temperature". Only a trailing
+ * icon that already says the kind, so it read "Efe Temp Temperature". Only a trailing
  * word matching the device class is dropped, and never the whole name.
  */
 

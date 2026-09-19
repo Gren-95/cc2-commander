@@ -1,14 +1,14 @@
 version: 2
 
 # Dependabot was already enabled here, and it is NOT sufficient on its own (ELEG-63).
-# All 38 advisories open at the time were TRANSITIVE — hono/express/ajv under
+# All 38 advisories open at the time were TRANSITIVE (hono/express/ajv under
 # @modelcontextprotocol/sdk, onnxruntime under @huggingface/transformers, esbuild under
-# tsx — and it opened no PR for any of them, because the fix is a floor in `overrides`
+# tsx) and it opened no PR for any of them, because the fix is a floor in `overrides`
 # and Dependabot does not write those. It only bumps entries it can find as a direct
 # manifest dependency.
 #
 # The move to Bun did not change this. `overrides` now lives in package.json rather than
-# in pnpm-workspace.yaml, which puts it in a file Dependabot *reads* — but it still only
+# in pnpm-workspace.yaml, which puts it in a file Dependabot *reads*, but it still only
 # proposes bumps for `dependencies` / `devDependencies` entries, not for override floors.
 #
 # So treat this as covering DIRECT dependencies and the actions below. The transitive
@@ -21,7 +21,7 @@ updates:
       interval: weekly
     # three and @types/three are pinned to exact versions in package.json (they must
     # move together, and gcode-preview peers on three), so a PR bumping either is
-    # noise, not news. This list is the only home for that rule now — it used to be
+    # noise, not news. This list is the only home for that rule now: it used to be
     # duplicated in pnpm-workspace.yaml's `updateConfig.ignoreDependencies`, which went
     # with pnpm.
     ignore:
@@ -36,8 +36,8 @@ updates:
     # in the Dockerfile.
     #
     # Majors stay a human decision, and ELEG-69 is why. The unattended bump in #10 took
-    # the base from node:22-slim (LTS, supported to 2027-04-30) to node:25-slim — an odd
-    # release that was never going to be LTS and has been EOL since 2026-06-01 — and
+    # the base from node:22-slim (LTS, supported to 2027-04-30) to node:25-slim (an odd
+    # release that was never going to be LTS and has been EOL since 2026-06-01) and
     # broke the Docker build outright, because 25 dropped the bundled corepack. Nobody
     # noticed for months: no workflow built the image.
     #
@@ -50,7 +50,7 @@ updates:
         update-types: ['version-update:semver-major']
 
   # Added by ELEG-63. Without this, an action major goes stale until a deprecation
-  # notice appears in a run log and someone reads it — which is exactly how ELEG-62
+  # notice appears in a run log and someone reads it, which is exactly how ELEG-62
   # came to be filed (checkout/setup-node/action-setup all sat on the Node 20 runtime).
   - package-ecosystem: github-actions
     directory: /

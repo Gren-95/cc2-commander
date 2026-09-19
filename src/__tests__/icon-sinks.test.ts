@@ -3,7 +3,7 @@
  *
  * A canvas paints exactly the characters it is given, `textContent` and attributes are text,
  * and a toast or a native dialog shows what it is handed. Put an icon in any of them and the
- * markup itself appears on screen — which is what the charts did, drawing
+ * markup itself appears on screen, which is what the charts did, drawing
  * `<i class="bi bi-search …">` across their top edge whenever they were zoomed. It came in
  * with the sweep that replaced emoji (which are text, and so worked in all of these) with
  * icons, and nothing looked at the places where an emoji had been fine.
@@ -69,7 +69,7 @@ const ph = (expr: string) => `$` + `{${expr}}`;
 
 describe('the check itself', () => {
   // A guard that cannot see the bug it guards against is worse than none, so it is shown
-  // the exact shapes that matter — including the multi-line one a per-line check misses.
+  // the exact shapes that matter, including the multi-line one a per-line check misses.
   it('sees an icon drawn onto a canvas, across several lines', () => {
     const source = `
       ctx.fillText(

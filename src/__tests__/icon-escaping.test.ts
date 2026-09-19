@@ -2,7 +2,7 @@
  * Icons are markup, so they must not travel inside a value that will be escaped.
  *
  * `icon()` and `iconSolo()` return HTML strings. The repo already states the rule for
- * one direction — use `iconText()` rather than `innerHTML` when the surrounding text is
+ * one direction: use `iconText()` rather than `innerHTML` when the surrounding text is
  * a filename or a printer error, or a crafted filename becomes script execution. This
  * file guards the *other* direction, which had no rule and shipped a bug:
  *
@@ -44,7 +44,7 @@ function code(text: string): string {
  * Every icon call that sits *inside the arguments* of an escaping call.
  *
  * The distinction is the whole point. `${icon('ok')} ${escapeHtml(text)}` is correct and
- * common — the glyph is markup, the text beside it is escaped. `escapeHtml(\`${icon('ok')}
+ * common: the glyph is markup, the text beside it is escaped. `escapeHtml(\`${icon('ok')}
  * OK\`)` is the bug. A line-contains-both check calls eleven correct sites wrong, so this
  * walks to the matching close paren instead.
  */
@@ -100,7 +100,7 @@ describe('icons never cross an escaping boundary', () => {
     // The scan is only worth having if it fails on the original bug and passes on the
     // eleven sites that emit a glyph beside separately-escaped text.
     // biome-ignore-start lint/suspicious/noTemplateCurlyInString: these are source
-    // fixtures — the scan's input is other people's code, so the placeholders have to
+    // fixtures, the scan's input is other people's code, so the placeholders have to
     // survive as literal text rather than being interpolated here.
     const bug = "return escapeHtml(`${icon('ok')} OK`);";
     const fine = "html += `<span>${icon('ok')} ${escapeHtml(subInfo.text)}</span>`;";

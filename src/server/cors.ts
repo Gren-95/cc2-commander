@@ -4,11 +4,11 @@
  * All five of them used to answer `Access-Control-Allow-Origin: *`. With **no credential
  * to withhold**, that is not a minor misconfiguration: any web page a browser on this
  * network loads could issue cross-origin requests and read the responses. The attacker
- * never had to reach the network — only get someone already on it to open a page.
+ * never had to reach the network, only get someone already on it to open a page.
  * `SameSite` is irrelevant, because there is no cookie to protect.
  *
  * Reachable that way: `set_temperature`, `move`, `home`, `start_print`, `stop_print` and
- * `emergency_stop` — physical consequences on a machine with heaters and motors — plus
+ * `emergency_stop` (physical consequences on a machine with heaters and motors) plus
  * `/api/snapshot` and `/api/stream`, a live camera image of the room.
  *
  * The default is now **same-origin**: no header at all unless an origin is configured.
@@ -21,12 +21,12 @@ export type CorsPolicy = { kind: 'none' } | { kind: 'any' } | { kind: 'list'; or
 /**
  * Parse the configured origin list.
  *
- * Unset or empty means `none` — same-origin only. A bare `*` restores the old
+ * Unset or empty means `none`: same-origin only. A bare `*` restores the old
  * everyone-welcome behaviour, but now somebody has to type it, which is the point:
  * the dangerous setting should be a deliberate act, not a default nobody chose.
  *
  * Origins are compared exactly, after stripping a trailing slash. No wildcard subdomains
- * and no prefix matching — `https://evil.example` must not be admitted by a rule meant
+ * and no prefix matching: `https://evil.example` must not be admitted by a rule meant
  * for `https://evil.example.good.test`, and prefix logic is how that happens.
  */
 export function parseCorsPolicy(raw: string | undefined): CorsPolicy {
@@ -48,8 +48,8 @@ export function parseCorsPolicy(raw: string | undefined): CorsPolicy {
 /**
  * The value for `Access-Control-Allow-Origin`, or `null` to send no header at all.
  *
- * Returning the *request's* origin rather than the configured list is deliberate — a
- * browser rejects a header naming several origins — and it is why the match has to be
+ * Returning the *request's* origin rather than the configured list is deliberate (a
+ * browser rejects a header naming several origins) and it is why the match has to be
  * exact. A request with no `Origin` is not a cross-origin request and needs no header.
  */
 export function allowOriginFor(
@@ -62,7 +62,7 @@ export function allowOriginFor(
   return policy.origins.includes(requestOrigin.replace(/\/+$/, '')) ? requestOrigin : null;
 }
 
-/** Minimal shape of what `applyCors` writes to — keeps this module free of node:http. */
+/** Minimal shape of what `applyCors` writes to: keeps this module free of node:http. */
 interface HeaderSink {
   setHeader(name: string, value: string): void;
 }

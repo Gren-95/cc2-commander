@@ -1,5 +1,5 @@
 /**
- * Shared state store — mirrors PrinterState from the frontend,
+ * Shared state store: mirrors PrinterState from the frontend,
  * but lives server-side and feeds data to all consumers.
  *
  * Also detects print events for notifications (Telegram, future webhooks).
@@ -23,7 +23,7 @@ import {
 } from '../types.js';
 import type { ZoneState } from '../types.js';
 
-/** Chart data point — matches the browser ChartStore format */
+/** Chart data point: matches the browser ChartStore format */
 export interface ChartPoint {
   t: number;
   values: Record<string, number>;
@@ -55,7 +55,7 @@ const MAX_PLAUSIBLE_LAYER_SEC = 600;
 
 /** What a `current_layer` report means, given the layer we were tracking before it. */
 export type LayerReportAction =
-  | 'ignore' // same layer as before — nothing has completed
+  | 'ignore' // same layer as before: nothing has completed
   | 'baseline' // no previous layer to time against; just start the clock
   | 'boundary' // layer went backwards: a different print, discard the pending entry
   | 'discard' // implausible duration, almost certainly a stale timestamp
@@ -63,12 +63,12 @@ export type LayerReportAction =
 
 /**
  * Decide what to do with a `current_layer` report. Pure, so the print-boundary rule can
- * be tested without an MQTT bridge — see `src/server/__tests__/layer-tracking.test.ts`.
+ * be tested without an MQTT bridge: see `src/server/__tests__/layer-tracking.test.ts`.
  *
  * The boundary case is the one that matters (ELEG-16): the printer keeps reporting the
  * *previous* job's `current_layer` for a moment after it ends, so the new job's first
  * report arrives as a drop (L29 → L1). Timing that gap produces an entry belonging to
- * neither print, and it lands in front of the new series — leaving `layerTimes`
+ * neither print, and it lands in front of the new series: leaving `layerTimes`
  * non-monotonic and the layer chart drawing outside its own axes.
  */
 export function classifyLayerReport(
@@ -468,8 +468,8 @@ export class StateStore extends EventEmitter {
    *
    * Sanitised on the way in (ELEG-18). `data/state.json` is accepted up to 24h old and is
    * not necessarily written by code that had the ELEG-16 fix, so a persisted series can
-   * still carry an entry from a previous print. Everything downstream — `/api/metrics`,
-   * `computeLayerStats` in the report collector — reads the raw
+   * still carry an entry from a previous print. Everything downstream (`/api/metrics`,
+   * `computeLayerStats` in the report collector) reads the raw
    * array and would average a cross-print duration into its numbers. Cleaning here means
    * none of them has to know.
    */
@@ -490,7 +490,7 @@ export class StateStore extends EventEmitter {
 
     this.layerTimes = clean;
     // The persisted baseline still describes the tail: entries are only ever dropped from
-    // the front, so the last entry — and the layer in progress after it — is unchanged.
+    // the front, so the last entry (and the layer in progress after it) is unchanged.
     this._lastLayer = lastLayer;
     this._lastLayerTime = lastLayerTime;
   }
@@ -574,7 +574,7 @@ export class StateStore extends EventEmitter {
       }
       case 1036: {
         // Print history. Not stored here: the ledger owns it, and this store would only
-        // be a second copy that could disagree. Handed on raw, whoever asked for it —
+        // be a second copy that could disagree. Handed on raw, whoever asked for it:
         // a browser's request answers the ledger's question too.
         const tasks = (result.history_task_list ?? result.task_list) as unknown[] | undefined;
         if (Array.isArray(tasks)) this.emit('history', tasks);
@@ -609,7 +609,7 @@ export class StateStore extends EventEmitter {
         //
         // So `result.url` is never present and this branch has never fired. It is left in
         // place rather than deleted because 1051 (export) does appear to answer with one,
-        // and the two share this field — but nothing should rely on 1050 filling it.
+        // and the two share this field, but nothing should rely on 1050 filling it.
         //
         // What the token is for is unknown; the timelapse player does not need it. A
         // video comes down the ordinary `/download?X-Token=<printer password>&file_name=`
@@ -627,7 +627,7 @@ export class StateStore extends EventEmitter {
         const url = result.url as string | undefined;
         if (errorCode === 0 && url) {
           this.videoUrl = url;
-          // The transcode this method triggers just finished — archive it to server
+          // The transcode this method triggers just finished: archive it to server
           // storage now rather than waiting for someone to press play (rest-api.ts
           // precacheTimelapse), so it survives the printer going offline even if no
           // one ever opens the Timelapse view for this print.
@@ -718,7 +718,7 @@ export class StateStore extends EventEmitter {
         this._lastLayer <= currentLayer &&
         this.layerTimes.length > 0
       ) {
-        // Data looks consistent with the current print — keep it, just reset
+        // Data looks consistent with the current print: keep it, just reset
         // the timestamp so the first layer after restart isn't bogus
         this._lastLayer = currentLayer;
         this._lastLayerTime = Date.now();
@@ -810,7 +810,7 @@ export class StateStore extends EventEmitter {
 
     let printEnded = false;
 
-    // Print started — either machine_status transitions to 2,
+    // Print started: either machine_status transitions to 2,
     // or sub_status transitions from completed/stopped to active while already printing
     const ENDED_SUBSTATUS = new Set([2077, 2503, 2504]);
     const isNewPrint =
@@ -898,7 +898,7 @@ export class StateStore extends EventEmitter {
       );
       this.emit('print_event', { type: 'error', codes: newExceptions, names } satisfies PrintEvent);
 
-      // Suppress filament runout near print completion — sensor may read empty as print finishes
+      // Suppress filament runout near print completion: sensor may read empty as print finishes
       // Also suppress during filament change operations (Canvas swap, extruder load/unload)
       // Also suppress when toolhead is not in print area (cutter/purge zones)
       const progress = ms?.progress ?? 0;
@@ -1053,7 +1053,7 @@ export class StateStore extends EventEmitter {
     const speedName = SPEED_MODE_NAMES[s.gcode_move?.speed_mode ?? 1] || '';
 
     let summary = `*Status:* ${esc(statusName)}`;
-    if (subName) summary += ` — ${esc(subName)}`;
+    if (subName) summary += `: ${esc(subName)}`;
     summary += '\n';
 
     summary += `🌡 *Nozzle:* ${s.extruder?.temperature ?? '?'}°C`;

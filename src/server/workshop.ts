@@ -1,5 +1,5 @@
 /**
- * The workshop tools' own state — prices, maintenance tasks, spools — and the one
+ * The workshop tools' own state (prices, maintenance tasks, spools) and the one
  * automatic thing among them: taking a finished print off a spool.
  *
  * All of it is small and most of it is typed in by hand, so it lives in one file,
@@ -8,7 +8,7 @@
  *
  * Writes are queued. Two requests arriving together would otherwise both write the same
  * temporary file and rename it over the real one, and whichever rename ran second would
- * decide what survived — not necessarily the later state.
+ * decide what survived, not necessarily the later state.
  */
 
 import { EventEmitter } from 'node:events';
@@ -114,7 +114,7 @@ export class WorkshopService extends EventEmitter {
     return this.state.cost;
   }
 
-  /** What a print already made cost — using the spool's own price if it is known. */
+  /** What a print already made cost: using the spool's own price if it is known. */
   costOfEntry = (entry: LedgerEntry): CostBreakdown => {
     const spool = this.state.spools.find((s) => s.id === this.state.attributions[entry.id]);
     if (spool?.pricePerKg != null && entry.grams !== null) {

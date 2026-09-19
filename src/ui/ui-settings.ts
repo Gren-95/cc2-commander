@@ -2,7 +2,7 @@ import { readMigrated } from './storage-migration';
 /** Persistent UI settings stored in localStorage */
 
 const STORAGE_KEY = 'cc2-commander-ui-settings';
-/** The pre-rename name. See `storage-migration.ts` — a renamed key is a deleted key. */
+/** The pre-rename name. See `storage-migration.ts`: a renamed key is a deleted key. */
 const LEGACY_STORAGE_KEY = 'elegoo-web-ui-settings';
 
 export interface UISettings {
@@ -40,7 +40,7 @@ export interface UISettings {
    * The filament-drying session in progress, or null.
    *
    * Stored with an ABSOLUTE start time so a tab reopened hours later can tell whether
-   * the session finished while it was gone — and turn the bed off if it did. Typed as
+   * the session finished while it was gone, and turn the bed off if it did. Typed as
    * unknown because `ui/dryer.ts` owns the shape and re-validates it on the way out;
    * this file must not become a second place that decides what a session is.
    */
@@ -66,7 +66,7 @@ const defaults: UISettings = {
   // Absolute by default: it is what you need when correlating with journalctl, the
   // printer's display or someone else's screenshot (ELEG-45).
   relativeTimestamps: false,
-  // The first visible card, resolved at runtime — see `resolveFocus`. Stored empty so
+  // The first visible card, resolved at runtime, see `resolveFocus`. Stored empty so
   // a fresh phone focuses whatever is at the top of the user's own layout.
   mobileFocus: '',
   dryer: null,
@@ -127,7 +127,7 @@ export function saveListSort(listId: string, sort: { key: string; dir: string })
   saveUISettings({ listSort });
 }
 
-/** Get a saved list sort, or undefined — the caller supplies and validates the default. */
+/** Get a saved list sort, or undefined: the caller supplies and validates the default. */
 export function getListSort(listId: string): unknown {
   return loadUISettings().listSort?.[listId];
 }

@@ -1,7 +1,7 @@
 /**
  * Read and write the small JSON files the workshop tools keep under `DATA_DIR`.
  *
- * Written atomically — to a temporary file, then renamed over the original — because
+ * Written atomically (to a temporary file, then renamed over the original) because
  * some of this is data a person typed in by hand, like a spool inventory. A crash or a
  * full disk halfway through a plain `writeFile` leaves a truncated file, and the next
  * start would read nothing and carry on with an empty inventory. A rename either happens

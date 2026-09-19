@@ -2,7 +2,7 @@
  * The humidity trace on the dryer panel.
  *
  * Pure geometry, in its own module, because it is the one part of the panel with maths
- * worth asserting — and because the panel re-renders by `innerHTML` every second, so
+ * worth asserting, and because the panel re-renders by `innerHTML` every second, so
  * the chart has to be a string rather than a canvas that a re-render would destroy.
  * `ui/charts.ts` is canvas-based and registered by element id; that suits a chart that
  * lives in a stable container, which this does not.
@@ -11,7 +11,7 @@
  *
  * Moisture leaving filament has to go somewhere, and in a closed chamber it goes into
  * the air. So a session that is working shows humidity RISING for the first stretch and
- * then falling back as it vents — and a flat line from the start means either the
+ * then falling back as it vents, and a flat line from the start means either the
  * filament was already dry or nothing is reaching the sensor. That is the whole reason
  * to draw it: the number alone cannot tell those apart, and the shape can.
  */
@@ -37,7 +37,7 @@ export interface SparklineGeometry {
  *
  * The Y range is padded and never zero-height: a session where humidity holds at 51%
  * for four hours would otherwise divide by zero and put the line at NaN, which SVG
- * renders as nothing at all — a blank chart that looks like missing data rather than a
+ * renders as nothing at all, a blank chart that looks like missing data rather than a
  * flat reading.
  */
 export function sparklineGeometry(

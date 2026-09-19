@@ -4,7 +4,7 @@
  * This is the repo's only test that exercises drawing code, and it does it without a
  * browser: there is no jsdom and no canvas here, so it hands `renderLayerTimeChart` a
  * recording 2D-context stub and asserts on the *operations* it emitted. That covers the
- * two things the pure-helper tests cannot — that the series is clipped to the plot rect,
+ * two things the pure-helper tests cannot: that the series is clipped to the plot rect,
  * and that the rightmost value label stays on the canvas.
  *
  * It is not a substitute for looking at the page. Colours, fonts, overlap and anything
@@ -26,7 +26,7 @@ const H = 160;
 const PAD = { top: 10, right: 12, bottom: 28, left: 48 };
 const PLOT_W = W - PAD.left - PAD.right;
 const PLOT_H = H - PAD.top - PAD.bottom;
-/** The stub's stand-in for text metrics — 6px per character */
+/** The stub's stand-in for text metrics, 6px per character */
 const CHAR_W = 6;
 
 interface Op {
@@ -123,7 +123,7 @@ function clippedOps(ops: Op[]): Op[] {
 
 describe('layer chart render path', () => {
   it('clips the series to the plot rect', () => {
-    // A previous print's L29 in front of the current one — the live ELEG-16 repro.
+    // A previous print's L29 in front of the current one: the live ELEG-16 repro.
     const series: LayerTime[] = [
       { layer: 29, duration: 155.259, timestamp: 1 },
       ...Array.from({ length: 63 }, (_, i) => ({

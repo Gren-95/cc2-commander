@@ -1,7 +1,7 @@
 /**
  * The MQTT phase as a human actually sees it (ELEG-59).
  *
- * The pure decisions — which phase, whether to warn — are tested in `types.test.ts`
+ * The pure decisions (which phase, whether to warn) are tested in `types.test.ts`
  * under `bun test`. What is asserted here is the wiring: that the phase reaches the
  * badge and the banner, that the two previously-indistinguishable states now read
  * differently on the page, and that a browser holding a pre-ELEG-59 payload still
@@ -91,7 +91,7 @@ test.describe('the two broker_only states no longer look identical', () => {
     expect(text).toMatch(/two clients/i);
   });
 
-  test('renders the two phases differently — the whole point of the change', async ({ page }) => {
+  test('renders the two phases differently: the whole point of the change', async ({ page }) => {
     const { awaiting, rejected } = await page.evaluate(() => {
       const w = window as never as any;
       w.mount();
@@ -138,7 +138,7 @@ test.describe('the banner threshold', () => {
 
 test.describe('a browser holding a payload from before this shipped', () => {
   test('falls back to the coarse mqtt field rather than rendering undefined', async ({ page }) => {
-    // No mqttPhase key at all — exactly what an old server sends.
+    // No mqttPhase key at all: exactly what an old server sends.
     const { text } = await panelAfter(page, {
       mqttPhase: undefined,
       mqtt: 'broker_only',
@@ -228,7 +228,7 @@ test.describe('the running version in the panel (ELEG-48)', () => {
  * The printer link, which used to be a separate "Disconnected" pill in the header.
  *
  * Folding it into this badge is only an improvement if the collapsed badge actually
- * answers the question the pill answered — so that is what is asserted here, including
+ * answers the question the pill answered, so that is what is asserted here, including
  * the case the pill handled badly: the link is known before the first `service_status`
  * broadcast arrives, and the badge has to show it rather than sit blank.
  */

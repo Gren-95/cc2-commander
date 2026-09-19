@@ -1,7 +1,7 @@
 /**
  * Edit mode: arrange the dashboard on the dashboard.
  *
- * This module owns the *mode* — entering, leaving, undo, and the two pure decisions
+ * This module owns the *mode*: entering, leaving, undo, and the two pure decisions
  * (where a dragged card lands, which width bucket a drag means). The two interfaces
  * live beside it, because they share almost nothing beyond the layout they write:
  *
@@ -15,7 +15,7 @@
  * Below 700px the dashboard shows ONE card at a time through the focus rail
  * (`ui/mobile-focus.ts`), and every card is full width. Resizing therefore means
  * nothing there, and dragging a grid you can see one cell of means little more. What
- * *does* still matter is order, because the rail walks the cards in layout order — so
+ * *does* still matter is order, because the rail walks the cards in layout order, so
  * the phone gets a reorder list, and the three width buckets are simply absent.
  *
  * ## All writes go through `updateCardLayout`
@@ -23,15 +23,15 @@
  * Neither this module nor its two interfaces touches localStorage. `ui/settings.ts`
  * owns the key and the redraw; these decide what the new arrangement is and hand it
  * over. Two writers to one layout is how the grid and the mobile rail would come to
- * disagree about which cards exist — `applyCardLayout` already redraws both from one
+ * disagree about which cards exist: `applyCardLayout` already redraws both from one
  * source.
  *
  * ## Undo is a snapshot, not a command log
  *
  * Entering edit mode deep-copies the layout; **Cancel** writes that copy back. Every
  * intermediate change is still persisted as it happens, deliberately: a tab closed
- * mid-arrange should not lose the work, and the alternative — buffering and committing
- * on Done — means the grid you are looking at is not the layout that is saved, which is
+ * mid-arrange should not lose the work, and the alternative (buffering and committing
+ * on Done) means the grid you are looking at is not the layout that is saved, which is
  * the exact confusion this feature exists to remove.
  */
 

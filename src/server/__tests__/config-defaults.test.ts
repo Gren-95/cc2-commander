@@ -10,7 +10,7 @@ import { loadConfig } from '../config.js';
  * explicitly and so the defaults were never exercised on the one install anyone looks at.
  *
  * `loadConfig()` reads `process.env` directly, so these tests swap it out wholesale
- * rather than mutating keys — a stray value inherited from the developer's shell would
+ * rather than mutating keys: a stray value inherited from the developer's shell would
  * otherwise make them pass or fail for reasons unrelated to the code.
  */
 
@@ -27,7 +27,7 @@ afterEach(() => {
 
 describe('AI monitoring, which no longer exists', () => {
   it('exposes no AI configuration at all', () => {
-    // The whole subsystem is gone — local classification, the VLM backend, motion
+    // The whole subsystem is gone: local classification, the VLM backend, motion
     // detection, the card and the alerts. What is asserted here is the *surface*: a
     // stale AI_ENABLED or AI_VLM_* in an existing .env must be inert.
     //
@@ -36,7 +36,7 @@ describe('AI monitoring, which no longer exists', () => {
     // private address on the maintainer's own LAN and shipped that way in a public
     // image, so every user who turned AI on sent pictures of their printer to whatever
     // held that IP on THEIR network (ELEG-72); AI_ENABLED=true also silently switched
-    // the VLM on. Both are impossible now because nothing reads the keys — but if AI
+    // the VLM on. Both are impossible now because nothing reads the keys, but if AI
     // ever comes back, it must come back deliberately, and this test is what fails
     // first to say so.
     process.env.AI_ENABLED = 'true';

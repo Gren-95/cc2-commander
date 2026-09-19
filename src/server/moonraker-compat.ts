@@ -603,7 +603,7 @@ export function createMoonrakerRouter(
       return true;
     }
 
-    // --- GET / (root — endpoint index) ---
+    // --- GET / (root: endpoint index) ---
     if ((path === '' || path === '/') && method === 'GET') {
       jsonRaw(res, {
         elegoo_cc2_compat: true,

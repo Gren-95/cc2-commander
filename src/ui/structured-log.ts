@@ -165,7 +165,7 @@ function compactPayload(entry: LogEntry): string {
     return `${interesting.slice(0, 3).join(', ')} +${interesting.length - 3} more`;
   }
 
-  // For responses, show error_code. **Plain text only** — see `summaryGlyph`.
+  // For responses, show error_code. **Plain text only**: see `summaryGlyph`.
   if (classifyEntry(entry) === 'response') {
     const result = raw.result as Record<string, unknown> | undefined;
     if (result?.error_code !== undefined) {
@@ -185,7 +185,7 @@ function compactPayload(entry: LogEntry): string {
  *
  * Kept out of `compactPayload` because that value goes through `highlightMatch`, which
  * escapes so the search term can be wrapped in `<mark>` safely. An `<i>` tag fed into it
- * comes out as the literal text `<i class="bi bi-check-circle-fill …">` on screen — which
+ * comes out as the literal text `<i class="bi bi-check-circle-fill …">` on screen, which
  * is exactly what every OK response in the log rendered as. The rule the repo already
  * states for `iconText` applies to any escaping boundary, not only `textContent`:
  * **an icon is markup, so it cannot travel inside a value that will be escaped.**
@@ -420,7 +420,7 @@ export function bindStructuredLogControls(store: LogStore): void {
   });
 
   $('slog-export').addEventListener('click', () => {
-    // Whatever the direction / type / method / search filters are currently showing —
+    // Whatever the direction / type / method / search filters are currently showing:
     // the same set on screen, so the file matches what the user was looking at.
     const entries = store.getEntries().filter(matchesFilters);
     if (!entries.length) {

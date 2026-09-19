@@ -1,21 +1,21 @@
 /**
- * Ambient temperature and humidity, read from Home Assistant — and, optionally, a
+ * Ambient temperature and humidity, read from Home Assistant, and, optionally, a
  * buzzer this service can ring on a critical error or a failed print.
  *
  * The printer reports its own chamber, nozzle and bed. What it cannot tell you is the
- * humidity of the room the filament is sitting in — and that is the number that decides
+ * humidity of the room the filament is sitting in, and that is the number that decides
  * whether PLA prints cleanly or strings, and whether a drying session was worth running.
  * Home Assistant usually already has a sensor for it.
  *
  * ## One write, and deliberately narrow
  *
- * Reading polls `GET /api/states/<entity>` and never writes — that part of this file
+ * Reading polls `GET /api/states/<entity>` and never writes: that part of this file
  * used to be the whole of it, and the reasoning still holds: a long-lived access token
  * in Home Assistant carries the permissions of the user who made it, which for most
  * people is an administrator, so a bug here could otherwise unlock a door. `ringBuzzer`
  * is the one exception, and it stays as narrow as the risk allows: it calls exactly two
  * generic services (`homeassistant.turn_on`, `homeassistant.turn_off`) against exactly
- * one entity, `HOMEASSISTANT_BUZZER_ENTITY` — never an entity named by anything this
+ * one entity, `HOMEASSISTANT_BUZZER_ENTITY`, never an entity named by anything this
  * service reads elsewhere, and never a service name that arrives from outside this file.
  * There is no general "call any service" method here, and there should not be one.
  *
@@ -23,7 +23,7 @@
  *
  * Home Assistant is someone else's service on the same LAN: it reboots, it updates, its
  * token expires. Every failure degrades to `reachable: false` and a message, and the
- * rest of the dashboard carries on — a printer dashboard that goes dark because a
+ * rest of the dashboard carries on, a printer dashboard that goes dark because a
  * thermometer is unreachable would be a poor trade. `ringBuzzer` holds to the same rule:
  * every failure is logged and swallowed, never thrown, so a Home Assistant outage can
  * never take the printer's own error handling down with it.
@@ -37,12 +37,12 @@ const log = getLogger('HomeAssistant');
 
 /**
  * Whether a `print_event` is worth ringing the buzzer for: a failed print, or a new
- * exception `CRITICAL_EXCEPTIONS` agrees is one — not every warning-level exception, or
+ * exception `CRITICAL_EXCEPTIONS` agrees is one, not every warning-level exception, or
  * a routine filament-change pause would set it off.
  *
  * Pure, and exported, for the same reason `ui/alert-sound.ts`'s `alertForEvent` is: a
  * unit test can reach it without a fake Home Assistant. It reproduces that function's
- * severity rule rather than importing it — that file lives in the browser-bundled half
+ * severity rule rather than importing it: that file lives in the browser-bundled half
  * of the tree, this one in the server half, and the two halves resolve modules
  * differently (CLAUDE.md's import convention). `CRITICAL_EXCEPTIONS` is still the one
  * shared list both read, so the two decisions cannot drift on what counts as critical,
@@ -66,7 +66,7 @@ const POLL_MS = 60_000;
 /**
  * How many humidity samples to keep: twelve hours at one a minute.
  *
- * Long enough for any drying session — the panel caps a session at 12h — and small
+ * Long enough for any drying session (the panel caps a session at 12h) and small
  * enough that shipping the whole array to each client on every poll stays trivial
  * (720 points is about 18KB of JSON).
  */
@@ -77,7 +77,7 @@ const TIMEOUT_MS = 5_000;
 
 /**
  * How long the buzzer stays on before this turns it back off. Not configurable: a
- * siren left on because the off command was never sent — a crash, a restart — would be
+ * siren left on because the off command was never sent (a crash, a restart) would be
  * a worse outcome than the alert it exists to give, so the window stays short and fixed
  * rather than becoming one more thing a misconfiguration can get wrong.
  */
@@ -111,7 +111,7 @@ export interface HaState {
    * Recent humidity, oldest first.
    *
    * Kept here rather than in the browser because a drying session runs for hours and a
-   * page reload would otherwise start the trace again from nothing — the same reason
+   * page reload would otherwise start the trace again from nothing: the same reason
    * the session itself is owned by the service. It is in memory only: a service restart
    * loses the curve but not the session, which is the right way round.
    */
@@ -133,7 +133,7 @@ interface HaEntityPayload {
 /**
  * Turn one `/api/states/<entity>` body into a reading, or null if it is not one.
  *
- * Pure, and exported for that reason — this is where the shapes Home Assistant actually
+ * Pure, and exported for that reason: this is where the shapes Home Assistant actually
  * returns get handled, and they are more varied than the docs suggest. `state` is always
  * a STRING, including for numbers; an entity that is unavailable reports the literal
  * `"unavailable"` or `"unknown"` rather than an error, and a sensor that has never
@@ -250,12 +250,12 @@ export class HomeAssistantService extends EventEmitter {
 
   /**
    * Ring the configured buzzer entity, on for `BUZZER_ON_MS` then off again. A no-op,
-   * not an error, when nothing is configured — every caller of this is a printer error
+   * not an error, when nothing is configured: every caller of this is a printer error
    * path, and a missing buzzer must never become a second error on top of the first.
    *
    * `turn_on` and `turn_off` are two independent requests, and only the first is
    * awaited by the caller; the second fires on its own timer regardless of what the
-   * caller does next. Both failures are logged and nothing more — see the module
+   * caller does next. Both failures are logged and nothing more: see the module
    * comment on why this never throws.
    */
   async ringBuzzer(): Promise<void> {
@@ -300,7 +300,7 @@ export class HomeAssistantService extends EventEmitter {
           try {
             return await this.fetchEntity(id);
           } catch (err) {
-            // One bad entity must not blank the others — a renamed sensor is the common
+            // One bad entity must not blank the others: a renamed sensor is the common
             // case, and the rest are still worth showing.
             log.warn(`${id}: ${(err as Error).message}`);
             return null;

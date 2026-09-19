@@ -1,5 +1,5 @@
 /**
- * WebSocket transport — serves browser clients.
+ * WebSocket transport: serves browser clients.
  *
  * Protocol (JSON messages):
  *
@@ -121,7 +121,7 @@ export class WebSocketTransport {
   /**
    * The `websocket` handler table for `Bun.serve`.
    *
-   * Bun owns the socket itself — no `ws` package, no Node stream per connection, and
+   * Bun owns the socket itself: no `ws` package, no Node stream per connection, and
    * the upgrade is decided in `fetch()` rather than by a second `upgrade` listener
    * bolted onto an http.Server.
    */

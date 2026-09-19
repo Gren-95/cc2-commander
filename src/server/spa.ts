@@ -1,14 +1,14 @@
 /**
  * The built SPA, served by Bun's static route table.
  *
- * `dist/` is immutable for the lifetime of a process — the container bakes it into the
+ * `dist/` is immutable for the lifetime of a process (the container bakes it into the
  * image, and a deploy replaces the container rather than editing files underneath a
- * running one — so the whole tree is walked once at startup and turned
+ * running one) so the whole tree is walked once at startup and turned
  * into `Bun.serve({ routes })` entries. Bun answers those from its own route table
  * without entering JavaScript at all, which is the point of the exercise: the request
  * burst a browser makes when it opens the dashboard never reaches our code.
  *
- * This replaces the hand-rolled `serveStatic()` that used to live in rest-api.ts —
+ * This replaces the hand-rolled `serveStatic()` that used to live in rest-api.ts,
  * an `existsSync` + `createReadStream` per request, with its own MIME table.
  *
  * The consequence of building the table once is that a rebuild is not picked up by a
@@ -28,7 +28,7 @@ const DIST_DIR = resolve(import.meta.dirname, '..', '..', 'dist');
 
 /**
  * Vite fingerprints everything under assets/, so those may be cached forever. Anything
- * else — index.html above all — must be revalidated or a deploy is invisible.
+ * else (index.html above all) must be revalidated or a deploy is invisible.
  */
 function cacheControlFor(urlPath: string): string {
   return urlPath.startsWith('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache';
@@ -40,8 +40,8 @@ function cacheControlFor(urlPath: string): string {
  * The `serveStatic()` this replaced carried its own MIME map, which is how a table like
  * that always ends: it listed `.woff2` but not the `.wasm` a future dependency might
  * ship, and every new asset type is a silent `application/octet-stream`. Bun's own
- * inference was checked against everything vite emits here — html, css, js, svg, ico,
- * png, webmanifest, woff, woff2, map, wasm — and is right on all of them.
+ * inference was checked against everything vite emits here (html, css, js, svg, ico,
+ * png, webmanifest, woff, woff2, map, wasm) and is right on all of them.
  */
 function contentTypeFor(filePath: string): string {
   return Bun.file(filePath).type || 'application/octet-stream';
@@ -69,7 +69,7 @@ const INDEX_HEADERS = {
 /**
  * Every file in dist/ as a `Bun.serve` route, keyed by URL path.
  *
- * Returns an empty table when there is no build — `bun run dev` runs the service
+ * Returns an empty table when there is no build: `bun run dev` runs the service
  * without ever calling `vite build`, and that has to keep working.
  */
 export function buildStaticRoutes(): Record<string, Response> {
@@ -103,7 +103,7 @@ export function buildStaticRoutes(): Record<string, Response> {
  * Say so, once, when a fingerprinted asset is missing.
  *
  * The only way to reach this is a dist/ that has changed under a running process, and
- * the symptom at the browser — a page that loads and does nothing — gives no hint of the
+ * the symptom at the browser (a page that loads and does nothing) gives no hint of the
  * cause. One line in the journal is the difference between a restart and an afternoon.
  * Rate-limited because a stale index.html asks for every asset it references.
  */
@@ -120,7 +120,7 @@ function warnStaleAsset(urlPath: string): void {
 }
 
 /**
- * The same fallback for callers still holding a Node `ServerResponse` — rest-api.ts's
+ * The same fallback for callers still holding a Node `ServerResponse`: rest-api.ts's
  * terminal "not an API route" branch, which behaves exactly as it did before.
  */
 export function writeSpaFallback(res: ServerResponse, urlPath: string, method?: string): void {

@@ -1,4 +1,4 @@
-/** Event Log panel — shows important printer events (start, error, milestones, layer changes) */
+/** Event Log panel: shows important printer events (start, error, milestones, layer changes) */
 
 import { icon } from './icons';
 import { EMPTY } from './design';

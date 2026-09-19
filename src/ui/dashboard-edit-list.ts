@@ -1,12 +1,12 @@
 /**
- * The phone edit interface — a reorder list, and nothing else.
+ * The phone edit interface: a reorder list, and nothing else.
  *
  * Below 700px the dashboard is a focus rail showing one card at a time
  * (`ui/mobile-focus.ts`), and the rail walks the cards in layout order. So order is the
  * one thing still worth changing on a phone, and it is the only thing this offers:
  *
  *   - ▲ / ▼ move a card one place. Buttons rather than drag, because a drag inside a
- *     scrolling list on a touchscreen fights the scroll — the gesture is ambiguous and
+ *     scrolling list on a touchscreen fights the scroll: the gesture is ambiguous and
  *     the browser resolves it against you about half the time.
  *   - × takes a card off the dashboard, and hidden cards come back from chips below.
  *   - No resize at all. Every card on the rail is full width, so the three buckets have
@@ -49,7 +49,7 @@ export function setListEditing(on: boolean, layout: CardLayout): void {
   if (!list) return;
 
   list.classList.toggle('hidden', !on);
-  // The rail and the list are alternatives, never both — and that means the rail's
+  // The rail and the list are alternatives, never both, and that means the rail's
   // *buttons* too. `#mobile-focus-rail` is `fixed … z-[150]`, so leaving it up puts a
   // column of 44px targets over the list's remove buttons: measured, every click on the
   // right-hand third of a row hit the rail instead.
@@ -92,7 +92,7 @@ export function bindListEdit(onChange: () => void): void {
       const id = move.dataset.cardId;
       const dir = move.dataset.dir;
       updateCardLayout((l) => {
-        // Move relative to the cards actually on screen, not to raw `order` — `order`
+        // Move relative to the cards actually on screen, not to raw `order`: `order`
         // also holds the hidden ones, so stepping through it would look like a button
         // that sometimes does nothing.
         const shown = knownCards(l).filter((c) => !l.hidden.includes(c));
@@ -100,7 +100,7 @@ export function bindListEdit(onChange: () => void): void {
         const to = dir === 'up' ? at - 1 : at + 1;
         if (at === -1 || to < 0 || to >= shown.length) return;
         // Moving down means landing *after* the neighbour, which `reorder` expresses as
-        // "before the one after it" — or at the end when there is nothing after it.
+        // "before the one after it", or at the end when there is nothing after it.
         const anchor = dir === 'up' ? shown[to] : shown[to + 1];
         l.order = anchor ? reorder(l.order, id, anchor) : [...l.order.filter((c) => c !== id), id];
       });

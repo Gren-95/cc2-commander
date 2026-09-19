@@ -154,7 +154,7 @@ describe('powerLossState', () => {
   });
 });
 
-describe('mqttPhase — telling the two broker_only cases apart (ELEG-59)', () => {
+describe('mqttPhase: telling the two broker_only cases apart (ELEG-59)', () => {
   const base = { brokerConnected: true, registered: false, snKnown: false, rejected: false };
 
   it('reports disconnected whenever the broker is down, whatever else is set', () => {
@@ -167,7 +167,7 @@ describe('mqttPhase — telling the two broker_only cases apart (ELEG-59)', () =
 
   it('separates "printer never spoke" from "registering" by whether an SN is known', () => {
     // THE distinction this exists for. Both were `broker_only`, and the UI said
-    // `registering…` for both — pointing the diagnosis at the service when the fault was
+    // `registering…` for both: pointing the diagnosis at the service when the fault was
     // a printer whose control application had stopped.
     expect(mqttPhase({ ...base, snKnown: false })).toBe('awaiting_sn');
     expect(mqttPhase({ ...base, snKnown: true })).toBe('registering');
@@ -179,14 +179,14 @@ describe('mqttPhase — telling the two broker_only cases apart (ELEG-59)', () =
 
   it('lets a successful registration win over a stale rejection', () => {
     // A refusal followed by a slow-retry that succeeded must read `connected`, not
-    // `rejected` — otherwise a working service reports a fault forever.
+    // `rejected`: otherwise a working service reports a fault forever.
     expect(mqttPhase({ ...base, snKnown: true, rejected: true, registered: true })).toBe(
       'connected',
     );
   });
 });
 
-describe('mqttBannerHeadline — the warning that could never fire (ELEG-59)', () => {
+describe('mqttBannerHeadline: the warning that could never fire (ELEG-59)', () => {
   it('warns immediately when the printer never spoke, with zero attempts', () => {
     // The regression this pins. The old rule was `broker_only && attempts >= 3`, but in
     // this phase registration is never attempted, so the counter stays 0 for ever and the
@@ -229,7 +229,7 @@ describe('mqttPhaseMessage', () => {
   });
 });
 
-describe('formatBuildVersion — x.y.z+aa, the way RCP renders it (ELEG-48)', () => {
+describe('formatBuildVersion: x.y.z+aa, the way RCP renders it (ELEG-48)', () => {
   it('emits the commit DISTANCE, not a short sha', () => {
     // The issue described `+aa` as "a short build/commit suffix", which is what it looks
     // like. RCP's formatVersion actually emits the number of commits since the tag, and

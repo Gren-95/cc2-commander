@@ -1,5 +1,5 @@
 /**
- * ELEG-41 — the camera overlay's focus trap, in a real browser.
+ * ELEG-41: the camera overlay's focus trap, in a real browser.
  *
  * This suite used to run under `@vitest-environment jsdom` and carried a caveat:
  *
@@ -7,7 +7,7 @@
  * > only; that a browser honours it is checked by hand.
  *
  * That caveat is gone. Chromium implements `inert`, so the test below presses a real Tab
- * key and asserts that focus genuinely cannot reach the button behind the overlay —
+ * key and asserts that focus genuinely cannot reach the button behind the overlay,
  * which is the property the trap exists for, and the one jsdom could never check.
  *
  * The safety case is not abstract: `danger-home` commands a physical machine, and it
@@ -18,7 +18,7 @@ import { expect, test } from '@playwright/test';
 
 /**
  * The real shape: a dashboard containing buttons that command the machine, and a modal
- * that is a sibling deeper in the tree — not a direct child of body, which is why the
+ * that is a sibling deeper in the tree, not a direct child of body, which is why the
  * trap walks the whole ancestor chain.
  */
 const LAYOUT = `
@@ -43,7 +43,7 @@ test.beforeEach(async ({ page }) => {
   }, LAYOUT);
 });
 
-/** The id of whatever currently has focus — the assertion these tests are made of. */
+/** The id of whatever currently has focus: the assertion these tests are made of. */
 const focused = (page: import('@playwright/test').Page) =>
   page.evaluate(() => document.activeElement?.id ?? null);
 
@@ -138,7 +138,7 @@ test.describe('createFocusTrap', () => {
     // reached the page behind", and asserted that a Tab after `danger-home.focus()`
     // returned focus to the modal. In a real browser that premise cannot happen:
     // `.focus()` on an element inside an `inert` subtree is a no-op, so focus never
-    // leaves the overlay in the first place. Measured — activeElement stays
+    // leaves the overlay in the first place. Measured: activeElement stays
     // `camera-modal-close` across the call.
     //
     // So the assertion is stronger here than it could be under jsdom, and the trap's
@@ -217,7 +217,7 @@ test.describe('createFocusTrap', () => {
 
     await page.evaluate(() => (document.getElementById('danger-home') as HTMLElement).focus());
     await page.keyboard.press('Tab');
-    // No longer pulled back — the trap must not outlive the overlay.
+    // No longer pulled back: the trap must not outlive the overlay.
     expect(await focused(page)).not.toBe('camera-modal-close');
   });
 

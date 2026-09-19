@@ -1,12 +1,12 @@
 /**
- * A small static isometric cube for the Control card — a 3D representation of the
+ * A small static isometric cube for the Control card: a 3D representation of the
  * machine's axes, drawn once beside the X/Y/Z coordinate readouts in index.html.
  *
  * Deliberately not live: an earlier version tracked the toolhead's actual position with
- * a moving dot inside the box, which was more than this card needs — the numbers next
+ * a moving dot inside the box, which was more than this card needs, the numbers next
  * to the cube already say where the toolhead is, live, and a dot chasing them added
  * motion to track without adding anything the numbers didn't. What stayed is the part
- * that actually answers "the numbers are 3D how" — the wireframe box and its axis
+ * that actually answers "the numbers are 3D how": the wireframe box and its axis
  * labels, giving the flat X/Y/Z figures a visual home.
  */
 
@@ -19,8 +19,8 @@ const COS30 = Math.cos(Math.PI / 6);
 const SIN30 = Math.sin(Math.PI / 6);
 /*
  * Chosen so every corner of the cube, PLUS the axis labels a little beyond it, lands
- * inside the "0 0 150 130" viewBox (index.html) with room to spare. The far corner —
- * max X and max Y at Z=0 — is the one that actually decides this: it is the largest
+ * inside the "0 0 150 130" viewBox (index.html) with room to spare. The far corner
+ * (max X and max Y at Z=0) is the one that actually decides this: it is the largest
  * isoY the box produces.
  */
 const SCALE_XY = 40;
@@ -46,7 +46,7 @@ function pt([x, y]: Point): string {
 
 function edge(a: Point, b: Point): string {
   // Solid, not dashed, and fg-muted rather than the card-border line color: a dashed
-  // border-colored line reads as decoration you're not meant to look at closely — which
+  // border-colored line reads as decoration you're not meant to look at closely, which
   // is right for a card outline, wrong for the one thing this SVG exists to draw.
   return `<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" class="stroke-fg-muted" stroke-width="1.5" stroke-linecap="round" />`;
 }

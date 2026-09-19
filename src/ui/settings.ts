@@ -1,4 +1,4 @@
-/** Settings panel — persistent card layout + Telegram config */
+/** Settings panel: persistent card layout + Telegram config */
 
 import { updateDeepLink } from './deep-link';
 import { savedSubtab } from './subtabs';
@@ -29,7 +29,7 @@ import { refreshTimestamps } from './relative-time';
 import { loadUISettings, saveUISettings } from './ui-settings';
 
 const STORAGE_KEY = 'cc2-commander-card-layout';
-/** The pre-rename name. See `storage-migration.ts` — a renamed key is a deleted key. */
+/** The pre-rename name. See `storage-migration.ts`: a renamed key is a deleted key. */
 const LEGACY_STORAGE_KEY = 'elegoo-web-card-layout';
 
 // ---- Card layout settings (localStorage) ----
@@ -42,7 +42,7 @@ function loadCardLayout(): CardLayout {
     const raw = readMigrated(STORAGE_KEY, LEGACY_STORAGE_KEY);
     if (raw) return normaliseCardLayout(JSON.parse(raw));
   } catch {
-    /* unreadable or malformed — fall through to the defaults */
+    /* unreadable or malformed, fall through to the defaults */
   }
   return defaultCardLayout();
 }
@@ -60,7 +60,7 @@ export function getCardLayout(): CardLayout {
 }
 
 /**
- * Change the layout, persist it and redraw — the single write path.
+ * Change the layout, persist it and redraw: the single write path.
  *
  * `ui/dashboard-edit.ts` drives drag, resize and dismiss through this rather than
  * touching storage itself. Two owners of one key is how the settings panel and the
@@ -93,7 +93,7 @@ export function applyCardLayout(): void {
   // cannot leave a focus applied with no rail to undo it. Idempotent.
   watchBreakpoint(applyCardLayout);
 
-  // Backfilling a newly added card used to happen here, on the in-memory copy only —
+  // Backfilling a newly added card used to happen here, on the in-memory copy only,
   // so the settings panel, which re-reads from storage, never saw it. It is part of
   // `normaliseCardLayout` now, which both paths go through (ELEG-44).
 
@@ -137,7 +137,7 @@ export function applyCardLayout(): void {
 /** One `card-w-*` class at a time, so a width change cannot leave two spans applied. */
 function applyCardWidth(card: HTMLElement, width: CardWidth): void {
   /*
-   * Remove first, then add — and only remove what the chosen width does NOT want.
+   * Remove first, then add, and only remove what the chosen width does NOT want.
    *
    * All three widths share `col-[span_12]` as their mobile-first base, so a naive
    * "toggle each width on or off in turn" adds that class for the selected width and
@@ -171,7 +171,7 @@ export function openSettings(): void {
  * Show one section of the About page.
  *
  * Debug used to be a main tab of its own. It is a sub-tab here because it belongs with
- * Help — both answer "what is this thing doing?" — but it must not be *stacked under*
+ * Help (both answer "what is this thing doing?") but it must not be *stacked under*
  * Help, whose API reference runs to several screens.
  *
  * A thin wrapper over the shared `switchSubtab` so `switchToTab('debug')` still has
@@ -186,7 +186,7 @@ export function switchHelpSubtab(sub: HelpSubtab): void {
 /** Which main tab is showing. The focus rail belongs to the dashboard alone. */
 let activeTab: 'dashboard' | 'settings' | 'tools' | 'help' | 'debug' = 'dashboard';
 
-/** The tab on screen — which, at startup, is whatever a deep link asked for. */
+/** The tab on screen, which, at startup, is whatever a deep link asked for. */
 export function getActiveTab(): typeof activeTab {
   return activeTab;
 }
@@ -202,14 +202,14 @@ export function switchToTab(tab: 'dashboard' | 'settings' | 'tools' | 'help' | '
   if (!dashboard || !settingsPage) return;
 
   /*
-   * `debug` is no longer a tab of its own — it is a section of the About page. It stays
+   * `debug` is no longer a tab of its own: it is a section of the About page. It stays
    * in the union so `switchToTab('debug')` keeps working and lands where a caller
    * expects: the About page, opened on Debug.
    */
   const mainTab = tab === 'debug' ? 'help' : tab;
   activeTab = tab;
   // Keep the address bar showing where you are, so the view can be linked and survives
-  // a reload. Replaced rather than pushed — see ui/deep-link.ts.
+  // a reload. Replaced rather than pushed: see ui/deep-link.ts.
   updateDeepLink(mainTab, savedSubtab(mainTab === 'help' ? 'help' : mainTab));
   // Hide the rail immediately on the way out; `applyCardLayout` brings it back.
   renderFocusRail(currentLayout, tab === 'dashboard');
@@ -357,7 +357,7 @@ function buildSettingsHTML(content: HTMLElement): void {
     relTime.checked = loadUISettings().relativeTimestamps;
     relTime.addEventListener('change', () => {
       saveUISettings({ relativeTimestamps: relTime.checked });
-      // Apply immediately rather than waiting up to a second for the next tick — and
+      // Apply immediately rather than waiting up to a second for the next tick, and
       // note this rewrites the existing spans in place, so the log is not re-rendered
       // and the scroll position and expanded rows survive the switch.
       refreshTimestamps();
@@ -403,7 +403,7 @@ function buildSettingsHTML(content: HTMLElement): void {
   content.querySelector('#settings-reset-layout')?.addEventListener('click', () => {
     // Confirmed because it discards arranging work and cannot be undone. Scoped to the
     // layout key alone: chart resolution, log filters and camera selection live in a
-    // separate store (`ui-settings.ts`) and are untouched — which is the whole reason
+    // separate store (`ui-settings.ts`) and are untouched, which is the whole reason
     // to have this rather than telling people to clear site data (ELEG-44).
     if (
       !confirm(

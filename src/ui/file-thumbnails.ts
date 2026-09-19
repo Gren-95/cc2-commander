@@ -8,7 +8,7 @@
  *
  * Split out of `files.ts` with the upload and the popover, which between them had it at
  * 781 lines doing four unrelated jobs. The list rendering asks this module two
- * questions — is this file cached, and do we have its thumbnail — through accessors,
+ * questions (is this file cached, and do we have its thumbnail) through accessors,
  * rather than reaching into two Maps it does not own.
  */
 
@@ -22,7 +22,7 @@ import type { PrinterState } from '../printer-state';
  *
  * The extracted code called `renderFiles(_lastState, client)` directly, which would put
  * an import back into `files.ts` and close exactly the cycle this split exists to
- * remove. So the renderer registers instead — the same inversion `theme.ts` uses to
+ * remove. So the renderer registers instead: the same inversion `theme.ts` uses to
  * avoid importing the gcode preview.
  */
 let boundState: PrinterState | null = null;
@@ -115,7 +115,7 @@ function fetchNextThumbnail(): void {
   _thumbClient.sendCommand(1045, { storage_media: currentFileSource(), file_name: next });
 }
 
-/** Called when a thumbnail response arrives — update inline preview if applicable */
+/** Called when a thumbnail response arrives: update inline preview if applicable */
 export function handleInlineThumbnail(base64: string | null): void {
   const fullPath = thumbnailFetching;
   thumbnailFetching = null;
@@ -129,7 +129,7 @@ export function handleInlineThumbnail(base64: string | null): void {
       if (fp !== fullPath) return;
       const iconEl = el.querySelector('.file-icon');
       // The guard skips a slot that already holds a *real* thumbnail. The placeholder
-      // is not one, and must be replaced when the genuine preview arrives — treating it
+      // is not one, and must be replaced when the genuine preview arrives: treating it
       // as "already done" would leave every gcode file showing the placeholder forever
       // (ELEG-42).
       const existing = iconEl?.querySelector('img');

@@ -73,7 +73,7 @@ function renderCapacityBar(state: PrinterState): string {
   if (!cap || cap.total === 0) return '';
   const usedPct = Math.min(100, Math.round((cap.used / cap.total) * 100));
   // ONE background utility, chosen here. It used to be `bg-accent` plus a `capacity-warn`
-  // / `capacity-high` class that appears at this call site and in no stylesheet — so a
+  // / `capacity-high` class that appears at this call site and in no stylesheet, so a
   // disk at 95% drew the same accent blue as one at 10%, and had the classes existed,
   // two background utilities on one element have no defined winner anyway.
   const fill = usedPct > 90 ? 'bg-bad' : usedPct > 75 ? 'bg-warn' : 'bg-accent';
@@ -85,7 +85,7 @@ function renderCapacityBar(state: PrinterState): string {
 
 /**
  * Sort and filter controls (ELEG-49). Created lazily on the first render because the
- * card may be hidden at startup, and once only — the bar lives in `#file-list-controls`,
+ * card may be hidden at startup, and once only: the bar lives in `#file-list-controls`,
  * a static sibling of `#file-list`, so nothing here is touched when the list repaints.
  */
 let fileControls: ListControls<FileEntry> | null = null;
@@ -188,7 +188,7 @@ export function renderFiles(state: PrinterState, client: CommandSender): void {
     // second row holding the thumbnail, so a file was visually separated from its own
     // preview and every row was twice as tall as it needed to be.
     // Two verbs, not three. Download went on the row a commit ago because the popover
-    // that held it opens on hover and is therefore unreachable on a touchscreen — but
+    // that held it opens on hover and is therefore unreachable on a touchscreen, but
     // downloading a gcode off the printer only means anything on a machine with a mouse
     // and a filesystem to put it on, which is exactly the machine that can hover. Print
     // and Delete are the two that a phone needs, so they are the two the row carries.
@@ -245,7 +245,7 @@ export function bindFileControls(client: CommandSender): void {
       resetThumbnailQueue();
       document.querySelectorAll('.file-source-tab').forEach((t) => toggleState(t, 'active', false));
       toggleState(tab, 'active', true);
-      // The fill does not follow a class change on its own — it is positioned from the
+      // The fill does not follow a class change on its own: it is positioned from the
       // selected button's offsetLeft/offsetWidth, so every picker moves it by hand.
       const track = tab.closest('.segmented') as HTMLElement | null;
       if (track) positionSegmented(track);

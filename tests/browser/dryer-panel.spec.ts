@@ -1,7 +1,7 @@
 /**
  * The dryer panel, now that it is only a view.
  *
- * The keepalive, the expiry check and the off command moved into `server/dryer.ts` — a
+ * The keepalive, the expiry check and the off command moved into `server/dryer.ts`: a
  * heater cannot be owned by a page that a phone can put to sleep. What is left here is
  * rendering, and the rendering still carries the two things that matter to someone
  * standing at the printer: whether the bed is actually at temperature, and that stopping

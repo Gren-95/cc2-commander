@@ -5,12 +5,12 @@
  *
  * 1. **Connect.** Ask the printer for its history and fold in anything new. This is the
  *    backfill, and it is also how a print that finished while the service was down gets
- *    recorded — late, but with the printer's own timestamps, so nothing is lost but the
+ *    recorded: late, but with the printer's own timestamps, so nothing is lost but the
  *    filament weight, if the file has gone since.
  * 2. **A print starts.** Read its file's weight and colours *now*, while the file is
  *    certainly on the printer, and hold them until the print ends. Waiting until the
- *    end would usually work, but a file deleted mid-print — or a list that has moved to
- *    the USB stick in the meantime — would lose the one number this exists to keep.
+ *    end would usually work, but a file deleted mid-print (or a list that has moved to
+ *    the USB stick in the meantime) would lose the one number this exists to keep.
  * 3. **A print ends.** Ask for history again: that is where the finished row appears,
  *    with the printer's own start, end and outcome.
  *

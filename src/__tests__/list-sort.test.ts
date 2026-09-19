@@ -92,7 +92,7 @@ describe('sortItems', () => {
     const asc = sortItems(rows, byName, 'asc', { group });
     expect(asc.map((r) => r.name)).toEqual(['alpha', 'omega', 'beta.gcode', 'zebra.gcode']);
 
-    // Descending flips the names but folders are still the first two — the grouping is
+    // Descending flips the names but folders are still the first two: the grouping is
     // not a sort key and must survive a direction change.
     const desc = sortItems(rows, byName, 'desc', { group });
     expect(desc.map((r) => r.name)).toEqual(['omega', 'alpha', 'zebra.gcode', 'beta.gcode']);

@@ -1,5 +1,5 @@
 /**
- * ELEG-61/ELEG-22 — the list control bar's focus invariant, in a real browser.
+ * ELEG-61/ELEG-22: the list control bar's focus invariant, in a real browser.
  *
  * What is under test is the one invariant `list-controls.ts` is built around and that
  * ELEG-22 called out as most likely to be got wrong and least likely to be caught:
@@ -10,13 +10,13 @@
  *
  * These views assign `container.innerHTML` wholesale on every 1036 response. If the bar
  * were built inside that container, an input would be destroyed and recreated under
- * whoever was typing — losing focus, the caret and any selection.
+ * whoever was typing: losing focus, the caret and any selection.
  *
  * **NOTE ON THE FAILING DIRECTION.** A test that cannot go red is not coverage, so the
  * counterfactual is encoded permanently rather than demonstrated once by hand: the last
  * describe mounts the bar INSIDE the re-rendered container and asserts that focus IS
  * lost. If someone "simplifies" list-controls into the list container, the sibling tests
- * go red — and if someone weakens those assertions so they pass either way, the
+ * go red, and if someone weakens those assertions so they pass either way, the
  * counterfactual goes red instead, because it would be asserting a failure that no
  * longer happens.
  *
@@ -27,7 +27,7 @@
  *
  * Ids are unique per test because `ui-settings.ts` memoises the settings object in a
  * module-level `cached`, so a persisted sort from one test would otherwise leak into the
- * next — cheaper and less brittle than resetting modules.
+ * next: cheaper and less brittle than resetting modules.
  */
 
 import { type Page, expect, test } from '@playwright/test';
@@ -158,7 +158,7 @@ test.describe('the focus invariant', () => {
 
       return {
         sameInput: document.querySelector('.list-filter') === input,
-        // The buttons themselves DID repaint — otherwise this test would pass on a
+        // The buttons themselves DID repaint, otherwise this test would pass on a
         // control bar that simply never updates, which is not the invariant.
         buttonRepainted: sortWrap.querySelector('[data-key="size"]') !== sizeBtn,
         pressed: sortWrap.querySelector('[data-key="size"]')?.getAttribute('aria-pressed'),
@@ -196,7 +196,7 @@ test.describe('the failure mode the sibling layout prevents', () => {
   test('loses focus and the caret when the bar is inside the re-rendered container', async ({ page }) => {
     // Deliberately WRONG: the control bar is mounted inside the container the render
     // pass overwrites. This asserts the bug is real, which is what makes the tests above
-    // meaningful — if this ever passes, `renderList` has stopped destroying its children
+    // meaningful, if this ever passes, `renderList` has stopped destroying its children
     // and the sibling requirement no longer has teeth.
     const result = await page.evaluate(() => {
       const w = window as never as any;
@@ -297,7 +297,7 @@ test.describe('the two empty states', () => {
 
     expect(result.after.filtering).toBe(true);
     expect(result.after.html).toContain('Nothing matches your filter');
-    // The caller's message must NOT leak into the filtered state — they are different
+    // The caller's message must NOT leak into the filtered state: they are different
     // facts and that is the whole point of having two.
     expect(result.after.html).not.toContain('No files on the printer.');
   });

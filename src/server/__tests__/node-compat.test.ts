@@ -12,7 +12,7 @@ import { Readable } from 'node:stream';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { runNodeHandler } from '../node-compat.js';
 
-describe('runNodeHandler — buffered responses', () => {
+describe('runNodeHandler: buffered responses', () => {
   it('sends status, headers and body from writeHead + end', async () => {
     const res = await runNodeHandler((_req, res) => {
       res.writeHead(201, { 'Content-Type': 'application/json', 'X-Custom': 'yes' });
@@ -28,8 +28,8 @@ describe('runNodeHandler — buffered responses', () => {
   it('holds the response back until end(), so the body goes out whole', async () => {
     // This is the buffered branch, and it is worth a test of its own: Bun gives a
     // whole-body Response a Content-Length and sends it unchunked, while a streamed
-    // one goes out chunked. `writableEnded` — the obvious way to detect "no more
-    // writes is coming" — reads true inside Node's final `_write` but false inside
+    // one goes out chunked. `writableEnded` (the obvious way to detect "no more
+    // writes is coming") reads true inside Node's final `_write` but false inside
     // Bun's, so the first version of this shim chunked every JSON route in production
     // while looking perfectly correct under the (Node-hosted) test runner.
     //
@@ -96,7 +96,7 @@ describe('runNodeHandler — buffered responses', () => {
   });
 });
 
-describe('runNodeHandler — streamed responses', () => {
+describe('runNodeHandler: streamed responses', () => {
   it('assembles a body written in several chunks', async () => {
     const res = await runNodeHandler((_req, res) => {
       res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -141,7 +141,7 @@ describe('runNodeHandler — streamed responses', () => {
   });
 });
 
-describe('runNodeHandler — the request side', () => {
+describe('runNodeHandler: the request side', () => {
   it('exposes method, a path-only url, and lower-cased headers', async () => {
     let seen: Pick<IncomingMessage, 'method' | 'url' | 'headers' | 'rawHeaders'> | null = null;
 
@@ -159,7 +159,7 @@ describe('runNodeHandler — the request side', () => {
     );
 
     expect(seen!.method).toBe('POST');
-    // Node hands routers a path, never an absolute URL — every route here slices it.
+    // Node hands routers a path, never an absolute URL: every route here slices it.
     expect(seen!.url).toBe('/api/files?sort=name&dir=up');
     expect(seen!.headers['x-api-key']).toBe('secret');
     // A Node-style body parser reads the flat form.
@@ -201,7 +201,7 @@ describe('runNodeHandler — the request side', () => {
   });
 });
 
-describe('runNodeHandler — client disconnect', () => {
+describe('runNodeHandler: client disconnect', () => {
   it("fires res.on('close') when the request aborts", async () => {
     // The MJPEG client registry removes a viewer on `close`; without this the set
     // grows forever and frames are written into dead sockets.

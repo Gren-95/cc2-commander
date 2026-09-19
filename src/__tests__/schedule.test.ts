@@ -3,7 +3,7 @@
  *
  * This is the other feature in the repo that commands the printer on a timer rather
  * than a click, so the tests here are weighted the same way `dryer.test.ts`'s are:
- * toward the properties that would actually matter if they broke — a schedule that
+ * toward the properties that would actually matter if they broke, a schedule that
  * outlives its own moment, one created in the past, and what "due right now" and
  * "worth keeping in the list" mean.
  */
@@ -38,7 +38,7 @@ describe('normaliseNewSchedule', () => {
     expect(normaliseNewSchedule({ filename: 'a.gcode', dir: '', runAt: now - 1 }, now)).toBeNull();
   });
 
-  it('refuses right now — the whole point of the feature is "later"', () => {
+  it('refuses right now: the whole point of the feature is "later"', () => {
     expect(normaliseNewSchedule({ filename: 'a.gcode', dir: '', runAt: now }, now)).toBeNull();
   });
 
@@ -102,7 +102,7 @@ describe('dueEntries', () => {
     expect(dueEntries([s], now)).toEqual([]);
   });
 
-  it('never reconsiders anything already fired, skipped or cancelled — the whole', () => {
+  it('never reconsiders anything already fired, skipped or cancelled: the whole', () => {
     // point of "fires at most once": being due again is not the same as firing again.
     const base = createSchedule(
       { filename: 'a.gcode', dir: '', runAt: now - 1, options: null },
@@ -358,7 +358,7 @@ describe('spoolMismatch', () => {
 
   const matching = canvas([tray(1), tray(3, { filament_type: 'PETG', filament_color: '#1E40AF' })]);
 
-  it('has nothing to check for a schedule with no mapping — even with no Canvas at all', () => {
+  it('has nothing to check for a schedule with no mapping, even with no Canvas at all', () => {
     expect(spoolMismatch([], null)).toBeNull();
   });
 

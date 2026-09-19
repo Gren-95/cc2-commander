@@ -2,8 +2,8 @@
  * The browser half of single-user auth.
  *
  * The session lives in an `HttpOnly` cookie, so this module never sees a token and has
- * nothing to store. It only ever asks the service two things — "is a password required,
- * and am I past it?" — and shows either the sign-in card or the dashboard.
+ * nothing to store. It only ever asks the service two things ("is a password required,
+ * and am I past it?") and shows either the sign-in card or the dashboard.
  *
  * That is deliberate. A token in `localStorage` is readable by any script that ends up
  * on the page, and this page renders printer-supplied filenames and error strings; a
@@ -20,7 +20,7 @@ export interface AuthState {
   authenticated: boolean;
 }
 
-/** Ask the service where we stand. Never throws — a dead service is "not signed in". */
+/** Ask the service where we stand. Never throws: a dead service is "not signed in". */
 export async function fetchAuthState(): Promise<AuthState> {
   try {
     const res = await fetch('/api/auth/me', { credentials: 'same-origin' });
@@ -85,7 +85,7 @@ export async function logout(): Promise<void> {
   try {
     await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
   } catch {
-    // Nothing useful to do — the reload below puts the user at the sign-in card anyway.
+    // Nothing useful to do, the reload below puts the user at the sign-in card anyway.
   }
 }
 
@@ -93,7 +93,7 @@ export async function logout(): Promise<void> {
  * Everything that is not the sign-in card.
  *
  * On a phone the sign-in screen came up with the full app around it: the tab bar along
- * the bottom, the focus rail down the right — thirteen card buttons — and the header's
+ * the bottom, the focus rail down the right (thirteen card buttons) and the header's
  * layout control. None of it does anything useful before you are signed in, the rail
  * overlapped the card and clipped the password field, and offering navigation on a login
  * screen invites the question of what it navigates to.
@@ -107,7 +107,7 @@ const CHROME_IDS = ['main-tabs-bar', 'header-actions', 'mobile-focus-rail'];
  * Show or hide the app's chrome around the sign-in card.
  *
  * The focus rail is rebuilt by `renderFocusRail` on every layout change, so hiding the
- * element is not enough on its own — `mobile-focus.ts` asks `isSignedOut()` before it
+ * element is not enough on its own: `mobile-focus.ts` asks `isSignedOut()` before it
  * draws one.
  */
 export function setChromeVisible(visible: boolean): void {
@@ -143,7 +143,7 @@ export function renderSignIn(state: AuthState): void {
 }
 
 /**
- * A 401 from any endpoint means the session ended — expired, revoked, or the service
+ * A 401 from any endpoint means the session ended: expired, revoked, or the service
  * restarted (sessions are in memory by design).
  *
  * Reloading rather than swapping the view is the honest move: every card is holding
@@ -163,7 +163,7 @@ export function handleUnauthorized(): void {
  */
 export function installUnauthorizedHandler(): void {
   const original = window.fetch;
-  // `Object.assign` onto the original keeps the statics — `fetch.preconnect` exists and
+  // `Object.assign` onto the original keeps the statics, `fetch.preconnect` exists and
   // is part of the type, so a bare arrow function is not a `typeof fetch`.
   window.fetch = Object.assign(async (...args: Parameters<typeof fetch>) => {
     const res = await original(...args);

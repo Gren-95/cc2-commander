@@ -2,8 +2,8 @@
  * The sliding fill behind a segmented picker.
  *
  * Every failure here is silent: the fill sits under the wrong label, or off the end of
- * the track, and nothing throws. It is also pure layout — `offsetLeft` and `offsetWidth`
- * against real, laid-out, differently-sized labels — so there is nothing to assert
+ * the track, and nothing throws. It is also pure layout (`offsetLeft` and `offsetWidth`
+ * against real, laid-out, differently-sized labels) so there is nothing to assert
  * without a browser. jsdom reports 0 for both and would pass whatever was written.
  *
  * The track is built here rather than taken from `index.html` so the widths are known:
@@ -22,8 +22,8 @@ const BTN = 'segmented-btn';
  *
  * The harness serves the modules against a blank document with no stylesheet, so the
  * Tailwind classes carry no geometry there and every measurement would be zero. Stating
- * the handful of properties the maths depends on — the track establishing a containing
- * block, the fill being absolute, the labels having width — keeps this a test of
+ * the handful of properties the maths depends on (the track establishing a containing
+ * block, the fill being absolute, the labels having width) keeps this a test of
  * `positionSegmented` rather than of Tailwind's output. If the tokens ever stop
  * supplying one of these, the app breaks and this spec does not; that is what the
  * in-browser alignment check on the real page is for.

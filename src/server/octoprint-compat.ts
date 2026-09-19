@@ -313,7 +313,7 @@ export function createOctoPrintRouter(
               // sends. This said 'udisk', which is neither. Probed on firmware 02.01.00.00,
               // the printer answers 'udisk' with error_code 0 and no file_list: it succeeds
               // and does nothing, which is why this never looked broken. See mqtt-bridge.ts.
-              // OctoPrint start requires a file already selected — we support filename
+              // OctoPrint start requires a file already selected: we support filename
               if (cmd.filename) {
                 bridge.sendCommand(1020, {
                   filename: cmd.filename,
@@ -448,7 +448,7 @@ export function createOctoPrintRouter(
       return true;
     }
 
-    // --- GET / (root — endpoint index) ---
+    // --- GET / (root: endpoint index) ---
     if ((path === '' || path === '/' || path === '/api') && method === 'GET') {
       json(res, {
         elegoo_cc2_compat: true,

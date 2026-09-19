@@ -2,8 +2,8 @@
  * `?tab=` and `?subtab=` parsing.
  *
  * Pure, so it is tested without a browser. The cases that matter are the bad ones: a
- * link is the one input that arrives from outside the app — pasted, bookmarked, or left
- * over from an older build — so every field has to survive being wrong.
+ * link is the one input that arrives from outside the app (pasted, bookmarked, or left
+ * over from an older build) so every field has to survive being wrong.
  */
 
 import { describe, expect, it } from 'bun:test';

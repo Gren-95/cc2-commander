@@ -11,10 +11,10 @@ import {
 /**
  * DATA_DIR is honoured by the gcode cache and the debug captures (ELEG-70).
  *
- * Both used to be built from the working directory — `join(process.cwd(), 'data', …)`
+ * Both used to be built from the working directory: `join(process.cwd(), 'data', …)`
  * and the relative `join('data', 'logs', …)`. That coincides with `DATA_DIR` at its
  * default and only at its default, so the bug was invisible on metal and in the
- * container alike, and appeared only for someone who set `DATA_DIR` elsewhere — which
+ * container alike, and appeared only for someone who set `DATA_DIR` elsewhere, which
  * the README documents as supported.
  *
  * The assertions below are therefore written against a directory that is deliberately
@@ -51,7 +51,7 @@ describe('timelapseCacheDir', () => {
   });
 
   it('is a separate directory from the gcode cache', () => {
-    // The two caches have different eviction policies (rest-api.ts) — sharing a
+    // The two caches have different eviction policies (rest-api.ts): sharing a
     // directory would make the gcode cache's eviction sweep up archived timelapses.
     initDataPaths('/srv/elegoo-data');
     expect(timelapseCacheDir()).not.toBe(gcodeCacheDir());
@@ -65,7 +65,7 @@ describe('captureLogDir', () => {
   });
 
   it('lands in the same place initLogger writes service.log', () => {
-    // Both are diagnostics a user is told to go and fetch, so they must agree — the
+    // Both are diagnostics a user is told to go and fetch, so they must agree: the
     // capture endpoint writing somewhere else is how a capture becomes unretrievable.
     initDataPaths('/srv/elegoo-data');
     expect(captureLogDir()).toBe('/srv/elegoo-data/logs');

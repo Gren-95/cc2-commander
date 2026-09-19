@@ -9,14 +9,14 @@
  * an argon2id hash by hand, and a security feature that takes a detour through "how do I
  * even produce this value" is a security feature that stays switched off.
  *
- * The password is read without echo and never written anywhere — not to a file, not to
+ * The password is read without echo and never written anywhere, not to a file, not to
  * the shell history, not to the terminal. Only the hash is printed.
  */
 
 import { randomBytes } from 'node:crypto';
 import { hashPassword } from '../src/server/auth.js';
 
-/** 256 bits, base64url — safe in a header, a query string and a YAML file alike. */
+/** 256 bits, base64url: safe in a header, a query string and a YAML file alike. */
 function mintApiKey(): string {
   return randomBytes(32).toString('base64url');
 }
@@ -78,7 +78,7 @@ console.log(`AUTH_SECRET=${mintApiKey()}`);
 const password = await readSecret('Password for the dashboard: ');
 if (password.length < 8) {
   // The floor from the org guideline. Enforced here rather than at login, because a weak
-  // password chosen once is a weak password forever — there is no rotation prompt.
+  // password chosen once is a weak password forever: there is no rotation prompt.
   console.error('\nRefusing: use at least 8 characters (a passphrase is easier and stronger).');
   process.exit(1);
 }
@@ -90,13 +90,13 @@ if (password !== again) {
 
 const hash = await hashPassword(password);
 
-console.log('\nAdd these to .env (which is gitignored — never commit them):\n');
+console.log('\nAdd these to .env (which is gitignored: never commit them):\n');
 console.log(`AUTH_PASSWORD_HASH=${hash.replaceAll('$', String.raw`\$`)}`);
 console.log(`AUTH_API_KEY=${mintApiKey()}`);
 console.log(`AUTH_SECRET=${mintApiKey()}`);
 console.log(`
 Each '$' in the hash is BACKSLASH-ESCAPED, and it has to be. Bun loads .env itself and
-expands $VAR inside single quotes and double quotes alike — verified: A=scrypt$65536$8$1$x,
+expands $VAR inside single quotes and double quotes alike: verified: A=scrypt$65536$8$1$x,
 '…' and "…" all arrive as "scrypt". Only \\$ survives. scrypt's format is
 scrypt$N$r$p$salt$hash, so an unescaped hash always loses everything after "scrypt" and
 every login answers 401 with nothing to say why.

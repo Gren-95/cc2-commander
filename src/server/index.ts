@@ -1,5 +1,5 @@
 /**
- * Elegoo CC2 Service — single MQTT connection shared by all consumers.
+ * Elegoo CC2 Service: single MQTT connection shared by all consumers.
  *
  * Architecture:
  *   Printer MQTT ←→ MqttBridge (singleton) ←→ StateStore
@@ -12,7 +12,7 @@
  * paths, fastest first:
  *
  *   dist/**   Bun's static route table, built once at startup (spa.ts). Served
- *             without entering JavaScript — this is the SPA's whole asset burst.
+ *             without entering JavaScript: this is the SPA's whole asset burst.
  *   /ws       Bun's native WebSocket server (ws-transport.ts). No `ws` package.
  *   the rest  the existing Node-style routers, through the adapter in node-compat.ts.
  */
@@ -93,7 +93,7 @@ if (config.auth.enabled && config.auth.plainPassword) {
 }
 
 // A hash that cannot parse means nobody can ever log in, and the only symptom is a 401
-// with no explanation — see `isWellFormedHash` for the `.env` expansion that causes it.
+// with no explanation: see `isWellFormedHash` for the `.env` expansion that causes it.
 if (
   config.auth.enabled &&
   config.auth.passwordHash &&
@@ -179,7 +179,7 @@ const dryer = new DryerService(store, bridge);
  */
 const ledger = new LedgerService(store, bridge);
 
-/* Prices, maintenance tasks and spools — the workshop tools' own state. */
+/* Prices, maintenance tasks and spools: the workshop tools' own state. */
 const workshop = new WorkshopService(ledger);
 
 /*
@@ -195,7 +195,7 @@ const scheduler = new ScheduleService(store, bridge);
  * --- Home Assistant (optional) ---
  *
  * Ambient temperature and humidity, which the printer cannot measure. Reading is
- * read-only, and every failure degrades to "unreachable" — a thermometer on someone
+ * read-only, and every failure degrades to "unreachable": a thermometer on someone
  * else's server is not a reason for this dashboard to stop working. Ringing the
  * configured buzzer entity on a critical error or a failed print is the one write; see
  * `home-assistant.ts` for why it stays that narrow.
@@ -229,14 +229,14 @@ const moonrakerHandler = createMoonrakerRouter(store, bridge, config);
 
 /**
  * The non-static, non-WebSocket half of the service, unchanged from when this was an
- * `http.createServer` callback — one `res` threaded through the whole chain, so the
+ * `http.createServer` callback: one `res` threaded through the whole chain, so the
  * CORS headers each branch applies still survive a fall-through to the next router.
  */
 /**
  * Single-user auth. Built before the router because every branch below consults it.
  *
  * `AUTH_PASSWORD` is hashed here rather than in `loadConfig` because hashing is async
- * and config loading is not — argon2 is deliberately slow, which is the point of it.
+ * and config loading is not: argon2 is deliberately slow, which is the point of it.
  */
 const sessions = new SessionStore(config.auth, config.auth.sessionSecret);
 if (config.auth.enabled && !config.auth.passwordHash) {
@@ -394,7 +394,7 @@ async function start(): Promise<void> {
   bridge.connect();
 
   // Start HTTP + WebSocket server. Bun.serve binds as soon as it is constructed, so
-  // it is created here rather than at module scope — nothing is answered until the
+  // it is created here rather than at module scope: nothing is answered until the
   // persisted state is back and the report collector is initialised.
   server = Bun.serve({
     port: config.servicePort,
@@ -459,7 +459,7 @@ async function start(): Promise<void> {
 // Graceful shutdown
 function shutdown(): void {
   log.info('Shutting down...');
-  // Only the interval. The session stays on disk and the bed stays at temperature —
+  // Only the interval. The session stays on disk and the bed stays at temperature:
   // deliberately: a restart resumes it, and turning a heater off because a process is
   // cycling would end a four-hour job on a `systemctl restart`.
   dryer.stop();

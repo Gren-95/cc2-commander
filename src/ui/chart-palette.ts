@@ -3,7 +3,7 @@
  *
  * `layer-chart.ts`, `charts.ts` and the gcode preview draw to a `<canvas>`, where CSS
  * does not reach. They used to hardcode `#a0a0b8`, `rgba(160,160,184,0.12)`, `#ab47bc`
- * and friends — which is exactly why they would have stayed dark-on-dark while the rest
+ * and friends, which is exactly why they would have stayed dark-on-dark while the rest
  * of the UI flipped to light, and a half-themed dashboard is worse than a dark one.
  *
  * So the values live in `:root` / `:root[data-theme='light']` as custom properties and
@@ -110,7 +110,7 @@ export function resolvePalette(readVar: (name: string) => string | undefined): C
   for (const key of Object.keys(VARS) as (keyof ChartPalette)[]) {
     const value = readVar(VARS[key])?.trim();
     // An empty string is what getPropertyValue returns for an undefined property, so it
-    // has to fall back rather than be assigned — `fillStyle = ''` silently keeps the
+    // has to fall back rather than be assigned: `fillStyle = ''` silently keeps the
     // previous colour, which would be a genuinely confusing bug to chase.
     out[key] = value ? value : FALLBACK_PALETTE[key];
   }
@@ -121,7 +121,7 @@ export function resolvePalette(readVar: (name: string) => string | undefined): C
 export function chartPalette(): ChartPalette {
   if (cached) return cached;
   if (typeof document === 'undefined' || typeof getComputedStyle !== 'function') {
-    // No DOM — under `bun test`, or the render-test stub. Do not cache: a real document may
+    // No DOM, under `bun test`, or the render-test stub. Do not cache: a real document may
     // exist by the next call in a browser.
     return FALLBACK_PALETTE;
   }

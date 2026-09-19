@@ -2,7 +2,7 @@
  * The mouse wheel over a chart.
  *
  * Two things went wrong together. Every chart swallowed the wheel, so scrolling the page
- * with the pointer over one zoomed it instead — up to 10×, or down to 0.1× — and stopped
+ * with the pointer over one zoomed it instead (up to 10×, or down to 0.1×) and stopped
  * the page moving. And the label shown while zoomed painted its own markup as text. Both are
  * read here from what the page really does: whether the browser was allowed to scroll, and
  * what text the chart actually paints onto its canvas.
@@ -87,7 +87,7 @@ test.describe('Ctrl + wheel, and ⌘ + wheel', () => {
     expect((await wheel(page, { deltaY: -120, metaKey: true })).pageMayScroll).toBe(false);
   });
 
-  test('zooms, and says so in plain text — never in markup', async ({ page }) => {
+  test('zooms, and says so in plain text: never in markup', async ({ page }) => {
     for (let i = 0; i < 3; i++) await wheel(page, { deltaY: -120, ctrlKey: true });
     const m = await mark(page);
     await settle(page);

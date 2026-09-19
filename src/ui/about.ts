@@ -1,10 +1,10 @@
 /**
- * "About this project" — what this is, which build is running, and what it is talking
+ * "About this project": what this is, which build is running, and what it is talking
  * to.
  *
  * The build stamp is the reason this panel exists. Production runs as a container,
  * which is not a git checkout (see `docs/deployment.md`), so the stamp baked into
- * the image is the only answer to "which commit am I looking at?" — and that is the
+ * the image is the only answer to "which commit am I looking at?", and that is the
  * first question anyone asks when a stranger reports a bug.
  *
  * Which is also why the **Copy diagnostics** button is here rather than the version
@@ -13,7 +13,7 @@
  *
  * An unstamped deploy says so in plain words rather than inventing a version. That is
  * the ELEG-48 rule: a version you cannot trust is worse than none, and all-null is a
- * real state — a dev run from a checkout, or a deploy whose installer never re-ran.
+ * real state, a dev run from a checkout, or a deploy whose installer never re-ran.
  */
 
 import type { BuildStampish } from '../types';
@@ -63,7 +63,7 @@ function formatUptime(seconds: number | undefined): string | null {
 interface Fact {
   label: string;
   value: string;
-  /** Long form, on hover — the full sha behind a short one, say. */
+  /** Long form, on hover, the full sha behind a short one, say. */
   title?: string;
   /** Rendered in the muted colour: a real but unremarkable absence. */
   muted?: boolean;
@@ -223,7 +223,7 @@ export function renderAbout(): void {
       toast('Diagnostics copied', 'success');
     } catch {
       // Clipboard access is refused on an insecure origin, which is exactly how this
-      // dashboard is usually reached — over plain HTTP on a LAN. Falling back to a
+      // dashboard is usually reached: over plain HTTP on a LAN. Falling back to a
       // prompt keeps the text reachable rather than failing silently.
       window.prompt('Copy the text below', text);
     }

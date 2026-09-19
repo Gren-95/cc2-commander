@@ -89,7 +89,7 @@ async function buildCss(): Promise<string> {
 
   // Tailwind's CLI resolves `@import` but does NOT rewrite `url()` inside what it
   // imported, and copies nothing. `bootstrap-icons.css` refers to
-  // `url(./fonts/bootstrap-icons.woff2?<version>)`, relative to the emitted stylesheet —
+  // `url(./fonts/bootstrap-icons.woff2?<version>)`, relative to the emitted stylesheet,
   // so the fonts have to land at `assets/fonts/` or every icon renders as a blank box.
   // Vite did this rewriting invisibly, which is exactly why it is easy to lose.
   await cp(join(ROOT, 'node_modules/bootstrap-icons/font/fonts'), join(ASSETS, 'fonts'), {
@@ -107,7 +107,7 @@ async function buildCss(): Promise<string> {
 /**
  * Point index.html at the built files.
  *
- * The dev document references `/src/main.ts` and `/src/styles/main.css` directly — a
+ * The dev document references `/src/main.ts` and `/src/styles/main.css` directly: a
  * browser cannot run either, which is what a bundler is for. Everything else in the
  * document, including the `public/` URLs, is already correct for production and is left
  * exactly as written.
@@ -118,7 +118,7 @@ async function buildHtml(js: string, css: string): Promise<void> {
   const before = html;
   html = html.replace('<link rel="stylesheet" href="/src/styles/main.css">', `<link rel="stylesheet" href="/assets/${css}">`);
   html = html.replace('<script type="module" src="/src/main.ts"></script>', `<script type="module" src="/assets/${js}"></script>`);
-  if (html === before) throw new Error('index.html entry tags not found — did they move?');
+  if (html === before) throw new Error('index.html entry tags not found: did they move?');
   if (html.includes('/src/')) throw new Error('index.html still references /src/ after rewrite');
 
   await writeFile(join(DIST, 'index.html'), html);
@@ -128,7 +128,7 @@ const t0 = performance.now();
 // Empty dist/, rather than remove and recreate it.
 //
 // `rm(DIST)` fails with EBUSY when dist/ is a mount point, which it is whenever the
-// build runs in a container with a volume mounted there — you cannot unlink a mounted
+// build runs in a container with a volume mounted there: you cannot unlink a mounted
 // directory. Clearing the contents leaves the mount alone and is otherwise identical:
 // what matters is that no file from a previous build survives into this one.
 await mkdir(DIST, { recursive: true });

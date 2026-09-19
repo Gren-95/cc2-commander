@@ -2,8 +2,8 @@ import { describe, expect, it } from 'bun:test';
 import { ensureShadable } from '../ui/color-shading';
 
 /**
- * The gcode-preview library's tube shader is purely multiplicative —
- * `finalColor = uColor * (diff + ambient) * brightness` — so a black or near-black
+ * The gcode-preview library's tube shader is purely multiplicative
+ * (`finalColor = uColor * (diff + ambient) * brightness`) so a black or near-black
  * filament rendered as a flat, shapeless silhouette: there is nothing for the light to
  * multiply. `ensureShadable` lifts the color's minimum brightness before it reaches the
  * renderer, so the shading actually shows.

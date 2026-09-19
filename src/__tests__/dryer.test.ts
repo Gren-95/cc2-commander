@@ -75,7 +75,7 @@ describe('clamping', () => {
   it('fails COLD on nonsense, rather than passing NaN to a heater', () => {
     // Both of these fall to the floor, not the ceiling. A non-finite input means the
     // caller has lost track of what it is asking for, and the safe response to that is
-    // the coldest useful setting — never the hottest.
+    // the coldest useful setting: never the hottest.
     expect(clampTemp(Number.NaN)).toBe(MIN_USEFUL_C);
     expect(clampTemp(Number.POSITIVE_INFINITY)).toBe(MIN_USEFUL_C);
     expect(clampMinutes(Number.NaN)).toBe(60);

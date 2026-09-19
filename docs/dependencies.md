@@ -1,20 +1,20 @@
 # Dependencies
 
 Why the `overrides` block in `package.json` looks the way it does, and what may and may
-not be changed in it. Not auto-loaded — open it when touching dependencies or when
+not be changed in it. Not auto-loaded: open it when touching dependencies or when
 `bun audit` reports something.
 
 ## Where this used to live
 
 In `pnpm-workspace.yaml`, with the reasons as comments beside each line. Bun reads
-`overrides` from `package.json`, which is JSON and cannot carry a comment — so the
+`overrides` from `package.json`, which is JSON and cannot carry a comment, so the
 reasons moved here. **A floor without a recorded reason is a floor nobody can ever
 date or delete**, which is the failure this file exists to prevent.
 
 ## The floors
 
 Every entry in `overrides` is a **floor** raising a transitive dependency to its patched
-version (ELEG-63) — not a compatibility shim, and not a pin.
+version (ELEG-63), not a compatibility shim, and not a pin.
 
 A floor rather than a lockfile bump on purpose: `bun update` moves the lockfile and the
 next resolution can quietly move it back, whereas an override is re-asserted on every
@@ -31,7 +31,7 @@ a floor nobody can date. Check with `bun why <pkg>`.
 ### One that was deleted
 
 `esbuild: '>=0.28.1'` is gone. It was there because `tsx` depended on esbuild and `tsx`
-was a *runtime* dependency — production ran the TypeScript under `node --import tsx`, so
+was a *runtime* dependency: production ran the TypeScript under `node --import tsx`, so
 it was not a build-only advisory. Bun executes the TypeScript itself, `tsx` was removed
 with it, and Vite 8 bundles with Rolldown rather than esbuild. `bun why esbuild` now
 reports the package is not in the lockfile at all.
@@ -41,7 +41,7 @@ reports the package is not in the lockfile at all.
 `trustedDependencies` is Bun's equivalent of pnpm's `onlyBuiltDependencies`: the
 allowlist of packages permitted to run install scripts. It holds the native builds
 (`sharp`, `esbuild`) plus `@biomejs/biome` and `simple-git-hooks`. Adding a name here lets that package execute arbitrary code at
-install time — do not add one without a reason.
+install time: do not add one without a reason.
 
 ## Advisories are reported, never gated
 
@@ -52,14 +52,14 @@ published something destroys "a red check on your branch is yours".
 
 ## What was removed, and why it is worth knowing
 
-- **`dotenv`** — `config.ts` opened with `import 'dotenv/config'`, which had been a no-op
+- **`dotenv`**: `config.ts` opened with `import 'dotenv/config'`, which had been a no-op
   since the Bun conversion: Bun loads `.env`, `.env.local` and `.env.<NODE_ENV>` before
-  any user code runs. Both deployment paths were already covered without it — a dev
+  any user code runs. Both deployment paths were already covered without it: a dev
   checkout by Bun itself, a container by the `environment:` block compose passes in.
   The shape to recognise: **a dependency that a
   runtime change made redundant stays in `package.json` looking load-bearing**, because
   nothing fails when it is present.
-- **`concurrently`** — ran vite and the service side by side. `bun run dev` is one
+- **`concurrently`**: ran vite and the service side by side. `bun run dev` is one
   process now, so it went with Vite.
 
 ## The 513 MB nobody chose, and why making it optional was not enough
@@ -69,15 +69,15 @@ every platform and accelerator it supports. Measured on this checkout before rem
 
 | | |
 | --- | --- |
-| `libonnxruntime_providers_cuda.so` | **302 MB** — needs an NVIDIA GPU and CUDA |
-| `bin/napi-v6/win32` + `darwin` | **159 MB** — platforms this never runs on |
-| `linux/x64/libonnxruntime.so.1` | 34 MB — the part that actually executes |
+| `libonnxruntime_providers_cuda.so` | **302 MB** (needs an NVIDIA GPU and CUDA |
+| `bin/napi-v6/win32` + `darwin` | **159 MB**) platforms this never runs on |
+| `linux/x64/libonnxruntime.so.1` | 34 MB: the part that actually executes |
 
 ~90% of it could not run here: the host is Intel Iris Xe with no `nvidia-smi` and no
 `libcuda`. It was **also in every container image**, because the Dockerfile's
 `bun install --frozen-lockfile --production` installs the same tree.
 
-The first fix was to make it opt-in — a dynamic import through a variable specifier, a
+The first fix was to make it opt-in: a dynamic import through a variable specifier, a
 `bun run ai:install` script, and a startup probe that warned when it was missing. That
 took a clean install from 1.2 GB to 404 MB and was the right call at the time.
 
@@ -85,13 +85,13 @@ took a clean install from 1.2 GB to 404 MB and was the right call at the time.
 strings, the label-config file and its `/api/config/ai-labels` endpoint, and the
 classification chart. The lesson worth keeping is the one the opt-in step postponed:
 *making an expensive thing optional is not the same as deciding whether it earns its
-keep.* Once someone asked what it actually bought — zero-shot classification of a dim
+keep.* Once someone asked what it actually bought (zero-shot classification of a dim
 enclosure webcam against hand-tuned sentences, on a printer that does its own failure
-detection — the answer was "not much", and the cheaper of the two remaining paths
+detection) the answer was "not much", and the cheaper of the two remaining paths
 (`sharp` frame-diffing, which catches the stall a still image cannot show) was the one
 worth keeping.
 
-`sharp` stays regardless — `rest-api.ts` imports it directly for the camera snapshot
+`sharp` stays regardless: `rest-api.ts` imports it directly for the camera snapshot
 path, so it is a real dependency rather than something transformers dragged in.
 
 ## The exact pins, and why `three` is eight versions behind

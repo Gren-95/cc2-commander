@@ -1,5 +1,5 @@
 /**
- * The desktop edit canvas — the dashboard, arranged in place.
+ * The desktop edit canvas: the dashboard, arranged in place.
  *
  * Three interactions, and what they have in common is that the grid answers *during*
  * the gesture rather than after it:
@@ -11,7 +11,7 @@
  *   add      a panel on the left holds a live, scaled-down clone of every hidden card.
  *            Drag one onto the grid to place it, or click to append it.
  *
- * The first version did none of that — it read the drop target on `drop` and applied
+ * The first version did none of that: it read the drop target on `drop` and applied
  * the width on `pointerup`. Both worked and both felt broken, because a direct
  * manipulation interface that does not move while you manipulate it reads as a dead one.
  *
@@ -19,7 +19,7 @@
  *
  * The chrome is a strip *above* each card plus an outline around it, never a veil over
  * it. An earlier version covered each card with a translucent accent panel, which turned
- * the grid into a field of identical rectangles — you could not tell which card you were
+ * the grid into a field of identical rectangles: you could not tell which card you were
  * dragging, which is the one thing you need to know.
  *
  * The strip is absolutely positioned above the card, and the grid's row gap is widened
@@ -30,12 +30,12 @@
  *
  * ## Previews are clones, and clones must not carry ids
  *
- * A preview is the real card, `cloneNode(true)`, scaled down — honest for free, with no
+ * A preview is the real card, `cloneNode(true)`, scaled down: honest for free, with no
  * thumbnail to regenerate when a card changes. But a clone brings every `id` in the
  * subtree with it, and a duplicate id makes `document.getElementById` return whichever
  * comes first in the document: the panel's dead copy, not the live card. Every id is
  * stripped. `<canvas>` pixels do not survive cloning either, so chart-heavy cards
- * preview as empty frames — a known and accepted limit.
+ * preview as empty frames: a known and accepted limit.
  */
 
 import {
@@ -181,7 +181,7 @@ export function setCanvasEditing(on: boolean, layout: CardLayout): void {
 
   panel?.classList.toggle('hidden', !on);
   grid.style.rowGap = on ? EDIT_ROW_GAP : '';
-  // The first row has no gap above it, only the grid's own padding — without this its
+  // The first row has no gap above it, only the grid's own padding, without this its
   // strips render behind the edit bar.
   grid.style.paddingTop = on ? EDIT_ROW_GAP : '';
   grid.style.paddingLeft = on && panel ? `${panel.offsetWidth + 20}px` : '';
@@ -232,8 +232,8 @@ function commitOrderFromDom(grid: HTMLElement): void {
     .map((c) => (c as HTMLElement).id)
     .filter((id): id is string => Boolean(id));
   updateCardLayout((l) => {
-    // Ids the DOM does not carry — one from a newer build, which `normaliseCardLayout`
-    // deliberately keeps — hold their relative order at the end rather than vanishing.
+    // Ids the DOM does not carry (one from a newer build, which `normaliseCardLayout`
+    // deliberately keeps) hold their relative order at the end rather than vanishing.
     const seen = new Set(order);
     l.order = [...order, ...l.order.filter((id) => !seen.has(id))];
   });
@@ -342,7 +342,7 @@ function bindPanel(grid: HTMLElement): void {
     refresh();
   });
 
-  // Dragging a card onto the panel takes it off the dashboard — the inverse of dragging
+  // Dragging a card onto the panel takes it off the dashboard: the inverse of dragging
   // one out, and the gesture people try first once they have seen the panel.
   panel.addEventListener('dragover', (e) => {
     if (!dragging) return;
@@ -369,7 +369,7 @@ function bindPanel(grid: HTMLElement): void {
  * Drag the corner to resize.
  *
  * Pointer events rather than HTML5 drag: a drag operation cannot report intermediate
- * positions usefully, and the width has to snap live — the point is to watch the card
+ * positions usefully, and the width has to snap live, the point is to watch the card
  * become the size you are choosing, not to read a label describing it.
  */
 function bindResize(grid: HTMLElement): void {
@@ -383,7 +383,7 @@ function bindResize(grid: HTMLElement): void {
     if (!card) return;
     e.preventDefault();
     grip.setPointerCapture(e.pointerId);
-    // One column including its share of the gap — measured rather than assumed, because
+    // One column including its share of the gap: measured rather than assumed, because
     // the column count changes with the breakpoint, and the grid carries a left inset
     // for the panel while editing.
     const style = getComputedStyle(grid);

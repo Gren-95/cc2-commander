@@ -34,13 +34,13 @@ docker run -d \
   ghcr.io/gren-95/cc2-commander:latest
 ```
 
-Everything then appears under `./elegoo-data` — `reports/`, `gcode-cache/`, `logs/`,
+Everything then appears under `./elegoo-data`: `reports/`, `gcode-cache/`, `logs/`,
 `state.json`, `moonraker-db.json`.
 
 > **Mount the directory, not the individual files.** A bind mount whose source does not
 > exist yet is created by Docker as a **directory**, so `-v ./elegoo-data/state.json:
 > /app/data/state.json` gives the service a directory where it expects a file. It does
-> not crash — the container stays `Up` and the UI works — it just logs
+> not crash (the container stays `Up` and the UI works) it just logs
 > `EISDIR: illegal operation on a directory` and silently never persists anything.
 
 ### Docker Compose
@@ -86,7 +86,7 @@ services:
       # One host path for everything, so the data is easy to get at. A named volume
       # (`elegoo-data:/app/data`, declared under a top-level `volumes:`) works too.
       #
-      # Mount the DIRECTORY, never the individual files inside it — see the warning
+      # Mount the DIRECTORY, never the individual files inside it: see the warning
       # above for what binding `state.json` directly does.
       - ./elegoo-data:/app/data
 ```
@@ -98,11 +98,11 @@ table below; the commented lines above are the ones worth knowing about first.
 
 | Tag | What it is |
 |-----|------------|
-| `latest` | the newest build of `main` — use this unless you have a reason not to |
+| `latest` | the newest build of `main`: use this unless you have a reason not to |
 | `x.y.z`, `x.y` | a specific release, pinned |
 
 Images are built for **linux/amd64 and linux/arm64**, so a Raspberry Pi next to the
-printer works. Each image carries its own build stamp — the version shows in the web UI's
+printer works. Each image carries its own build stamp: the version shows in the web UI's
 status dropdown, which is the first thing to quote when reporting a problem.
 
 ### Build Locally
@@ -121,30 +121,30 @@ supplied by the publish workflow, not by `docker build`.
 | ---------- | --------- | ------------- |
 | `PRINTER_IP` | **required** | Printer IPv4 address. The service refuses to start without it |
 | `PRINTER_PASSWORD` | `123456` | Printer access code |
-| `PRINTER_SN` | — (discovered) | Printer serial number, e.g. `F01U3UD3798YT8K`. Normally discovered automatically and then cached in `<DATA_DIR>/printer-sn.json`, so this is rarely needed. Set it if a **first** start hangs at "registering": the printer only publishes while a client is registered, so a service that has never learned the serial has nothing to overhear |
+| `PRINTER_SN` |: (discovered) | Printer serial number, e.g. `F01U3UD3798YT8K`. Normally discovered automatically and then cached in `<DATA_DIR>/printer-sn.json`, so this is rarely needed. Set it if a **first** start hangs at "registering": the printer only publishes while a client is registered, so a service that has never learned the serial has nothing to overhear |
 | `SERVICE_PORT` | `8088` | Web UI / API / WebSocket port |
 | `MOONRAKER_PORT` | `7125` | Moonraker compatibility API port |
 | `BIND_ADDRESS` | `0.0.0.0` | Interface both HTTP servers listen on. IPv4 only; anything else refuses to start. **Not the knob for Docker:** on bridge networking, `127.0.0.1` inside the container is the container's own loopback, so the published port stops answering. To keep a containerised service off the LAN, narrow the mapping instead (`"127.0.0.1:8088:8088"`). Meant for a bare-metal `bun run` service |
 | `CAMERA_ENABLED` | `true` | Enable camera MJPEG proxy |
 | `CAMERA_URL` | `http://<PRINTER_IP>:8080` | Override camera URL |
-| `CORS_ALLOWED_ORIGINS` | — (same-origin) | Comma-separated origins allowed to make cross-origin requests to `/api/*`, `/moonraker/*`, `/octoprint/*` and `:7125`. Unset means **no cross-origin access**. `*` restores the old allow-everything behaviour |
-| `AUTH_PASSWORD_HASH` | — | Password hash for the dashboard login. Generate with `bun run auth:secret`. **With no password set, every endpoint answers without credentials** |
-| `AUTH_PASSWORD` | — | Plaintext alternative, hashed at startup. Prefer the hash |
-| `AUTH_API_KEY` | — | Shared secret for clients that cannot hold a cookie (Moonraker, OctoPrint, slicers). Sent as `X-Api-Key` or `Authorization: Bearer` |
+| `CORS_ALLOWED_ORIGINS` |: (same-origin) | Comma-separated origins allowed to make cross-origin requests to `/api/*`, `/moonraker/*`, `/octoprint/*` and `:7125`. Unset means **no cross-origin access**. `*` restores the old allow-everything behaviour |
+| `AUTH_PASSWORD_HASH` |: | Password hash for the dashboard login. Generate with `bun run auth:secret`. **With no password set, every endpoint answers without credentials** |
+| `AUTH_PASSWORD` |: | Plaintext alternative, hashed at startup. Prefer the hash |
+| `AUTH_API_KEY` |: | Shared secret for clients that cannot hold a cookie (Moonraker, OctoPrint, slicers). Sent as `X-Api-Key` or `Authorization: Bearer` |
 | `AUTH_SESSION_HOURS` | `720` | Absolute session lifetime |
 | `AUTH_IDLE_HOURS` | `168` | How long a session survives unused |
-| `AUTH_ENABLED` | — | `false` keeps auth off even with a password set |
-| `AUTH_PASSWORD` | — | Plaintext password, hashed at startup and never stored. Use when you would rather not paste a hash; a hash wins if both are set |
-| `AUTH_SECRET` | — | Signs session tokens so a restart does not sign every browser out. Rotating it signs out everywhere |
-| `TELEGRAM_BOT_TOKEN` | — | Telegram bot token (enables notifications) |
-| `TELEGRAM_CHAT_ID` | — | Telegram chat ID — where notifications are **sent** |
+| `AUTH_ENABLED` | (| `false` keeps auth off even with a password set |
+| `AUTH_PASSWORD` |) | Plaintext password, hashed at startup and never stored. Use when you would rather not paste a hash; a hash wins if both are set |
+| `AUTH_SECRET` |: | Signs session tokens so a restart does not sign every browser out. Rotating it signs out everywhere |
+| `TELEGRAM_BOT_TOKEN` | (| Telegram bot token (enables notifications) |
+| `TELEGRAM_CHAT_ID` |) | Telegram chat ID, where notifications are **sent** |
 | `TELEGRAM_ALLOWED_CHAT_IDS` | `TELEGRAM_CHAT_ID` | Comma-separated numeric sender ids permitted to **issue** bot commands. Anyone else is ignored silently |
 | `PROGRESS_INTERVAL` | `25` | Notify every N% progress |
 | `DATA_DIR` | `./data` | Data directory for state, reports, logs |
-| `HOMEASSISTANT_URL` | — | Home Assistant base URL, e.g. `http://homeassistant.local:8123` |
-| `HOMEASSISTANT_TOKEN` | — | Long-lived access token. Almost entirely read-only — see below for the one write |
-| `HOMEASSISTANT_ENTITIES` | — | Comma-separated entity ids, e.g. `sensor.dry_box_humidity,sensor.workshop_temperature` |
-| `HOMEASSISTANT_BUZZER_ENTITY` | — | Optional, and independent of the three above: an entity to ring on a critical error or a failed print, e.g. `switch.printer_buzzer`. Needs only `HOMEASSISTANT_URL` and `HOMEASSISTANT_TOKEN`, not `HOMEASSISTANT_ENTITIES` |
+| `HOMEASSISTANT_URL` |: | Home Assistant base URL, e.g. `http://homeassistant.local:8123` |
+| `HOMEASSISTANT_TOKEN` |: | Long-lived access token. Almost entirely read-only (see below for the one write |
+| `HOMEASSISTANT_ENTITIES` |) | Comma-separated entity ids, e.g. `sensor.dry_box_humidity,sensor.workshop_temperature` |
+| `HOMEASSISTANT_BUZZER_ENTITY` |: | Optional, and independent of the three above: an entity to ring on a critical error or a failed print, e.g. `switch.printer_buzzer`. Needs only `HOMEASSISTANT_URL` and `HOMEASSISTANT_TOKEN`, not `HOMEASSISTANT_ENTITIES` |
 
 ### Passwords, and staying logged in
 
@@ -155,8 +155,8 @@ bun run auth:secret          # prints AUTH_PASSWORD_HASH, AUTH_API_KEY and AUTH_
 ```
 
 ```ini
-AUTH_PASSWORD_HASH=scrypt\$65536\$8\$1\$…   # every $ BACKSLASH-ESCAPED — see below
-# — or, if you would rather not handle a hash —
+AUTH_PASSWORD_HASH=scrypt\$65536\$8\$1\$…   # every $ BACKSLASH-ESCAPED, see below
+# or, if you would rather not handle a hash:
 AUTH_PASSWORD=your-password                  # hashed at startup, never stored
 ```
 
@@ -165,12 +165,12 @@ things that read `.env` disagree about it:
 
 | reads `.env` | `scrypt\$65536\$…` becomes | so a hash must be |
 | --- | --- | --- |
-| **Bun** (bare metal, `bun run dev`) | `scrypt$65536$…` — unescaped | escaped |
-| **Docker** (`env_file:` in compose) | `scrypt\$65536\$…` — literal | **not** escaped |
+| **Bun** (bare metal, `bun run dev`) | `scrypt$65536$…` (unescaped | escaped |
+| **Docker** (`env_file:` in compose) | `scrypt\$65536\$…`) literal | **not** escaped |
 
 One file cannot satisfy both. An unescaped hash read by Bun collapses to the bare word
 `scrypt`; an escaped one read by Docker keeps its backslashes. Either way every login
-answers 401 and nothing says why — which looks exactly like a forgotten password.
+answers 401 and nothing says why, which looks exactly like a forgotten password.
 
 A password has no `$`, so `AUTH_PASSWORD` survives both parsers unchanged. It is hashed
 at startup and never stored. Use the hash when the service reads `.env` directly rather
@@ -179,28 +179,28 @@ than through Docker, and paste the line `auth:secret` prints as-is.
 The service checks the hash shape at startup and logs an error naming whichever direction
 it went wrong.
 
-`AUTH_SECRET` signs session tokens so they are still valid after a restart — without it,
+`AUTH_SECRET` signs session tokens so they are still valid after a restart, without it,
 every deploy signs every browser out. Rotating the secret is how you sign out everywhere;
 it invalidates every outstanding token at once.
 
 ### Home Assistant (ambient temperature and humidity)
 
 The printer reports its own nozzle, bed and chamber. It cannot tell you the **humidity of
-the room the filament is sitting in** — which decides whether a spool prints cleanly or
+the room the filament is sitting in**, which decides whether a spool prints cleanly or
 strings, and is the only way to know whether a drying session achieved anything.
 
 Set all three `HOMEASSISTANT_*` variables and the readings appear in the Temperatures
-card. Humidity is tinted: green below 40%, amber to 60%, red above — coarse advisory
+card. Humidity is tinted: green below 40%, amber to 60%, red above, coarse advisory
 bands, since this is someone else's sensor and not a control input.
 
 Make the token under your Home Assistant profile → Security → **Long-lived access
 tokens**. It carries the permissions of the account that made it, so prefer an account
 with little access: reading issues nothing but `GET /api/states/<entity>`, and the one
-write this service makes — ringing `HOMEASSISTANT_BUZZER_ENTITY`, below — calls exactly
+write this service makes (ringing `HOMEASSISTANT_BUZZER_ENTITY`, below) calls exactly
 two generic services against exactly that one entity, never anything named by a reading
 or by anything outside this service. The token itself does not enforce any of that, so
 the account it comes from is still what actually limits the blast radius of a bug here.
-It is read from the environment, never logged, and never sent to the browser —
+It is read from the environment, never logged, and never sent to the browser:
 `/api/home-assistant` returns readings only.
 
 Entities are polled once a minute. Home Assistant being down, or a renamed entity, shows
@@ -211,13 +211,13 @@ another machine is not a reason for a printer dashboard to stop working.
 
 Set `HOMEASSISTANT_BUZZER_ENTITY` to a switch, siren, script or any other entity that
 answers to Home Assistant's generic `turn_on`/`turn_off` services, and this service
-turns it on for ten seconds — not configurable, deliberately, so a failure that leaves
-the off command unsent cannot leave a siren running forever — on a failed print or a new
+turns it on for ten seconds (not configurable, deliberately, so a failure that leaves
+the off command unsent cannot leave a siren running forever) on a failed print or a new
 exception this app's own `CRITICAL_EXCEPTIONS` list treats as one. A routine pause, like
 a filament-change prompt, does not ring it; that list is the same one the browser's own
 audible alert uses, so the two agree on what counts as serious.
 
-Needs only `HOMEASSISTANT_URL` and `HOMEASSISTANT_TOKEN` — not `HOMEASSISTANT_ENTITIES`,
+Needs only `HOMEASSISTANT_URL` and `HOMEASSISTANT_TOKEN`, not `HOMEASSISTANT_ENTITIES`,
 which is for sensors this has nothing to do with. A Home Assistant outage, an unreachable
 host or a rejected call is logged and otherwise ignored: it never blocks or fails the
 printer's own error handling.
@@ -243,8 +243,8 @@ All persistent data lives under `/app/data` inside the container:
 
 ## Authentication
 
-The service ships with **no authentication**: every endpoint — including printer control
-and the camera — answers any request that reaches the port. That is fine on a trusted LAN
+The service ships with **no authentication**: every endpoint (including printer control
+and the camera) answers any request that reaches the port. That is fine on a trusted LAN
 and not fine anywhere else, so if the port is reachable from outside, set a password:
 
 ```bash
@@ -273,7 +273,7 @@ set in their config. That is the point, but it is worth doing deliberately rathe
 discovering mid-print.
 
 What stays reachable without credentials: the static app shell, the login routes, and
-`/api/health` — which reports liveness but withholds the printer serial and the build
+`/api/health`, which reports liveness but withholds the printer serial and the build
 commit until the caller is known.
 
 Sessions live in memory only, so a restart signs you out. That is deliberate: a session
@@ -298,10 +298,10 @@ and the data you care about is under whatever you mounted at `/app/data`.
 **A merged commit is not a deployed one.** The image is built and pushed by the publish
 workflow on a tag or a push to `main`; until you pull it, the container keeps running the
 build it started with. The version in the web UI's status dropdown is the authoritative
-answer to "which build is this?" — it comes from a stamp baked into the image, so it
+answer to "which build is this?": it comes from a stamp baked into the image, so it
 cannot drift from what is actually running.
 
-There is no systemd installer any more. `contrib/` held one — `install.sh`,
-`uninstall.sh` and an `elegooweb.service` unit that deployed to `/opt/elegooweb` — and it
+There is no systemd installer any more. `contrib/` held one (`install.sh`,
+`uninstall.sh` and an `elegooweb.service` unit that deployed to `/opt/elegooweb`) and it
 was removed because this fork deploys as a container and nobody ran it. `git log` has it
 if a no-Docker install is ever wanted again.

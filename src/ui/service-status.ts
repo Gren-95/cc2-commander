@@ -1,4 +1,4 @@
-/** Service status — compact header badge with click-to-expand dropdown + system info */
+/** Service status: compact header badge with click-to-expand dropdown + system info */
 
 import { toggleState } from './state-classes';
 import { ICONS, type IconName, icon } from './icons';
@@ -54,8 +54,8 @@ const PHASE_LABELS: Record<MqttPhase, string> = {
 /**
  * Prefer the server's phase; fall back to deriving one from the coarse `mqtt` field so a
  * browser holding a pre-ELEG-59 `service_status` still renders sensibly. The fallback
- * cannot tell `awaiting_sn` from `registering` — that is the whole point of the new
- * field — so it reports the vaguer of the two rather than guessing.
+ * cannot tell `awaiting_sn` from `registering` (that is the whole point of the new
+ * field) so it reports the vaguer of the two rather than guessing.
  */
 function phaseOf(s: ServiceStatus): MqttPhase {
   if (s.mqttPhase) return s.mqttPhase;
@@ -71,7 +71,7 @@ let dropdownBound = false;
  * `service_status` broadcast.
  *
  * It lives here because it is drawn here. The header used to carry a second pill for
- * it, which put two overlapping answers to "is anything connected?" side by side — and
+ * it, which put two overlapping answers to "is anything connected?" side by side, and
  * on a phone that pill was one of the things pushed off-screen entirely. The two
  * sources still arrive independently, so the badge renders whichever it has.
  */
@@ -98,7 +98,7 @@ export function setPrinterLink(state: PrinterLink): void {
  * Paint the printer half of the badge.
  *
  * Separate from `renderServiceStatus` on purpose: that function returns early until the
- * first `service_status` arrives, and the printer state is known before then — a badge
+ * first `service_status` arrives, and the printer state is known before then, a badge
  * that stayed blank for the first few seconds is what this change was meant to remove.
  */
 function renderPrinterLink(): void {
@@ -117,7 +117,7 @@ function renderPrinterLink(): void {
 
   /*
    * The word is shown only when something is wrong. Connected is the steady state and
-   * needs no caption — and never relying on colour alone is what the glyph swap is
+   * needs no caption, and never relying on colour alone is what the glyph swap is
    * for: a filled printer when it is up, an unplugged lead when it is not.
    */
   stateEl.textContent = printerLink === 'connected' ? '' : link.label;
@@ -220,12 +220,12 @@ export function renderServiceStatus(): void {
   const phase = phaseOf(s);
   const mqttLabel = PHASE_LABELS[phase];
 
-  // `x.y.z+aa`, the way RCP renders it — see formatBuildVersion. The dot is grey on an
+  // `x.y.z+aa`, the way RCP renders it: see formatBuildVersion. The dot is grey on an
   // unstamped build rather than green, because "unknown" is a real gap: production runs
   // as a container, and an image built outside the publish workflow shows exactly this
   // (ELEG-48).
   const version = buildVersionLabel(s.build);
-  // Linked to the commit it was built from, when the deploy is stamped with one —
+  // Linked to the commit it was built from, when the deploy is stamped with one:
   // same commit the About panel links, so both point at the exact code running.
   const versionValueHtml = s.build?.commit
     ? `<a href="${escapeAttr(`${PROJECT_URL}/commit/${s.build.commit}`)}" target="_blank" rel="noopener noreferrer" class="text-fg ml-auto font-medium hover:underline">${escapeHtml(version)}</a>`
@@ -273,7 +273,7 @@ export function renderSystemInfo(state: PrinterState): void {
   lastSysKey = key;
 
   // Everything here comes from 1001 (GET_ATTRIBUTES). There used to be a second loop
-  // over `state.systemInfo`, filled from method 1062 — it never produced a single row,
+  // over `state.systemInfo`, filled from method 1062: it never produced a single row,
   // because 1062 answers `{"error_code": 1100}` on this firmware and the handler only
   // stored a result on `error_code === 0` (ELEG-55).
   const rows: [string, string][] = [];

@@ -270,7 +270,7 @@ export class MoonrakerServer {
     private config: ServiceConfig,
     /**
      * The same gate the main server uses. This port is the one `docs/security.md`
-     * calls the cautionary example — it carries the full control surface in Moonraker's
+     * calls the cautionary example: it carries the full control surface in Moonraker's
      * vocabulary on a separate listener, so anything applied only in index.ts misses it.
      */
     private auth: AuthGate,
@@ -296,7 +296,7 @@ export class MoonrakerServer {
    *
    * Keepalive is Bun's: `sendPings` (on by default) drives the ping frames the old
    * 10s `setInterval` used to send by hand, and `idleTimeout` below drops a client
-   * that stops answering — which is what `isAlive` + `ws.terminate()` were for.
+   * that stops answering, which is what `isAlive` + `ws.terminate()` were for.
    */
   private readonly wsHandlers: WebSocketHandler<{ readonly connectionId: number }> = {
     idleTimeout: 30,
@@ -330,7 +330,7 @@ export class MoonrakerServer {
    * Whether a request to this port may proceed.
    *
    * Built from the `Request` rather than a Node shim because the upgrade path never
-   * creates one — and the upgrade is the half that matters most here, since the
+   * creates one, and the upgrade is the half that matters most here, since the
    * JSON-RPC socket carries the same commands the HTTP routes do.
    */
   private authorized(request: Request): boolean {
@@ -355,7 +355,7 @@ export class MoonrakerServer {
       fetch: (request, self) => {
         // Fluidd and Mainsail connect to /websocket; KlipperScreen and others use /
         // or /klippy. The old server accepted the upgrade on every path, so this does
-        // too — the discriminator is the Upgrade header, not the path.
+        // too: the discriminator is the Upgrade header, not the path.
         // Mainsail and Fluidd run in a browser and send the session cookie; a native
         // client sends the API key. Either satisfies the gate.
         if (!this.authorized(request)) {
@@ -627,7 +627,7 @@ export class MoonrakerServer {
 
       case 'printer.objects.subscribe': {
         const objects = (params.objects || {}) as Record<string, string[] | null>;
-        // Update subscription — merge with existing or replace
+        // Update subscription, merge with existing or replace
         if (Object.keys(objects).length === 0) {
           // Empty objects = cancel subscription
           client.subscribedObjects = {};
@@ -1022,7 +1022,7 @@ export class MoonrakerServer {
         client.ws.send(rpcResult(msg.id, { queued_jobs: [], queue_state: 'ready' }));
         break;
 
-      // ── Access / Auth (stub — always permitted) ──
+      // ── Access / Auth (stub: always permitted) ──
       case 'access.get_user':
         client.ws.send(
           rpcResult(msg.id, {
@@ -1034,7 +1034,7 @@ export class MoonrakerServer {
         break;
 
       case 'access.oneshot_token':
-        // Deliberately still answers — see ONESHOT_TOKEN in compat-auth.ts. A browser
+        // Deliberately still answers, see ONESHOT_TOKEN in compat-auth.ts. A browser
         // may fetch this for a WebSocket or camera URL before it reads `access.info`,
         // so refusing it risks breaking the connection outright, and withdrawing it
         // would remove no protection because nothing validates it coming back.
@@ -1087,7 +1087,7 @@ export class MoonrakerServer {
         break;
 
       case 'access.users.list':
-        // Empty, because there are no users — rather than inventing one called 'elegoo'.
+        // Empty, because there are no users, rather than inventing one called 'elegoo'.
         // A list is still the right shape here: a client asking "who exists?" can be
         // told "nobody" without an error, and Mainsail renders that fine.
         client.ws.send(rpcResult(msg.id, { users: [] }));
@@ -1280,7 +1280,7 @@ export class MoonrakerServer {
 
     // Cross-origin policy, set ONCE for this response (ELEG-24). setHeader persists and
     // writeHead merges over it, so the ~100 jsonResult/jsonError call sites below do not
-    // each have to know about CORS — and cannot each forget it, which is how this
+    // each have to know about CORS, and cannot each forget it, which is how this
     // surface kept its wildcard when the others were reviewed.
     applyCors(
       res,
@@ -1686,7 +1686,7 @@ export class MoonrakerServer {
     // --- GET /access/info ---
     if (urlPath === '/access/info' && method === 'GET') {
       // `login_required` and `trusted` were on the JSON-RPC `access.info` but missing
-      // here, so an HTTP-only client was never told that no credential is needed — and
+      // here, so an HTTP-only client was never told that no credential is needed, and
       // now that the api_key endpoint no longer hands out a fake one, this is where it
       // has to learn it (ELEG-26).
       jsonResult(res, {
@@ -1699,7 +1699,7 @@ export class MoonrakerServer {
     }
 
     // --- GET /access/oneshot_token ---
-    // Answered only when nothing is being checked — see `oneshotToken` in compat-auth.ts
+    // Answered only when nothing is being checked: see `oneshotToken` in compat-auth.ts
     // and the JSON-RPC case above. With a key configured this is a credential in a URL,
     // so it refuses rather than mint one any caller could use.
     if (urlPath === '/access/oneshot_token' && method === 'GET') {
@@ -1917,7 +1917,7 @@ export class MoonrakerServer {
     }
 
     // --- Auth endpoints ---
-    // POST /access/login — no session is created, so no token is returned (ELEG-53).
+    // POST /access/login: no session is created, so no token is returned (ELEG-53).
     // `GET /access/info` reports login_required: false, which is where a client should
     // have learned not to come here.
     if (urlPath === '/access/login' && method === 'POST') {
@@ -1931,19 +1931,19 @@ export class MoonrakerServer {
       return;
     }
 
-    // GET /access/users/list — empty, because there are no users (ELEG-53).
+    // GET /access/users/list: empty, because there are no users (ELEG-53).
     if (urlPath === '/access/users/list' && method === 'GET') {
       jsonResult(res, { users: [] });
       return;
     }
 
-    // POST /access/refresh_jwt — nothing was issued, so nothing can be refreshed.
+    // POST /access/refresh_jwt: nothing was issued, so nothing can be refreshed.
     if (urlPath === '/access/refresh_jwt' && method === 'POST') {
       jsonError(res, sessionsMessage(apiKeyRequired(this.config.auth)), 404);
       return;
     }
 
-    // GET/POST /access/api_key — see the JSON-RPC case above (ELEG-26).
+    // GET/POST /access/api_key: see the JSON-RPC case above (ELEG-26).
     if (urlPath === '/access/api_key' && (method === 'GET' || method === 'POST')) {
       jsonError(res, apiKeyMessage(apiKeyRequired(this.config.auth)), 404);
       return;

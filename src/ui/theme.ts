@@ -14,7 +14,7 @@
  * The attribute is set **before first paint** by a small inline script in `index.html`;
  * doing it from this module would flash dark on a light-preferring system, because the
  * bundle is deferred. This module owns the choice from then on and must agree with that
- * script — the storage key and the values are the contract between them.
+ * script: the storage key and the values are the contract between them.
  */
 
 import { loadUISettings, saveUISettings } from './ui-settings';
@@ -53,7 +53,7 @@ function apply(resolved: ResolvedTheme): void {
   document.documentElement.setAttribute('data-theme', resolved);
   // The charts read their colours from the stylesheet once and cache the result, so a
   // theme change that skipped this would leave every canvas on the old palette until
-  // the page reloaded — the half-themed dashboard ELEG-34 exists to avoid.
+  // the page reloaded: the half-themed dashboard ELEG-34 exists to avoid.
   invalidateChartPalette();
   for (const listener of listeners) listener();
 }
@@ -64,7 +64,7 @@ function apply(resolved: ResolvedTheme): void {
  * A registry rather than a direct call, because the one caller is the WebGL g-code
  * preview: importing it here would drag `three` and the whole 3D module into every unit
  * test that touches a theme helper, which is how `chart-palette.test.ts` came to fail
- * with `localStorage is not defined`. The dependency points the other way now — the
+ * with `localStorage is not defined`. The dependency points the other way now: the
  * heavy module registers itself, and this file stays small enough to import anywhere.
  */
 const listeners = new Set<() => void>();
@@ -82,8 +82,8 @@ export function setThemeChoice(choice: ThemeChoice): void {
 /**
  * Re-apply the stored choice, and follow the system while the choice is `auto`.
  *
- * Called once at startup. The attribute is normally already correct — the inline script
- * set it — but this re-asserts it from the same source of truth and installs the
+ * Called once at startup. The attribute is normally already correct (the inline script
+ * set it) but this re-asserts it from the same source of truth and installs the
  * listener that keeps `auto` honest when the OS flips at sunset.
  */
 export function initTheme(): void {

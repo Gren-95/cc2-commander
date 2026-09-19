@@ -2,7 +2,7 @@
  * Controls that need an idle printer.
  *
  * The printer has twelve states and only one is Idle. Before this, the jog pad and
- * every maintenance button stayed live through all of them — pressing Home mid-print
+ * every maintenance button stayed live through all of them: pressing Home mid-print
  * either did nothing or ruined the print, and the only feedback was a toast afterwards.
  *
  * These run in a browser because `disabled` and `title` are DOM behaviour, and because

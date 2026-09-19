@@ -2,7 +2,7 @@
  * Tools → Inventory.
  *
  * What is on the shelf (spools, with how much filament each has left) and a queue of
- * finished prints the service could not attribute to a spool on its own —
+ * finished prints the service could not attribute to a spool on its own:
  * `workshop/inventory-core.ts` has the matching rules and why a queue beats a guess;
  * this file only draws it and saves what is typed.
  *
@@ -10,7 +10,7 @@
  *
  * A finished print can add a queued item at any moment, so the whole panel refetches
  * on the `workshop_changed` frame. The add-spool form is bound once and never rebuilt
- * from fetched data — nothing in it reflects server state, so there is nothing for a
+ * from fetched data: nothing in it reflects server state, so there is nothing for a
  * refetch to clobber. The spool list and the pending queue, which each hold their own
  * inline editing state, follow the same rule `workshop-cost.ts`'s settings form does:
  * a refetch always updates the data behind them, but only redraws while nothing inside
@@ -71,7 +71,7 @@ function toPickerHex(raw: string): string | null {
 /**
  * Keeps a colour picker and its hex text field showing the same colour, in whichever
  * direction the person just edited. Called after every render that creates one of
- * these pairs — `addFormHtml`'s fields are replaced wholesale after a successful add,
+ * these pairs: `addFormHtml`'s fields are replaced wholesale after a successful add,
  * so a listener bound once would be bound to elements no longer in the document.
  */
 function bindColorFields(root: ParentNode): void {
@@ -240,7 +240,7 @@ async function deleteSpool(id: string, name: string): Promise<void> {
   }
 }
 
-/** Price per kg has no currency symbol here — the Cost tab owns that setting. */
+/** Price per kg has no currency symbol here: the Cost tab owns that setting. */
 function fmtPricePerKg(pricePerKg: number): string {
   return `${pricePerKg.toFixed(2)}/kg`;
 }
@@ -417,7 +417,7 @@ function renderAddForm(): void {
 
 /**
  * Whether `host` holds a field with typed or selected state worth protecting. A
- * *button* inside it — Edit, Cancel, Save, Delete — can be the active element too
+ * *button* inside it (Edit, Cancel, Save, Delete) can be the active element too
  * (clicking one can focus it, in some browsers), but a button carries nothing a
  * redraw would lose, and guarding on it would make those very clicks appear to do
  * nothing: the guard would block the redraw the click was meant to trigger.
@@ -431,7 +431,7 @@ function renderSpoolList(): void {
   if (!data) return;
   const host = document.getElementById('inventory-spool-list');
   if (!host) return;
-  // Never redraw under someone's fingers, mid-edit — see the module comment.
+  // Never redraw under someone's fingers, mid-edit, see the module comment.
   if (hasFocusedField(host)) return;
   host.innerHTML = spoolListHtml(data);
   bindColorFields(host);

@@ -3,15 +3,15 @@
  *
  * ## Deducting a print, and when not to guess
  *
- * When a print lands in the ledger with a known weight, it comes off a spool — if the
+ * When a print lands in the ledger with a known weight, it comes off a spool, if the
  * spool can be named without guessing. The printer does not report which spool fed a
  * print: the slicer's colour map names each tool's colour and material, and a Canvas
  * slot is chosen at print time, not recorded after it. So a print is matched to a spool
  * only when exactly one spool on the shelf has that material and that colour, and the
  * print used exactly one colour.
  *
- * Everything else — two black PLA spools, a four-colour print whose weight comes as one
- * total, a colour nobody has entered — goes into a short queue for the person to assign
+ * Everything else (two black PLA spools, a four-colour print whose weight comes as one
+ * total, a colour nobody has entered) goes into a short queue for the person to assign
  * with a tap. A wrong deduction is silent and compounds; a queue asks once and is right.
  *
  * Pure: spools and a print in, spools and a decision out.
@@ -170,7 +170,7 @@ export function applyPrint(
     return unchanged;
   }
   // Only prints that ended once there was a shelf to take them off. Without this, the
-  // ledger's first backfill — every print in the printer's history — would queue each
+  // ledger's first backfill (every print in the printer's history) would queue each
   // weighed one for assignment, for prints made before anyone entered a spool.
   if (!list.length || entry.endedAt < Math.min(...list.map((s) => s.createdAt))) {
     return unchanged;

@@ -1,5 +1,5 @@
 /**
- * Print Report PDF Generator — produces a summary PDF from collected print data.
+ * Print Report PDF Generator: produces a summary PDF from collected print data.
  *
  * Uses PDFKit to draw charts, embed snapshots, and format statistics.
  */
@@ -177,7 +177,7 @@ function drawHeader(doc: PDFKit.PDFDocument, report: PrintReport, pageW: number)
   doc.fontSize(12).fillColor(COLORS.muted).text(report.filename, textX, doc.y, { width: textW });
   doc.moveDown(0.3);
 
-  // Outcome badge — draw colored rectangle + text instead of Unicode bullet
+  // Outcome badge: draw colored rectangle + text instead of Unicode bullet
   const outcomeText = report.outcome.charAt(0).toUpperCase() + report.outcome.slice(1);
   const badgeY = doc.y;
   const badgeH = 16;

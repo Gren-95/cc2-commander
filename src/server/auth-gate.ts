@@ -1,7 +1,7 @@
 /**
  * Where authentication meets an HTTP request.
  *
- * `auth.ts` holds the decisions; this holds the plumbing — which paths are reachable
+ * `auth.ts` holds the decisions; this holds the plumbing, which paths are reachable
  * without credentials, how a request proves itself, and the three routes that mint and
  * destroy a session.
  *
@@ -12,7 +12,7 @@
  * - the login routes themselves, or there is no way in;
  * - `/api/auth/me`, so the SPA can ask "am I signed in?" and show a login form instead
  *   of fifteen cards of errors;
- * - `/api/health`, so a monitor or a deploy check still works — with the printer serial
+ * - `/api/health`, so a monitor or a deploy check still works, with the printer serial
  *   withheld until the caller is known, because that is an identifier for a specific
  *   machine and nothing about liveness needs it.
  *
@@ -92,8 +92,8 @@ export class AuthGate {
    * Session first, because it is the common case and costs a map lookup; the API key is
    * only compared when no valid session was presented, and always in constant time.
    *
-   * Takes only the headers, so the :7125 server can ask about a WebSocket upgrade —
-   * which never becomes a Node request — with the same code path the REST routes use.
+   * Takes only the headers, so the :7125 server can ask about a WebSocket upgrade
+   * (which never becomes a Node request) with the same code path the REST routes use.
    */
   authenticate(req: { headers: Record<string, string | string[] | undefined> }): AuthResult {
     if (!this.config.enabled) return { ok: true, via: 'disabled' };
@@ -205,7 +205,7 @@ export class AuthGate {
           const data = JSON.parse(body) as { password?: unknown };
           if (typeof data.password === 'string') password = data.password;
         } catch {
-          // An unparseable body is a failed attempt like any other — it must still count
+          // An unparseable body is a failed attempt like any other, it must still count
           // against the throttle, or malformed JSON becomes a free retry.
         }
 
@@ -253,7 +253,7 @@ export class AuthGate {
    *
    * Cookie only, and that is not a limitation worth working around: the browser sends it
    * automatically on a same-origin upgrade, and the `WebSocket` constructor cannot set
-   * headers, so a token would have to travel in the query string — where it lands in
+   * headers, so a token would have to travel in the query string, where it lands in
    * access logs and `Referer`. A machine client that wants live state uses the API key
    * over HTTP, or Moonraker's socket on :7125.
    */

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { loadConfig } from '../config.js';
 
 /**
- * `BIND_ADDRESS` — the interface both HTTP servers listen on. Pinned the same way
+ * `BIND_ADDRESS`: the interface both HTTP servers listen on. Pinned the same way
  * `PRINTER_IP` is in `config-defaults.test.ts`: a minimal environment swapped in
  * wholesale, so a value inherited from the developer's shell cannot pass or fail these
  * for the wrong reason.
@@ -49,7 +49,7 @@ describe('BIND_ADDRESS', () => {
   });
 
   it('treats an empty value as unset', () => {
-    // env() counts an empty string as unset — easy to assume the opposite, and it is what
+    // env() counts an empty string as unset: easy to assume the opposite, and it is what
     // a `BIND_ADDRESS=` line left in a .env produces.
     process.env.BIND_ADDRESS = '';
     expect(loadConfig().bindAddress).toBe('0.0.0.0');

@@ -4,7 +4,7 @@
  * WHAT THE PREVIOUS ONE DID
  *
  * Nothing useful. `install` called `skipWaiting()` and cached not a single thing, so
- * the `fetch` handler's `caches.match()` fallback could only ever miss — and on a miss
+ * the `fetch` handler's `caches.match()` fallback could only ever miss, and on a miss
  * it resolved `undefined`, which `respondWith(undefined)` turns into a TypeError rather
  * than a page. Measured: with the worker registered and controlling, a reload with the
  * network cut failed outright with ERR_FAILED. The app was installable and offline-dead.
@@ -33,7 +33,7 @@
 
 /*
  * Bumping this name is how a stale cache is evicted: `activate` deletes every cache
- * whose name is not this one. The rename from `elegoo-web-v2` therefore does two jobs —
+ * whose name is not this one. The rename from `elegoo-web-v2` therefore does two jobs:
  * it finishes the project rename, and it purges the assets every existing client has
  * accumulated under `cacheFirst`, which never evicts an entry on its own.
  */
@@ -51,7 +51,7 @@ const LIVE = ['/api/', '/ws', '/mcp', '/octoprint', '/moonraker', '/webcam'];
 const OFFLINE_PAGE = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Offline — Elegoo Web</title>
+<title>Offline: Elegoo Web</title>
 <style>
   :root { color-scheme: dark light }
   body { margin:0; min-height:100vh; display:grid; place-items:center;
@@ -65,7 +65,7 @@ const OFFLINE_PAGE = `<!doctype html>
 <body><div class="box">
   <h1>Offline</h1>
   <p>This device cannot reach the Elegoo Web service. The printer is probably still
-     printing — this dashboard just cannot see it from here.</p>
+     printing: this dashboard just cannot see it from here.</p>
   <button onclick="location.reload()">Try again</button>
 </div></body></html>`;
 
@@ -80,14 +80,14 @@ const offlineResponse = () =>
  *
  * Without this the worker is only useful from the SECOND visit: a service worker does
  * not control the page that registers it, so the stylesheet and script requests of the
- * first load are never intercepted and never cached. Measured — after one visit the
+ * first load are never intercepted and never cached. Measured: after one visit the
  * cache held `/` and the manifest and nothing else, and the app appeared to work
  * offline purely because Chrome's own HTTP cache still had the immutable assets. That
  * is luck, not offline support.
  *
  * So the shell is read at install time and the `/assets/…` references are pulled out of
  * it. Stylesheets are read too, because the Bootstrap Icons woff2 is referenced from
- * the CSS and not from the HTML — miss it and a first-visit offline load renders every
+ * the CSS and not from the HTML: miss it and a first-visit offline load renders every
  * control as a blank box.
  */
 async function precacheShell(cache) {
@@ -145,7 +145,7 @@ async function cacheFirst(request) {
    * `/assets/bootstrap-icons-<hash>.woff2?<another hash>`, while the precache stored it
    * under the bare path it found in the stylesheet text. Without this the two are
    * different cache keys, the lookup misses, and a first-visit-offline load renders
-   * every icon as a blank box — the exact failure the precache exists to prevent.
+   * every icon as a blank box: the exact failure the precache exists to prevent.
    *
    * Safe because everything under /assets/ is content-hashed in the path itself, so the
    * query string cannot distinguish two different files.
@@ -170,7 +170,7 @@ async function networkFirst(request) {
     return response;
   } catch {
     // The shell is keyed on '/', so a deep SPA link falls back to it rather than 404ing
-    // into the offline page — the client router sorts the path out once it boots.
+    // into the offline page: the client router sorts the path out once it boots.
     return (await caches.match(request)) ?? (await caches.match('/')) ?? offlineResponse();
   }
 }

@@ -28,7 +28,7 @@ export function positionSegmented(track: HTMLElement): void {
 
   const selected = track.querySelector<HTMLElement>('.segmented-btn.active');
   if (!selected) {
-    // No selection is a real state — the speed picker has none until the printer says
+    // No selection is a real state: the speed picker has none until the printer says
     // which mode it is in. A fill parked at position 0 would be a confident lie.
     fill.style.opacity = '0';
     return;
@@ -53,7 +53,7 @@ export function positionAllSegmented(): void {
  * webfont has usually not swapped in, so a label measured now is a few pixels narrower
  * than the one on screen a moment later, and the fill ends up short. The observer fires
  * again when that swap reflows the track, so this is belt and braces rather than the
- * only correction — but it stops the first render being visibly wrong.
+ * only correction, but it stops the first render being visibly wrong.
  */
 export function initSegmented(): void {
   const tracks = [...document.querySelectorAll<HTMLElement>('.segmented')];

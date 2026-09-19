@@ -1,8 +1,8 @@
 /**
- * Relative timestamps for the log panels — "2m ago" as a toggle (ELEG-45).
+ * Relative timestamps for the log panels: "2m ago" as a toggle (ELEG-45).
  *
  * **A toggle, never a replacement.** Absolute time is what you need when correlating
- * with `journalctl`, the printer's own display, or somebody else's screenshot — and that
+ * with `journalctl`, the printer's own display, or somebody else's screenshot, and that
  * is the case where getting it wrong costs the most. So the default is absolute, and the
  * absolute value stays reachable in the `title` attribute even when relative is on.
  *
@@ -14,7 +14,7 @@
  *
  *  1. **`renderLog` deliberately short-circuits.** It returns early when the last
  *     timestamp and the entry count are both unchanged, so a periodic
- *     `renderLog()` call would do *nothing* — the relative times would sit there stale
+ *     `renderLog()` call would do *nothing*: the relative times would sit there stale
  *     and the bug would look like the timer was broken.
  *  2. **A re-render assigns `innerHTML`**, which destroys and rebuilds every row. That
  *     is what fights the auto-scroll and the expand/collapse state, and it is the same
@@ -36,7 +36,7 @@ const DAY = 24 * HOUR;
  * Format `then` relative to `now`, both epoch milliseconds.
  *
  * Pure, and `now` is a parameter rather than a call to `Date.now()` precisely so the
- * boundaries can be tested — they are where these read wrong.
+ * boundaries can be tested: they are where these read wrong.
  *
  * Rounds **down** throughout: at 119 seconds this says "1m ago", not "2m ago". Reading
  * a slightly conservative age is better than one that claims more time has passed than
@@ -74,7 +74,7 @@ export function refreshTimestamps(now: number = Date.now()): void {
     const abs = el.dataset.abs ?? '';
     if (!Number.isFinite(ts)) continue;
     el.textContent = relative ? formatRelative(ts, now) : abs;
-    // The absolute value stays available on hover in both modes — that is the whole
+    // The absolute value stays available on hover in both modes, that is the whole
     // point of not making this a replacement.
     el.title = abs;
   }

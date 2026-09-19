@@ -7,7 +7,7 @@
  * file exposing them on `window.T`, and serves it next to a blank document.
  *
  * Rebuilt on every request rather than once at startup: the run takes ~200ms and a stale
- * bundle would fail in a way that looks like a broken test rather than a stale build —
+ * bundle would fail in a way that looks like a broken test rather than a stale build,
  * the exact confusion the SPA route table caused in production.
  */
 
@@ -51,7 +51,7 @@ globalThis.__ready = true;`;
   const result = await Bun.build({
     entrypoints: ['./harness-entry.ts'],
     target: 'browser',
-    // The entry exists only in memory — there is no file to keep in sync with EXPOSED.
+    // The entry exists only in memory, there is no file to keep in sync with EXPOSED.
     plugins: [
       {
         name: 'virtual-entry',

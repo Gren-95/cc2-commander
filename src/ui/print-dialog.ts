@@ -12,7 +12,7 @@
  * "Later" does not send 1020 from here: it hands the file to the service's scheduler
  * (`schedule-panel.ts`'s `postSchedule`), which starts it once, at the chosen time, if the
  * printer is idle and the file is still there. Everything this dialog collects goes with
- * it — plate, timelapse, bed leveling, auto-refill and the spool chosen for each colour —
+ * it (plate, timelapse, bed leveling, auto-refill and the spool chosen for each colour)
  * and the service starts the job with exactly those. The spools are saved with what each
  * tray holds now, and the service checks them again when it fires, skipping rather than
  * printing in a filament nobody chose (`schedule-core.ts`'s `spoolMismatch`). It is
@@ -232,7 +232,7 @@ function showDialog(
   const mappings = isMultiColor ? autoMap(colorMap, canvas) : [];
   const autoRefill = canvas?.auto_refill ?? false;
 
-  // Later is for the printer's own storage only — see the header note.
+  // Later is for the printer's own storage only: see the header note.
   const canSchedule = currentFileSource() === 'local';
   const laterTitle = canSchedule
     ? 'Start at a chosen time'
@@ -394,7 +394,7 @@ function showDialog(
       : [];
 
     // Later: no precache and no 1020 from here. The service starts it, once, at the time
-    // chosen, with what was chosen above — and checks the spools again when it does.
+    // chosen, with what was chosen above, and checks the spools again when it does.
     if (startLater) {
       if (!canSchedule) return;
       const runAt = whenInput.value ? new Date(whenInput.value).getTime() : NaN;
@@ -478,12 +478,12 @@ function showDialog(
             ? 'Already cached'
             : `Cached (${formatSize(result.size)})`;
         } else {
-          // Precache failed — warn but still allow printing
+          // Precache failed: warn but still allow printing
           textEl.textContent = `Cache failed: ${result.error ?? 'unknown'}, printing anyway`;
           textEl.style.color = 'var(--warning)';
         }
       } catch {
-        // Network error — warn but still allow printing
+        // Network error: warn but still allow printing
         fillEl.style.width = '100%';
         fillEl.style.background = 'var(--warning)';
         textEl.textContent = 'Cache unavailable, printing anyway';

@@ -1,6 +1,6 @@
 /**
  * HTTP for scheduled prints. Its own small router rather than a branch in
- * `workshop-router.ts` — this is not a workshop tool — but the exact same shape:
+ * `workshop-router.ts` (this is not a workshop tool) but the exact same shape:
  * table-driven routes so a path that exists but was asked for with the wrong method
  * answers 405 with an `Allow` header, not 404. Sits in `nodeRouter`'s chain after the
  * auth gate exactly the same way, so it is protected by existing, not by remembering

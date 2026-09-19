@@ -2,27 +2,27 @@
  * Tools → Schedule.
  *
  * A form to start a file at a chosen time, once, and a list of what is upcoming or has
- * already happened. `schedule-core.ts` and `server/schedule.ts` have the reasoning —
+ * already happened. `schedule-core.ts` and `server/schedule.ts` have the reasoning:
  * this file only draws it and saves what is typed.
  *
  * ## The filename is typed, not browsed
  *
  * A schedule can name any file on the printer, but this panel does not browse the
- * printer's folders to offer one — the Files card already does that, and duplicating
+ * printer's folders to offer one: the Files card already does that, and duplicating
  * it here would drift. Absent beats wrong: the server re-checks the exact file is
  * still there, in the exact folder, the moment before it would fire (`schedule.ts`),
- * so a stale or mistyped name never silently starts the wrong thing — it skips, and
+ * so a stale or mistyped name never silently starts the wrong thing, it skips, and
  * says why.
  *
  * The Start Print dialog is the other way in: its Later choice schedules through
  * `postSchedule`, the same request this form makes, so there is one place that decides
- * what a schedule request looks like. This form sends no options — a schedule made here
- * starts as it always has — while the dialog sends everything it collected.
+ * what a schedule request looks like. This form sends no options (a schedule made here
+ * starts as it always has) while the dialog sends everything it collected.
  *
  * ## One static sibling, one freely-drawn list
  *
  * The add form is bound once and never rebuilt from fetched data, matching
- * `workshop-cost.ts`'s reasoning — nothing in it reflects server state, so a
+ * `workshop-cost.ts`'s reasoning: nothing in it reflects server state, so a
  * `schedule_changed` refetch has nothing in it to clobber. The list carries no input
  * of its own (a Cancel button holds no typed state), so it redraws freely.
  */
@@ -58,7 +58,7 @@ const STATUS_ICON: Record<ScheduleStatus, IconName> = {
   cancelled: 'close',
 };
 
-/** `<input type="datetime-local">`'s own format, in local time, a minute from now — so
+/** `<input type="datetime-local">`'s own format, in local time, a minute from now, so
  *  the field's `min` refuses the past without refusing "right now". */
 export function minLocalDateTime(): string {
   const d = new Date(Date.now() + 60_000);
@@ -96,7 +96,7 @@ function addFormHtml(): string {
 /**
  * Ask the service to start `filename` once, at `runAt`.
  *
- * Says why on failure — a toast, from here, so every caller reads the same — and returns
+ * Says why on failure (a toast, from here, so every caller reads the same) and returns
  * whether the schedule was created. `filename` is the path 1020 wants (`benchy.gcode`,
  * `misc/benchy.gcode`); the folder is worked out from it so the service can re-list
  * exactly that folder before firing. `options` is what to start it with; `null` for none.
@@ -168,7 +168,7 @@ async function cancelSchedule(id: string): Promise<void> {
   }
 }
 
-/** What a pending job will start with — the point of keeping the settings is that you can
+/** What a pending job will start with: the point of keeping the settings is that you can
  *  see them before nobody is there to. Empty for a schedule made with none. */
 function optionsSummary(o: PrintOptions | null): string {
   if (!o) return '';

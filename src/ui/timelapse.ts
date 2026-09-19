@@ -1,11 +1,11 @@
-/** Timelapse viewer — list and play timelapse videos from print history.
+/** Timelapse viewer: list and play timelapse videos from print history.
  *
  * The CC2 stores timelapse data per print history entry:
  *   time_lapse_video_status: 0=NotCaptured, 1=NotExported, 2=Exported, 3=Failed
  *   time_lapse_video_url: filename/URL for the video
  *
  * Method 1051 (GetTimeLapseVideoList) is actually used to *export* a specific
- * timelapse video — it takes { url: filename } and triggers video generation.
+ * timelapse video, it takes { url: filename } and triggers video generation.
  * The video list itself comes from print history (method 1036).
  */
 
@@ -38,7 +38,7 @@ const entryBegin = (v: TimelapseEntry): number | undefined =>
 const STATUS_EXPORTED = 2;
 const STATUS_FAILED = 3;
 
-/** Kept outside the render function — see `list-controls.ts` on why that matters. */
+/** Kept outside the render function: see `list-controls.ts` on why that matters. */
 let timelapseControls: ListControls<TimelapseEntry> | null = null;
 let lastTimelapseState: PrinterState | null = null;
 
@@ -60,7 +60,7 @@ function ensureTimelapseControls(): ListControls<TimelapseEntry> {
     selects: [
       {
         // The timelapse analogue of Print History's failures filter, which this issue
-        // asked to fold in if it was cheap. It was — the helper already does dropdowns.
+        // asked to fold in if it was cheap. It was: the helper already does dropdowns.
         id: 'state',
         label: 'State',
         options: [
@@ -160,11 +160,11 @@ function _formatDuration(seconds: number): string {
 /**
  * Play a timelapse.
  *
- * `url` is what the printer reports — a bare path like
+ * `url` is what the printer reports: a bare path like
  * `video/<name>.gcode<timestamp>.mp4`, with no scheme and no host. Assigning it to a
  * `<video>` resolved it against the dashboard's own origin, which has nothing there:
  * the element got a 404 whose body is not a video and reported
- * `MEDIA_ERR_SRC_NOT_SUPPORTED — "Format error"`, blaming the format rather than the
+ * `MEDIA_ERR_SRC_NOT_SUPPORTED, "Format error"`, blaming the format rather than the
  * address. It goes through the service's proxy now, which fetches it from the printer
  * and, crucially, gives it a content type the printer itself does not send.
  */
@@ -184,7 +184,7 @@ export function showTimelapsePlayer(url: string): void {
 /** Fetch print history which populates timelapse list */
 export function requestTimelapseList(): void {
   if (playerClient) {
-    // Request print history — timelapse entries are extracted from history
+    // Request print history, timelapse entries are extracted from history
     playerClient.sendCommand(1036, { page: 1, page_size: 100 });
   }
 }

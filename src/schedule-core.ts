@@ -8,15 +8,15 @@
  * nobody watching the bed a second and third time; the first is already the part of this
  * feature worth being careful about. So a schedule fires at most once, and if the moment
  * arrives while the printer is busy, offline, or the file is gone, it is marked skipped
- * with why — never retried unattended, never silently dropped. `server/schedule.ts` owns
+ * with why: never retried unattended, never silently dropped. `server/schedule.ts` owns
  * the clock, the MQTT command and the live file-list check this module cannot see; this
  * file is what stays true regardless of any of that: validation and "what is due now."
  *
  * ## The settings travel with the schedule
  *
- * A schedule made from the Start Print dialog keeps what that dialog collected — build
+ * A schedule made from the Start Print dialog keeps what that dialog collected (build
  * plate, timelapse, bed leveling, Canvas auto-refill and which spool prints which
- * colour — and starts the job with exactly those. The one thing that can go stale between
+ * colour) and starts the job with exactly those. The one thing that can go stale between
  * choosing and firing is the spools: someone changes a reel overnight and "tray 2, red
  * PLA" is now blue PETG. So each chosen spool is saved with what the tray held at the
  * time, and `spoolMismatch` is asked at the moment of firing; a schedule whose spools are
@@ -29,7 +29,7 @@ export type ScheduleStatus = 'pending' | 'fired' | 'skipped' | 'cancelled';
 
 /** One colour in the file, and the spool chosen to print it. */
 export interface ChosenSpool {
-  /** Index in the file's colour list — the `t` the start command wants. */
+  /** Index in the file's colour list: the `t` the start command wants. */
   t: number;
   canvas_id: number;
   tray_id: number;
@@ -51,7 +51,7 @@ export interface PrintOptions {
 }
 
 /**
- * What a schedule made with no options — typed into Tools → Schedule — has always
+ * What a schedule made with no options (typed into Tools → Schedule) has always
  * started with. Named rather than scattered, so "no options chosen" and the payload it
  * sends cannot drift apart.
  */
@@ -65,14 +65,14 @@ export const UNCHOSEN: PrintOptions = {
 
 export interface ScheduledPrint {
   id: string;
-  /** Exactly what the printer's start-print command expects as `filename` — the full
+  /** Exactly what the printer's start-print command expects as `filename`, the full
    *  path, e.g. `benchy.gcode` or `misc/benchy.gcode`. */
   filename: string;
   /** The directory `filename` lives in, so the service can re-list it before firing
    *  rather than trust a listing that may be stale or scoped to a different folder. */
   dir: string;
   runAt: number;
-  /** What to start it with, or `null` for a schedule made with none — see `UNCHOSEN`. */
+  /** What to start it with, or `null` for a schedule made with none, see `UNCHOSEN`. */
   options: PrintOptions | null;
   createdAt: number;
   status: ScheduleStatus;
@@ -82,15 +82,15 @@ export interface ScheduledPrint {
   firedAt: number | null;
 }
 
-/** A generous ceiling, not a real limit anyone should reach — this is a to-do list of
+/** A generous ceiling, not a real limit anyone should reach: this is a to-do list of
  *  upcoming prints, not a queue meant to hold hundreds. */
 export const MAX_SCHEDULES = 100;
 
-/** More than a year out is almost certainly a typo (a year for a day), not intent — and
+/** More than a year out is almost certainly a typo (a year for a day), not intent, and
  *  a schedule that silently sits for that long is worse than one that failed to create. */
 const MAX_FUTURE_MS = 366 * 24 * 60 * 60 * 1000;
 
-/** How long a `fired` or `skipped` entry stays in the list before `prune` drops it —
+/** How long a `fired` or `skipped` entry stays in the list before `prune` drops it:
  *  enough to read what happened, not forever. */
 export const HISTORY_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -98,7 +98,7 @@ function randomId(now: number): string {
   return `sched-${now.toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/** More spools than a Canvas has trays — a body past this is not a mapping. */
+/** More spools than a Canvas has trays: a body past this is not a mapping. */
 const MAX_SPOOLS = 16;
 
 const isIndex = (v: unknown): v is number =>
@@ -112,7 +112,7 @@ export function normaliseColor(color: string): string {
 }
 
 /**
- * Validate a schedule's options. `undefined` for anything malformed — never a repaired
+ * Validate a schedule's options. `undefined` for anything malformed: never a repaired
  * guess, because what this describes is what an unattended job will be started with.
  * `null` in, `null` out: no options chosen is a real answer, not an error.
  */
@@ -204,7 +204,7 @@ export function normaliseStored(raw: unknown): ScheduledPrint[] {
       ? (r.status as ScheduleStatus)
       : 'pending';
     let skipReason = typeof r.skipReason === 'string' ? r.skipReason : null;
-    // A schedule saved before options existed has none — that is `null`, and it starts as
+    // A schedule saved before options existed has none, that is `null`, and it starts as
     // it always did. One whose options are present but unreadable is not the same thing:
     // starting it with the defaults would be guessing at what the user chose, so it is
     // skipped, and says why.
@@ -254,7 +254,7 @@ const trayLabel = (canvasId: number, trayId: number) => `C${canvasId + 1}:T${tra
 /**
  * Why the chosen spools cannot be trusted right now, or `null` when every one is still
  * what was chosen. Called by the service at the moment a schedule fires, against the live
- * Canvas state — an unknown state is a reason too, because "could not check" is not "fine".
+ * Canvas state: an unknown state is a reason too, because "could not check" is not "fine".
  */
 export function spoolMismatch(
   spools: readonly ChosenSpool[],

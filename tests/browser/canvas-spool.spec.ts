@@ -2,7 +2,7 @@
  * The spool tile on the Canvas card.
  *
  * `spoolTile` is a pure string function, but every assertion worth making about it is
- * about escaping — and `escapeHtml` escapes by setting `textContent` on a real element
+ * about escaping, and `escapeHtml` escapes by setting `textContent` on a real element
  * and reading `innerHTML` back. There is no DOM in `bun test`, so this belongs here.
  *
  * What it guards: a tray reports a filament NAME and a TYPE straight from the printer,
@@ -10,7 +10,7 @@
  * named by whoever loaded it is the one string on this card a person chooses, so it is
  * the one that has to survive a quote.
  *
- * The harness serves no stylesheet, so these assert classes and text — never computed
+ * The harness serves no stylesheet, so these assert classes and text: never computed
  * styles, which would all be zero here.
  */
 
@@ -65,7 +65,7 @@ test.describe('spoolTile', () => {
     const r = await render(page, tray({ tray_id: 1, status: 0 }));
     expect(r.stateClass).toContain('spool-empty');
     expect(r.text).toContain('Empty');
-    // "Tap to set" is the only thing telling a user the ring is clickable at all — an
+    // "Tap to set" is the only thing telling a user the ring is clickable at all, an
     // empty Canvas is otherwise four anonymous circles.
     expect(r.text).toContain('Tap to set');
     expect(r.load).toBe(0);
@@ -121,7 +121,7 @@ test.describe('spoolTile', () => {
         filament_name: '" onmouseover="alert(1)',
       }),
     );
-    // The whole name must survive INSIDE the attribute — if the quote escaped, the
+    // The whole name must survive INSIDE the attribute, if the quote escaped, the
     // parser would end `title` early and `onmouseover` would become a real handler.
     expect(r.title).toBe('" onmouseover="alert(1): click to edit');
     expect(r.html).not.toContain('onmouseover="alert');

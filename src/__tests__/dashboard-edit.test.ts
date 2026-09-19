@@ -71,7 +71,7 @@ describe('widthForColumns', () => {
 
   it('never returns something outside the three named widths', () => {
     // A stored width the rest of the app does not know would render as no width class
-    // at all — a card 1/12 of a screen wide, which is how the print-status card used
+    // at all: a card 1/12 of a screen wide, which is how the print-status card used
     // to render before it was managed here.
     for (let c = -4; c <= 24; c++) {
       expect(['compact', 'wide', 'full']).toContain(widthForColumns(c));

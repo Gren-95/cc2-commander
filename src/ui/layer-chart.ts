@@ -1,4 +1,4 @@
-/** Layer time chart — plots duration per layer with layer numbers on X-axis */
+/** Layer time chart: plots duration per layer with layer numbers on X-axis */
 
 import type { PrinterState } from '../printer-state';
 import { type LayerTimeEntry, trailingLayerRun } from '../types';
@@ -21,10 +21,10 @@ export type LayerTimePoint = LayerTimeEntry;
  *
  * The series is not guaranteed monotonic. The printer reports the finished job's
  * `current_layer` for a moment after a print ends, so an entry belonging to the previous
- * print can sit in front of the new one (ELEG-16 — the server no longer creates those,
+ * print can sit in front of the new one (ELEG-16: the server no longer creates those,
  * but a persisted series from before the fix still has one). Anything at or before the
  * last decrease belongs to a different print, so plotting it would mix two jobs on one
- * axis — and its duration spans the gap between them, which flattens every real layer
+ * axis, and its duration spans the gap between them, which flattens every real layer
  * against the baseline.
  */
 export function selectVisibleLayers(
@@ -121,7 +121,7 @@ function drawLayerChart(canvas: HTMLCanvasElement, state: PrinterState): void {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
 
-  // Determine visible range — the current print's last N layers
+  // Determine visible range: the current print's last N layers
   const visible = selectVisibleLayers(layerTimes);
   if (visible.length < 2) {
     ctx.fillStyle = pal.label;
@@ -160,7 +160,7 @@ function drawLayerChart(canvas: HTMLCanvasElement, state: PrinterState): void {
     ctx.fillText(`${Math.round(val)}s`, PADDING.left - 4, y);
   }
 
-  // X grid — layer labels
+  // X grid: layer labels
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   const xGridCount = Math.min(8, Math.floor(plotW / 50));
@@ -175,7 +175,7 @@ function drawLayerChart(canvas: HTMLCanvasElement, state: PrinterState): void {
     ctx.fillText(`L${layer}`, x, PADDING.top + plotH + 4);
   }
 
-  // Series, fill and dots are clipped to the plot rect — the domain above keeps every
+  // Series, fill and dots are clipped to the plot rect: the domain above keeps every
   // point inside it, and this keeps that true for any data shape we have not thought of
   // rather than letting a stray point paint over the axis labels.
   ctx.save();

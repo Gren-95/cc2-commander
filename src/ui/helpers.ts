@@ -41,7 +41,7 @@ export function fanPct(speed: number): number {
 /**
  * Add or remove a whole set of utility classes at once.
  *
- * A "state" is no longer one class the stylesheet reacts to — it is the utilities that
+ * A "state" is no longer one class the stylesheet reacts to: it is the utilities that
  * state implies. The hook class is kept alongside them because `querySelector` and
  * `classList.contains` still look for it.
  */
@@ -89,7 +89,7 @@ export const THUMBNAIL_PLACEHOLDER_SRC = `data:image/svg+xml,${encodeURIComponen
  * Marks an `<img>` as a printer thumbnail, so the delegated handler below recognises it.
  * Thumbnails render from several places, some as HTML strings with no element handle at
  * render time, so a marker class plus one listener beats threading a handler through
- * each call site — and it covers any thumbnail added later for free.
+ * each call site, and it covers any thumbnail added later for free.
  */
 export const THUMBNAIL_CLASS = 'thumb-img';
 

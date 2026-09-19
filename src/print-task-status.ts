@@ -2,7 +2,7 @@
  * What `task_status` in a print-history entry (`1036`) means.
  *
  * Shared by the browser's history card and the service's statistics, so there is one
- * answer rather than two that can drift — which is how the previous one got to be wrong.
+ * answer rather than two that can drift, which is how the previous one got to be wrong.
  *
  * ## Verified, not assumed
  *
@@ -14,7 +14,7 @@
  *     task_status 2   ran 0.00–0.35 × the estimate, every time   → stopped early
  *
  * The history corroborates it on its own terms: nearly every `2` is followed by a `1` of
- * the same file — a first layer that went wrong, a cancel, a restart that succeeded.
+ * the same file, a first layer that went wrong, a cancel, a restart that succeeded.
  *
  * So under the old mapping every successful print was shown as still *printing*, and
  * every abandoned one as *completed*.

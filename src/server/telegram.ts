@@ -1,5 +1,5 @@
 /**
- * Telegram integration — plugs into the shared StateStore.
+ * Telegram integration: plugs into the shared StateStore.
  * No own MQTT connection; uses the service's singleton bridge.
  */
 
@@ -124,7 +124,7 @@ export class TelegramIntegration {
     this.bot = new Bot(config.telegramToken);
     this.registerCommands();
 
-    // Listen for print events — serialized to avoid race conditions
+    // Listen for print events: serialized to avoid race conditions
     store.on('print_event', (event: PrintEvent) => {
       log.info(`Event: ${event.type}`);
       this.eventQueue = this.eventQueue
@@ -297,7 +297,7 @@ export class TelegramIntegration {
       const msg = (err as Error).message;
       if (msg.includes('message is not modified')) return true;
       log.warn(`Edit failed (msgId=${this.liveMessageId}): ${msg}`);
-      // Message might have been deleted — clear tracking so we send a new one
+      // Message might have been deleted, clear tracking so we send a new one
       this.liveMessageId = null;
       return false;
     }
@@ -313,7 +313,7 @@ export class TelegramIntegration {
    * Send a plain notice, unattached to a print.
    *
    * The dryer is the only caller: its session runs in the service now, so "the filament
-   * is dry and the bed is off" has to reach someone who is not looking at a browser —
+   * is dry and the bed is off" has to reach someone who is not looking at a browser,
    * which is the entire reason that timer moved off the page.
    */
   async notify(text: string): Promise<void> {

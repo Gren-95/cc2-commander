@@ -2,8 +2,8 @@
  * HTTP for the workshop tools: statistics, cost, maintenance and inventory.
  *
  * Its own router rather than more branches in `rest-api.ts`, which is already the
- * longest file in the service. It sits in `nodeRouter`'s chain after the auth gate, so —
- * as `index.ts` says of every surface — it is protected by existing, not by remembering.
+ * longest file in the service. It sits in `nodeRouter`'s chain after the auth gate, so
+ * (as `index.ts` says of every surface) it is protected by existing, not by remembering.
  *
  * A table of routes rather than a ladder of `if`s, so that a path which exists but was
  * asked for with the wrong method answers 405 with an `Allow` header, not 404: the

@@ -7,12 +7,12 @@
  * ## Form, per the data's job
  *
  * - **Headline numbers are stat tiles, not a chart.** Four numbers do not need axes.
- * - **Finish rate is a meter** — a ratio against a fixed limit — in the series hue, not
+ * - **Finish rate is a meter** (a ratio against a fixed limit) in the series hue, not
  *   green. It is a measurement rather than a verdict, and the status colours are
  *   reserved for status.
  * - **Machine hours by month is one series of columns.** One series needs no legend;
- *   the title names it. Values are labelled on the peak and the current month only —
- *   a number on every column is a number nobody reads — and every value is reachable
+ *   the title names it. Values are labelled on the peak and the current month only
+ *   (a number on every column is a number nobody reads) and every value is reachable
  *   from the tooltip and from the table beneath, so the tooltip is never the only way in.
  *
  * The column colour is `--chart-series`, the theme's generic series hue, deliberately
@@ -64,7 +64,7 @@ function tile(label: string, value: string, unit: string, sub: string, extra = '
 
 /**
  * A cost tile: the figure it names, or a dash while nothing is priced. Filament and
- * electricity are known for different sets of prints — see `cost-core.ts` — so each
+ * electricity are known for different sets of prints (see `cost-core.ts`) so each
  * carries its own "known for N of M" rather than one shared count.
  */
 function costTile(label: string, value: number | null, knownFor: number, total: number): string {
@@ -129,7 +129,7 @@ function chart(s: Stats): string {
       const labelled = (i === peakIndex || i === last) && m.hours > 0;
       const aria = `${monthName(m.month, 'long')}: ${m.prints} prints, ${fmtHours(m.hours)} hours`;
       // The whole band is the button, so the hit target is the column's slot rather than
-      // a sliver of bar — a month with two hours of printing is otherwise unhoverable.
+      // a sliver of bar, a month with two hours of printing is otherwise unhoverable.
       return `
         <button type="button" class="stats-col group flex h-full flex-1 flex-col items-center justify-end gap-1 border-0 bg-transparent p-0 cursor-default focus:outline-none"
           data-i="${i}" aria-label="${escapeHtml(aria)}">
@@ -272,7 +272,7 @@ export async function renderWorkshopStats(): Promise<void> {
 
   try {
     const tz = new Date().getTimezoneOffset();
-    // The currency is the Cost tab's, not this endpoint's — fetched alongside rather
+    // The currency is the Cost tab's, not this endpoint's: fetched alongside rather
     // than blocking on it, so a Cost fetch failure never keeps statistics from showing.
     const [res, costRes] = await Promise.all([
       fetchTimeout(`/api/workshop/stats?tz=${tz}`),

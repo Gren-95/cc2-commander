@@ -1,5 +1,5 @@
 /**
- * WebSocket client — connects to the CC2 Commander service instead of
+ * WebSocket client: connects to the CC2 Commander service instead of
  * directly to the printer's MQTT broker.
  *
  * Provides the same interface as the old CC2MqttClient so the UI
@@ -33,14 +33,14 @@ export interface WsClientOptions {
   /** Called when a drying session ends, whatever ended it */
   onDryerFinished?: (reason: string, label: string) => void;
   /**
-   * Called when a workshop tool (cost, maintenance, inventory) changed its own state —
+   * Called when a workshop tool (cost, maintenance, inventory) changed its own state,
    * a save, a spool taken off, a task marked done. Carries no data: the frame only says
    * something changed, and the open panel re-fetches its own `/api/workshop/*` route.
    */
   onWorkshopChanged?: () => void;
   /**
    * Called when a scheduled print was created, cancelled, fired or skipped. Same
-   * carries-no-data shape as `onWorkshopChanged` — the open Schedule panel re-fetches
+   * carries-no-data shape as `onWorkshopChanged`: the open Schedule panel re-fetches
    * `/api/schedule/`.
    */
   onScheduleChanged?: () => void;
@@ -92,7 +92,7 @@ export class WsClient {
 
     this.ws.onopen = () => {
       this.reconnectDelay = 1000;
-      // Don't set 'connected' yet — wait for init message
+      // Don't set 'connected' yet: wait for init message
     };
 
     this.ws.onmessage = (event) => {

@@ -18,8 +18,8 @@ const GATED = true;
 
 /**
  * The compat layers are pure state→JSON translation, and a client breaks silently when
- * a field's shape drifts. These assert the emitted shape directly — no printer, no
- * network — which is what ELEG-26 asked for.
+ * a field's shape drifts. These assert the emitted shape directly (no printer, no
+ * network) which is what ELEG-26 asked for.
  */
 
 describe('octoprintApiSettings', () => {
@@ -30,14 +30,14 @@ describe('octoprintApiSettings', () => {
   it('reports it as enabled when a key IS required', () => {
     // The second lie this module has now told: a hardcoded `false` was honest until
     // AUTH_API_KEY existed, after which it sent a Mainsail user looking for a setting
-    // they were told not to configure — and then refused them with a 401.
+    // they were told not to configure, and then refused them with a 401.
     expect(octoprintApiSettings(GATED)).toEqual({ enabled: true, key: null });
   });
 
   it('never emits a key, in either state', () => {
     // The original regression: a fixed string that made clients show themselves as
     // authenticated against a service that checked nothing. The real key must not leak
-    // here either — this endpoint is reachable without one.
+    // here either: this endpoint is reachable without one.
     expect(octoprintApiSettings(OPEN).key).toBeNull();
     expect(octoprintApiSettings(GATED).key).toBeNull();
   });
@@ -81,7 +81,7 @@ describe('oneshotToken', () => {
 
   it('refuses when a key is required', () => {
     // This token exists to authenticate a URL that cannot carry a header. Handing out a
-    // fixed one with the gate armed would let any caller mint it — a bypass, not a
+    // fixed one with the gate armed would let any caller mint it: a bypass, not a
     // compatibility shim.
     expect(oneshotToken(GATED)).toBeNull();
   });
@@ -120,7 +120,7 @@ describe('octoprintLoginPayload', () => {
 
   it('still reports full control, because that is true', () => {
     // With no authentication every caller does have admin capability. Understating it
-    // would be its own dishonesty — the exposure is the point of ELEG-2.
+    // would be its own dishonesty: the exposure is the point of ELEG-2.
     expect(payload.admin).toBe(true);
     expect(payload.user).toBe(true);
     expect(payload.active).toBe(true);
@@ -170,7 +170,7 @@ describe('the oneshot token, which is deliberately still issued', () => {
   it('is a non-empty string, because withdrawing it could break the WebSocket', () => {
     // Real Moonraker uses this where a header cannot be set (WebSocket, camera stream),
     // and a client may fetch one BEFORE reading access.info. Refusing it would be a
-    // regression, not a security improvement — nothing validates it either way.
+    // regression, not a security improvement: nothing validates it either way.
     expect(typeof ONESHOT_TOKEN).toBe('string');
     expect(ONESHOT_TOKEN.length).toBeGreaterThan(0);
   });

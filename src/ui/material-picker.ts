@@ -1,6 +1,6 @@
 /**
  * A searchable dropdown for filament material, enhancing any
- * `input[data-material-picker]` with a filtered list — so entering "PLA" or something
+ * `input[data-material-picker]` with a filtered list, so entering "PLA" or something
  * far less common, like a carbon-fibre or wood-fill blend, is a few keystrokes and a
  * pick rather than typing the exact spelling from memory.
  *
@@ -8,8 +8,8 @@
  *
  * The list is a shortcut, not a closed set. This app's own `materialKey()`
  * (`workshop/cost-core.ts`) just trims and upper-cases whatever is typed, and a spool
- * holding a material this list has never heard of — a store's own blend, a filament
- * from a brand with its own name for it — is still a material. Picking an option fills
+ * holding a material this list has never heard of (a store's own blend, a filament
+ * from a brand with its own name for it) is still a material. Picking an option fills
  * the field; it does not restrict what can stay in it.
  *
  * ## Enhancement, not markup
@@ -24,7 +24,7 @@
 /** Roughly what a slicer's own material dropdown offers. */
 const BASIC = ['PLA', 'PLA+', 'PETG', 'ABS', 'ASA', 'TPU', 'Nylon (PA)', 'PC', 'PVA', 'HIPS', 'PP'];
 
-/** Reinforced, engineering and novelty filaments — the ones worth a shortcut most. */
+/** Reinforced, engineering and novelty filaments: the ones worth a shortcut most. */
 const WILD = [
   'PLA-CF',
   'PETG-CF',
@@ -114,8 +114,8 @@ class MaterialPicker {
     // Closing on blur, rather than a document-level "click outside" listener, is what
     // keeps this instance-free of the app: a listener on `document` would outlive every
     // field this enhances, since a form that rebuilds its markup (Cost, Inventory) never
-    // removes it. Any click elsewhere moves focus off the input — onto whatever was
-    // clicked, or nowhere — so blur already fires for exactly the cases a click-outside
+    // removes it. Any click elsewhere moves focus off the input (onto whatever was
+    // clicked, or nowhere) so blur already fires for exactly the cases a click-outside
     // listener exists to catch.
     input.addEventListener('blur', () => this.close());
   }
@@ -149,7 +149,7 @@ class MaterialPicker {
     this.menu.classList.remove('hidden');
     this.input.setAttribute('aria-expanded', 'true');
 
-    // Keep the buttons from stealing focus mid-click — same trick the stepper uses, or
+    // Keep the buttons from stealing focus mid-click: same trick the stepper uses, or
     // the field blurs, closes the menu, and the click lands on nothing.
     for (const opt of this.menu.querySelectorAll<HTMLElement>('[data-index]')) {
       opt.addEventListener('mousedown', (e) => e.preventDefault());
@@ -211,8 +211,8 @@ class MaterialPicker {
 }
 
 /**
- * Utilities that decide how much of the row the field claims — `flex-1`, `min-w-0`,
- * a fixed `w-24` — as opposed to how it looks. These have to move to the wrapper:
+ * Utilities that decide how much of the row the field claims (`flex-1`, `min-w-0`,
+ * a fixed `w-24`) as opposed to how it looks. These have to move to the wrapper:
  * the input is no longer the flex item once it is wrapped, so left on the input they
  * go inert and every call site that sizes this field (the Cost panel's `flex-1`
  * material row, Inventory's fixed-width one) silently collapses to the browser's

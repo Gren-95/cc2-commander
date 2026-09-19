@@ -34,7 +34,7 @@ describe('parseEntity', () => {
   });
 
   it('returns nothing for the states an offline sensor reports', () => {
-    // These are values, not errors — the request succeeds and carries them.
+    // These are values, not errors: the request succeeds and carries them.
     for (const state of ['unavailable', 'unknown', '']) {
       expect(parseEntity(entity({ state }))).toBeNull();
     }
@@ -103,7 +103,7 @@ describe('shouldRingBuzzer', () => {
     expect(shouldRingBuzzer({ type: 'error' })).toBe(false);
   });
 
-  it('stays quiet for anything else — a status change is not a failure', () => {
+  it('stays quiet for anything else: a status change is not a failure', () => {
     expect(shouldRingBuzzer({ type: 'status_change' })).toBe(false);
     expect(shouldRingBuzzer({ type: 'print_completed' })).toBe(false);
   });

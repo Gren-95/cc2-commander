@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs';
  *
  * These replace the six suites that ran under `@vitest-environment jsdom`. Everything
  * that does not need a DOM runs under `bun test` instead, which is both faster and one
- * fewer toolchain — vitest is Vite, and removing Vite was the point.
+ * fewer toolchain: vitest is Vite, and removing Vite was the point.
  *
  * The move is not a like-for-like port. jsdom approximates a browser; these run in one.
  * `focus-trap.test.ts` said so itself: *"What jsdom does NOT implement is the native
@@ -32,7 +32,7 @@ export default defineConfig({
   // about half the cores, browsers contend for CPU. On a 4-core CI runner this is still 2.
   workers: '50%',
   forbidOnly: !!process.env.CI,
-  // Written outside the project when those directories exist — the dev container mounts
+  // Written outside the project when those directories exist, the dev container mounts
   // volumes at `/test-results` and `/playwright-report` precisely so a test run leaves
   // nothing in the checkout. Falls back to the defaults everywhere else.
   outputDir: existsSync('/test-results') ? '/test-results/run' : undefined,

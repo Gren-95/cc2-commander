@@ -2,9 +2,9 @@
  * Lift a color's minimum brightness so the gcode preview's lighting can actually show
  * on it.
  *
- * The gcode-preview library's tube shader is purely multiplicative —
+ * The gcode-preview library's tube shader is purely multiplicative:
  * `finalColor = uColor * (diff + ambient) * brightness` (its fragment shader, in
- * node_modules/gcode-preview/dist/gcode-preview.es.js) — so a channel that is exactly 0
+ * node_modules/gcode-preview/dist/gcode-preview.es.js), so a channel that is exactly 0
  * stays exactly 0 under any of the three light values `ui/gcode-preview.ts` can tune. A
  * black or near-black filament therefore rendered as a flat, shapeless silhouette no
  * matter how that lighting was set: there is nothing for it to multiply. Scaling every
@@ -13,7 +13,7 @@
  *
  * True black gets its own, more generous floor: there is no hue to preserve for it, so
  * it can go all the way to a plainly visible mid grey rather than the subtler lift a
- * colored filament gets — the model should read as grey, not as a slightly-less-black
+ * colored filament gets, the model should read as grey, not as a slightly-less-black
  * black.
  *
  * Its own module, not part of gcode-preview.ts, so a test can import this pure function

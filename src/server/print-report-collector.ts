@@ -1,5 +1,5 @@
 /**
- * Print Report Collector — captures per-print data for post-print summary reports.
+ * Print Report Collector: captures per-print data for post-print summary reports.
  *
  * Listens to StateStore print lifecycle events. When a print starts, begins
  * capturing snapshots at intervals + chart data. When the print ends, finalizes
@@ -89,7 +89,7 @@ interface MinMaxAvg {
   avg: number;
 }
 
-/** Interval between snapshot captures (ms) — default 2 minutes */
+/** Interval between snapshot captures (ms): default 2 minutes */
 const SNAPSHOT_INTERVAL_MS = 2 * 60 * 1000;
 /** Max snapshots per print */
 const MAX_SNAPSHOTS = 60;

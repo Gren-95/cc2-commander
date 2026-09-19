@@ -1,5 +1,5 @@
 /**
- * Cost, maintenance and inventory — the three workshop tools' decisions.
+ * Cost, maintenance and inventory: the three workshop tools' decisions.
  *
  * Weighted towards what would be wrong without looking wrong: a price that was never
  * set producing a number, a multi-material print priced as one material, a spool that

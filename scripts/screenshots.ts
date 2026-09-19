@@ -3,7 +3,7 @@
  * Screenshots of every view, at every size.
  *
  * Built because checking a layout change meant writing a throwaway Playwright script
- * each time — and because "it looks cramped on my phone" is not something a gate can
+ * each time, and because "it looks cramped on my phone" is not something a gate can
  * tell you. `bun run gates` says so itself: *no browser and no screenshot*.
  *
  *   bun scripts/screenshots.ts                      every view, every viewport
@@ -19,7 +19,7 @@
  * reason those parameters exist.
  *
  * NOT part of `bun run gates`. It needs a running service with a real printer behind it,
- * and it asserts nothing — it produces pictures for a person to look at. A gate that
+ * and it asserts nothing: it produces pictures for a person to look at. A gate that
  * needs a printer is a gate that fails on every machine that does not have one.
  */
 
@@ -30,7 +30,7 @@ import { type Browser, type BrowserContext, type Page, chromium } from 'playwrig
 
 /** Sizes worth checking, and why each one. */
 const VIEWPORTS = {
-  // Below 700px the dashboard becomes the one-card focus rail — a different layout,
+  // Below 700px the dashboard becomes the one-card focus rail: a different layout,
   // not a narrower one, so it has to be looked at separately.
   phone: { width: 390, height: 844, label: 'iPhone-ish, focus rail' },
   tablet: { width: 820, height: 1180, label: 'iPad-ish, two columns' },
@@ -85,14 +85,14 @@ async function settle(page: Page): Promise<void> {
       { timeout: 15_000 },
     )
     .catch(() => {
-      // A service with no printer behind it never fills in. Shoot it anyway — an empty
+      // A service with no printer behind it never fills in. Shoot it anyway: an empty
       // dashboard is a legitimate thing to want a picture of.
     });
   // Charts animate in and the segmented fills measure themselves a frame late.
   await page.waitForTimeout(1200);
 
   // Toasts are transient overlays that sit on top of whatever the shot is of, and the
-  // connect toast names the printer's serial — which is not something to publish in a
+  // connect toast names the printer's serial, which is not something to publish in a
   // README. Clearing them is right for every screenshot, not just the documented ones.
   await page.evaluate(
     `(() => {
@@ -105,7 +105,7 @@ async function settle(page: Page): Promise<void> {
 /**
  * Sign in once, and hand every later context the resulting cookie.
  *
- * Without this the script photographs the login card — correctly, and uselessly — for
+ * Without this the script photographs the login card (correctly, and uselessly) for
  * every view and every viewport, because `AUTH_PASSWORD` turns the whole app into one
  * overlay. That is exactly what it did between auth landing and this function existing.
  *
@@ -140,9 +140,9 @@ async function signIn(browser: Browser): Promise<StorageState | undefined> {
   await field.fill(password);
   await page.locator('button:has-text("Sign in")').first().click();
   // The field is hidden rather than removed, so waiting for it to disappear from the
-  // DOM waits forever — which is how the login page ended up in the screenshots.
+  // DOM waits forever, which is how the login page ended up in the screenshots.
   await field.waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => {
-    throw new Error('Sign-in did not take — wrong password, or the service refused it.');
+    throw new Error('Sign-in did not take: wrong password, or the service refused it.');
   });
 
   const state = await context.storageState();
@@ -155,8 +155,8 @@ const THEMES = ['light', 'dark'] as const;
 /**
  * The three pictures the README shows, once per theme, into `docs/images/`.
  *
- * They are viewport-sized rather than full-page — a README picture is a front door, not
- * an inventory — which is why the general mode above cannot make them, and why they used
+ * They are viewport-sized rather than full-page (a README picture is a front door, not
+ * an inventory) which is why the general mode above cannot make them, and why they used
  * to be cropped by hand. Each name becomes `<name>-<theme>.png`, and the README picks
  * between the pair with `prefers-color-scheme`.
  *
@@ -167,7 +167,7 @@ const THEMES = ['light', 'dark'] as const;
  * light theme would ship without anyone noticing.
  *
  * Read-only against the service: page loads, no commands. It does not press Start on the
- * dryer — it photographs the form.
+ * dryer: it photographs the form.
  */
 async function readmeShots(): Promise<void> {
   const out = flag('out', 'docs/images');
@@ -223,7 +223,7 @@ async function readmeShots(): Promise<void> {
       const start = await page.locator('#dryer-start').boundingBox();
       if (!strip || !start) {
         throw new Error(
-          'The dryer form is not showing — a session may be running, which is a different picture.',
+          'The dryer form is not showing: a session may be running, which is a different picture.',
         );
       }
       // 16px above, not more: the sticky header's bottom border sits just over the strip
@@ -273,12 +273,12 @@ async function main(): Promise<void> {
       console.log(`  ${file}`);
       count++;
 
-      // One picture per card, from the dashboard only — a full-page shot of fifteen
+      // One picture per card, from the dashboard only: a full-page shot of fifteen
       // cards is where a cramped one hides.
       if (has('cards') && view.name === 'dashboard') {
         // Below 700px the dashboard is a focus rail showing ONE card, so `:visible`
         // finds exactly one. The rail's "All" button restores the scrolling grid, which
-        // is the only way to photograph every card at a phone's width — and a phone's
+        // is the only way to photograph every card at a phone's width, and a phone's
         // width is where cramped layouts live.
         const all = page.locator('#mobile-focus-rail button[aria-label="Show all cards"]');
         if (await all.count()) {

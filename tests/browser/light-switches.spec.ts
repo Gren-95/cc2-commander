@@ -80,7 +80,7 @@ test('sends nothing when nothing was used', async ({ page }) => {
 test('the printer’s report wins over a click that has not been confirmed', async ({ page }) => {
   await page.locator('label:has(#led-toggle-fans)').click();
   expect(await state(page)).toEqual([true, true]);
-  // The printer says the light is off — say it was refused, or was already changed.
+  // The printer says the light is off: say it was refused, or was already changed.
   await show(page, false);
   expect(await state(page)).toEqual([false, false]);
 });

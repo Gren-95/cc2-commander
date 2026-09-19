@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [Bun](https://bun.sh) 1.2.3 or newer — `curl -fsSL https://bun.sh/install | bash`
+- [Bun](https://bun.sh) 1.2.3 or newer: `curl -fsSL https://bun.sh/install | bash`
 - An Elegoo CC2 printer on the same network, set to **LAN-only mode**
 
 Bun is the package manager, the TypeScript runtime and the HTTP server. There is no
@@ -16,12 +16,12 @@ bun run dev
 ```
 
 This builds the frontend, starts the service, and rebuilds on change. Open
-`http://localhost:8088` — one port, the same shape as production.
+`http://localhost:8088`: one port, the same shape as production.
 
 ### Develop in a container (nothing generated on your machine)
 
 `bun install` puts 552 MB in `node_modules/`, and `bunx playwright install` puts **1.3 GB**
-in `~/.cache/ms-playwright` — outside the project entirely. Add `dist/`, the runtime
+in `~/.cache/ms-playwright`: outside the project entirely. Add `dist/`, the runtime
 `data/` and the test output and a checkout costs about 1.9 GB of host disk.
 
 The `dev` service in `docker-compose.yml` keeps all of it in Docker volumes instead. Only the source stays
@@ -35,11 +35,11 @@ docker compose logs -f dev
 
 The service comes up on `http://localhost:8088` exactly as `bun run dev` does, rebuilding
 and restarting on change. Every generated directory is a named volume mounted **on top of**
-the bind mount — `node_modules`, `dist`, `data`, `test-results`, `playwright-report`, and
-the browsers at `/ms-playwright` — so the container has its own and the host directory is
+the bind mount (`node_modules`, `dist`, `data`, `test-results`, `playwright-report`, and
+the browsers at `/ms-playwright`) so the container has its own and the host directory is
 never written to.
 
-Only `dist/` and `node_modules/` appear in the checkout, as empty 4KB mount points —
+Only `dist/` and `node_modules/` appear in the checkout, as empty 4KB mount points:
 Bun resolves one and the server serves the other from `/app`, so those two cannot live
 anywhere else. Everything else the container generates (`data`, the Playwright output,
 screenshots) is mounted OUTSIDE `/app`, because a volume mounted inside the bind-mounted
@@ -52,7 +52,7 @@ directory a volume is mounted on detaches the mount: the container then sees an 
 --profile dev up -d --force-recreate` puts it right.
 
 **The catch, and it is a real one:** with `node_modules` only inside the container, your
-editor's TypeScript server has no types — no autocomplete, no go-to-definition, every
+editor's TypeScript server has no types: no autocomplete, no go-to-definition, every
 import underlined. The fix is to run the editor in the container too (VS Code Dev
 Containers, JetBrains remote). There is no arrangement that gives you both an empty host
 and a host language server.
@@ -62,11 +62,11 @@ Two things worth knowing:
 - **`UID`/`GID`.** The container runs as your user so it cannot leave root-owned files in
   the bind mount, and the volumes are seeded from directories the image creates as uid
   1000. If `id -u` gives something else, pass it (`UID=$(id -u) GID=$(id -g) docker
-  compose …`) and recreate the volumes with `down -v` — seeding happens once, on an empty
+  compose …`) and recreate the volumes with `down -v`: seeding happens once, on an empty
   volume.
 - **Reclaiming the host copies.** Nothing deletes them for you. Once the container works,
   `node_modules/`, `dist/`, `test-results/` and `~/.cache/ms-playwright` can go. Look at
-  `data/` before removing it — it holds the gcode cache and any drying session, and the
+  `data/` before removing it: it holds the gcode cache and any drying session, and the
   container's `data` volume starts empty.
 
 ## Build
@@ -76,7 +76,7 @@ bun run build
 ```
 
 Production output goes to `dist/`. The service serves it on port 8088 from Bun's static
-route table, which is built once at startup — so a rebuild needs a service restart to
+route table, which is built once at startup, so a rebuild needs a service restart to
 be picked up.
 
 ## The README pictures
@@ -88,8 +88,8 @@ and the README picks between them with `prefers-color-scheme`. Regenerate the lo
 bun run screenshots --readme            # needs AUTH_PASSWORD (or --password) if auth is on
 ```
 
-It photographs a **running service with a real printer behind it** — an empty dashboard
-is all `--` — so point it at production (`--url`) or a dev service, never at a second
+It photographs a **running service with a real printer behind it** (an empty dashboard
+is all `--`) so point it at production (`--url`) or a dev service, never at a second
 service beside production: that would be a second MQTT connection. It only loads pages;
 it presses nothing, and it stops with an error rather than shoot the dryer if a drying
 session is running.

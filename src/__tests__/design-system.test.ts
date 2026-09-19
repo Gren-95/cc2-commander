@@ -9,7 +9,7 @@
  * Each rendered plausibly, so each survived review.
  *
  * A state delta is what makes this safe: `add` names what "selected" sets, `remove`
- * names the neutral it displaces. The two must line up — for every property `add`
+ * names the neutral it displaces. The two must line up, for every property `add`
  * touches, `remove` must clear the base's utility for that property, or the element ends
  * up wearing both.
  */
@@ -79,7 +79,7 @@ describe('state deltas', () => {
    * Standalone on/off buttons, which are not pickers at all.
    *
    * A picker's delta can be shared because every option sits on the same base. These sit
-   * on `BTN`, whose neutral text colour is `text-fg` — so `CHIP_ACTIVE` cannot be reused
+   * on `BTN`, whose neutral text colour is `text-fg`, so `CHIP_ACTIVE` cannot be reused
    * for them: it clears `text-fg-soft`, which these do not have, and its `text-white`
    * would then sit beside a surviving `text-fg`. Two utilities, one property, no defined
    * winner. Each carries a delta that clears the neutral it actually displaces.
@@ -118,8 +118,8 @@ describe('state deltas', () => {
   });
 
   it('every segmented picker shares one delta, and it is not the chip one', () => {
-    // A second family, deliberately: a segmented button has no background of its own —
-    // the sliding fill behind it supplies the colour — so "selected" is a text colour
+    // A second family, deliberately: a segmented button has no background of its own
+    // (the sliding fill behind it supplies the colour) so "selected" is a text colour
     // and nothing else. Adding the chip's `bg-accent` here would paint a static pill on
     // top of the sliding one and hide the slide entirely.
     const deltas = new Set(

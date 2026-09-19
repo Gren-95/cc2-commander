@@ -68,7 +68,7 @@ describe('isNavigation', () => {
   it('refuses every method a browser cannot navigate with', () => {
     // A POST to an unmatched path is an API call to something that does not exist.
     // Answering it with the app's HTML at 200 gives the caller a success it cannot
-    // parse — found when an endpoint was removed and every POST to it started returning the
+    // parse: found when an endpoint was removed and every POST to it started returning the
     // dashboard.
     for (const m of ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
       expect(isNavigation(m), m).toBe(false);

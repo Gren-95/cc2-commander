@@ -4,7 +4,7 @@
  * The native control is two 8px arrows inside the field: unhittable on a touchscreen,
  * hover-only in Chrome, absent on iOS, and different in every browser. What replaces it
  * has to behave at least as well, and the parts worth pinning down are the ones a
- * hand-rolled stepper usually gets wrong — clamping, an empty field, decimal steps, and
+ * hand-rolled stepper usually gets wrong: clamping, an empty field, decimal steps, and
  * telling the app the value moved.
  *
  * In a browser because the enhancement is DOM surgery: the input is MOVED into a wrapper
@@ -57,7 +57,7 @@ test.describe('the stepper', () => {
   }) => {
     // The classes, not the computed style: the harness serves no stylesheet, so nothing
     // Tailwind emits applies here and `appearance` would read `auto` however correct the
-    // module is. That the rule reaches the page is checked on the real build instead —
+    // module is. That the rule reaches the page is checked on the real build instead:
     // measured `appearance: textfield` there.
     await mount(page, 'min="0" max="10" step="1" value="5"');
     const cls = await page.$eval('#n', (el) => [...el.classList]);
@@ -86,7 +86,7 @@ test.describe('the stepper', () => {
   test('steps an empty field to its minimum, not to NaN or a surprising zero', async ({
     page,
   }) => {
-    // The bed field starts blank. `'' + 5` is not 5, and `Number('')` is 0 — which for a
+    // The bed field starts blank. `'' + 5` is not 5, and `Number('')` is 0, which for a
     // field whose min is 40 would offer an illegal value the printer then rejects.
     await mount(page, 'min="40" max="120" step="5" value=""');
     await press(page, 1);

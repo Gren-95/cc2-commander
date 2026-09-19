@@ -3,7 +3,7 @@ import { formatRelative } from '../ui/relative-time';
 
 /**
  * ELEG-45. The formatting is pure and `now` is a parameter, so the boundaries are
- * directly assertable — and the boundaries are exactly where these read wrong.
+ * directly assertable, and the boundaries are exactly where these read wrong.
  *
  * Every case is expressed as an offset from a fixed `NOW` so the arithmetic is visible
  * in the test rather than hidden in a literal.

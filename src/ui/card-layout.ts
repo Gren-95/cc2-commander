@@ -1,5 +1,5 @@
 /**
- * Dashboard card layout — the pure half.
+ * Dashboard card layout: the pure half.
  *
  * Deliberately free of DOM and localStorage so it can be unit-tested directly (the
  * test runner here is `bun test`, which has no document). `ui/settings.ts` owns the
@@ -13,7 +13,7 @@
  * "always visible", so choosing a position also chose a width and vice versa.
  *
  * Now there is ONE ordered list and a width per card. Order is order; width is width.
- * The old two-panel layouts are migrated rather than discarded — see
+ * The old two-panel layouts are migrated rather than discarded: see
  * `normaliseCardLayout`.
  */
 
@@ -52,9 +52,9 @@ export interface CardLayout {
 /**
  * Bumped when a stored layout needs rewriting rather than merely reading.
  *
- * 2: widths became uniform. Cards used to default to three different spans by identity —
- * the old sidebar six were quarters, two log cards were full width, everything else a
- * half — which made a fresh dashboard look arbitrary rather than designed: at 1600px
+ * 2: widths became uniform. Cards used to default to three different spans by identity
+ * (the old sidebar six were quarters, two log cards were full width, everything else a
+ * half) which made a fresh dashboard look arbitrary rather than designed: at 1600px
  * that is 387px, 783px and 1576px cards in the same grid. A layout from before this
  * has its widths dropped once, so the uniform default applies; anything resized after
  * the reset is kept.
@@ -96,7 +96,7 @@ export const ALL_CARD_IDS = [...DEFAULT_ORDER];
  *
  * `camera-card` is now part of `print-status-bar`: the camera sits at the top of the print
  * card, so a separate card for it was a second place to look at the same job. This is
- * deliberately a list of *named* retirements and not "drop anything unrecognised" — an
+ * deliberately a list of *named* retirements and not "drop anything unrecognised": an
  * unknown card is otherwise kept, so a layout saved by a newer build survives a visit from
  * an older one. A hidden `camera-card` is not carried over: the camera is part of the print
  * card now, and shows or hides with it.
@@ -107,7 +107,7 @@ const RETIRED_CARDS: readonly string[] = ['camera-card'];
  * The width every card gets unless it has been resized.
  *
  * One bucket, not three. `compact` is a quarter above 1500px, a third from 1101, a half
- * from 701 and full width below — so the grid is regular at every breakpoint instead of
+ * from 701 and full width below, so the grid is regular at every breakpoint instead of
  * only at the one it was tuned for. Cards that genuinely want the room (the MQTT log,
  * the event log) can still be widened in edit mode; the point is that the *default* is
  * uniform rather than a table of exceptions nobody can predict.
@@ -119,7 +119,7 @@ const UNIFORM_WIDTH: CardWidth = 'compact';
  *
  * Written with `min-[…]` rather than `max-[…]` deliberately. Tailwind does not order
  * overlapping arbitrary max-width variants by breakpoint, so `max-[1100px]:col-[span_6]`
- * and `max-[700px]:col-[span_12]` both applied at 390px and the WIDER one won — every
+ * and `max-[700px]:col-[span_12]` both applied at 390px and the WIDER one won: every
  * card came out half-width on a phone, overlapping its neighbour. Ascending `min-*`
  * variants have an unambiguous order: the largest matching one wins, which is the
  * cascade this needs.
@@ -138,7 +138,7 @@ export function defaultWidthFor(_id: string): CardWidth {
   return UNIFORM_WIDTH;
 }
 
-/** Display names for cards, as **HTML fragments** — each carries a Bootstrap Icon. */
+/** Display names for cards, as **HTML fragments**: each carries a Bootstrap Icon. */
 export const CARD_NAMES: Record<string, string> = {
   'print-status-bar': `${icon('print')} Print & Camera`,
   'temps-card': `${icon('temperature')} Temperatures`,
@@ -156,7 +156,7 @@ export const CARD_NAMES: Record<string, string> = {
 };
 
 /**
- * One glyph per card, for the mobile focus rail — where there is no room for a label.
+ * One glyph per card, for the mobile focus rail, where there is no room for a label.
  *
  * Separate from `CARD_NAMES` because that is an HTML fragment (icon **and** text) meant
  * for the settings list; the rail needs the icon's NAME so it can size and colour it
@@ -165,7 +165,7 @@ export const CARD_NAMES: Record<string, string> = {
 /**
  * The card's name as plain text.
  *
- * `CARD_NAMES` values are **HTML** — each is an `<i>` glyph followed by the words — so
+ * `CARD_NAMES` values are **HTML** (each is an `<i>` glyph followed by the words) so
  * they are safe to drop into an element's contents and actively unsafe anywhere else.
  * Interpolated into `title="…"` or `aria-label="…"` the tag closes the attribute and the
  * rest of the markup lands on screen as text, which is exactly what edit mode's first
@@ -194,37 +194,37 @@ export const CARD_ICONS: Record<string, IconName> = {
 /**
  * A hue per card, for the mobile focus rail.
  *
- * Fifteen identical grey buttons are a memory test — the rail is used by reaching for
+ * Fifteen identical grey buttons are a memory test: the rail is used by reaching for
  * a position, and colour is what makes that reachable without reading fifteen
  * tooltips. Each card keeps its hue wherever it sits in the order.
  *
  * Chosen at a single saturation and lightness so they read as one set rather than a
  * ransom note, and so each stays legible on both themes: the rail tints the button at
  * low alpha when idle and fills it solid when focused, and a mid-lightness hue has
- * enough contrast either way. Related cards share a family — the two logs are both
- * violet, the print-history/reports pair both teal — so the rail groups by eye.
+ * enough contrast either way. Related cards share a family (the two logs are both
+ * violet, the print-history/reports pair both teal) so the rail groups by eye.
  */
 export const CARD_ACCENTS: Record<string, string> = {
-  'print-status-bar': '#3b82f6', // blue — the job itself, and the view of it
-  'temps-card': '#ef4444', // red — heat
-  'canvas-card': '#f97316', // orange — filament
-  'fans-card': '#06b6d4', // cyan — air
-  'toolhead-card': '#8b5cf6', // violet — motion
-  'speed-flow-card': '#eab308', // amber — rate
-  'gcode-preview-card': '#22c55e', // green — geometry
-  'files-card': '#0ea5e9', // sky — storage
-  'print-history-card': '#14b8a6', // teal — records
-  'print-reports-card': '#10b981', // emerald — records
-  'timelapse-card': '#a855f7', // purple — media
-  'event-log-card': '#6366f1', // indigo — logs
-  'log-card': '#7c3aed', // violet — logs
+  'print-status-bar': '#3b82f6', // blue (the job itself, and the view of it
+  'temps-card': '#ef4444', // red) heat
+  'canvas-card': '#f97316', // orange (filament
+  'fans-card': '#06b6d4', // cyan) air
+  'toolhead-card': '#8b5cf6', // violet (motion
+  'speed-flow-card': '#eab308', // amber) rate
+  'gcode-preview-card': '#22c55e', // green (geometry
+  'files-card': '#0ea5e9', // sky) storage
+  'print-history-card': '#14b8a6', // teal (records
+  'print-reports-card': '#10b981', // emerald) records
+  'timelapse-card': '#a855f7', // purple (media
+  'event-log-card': '#6366f1', // indigo) logs
+  'log-card': '#7c3aed', // violet, logs
 };
 
 /** Shown when every card is visible at once, i.e. the scrolling dashboard. */
 export const FOCUS_ALL = 'all';
 
 /**
- * The cards a user can actually focus: layout order, minus the hidden ones — and minus
+ * The cards a user can actually focus: layout order, minus the hidden ones, and minus
  * anything that is not a card this build has. A saved order keeps ids it does not
  * recognise (see `normaliseCardLayout`), and one of those has no name, icon or element:
  * it would be a blank button on the rail, and a saved focus on it would show an empty
@@ -237,8 +237,8 @@ export function focusableCards(layout: CardLayout): string[] {
 /**
  * Which card the focus rail should show.
  *
- * A saved choice can go stale — the card may have been hidden in Settings since, or
- * removed from the app entirely — and silently showing an empty dashboard would look
+ * A saved choice can go stale (the card may have been hidden in Settings since, or
+ * removed from the app entirely) and silently showing an empty dashboard would look
  * like a bug. So a stale choice falls back to the first visible card rather than being
  * honoured or cleared.
  *
@@ -263,7 +263,7 @@ export function defaultCardLayout(): CardLayout {
   };
 }
 
-/** Strings only — a hand-edited or half-written layout should not poison the DOM pass. */
+/** Strings only: a hand-edited or half-written layout should not poison the DOM pass. */
 function stringArray(value: unknown): string[] | null {
   if (!Array.isArray(value)) return null;
   return value.filter((v): v is string => typeof v === 'string');
@@ -289,13 +289,13 @@ function widthMap(value: unknown): Record<string, CardWidth> {
  * Four jobs, and the last two both have history behind them:
  *
  * 1. Defaults for anything absent, and non-strings dropped.
- * 2. **Two older formats migrated** — `{ order, hidden }` from before panels existed,
+ * 2. **Two older formats migrated**: `{ order, hidden }` from before panels existed,
  *    and `{ sidebar, main, … }` from while they did. A two-panel layout becomes
  *    sidebar-then-main in one list, with the sidebar half defaulting to `compact`, so
  *    an existing dashboard comes back looking like itself.
  * 3. **Every known card placed.** A card added to the app after a user last saved their
  *    layout is in no list, and before ELEG-44 this backfill lived in `applyCardLayout`
- *    — which mutated its in-memory copy but never saved it, while the settings panel
+ *    which mutated its in-memory copy but never saved it, while the settings panel
  *    re-read straight from storage. So the new card rendered on the dashboard but was
  *    missing from the settings list, and the next reorder saved a layout that still did
  *    not mention it. Doing it here means both paths see the same layout.
@@ -318,7 +318,7 @@ export function normaliseCardLayout(parsed: unknown): CardLayout {
     : (stringArray(fields.order) ?? [...DEFAULT_ORDER]);
 
   // A layout from before widths were uniform keeps its order, its hidden set and its
-  // collapsed set — only the widths go, because those were assigned by card identity
+  // collapsed set, only the widths go, because those were assigned by card identity
   // rather than chosen by anyone. Resizing after the reset is recorded normally and
   // survives, since the version is stamped below.
   const stale = fields.v !== LAYOUT_VERSION;
@@ -365,8 +365,8 @@ const WIDTH_COLUMNS: Record<CardWidth, number> = { compact: 3, wide: 6, full: 12
  *
  * Pure, and here rather than in `dashboard-edit.ts` so both edit interfaces can reach
  * it without importing each other. The index arithmetic of "remove then insert" is
- * off-by-one in one direction only — removing an earlier element shifts the target
- * index down — and that is exactly the kind of bug that looks like a flaky drag.
+ * off-by-one in one direction only (removing an earlier element shifts the target
+ * index down) and that is exactly the kind of bug that looks like a flaky drag.
  */
 export function reorder(order: string[], moved: string, target: string): string[] {
   if (moved === target) return [...order];
@@ -381,7 +381,7 @@ export function reorder(order: string[], moved: string, target: string): string[
  * The width bucket closest to a dragged pixel width.
  *
  * Snapping rather than free resize keeps the saved layout in the three named buckets
- * the rest of the app already understands — `compact` is a quarter of a wide desktop
+ * the rest of the app already understands: `compact` is a quarter of a wide desktop
  * and a half of a laptop, so a stored pixel width would be wrong at every other size.
  */
 export function widthForColumns(columns: number): CardWidth {

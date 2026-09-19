@@ -2,7 +2,7 @@
  * Cross-origin policy (ELEG-24).
  *
  * A CORS check that is wrong in the *permissive* direction looks completely fine from the
- * outside — the app works, nothing errors, and the hole is invisible until someone goes
+ * outside: the app works, nothing errors, and the hole is invisible until someone goes
  * looking. So these assert refusal at least as hard as they assert admission.
  *
  * What was there before: `Access-Control-Allow-Origin: *` on all five surfaces, with no

@@ -1,12 +1,12 @@
 /**
- * Zooming a chart — the decisions, without the DOM.
+ * Zooming a chart: the decisions, without the DOM.
  *
  * ## The wheel belongs to the page unless a modifier says otherwise
  *
  * Charts used to zoom on any wheel movement over them, and swallowed the event to do it. On
  * a dashboard made of charts that meant an ordinary scroll of the page stopped dead the
  * moment the pointer crossed one, and instead silently zoomed that chart as far as 10× (or
- * squashed it to 0.1×) — with nothing on screen to say why the data had gone strange. Ctrl
+ * squashed it to 0.1×), with nothing on screen to say why the data had gone strange. Ctrl
  * (or ⌘) plus the wheel is the convention for "zoom this, not the page", and it is also what
  * a trackpad pinch is reported as, so pinching still works.
  */
@@ -22,7 +22,7 @@ export interface WheelLike {
 }
 
 /**
- * The zoom a wheel event asks for, or `null` when it is not a zoom gesture — in which case
+ * The zoom a wheel event asks for, or `null` when it is not a zoom gesture, in which case
  * the caller must leave the event alone so the page scrolls.
  */
 export function wheelZoom(current: number, e: WheelLike): number | null {

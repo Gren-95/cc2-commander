@@ -3,7 +3,7 @@
  *
  * Hover-only, and that is exactly why the row carries Print and Delete itself: this
  * surface does not exist on a touchscreen. What stays here is what only makes sense
- * with a pointer — a larger thumbnail, the slicer metadata, and Download, which needs a
+ * with a pointer: a larger thumbnail, the slicer metadata, and Download, which needs a
  * filesystem to put the file on.
  *
  * Split out of `files.ts`. It does not import the renderer: `bindPopover` lends it each
@@ -174,7 +174,7 @@ export function showFilePopover(file: FileEntry, anchor: HTMLElement): void {
 
   // One action, and it is the one the row does not carry. Delete and Print live on the
   // row; "Preview" opened a larger thumbnail popup from a popover that is already
-  // showing the thumbnail — a second floating layer over the first, for the same image.
+  // showing the thumbnail: a second floating layer over the first, for the same image.
   html += '<div class="file-popover-actions flex [margin-top:6px] pt-2 border-t border-line">';
   html += `<button class="file-popover-download inline-flex w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted" title="Download">${icon('download')} Download</button>`;
   html += '</div>';

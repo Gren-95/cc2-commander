@@ -1,7 +1,7 @@
 /**
  * State classes, as utilities.
  *
- * A "state" used to be one class that the stylesheet reacted to — `.main-tab.active`
+ * A "state" used to be one class that the stylesheet reacted to: `.main-tab.active`
  * turned a tab blue. With the stylesheet gone the class name means nothing on its own,
  * so the utilities each state implies live here and `toggleState` applies them.
  *
@@ -10,7 +10,7 @@
  * Two utilities setting the same property on one element have no defined winner:
  * Tailwind orders its own output, and the source cascade that used to decide is gone.
  * Adding `bg-accent text-white` on top of the base `bg-transparent text-fg-muted` is
- * therefore a coin toss — measured, it left the active tab with a near-transparent
+ * therefore a coin toss, measured, it left the active tab with a near-transparent
  * background and dark text, i.e. invisible.
  *
  * So each entry also names what the state OVERRIDES, taken from the old stylesheet by
@@ -23,7 +23,7 @@
  * so the right entry can be found at runtime.
  *
  * GENERATED from the stylesheet this replaced. If a state needs new styling, edit it
- * here — there is no CSS file to go back to.
+ * here: there is no CSS file to go back to.
  */
 
 /** What a state adds, and what it overrides on the way. Both are class lists. */
@@ -36,7 +36,7 @@ export interface StateDelta {
  * What "selected" looks like on a chip, for every segmented picker in the app.
  *
  * There used to be five of these, one per hook, differing in which neutral classes they
- * removed — because each was generated from whatever the old stylesheet happened to say
+ * removed, because each was generated from whatever the old stylesheet happened to say
  * for that one selector. They all mean the same thing, so they are now one delta against
  * one base (`CHIP` in `design.ts`). `remove` must name every neutral the base sets for a
  * property `add` also sets, or the two fight and the winner is undefined.
@@ -49,7 +49,7 @@ const CHIP_ACTIVE: StateDelta = {
 /**
  * Selected, on a segmented picker.
  *
- * Only the text colour, because the fill behind the label supplies the background —
+ * Only the text colour, because the fill behind the label supplies the background:
  * adding `bg-accent` here would paint a second pill on top of the sliding one and the
  * slide would be invisible under it.
  */
@@ -138,7 +138,7 @@ export const STATE_UTILITIES: Record<string, Record<string, StateDelta>> = {
  * Turn a state on or off: the hook class, what it implies, and what it overrides.
  *
  * The hook is kept because `classList.contains`, `querySelector` and the delegated
- * click handlers still look for it — only the styling moved.
+ * click handlers still look for it, only the styling moved.
  */
 export function toggleState(el: Element, state: string, on: boolean): void {
   el.classList.toggle(state, on);

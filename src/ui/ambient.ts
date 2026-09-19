@@ -2,7 +2,7 @@
  * Ambient readings from Home Assistant, in the Temperatures card.
  *
  * The printer measures its own chamber, nozzle and bed. It has nothing to say about the
- * humidity of the room the filament is sitting in — which is the number that decides
+ * humidity of the room the filament is sitting in, which is the number that decides
  * whether a spool prints cleanly, and the only way to know whether a drying session
  * achieved anything.
  *
@@ -23,7 +23,7 @@ interface Reading {
   value: number;
   unit: string;
   deviceClass: string;
-  /** When Home Assistant last saw it change — not when we read it. */
+  /** When Home Assistant last saw it change, not when we read it. */
   changedAt: string;
 }
 
@@ -40,7 +40,7 @@ function glyphFor(deviceClass: string): string {
  * Filament manufacturers put the threshold for "store it below this" between 15% and
  * 20% RH; above about 60% most hygroscopic filaments pick up moisture fast enough to
  * matter within a day. These are advisory colours on someone else's sensor, not a
- * control input, so they are deliberately coarse — and the accent is not used, because
+ * control input, so they are deliberately coarse, and the accent is not used, because
  * on this dashboard the accent means "this control is engaged".
  */
 /** How long since Home Assistant saw this change, once that is worth saying. */
@@ -112,11 +112,11 @@ export function renderAmbient(state: Record<string, unknown>): void {
       const tone = r.deviceClass === 'humidity' ? humidityTone(r.value) : 'text-fg';
       // A battery sensor goes quiet in two ways that look the same on a dashboard:
       // nothing changed, or nothing is being heard. Putting one inside a printer makes
-      // the second much likelier — an enclosure is a metal box, and Zigbee and BLE both
+      // the second much likelier: an enclosure is a metal box, and Zigbee and BLE both
       // struggle to get out of one. Without an age, a stale number reads as a fact.
       const stale = readingAge(r.changedAt);
       // `value` is a number from the service's own parse, and `unit`/`name` come from
-      // Home Assistant — user-set strings, so both are escaped.
+      // Home Assistant: user-set strings, so both are escaped.
       return `<div class="flex min-w-0 items-center gap-1.5" title="${escapeHtml(r.name)}">
         <span class="text-fg-muted">${glyphFor(r.deviceClass)}</span>
         <span class="font-mono text-sm tabular-nums ${tone}">${r.value}</span>

@@ -1,9 +1,9 @@
 /**
- * ELEG-64 — UI settings really do survive a reload.
+ * ELEG-64: UI settings really do survive a reload.
  *
  * These exist to prove persistence is REAL, and are written so they cannot pass if it is
  * not. The hazard: `ui-settings.ts` wraps every storage access in try/catch and falls
- * back to defaults, so a broken environment produces no error — just defaults, silently.
+ * back to defaults, so a broken environment produces no error, just defaults, silently.
  *
  * Two rules for anything added here, both carried over from the jsdom version:
  *
@@ -13,16 +13,16 @@
  *     absent storage.
  *  2. **Reload rather than calling load twice.** `ui-settings.ts` memoises in a
  *     module-level `cached`, so a second `loadUISettings()` returns the cache without
- *     touching storage — testing the variable, not the persistence.
+ *     touching storage: testing the variable, not the persistence.
  *
  * Rule 2 is where this port is stronger than what it replaces. The jsdom version
- * simulated a reload with `vi.resetModules()` — a test-runner API that drops a module
+ * simulated a reload with `vi.resetModules()`: a test-runner API that drops a module
  * cache. Here `page.reload()` is an actual browser reload: new realm, new module
  * instances, storage re-read from disk. The thing under test is the thing being done.
  *
  * The original also asserted the document origin was not opaque, because jsdom's default
  * `about:blank` refuses localStorage outright. A real browser served over http has no
- * such failure mode, but the probe is kept — if storage is ever unavailable, every
+ * such failure mode, but the probe is kept, if storage is ever unavailable, every
  * assertion below would pass for the wrong reason, so it must fail loudly first.
  */
 
@@ -66,7 +66,7 @@ test.describe('ui-settings persistence', () => {
   test('writes saved settings through to the storage key', async ({ page }) => {
     const raw = await page.evaluate((key) => {
       (window as never as { T: any }).T.uiSettings.saveUISettings({ theme: 'dark' });
-      // Asserting on the raw storage entry, not on a getter — this is what proves the
+      // Asserting on the raw storage entry, not on a getter, this is what proves the
       // value left the module and reached storage.
       return localStorage.getItem(key);
     }, STORAGE_KEY);
@@ -126,7 +126,7 @@ test.describe('ui-settings persistence', () => {
 test.describe('audible alert settings (ELEG-46)', () => {
   test('is OFF by default', async ({ page }) => {
     // An explicit requirement of ELEG-46, and the one most likely to be broken by a
-    // careless edit to the defaults object — a dashboard that starts making noise on
+    // careless edit to the defaults object: a dashboard that starts making noise on
     // first load is the failure this asserts against.
     expect(
       await page.evaluate(() => {

@@ -1,5 +1,5 @@
 import { readMigrated } from './storage-migration';
-/** Spool Calculator — visualizes remaining filament on a spool */
+/** Spool Calculator: visualizes remaining filament on a spool */
 
 // Material densities in g/cm³
 const MATERIALS: Record<string, number> = {
@@ -16,19 +16,19 @@ const MATERIALS: Record<string, number> = {
 };
 
 const STORAGE_KEY = 'cc2-commander-spool-calc';
-/** The pre-rename name. See `storage-migration.ts` — a renamed key is a deleted key. */
+/** The pre-rename name. See `storage-migration.ts`: a renamed key is a deleted key. */
 const LEGACY_STORAGE_KEY = 'elegoo-web-spool-calc';
 
 interface SpoolParams {
-  hubDiameter: number; // mm — inner diameter (the core around which filament is wound)
-  flangeDiameter: number; // mm — outer diameter of the spool flanges
-  spoolWidth: number; // mm — width/depth of the spool
-  emptyWeight: number; // g — weight of the empty spool (no filament)
-  currentWeight: number; // g — current total weight (spool + remaining filament)
-  filamentDiameter: number; // mm — 1.75 or 2.85
+  hubDiameter: number; // mm (inner diameter (the core around which filament is wound)
+  flangeDiameter: number; // mm) outer diameter of the spool flanges
+  spoolWidth: number; // mm (width/depth of the spool
+  emptyWeight: number; // g) weight of the empty spool (no filament)
+  currentWeight: number; // g (current total weight (spool + remaining filament)
+  filamentDiameter: number; // mm) 1.75 or 2.85
   material: string; // key into MATERIALS
-  fullWeight: number; // g — full spool weight (spool + full filament, e.g. empty + 1000)
-  currentOuterDiameter: number; // mm — measured outer diameter of remaining filament on spool
+  fullWeight: number; // g, full spool weight (spool + full filament, e.g. empty + 1000)
+  currentOuterDiameter: number; // mm, measured outer diameter of remaining filament on spool
 }
 
 const DEFAULTS: SpoolParams = {

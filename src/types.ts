@@ -135,7 +135,7 @@ export interface FileEntry {
   layer?: number;
   /**
    * Filament the slicer expects the whole file to use, in GRAMS. Not millimetres: a
-   * 3DBenchy reports 11.71, which is its weight — in millimetres it would be ~4000.
+   * 3DBenchy reports 11.71, which is its weight, in millimetres it would be ~4000.
    */
   total_filament_used?: number;
   /** One entry per slicer tool: its colour and material. Present on files from Elegoo's slicer. */
@@ -194,7 +194,7 @@ export const SUB_STATUS_NAMES: Record<number, string> = {
   1143: 'Cutting Filament',
   1144: 'Ejecting Filament',
   1145: 'Eject Filament Complete',
-  // Canvas (AMS) — Load
+  // Canvas (AMS), Load
   1150: 'Canvas: Load Start',
   1151: 'Canvas: Heating Nozzle',
   1152: 'Canvas: Insert Filament',
@@ -204,7 +204,7 @@ export const SUB_STATUS_NAMES: Record<number, string> = {
   1156: 'Canvas: Flushing Filament',
   1157: 'Canvas: Load Complete',
   1158: 'Canvas: Load Failed',
-  // Canvas (AMS) — Unload
+  // Canvas (AMS), Unload
   1160: 'Canvas: Unload Start',
   1161: 'Canvas: Heating Nozzle',
   1162: 'Canvas: Checking Filament',
@@ -313,7 +313,7 @@ export interface BuildStampish extends VersionStampish {
   installedAt?: string | null;
 }
 
-/** `1.2.3`, `1.2.3-rc.1` — a leading `v` having already been stripped. */
+/** `1.2.3`, `1.2.3-rc.1`: a leading `v` having already been stripped. */
 const SEMVER_PREFIX = /^\d+\.\d+\.\d+/;
 
 /** The `--long`-style shape: `<tag>-<distance>-g<sha>`. */
@@ -328,14 +328,14 @@ function versionFromTag(tag: string): string | null {
  * `x.y.z+aa`, matching how RCP renders its running version (ELEG-48).
  *
  * **The `+aa` is the commit distance since the tag, not a short sha.** ELEG-48 described
- * it as "semver plus a short build/commit suffix", which is what it looks like — but
+ * it as "semver plus a short build/commit suffix", which is what it looks like, but
  * RCP's `formatVersion` parses `git describe` and emits the *number of commits* since
  * the last tag, and drops the suffix entirely when that number is 0. Read RCP before
  * changing this; a near-miss defeats the point of the request, which was that the two
  * look the same.
  *
  * **Adapted rather than copied, because the two repos run different `describe` flags.**
- * RCP uses `--long`, which always yields `<tag>-<n>-g<sha>` — deliberately, so there is
+ * RCP uses `--long`, which always yields `<tag>-<n>-g<sha>`: deliberately, so there is
  * one shape to parse. `.github/workflows/publish.yml` here runs
  * `--tags --always --dirty`, which yields four:
  *
@@ -343,7 +343,7 @@ function versionFromTag(tag: string): string | null {
  * | --- | --- | --- |
  * | `v0.2.1-58-g5b00442` | `0.2.1+58` | the common case |
  * | `v0.3.0` | `0.3.0` | exactly on a tag; RCP drops the `+0` too |
- * | `v0.2.1-58-g5b00442-dirty` | `0.2.1+58.dirty` | installed from a modified checkout — worth saying, and still valid semver |
+ * | `v0.2.1-58-g5b00442-dirty` | `0.2.1+58.dirty` | installed from a modified checkout: worth saying, and still valid semver |
  * | `5b00442` | falls back | `--always` with no reachable tag: a bare sha is not a version |
  *
  * Anything unrecognised falls back to `package.json`'s version, and then to `null`.
@@ -376,7 +376,7 @@ export const UNKNOWN_VERSION_LABEL = 'unknown';
  * `unknown` rather than `dev`: an all-null stamp means `pnpm dev` from a checkout **or**
  * a deploy that predates ELEG-10 **or** one where the installer failed to write the file.
  * Those are not the same thing and this cannot tell them apart, so it does not pretend
- * to — the whole point of ELEG-48 is that a version you cannot trust is worse than none.
+ * to: the whole point of ELEG-48 is that a version you cannot trust is worse than none.
  */
 export function buildVersionLabel(stamp: VersionStampish | null | undefined): string {
   return formatBuildVersion(stamp) ?? UNKNOWN_VERSION_LABEL;
@@ -391,19 +391,19 @@ export function buildVersionLabel(stamp: VersionStampish | null | undefined): st
  * UI rendered both as `registering…` (ELEG-59). During the 2026-08-08 incident that
  * distinction cost a journal read plus a packet-level probe:
  *
- * - **`awaiting_sn`** — the broker accepted us but the printer has never spoken, so no
+ * - **`awaiting_sn`**, the broker accepted us but the printer has never spoken, so no
  *   SN was ever learned and **registration was never attempted**. `registerAttempts`
  *   stays 0 forever. This is a *printer-side* problem: the machine's Linux side is up
  *   (the broker answered) but its control application is not running. Nothing in the
  *   journal marks it, because the symptom is the *absence* of a line.
- * - **`registering`** — an SN is known and registration is genuinely in flight or being
+ * - **`registering`**: an SN is known and registration is genuinely in flight or being
  *   retried. `registerAttempts` climbs.
- * - **`rejected`** — the printer answered `register_response` with `code: 3`, i.e. it
+ * - **`rejected`**: the printer answered `register_response` with `code: 3`, i.e. it
  *   already has its maximum of two clients. Retrying every 30s will not help until one
  *   of them goes away.
  *
  * Reading `registering…` when the truth is `awaiting_sn` points the diagnosis at the
- * service, which is the opposite of where the fault is — in the incident the service was
+ * service, which is the opposite of where the fault is, in the incident the service was
  * behaving perfectly and the printer's firmware had hung.
  */
 export type MqttPhase = 'disconnected' | 'awaiting_sn' | 'registering' | 'rejected' | 'connected';
@@ -411,7 +411,7 @@ export type MqttPhase = 'disconnected' | 'awaiting_sn' | 'registering' | 'reject
 export interface MqttPhaseInput {
   /** TCP+MQTT session with the broker is up. */
   brokerConnected: boolean;
-  /** `register_response` came back `ok` — the only state in which commands work. */
+  /** `register_response` came back `ok`, the only state in which commands work. */
   registered: boolean;
   /** An SN is known, from discovery, config or the cache. Registration needs one. */
   snKnown: boolean;
@@ -436,7 +436,7 @@ export function mqttPhase(input: MqttPhaseInput): MqttPhase {
 /**
  * Whether to shout about the current phase, and what to call it.
  *
- * `null` means "no banner" — the two healthy-ish phases plus a registration that has only
+ * `null` means "no banner": the two healthy-ish phases plus a registration that has only
  * just started. The threshold applies **only** to `registering`, because that is the one
  * phase where waiting a few seconds is normal. `awaiting_sn` and `rejected` warn
  * immediately: neither improves by itself, and the old rule (`broker_only` **and**
@@ -544,15 +544,15 @@ export const ERROR_CODE_NAMES: Record<number, string> = {
  * What happened to a command, as far as the UI needs to care.
  *
  * The split that matters is `busy` vs the rest. The printer returns 1009 whenever it
- * cannot accept a command *right now* — mid-filament-change, during calibration, with
- * another command in flight — and that is not a failure: the same command will work in
+ * cannot accept a command *right now* (mid-filament-change, during calibration, with
+ * another command in flight) and that is not a failure: the same command will work in
  * a moment. Showing it as an error trains people to ignore real errors, and showing
  * nothing at all (which is what happened before ELEG-40) lets them conclude the command
  * worked.
  */
 export type CommandOutcome = 'ok' | 'busy' | 'rejected' | 'error';
 
-/** Transient — the identical command is expected to succeed once the printer is free. */
+/** Transient: the identical command is expected to succeed once the printer is free. */
 export const BUSY_ERROR_CODES = new Set([1009]);
 
 /**
@@ -586,8 +586,8 @@ export function describeCommandError(code: number | undefined | null): string {
 /**
  * Commands whose failure is worth a toast, and what to call them in one.
  *
- * Only *writes* are listed. A poll that comes back busy is noise — it will be re-polled
- * seconds later — whereas a button press that silently did nothing is the whole
+ * Only *writes* are listed. A poll that comes back busy is noise (it will be re-polled
+ * seconds later) whereas a button press that silently did nothing is the whole
  * complaint behind ELEG-40. Methods handled individually elsewhere (1047 delete, 1051
  * timelapse export, 2003 filament save) are deliberately absent so they keep their more
  * specific wording.
@@ -700,7 +700,7 @@ export interface ZoneState {
   history: Array<{ zone: ZoneName; entered: number; exited: number }>;
 }
 
-/** CC2 zone boundaries — checked in order, first match wins */
+/** CC2 zone boundaries: checked in order, first match wins */
 export const ZONE_DEFINITIONS: ZoneBoundary[] = [
   // Cutter area: front-right corner, centered ~X=254 Y=3.5
   { name: 'cutter_area', label: 'Cutter', xMin: 245, xMax: 265, yMin: -5, yMax: 15 },
@@ -735,8 +735,8 @@ export interface LayerTimeEntry {
  *
  * The series is supposed to be monotonic in `layer` within a print, and since ELEG-16 the
  * store no longer produces one that is not. But a series can still arrive non-monotonic
- * from *outside* that guarantee — `data/state.json` written before that fix, or any
- * future path that gets it wrong — and a cross-print entry then skews `/api/metrics`, the
+ * from *outside* that guarantee (`data/state.json` written before that fix, or any
+ * future path that gets it wrong) and a cross-print entry then skews `/api/metrics`, the
  * print-report stats, which do not look at anything but the
  * raw array (ELEG-18).
  *
@@ -744,8 +744,8 @@ export interface LayerTimeEntry {
  * duration spans the gap *between* two prints, which is why leaving it in is worse than
  * dropping it: on the live repro one 155s phantom sat among 14s layers.
  *
- * Lives in `types.ts` because both halves need the identical rule — the server sanitising
- * at the restore boundary, the chart choosing what to plot — and two copies would be free
+ * Lives in `types.ts` because both halves need the identical rule (the server sanitising
+ * at the restore boundary, the chart choosing what to plot) and two copies would be free
  * to disagree. Pure, and covered by `src/__tests__/layer-chart.test.ts`.
  */
 export function trailingLayerRun<T extends LayerTimeEntry>(entries: readonly T[]): T[] {

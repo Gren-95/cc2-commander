@@ -3,7 +3,7 @@
  *
  * Split deliberately in two halves, as the issue asked:
  *
- *  - `alertForEvent` is **pure** — event in, alert kind or null out — and is the half a
+ *  - `alertForEvent` is **pure** (event in, alert kind or null out) and is the half a
  *    unit test can reach. Every rule about *which* events sound lives there.
  *  - Everything below `--- playback ---` needs a browser: an `AudioContext`, a user
  *    gesture, and speakers. No gate can test it.
@@ -25,7 +25,7 @@ export type AlertKind = 'success' | 'failure';
  * this stays a statement about the *events* alone and can be tested without stubbing
  * storage.
  *
- * `CRITICAL_EXCEPTIONS` is reused rather than a second severity rule being invented —
+ * `CRITICAL_EXCEPTIONS` is reused rather than a second severity rule being invented:
  * the issue is explicit about that, and a second list would drift from the first.
  */
 export function alertForEvent(event: Record<string, unknown>): AlertKind | null {
@@ -37,7 +37,7 @@ export function alertForEvent(event: Record<string, unknown>): AlertKind | null 
     case 'error': {
       // The server sends `codes: number[]` alongside `names: string[]`; the codes are
       // what CRITICAL_EXCEPTIONS is keyed on. A non-critical exception is a warning and
-      // deliberately silent — otherwise the alert becomes noise and gets turned off,
+      // deliberately silent: otherwise the alert becomes noise and gets turned off,
       // which is the same as not having it.
       const codes = event.codes;
       if (!Array.isArray(codes)) return null;
@@ -83,7 +83,7 @@ function context(): AudioContext | null {
 /**
  * Whether the browser is currently refusing to play audio.
  *
- * Browsers block audio until the user has interacted with the page — and a dashboard
+ * Browsers block audio until the user has interacted with the page, and a dashboard
  * left open on a second monitor and never clicked is *exactly* the case this feature is
  * for, and also exactly the case where autoplay is refused. So this is surfaced in the
  * settings UI rather than left to fail silently.
@@ -95,12 +95,12 @@ export function playbackState(): PlaybackState {
 
 /** Tone pairs chosen to be distinguishable across a room without being alarming. */
 const TONES: Record<AlertKind, Array<{ hz: number; ms: number }>> = {
-  // Rising major third — reads as "finished".
+  // Rising major third, reads as "finished".
   success: [
     { hz: 660, ms: 140 },
     { hz: 880, ms: 220 },
   ],
-  // Falling, lower, three times — reads as "something is wrong".
+  // Falling, lower, three times, reads as "something is wrong".
   failure: [
     { hz: 440, ms: 160 },
     { hz: 350, ms: 160 },
@@ -164,7 +164,7 @@ export async function playAlert(kind: AlertKind): Promise<PlaybackState> {
  *
  * **Only ever call this for events arriving live.** The event log is restored on
  * connect, and firing a sound for a print that finished an hour ago would be a genuinely
- * bad first impression — so `main.ts` calls this from the live-event path and never from
+ * bad first impression, so `main.ts` calls this from the live-event path and never from
  * `loadEventLogHistory`.
  */
 export function maybeAlertForEvent(event: Record<string, unknown>): void {

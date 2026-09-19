@@ -122,7 +122,7 @@ export function bindLogControls(store: LogStore): void {
   });
 
   $('log-export').addEventListener('click', () => {
-    // The filtered view, not the whole buffer — the filter is how you found the
+    // The filtered view, not the whole buffer: the filter is how you found the
     // interesting thing, and an unfiltered dump is what people already cannot read.
     const entries = store.getEntries().filter(matchesFilter);
     if (!entries.length) {

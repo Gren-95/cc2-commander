@@ -3,7 +3,7 @@
  *
  * The point of the stamp is to answer "is this change live?" from `/api/health`, so the
  * reader must never be the thing that breaks that endpoint. These cases are the three
- * the issue names — present, absent, malformed — plus the two shapes a hand-edited or
+ * the issue names (present, absent, malformed) plus the two shapes a hand-edited or
  * half-written stamp actually takes: valid JSON that is not an object, and an object
  * with fields missing or blank.
  *
@@ -20,7 +20,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, mock } from 'bun
 
 /**
  * The reader's only observable output besides the BuildInfo is a warning, and that
- * warning is the entire difference between "malformed" and "absent" — both return the
+ * warning is the entire difference between "malformed" and "absent": both return the
  * same all-null value. Stubbing the logger is what makes the shape checks in
  * `readBuildInfo` assertable rather than merely present.
  */
@@ -77,7 +77,7 @@ describe('readBuildInfo', () => {
 
   it('returns the explicit unknown quietly when the file is absent', () => {
     // The normal case for `pnpm dev` and for any deploy predating the stamp, so it must
-    // not warn — an unstamped dev run is not a fault.
+    // not warn: an unstamped dev run is not a fault.
     expect(readBuildInfo(join(dir, 'does-not-exist.json'))).toEqual(UNKNOWN_BUILD_INFO);
     expect(warn).not.toHaveBeenCalled();
   });
@@ -91,7 +91,7 @@ describe('readBuildInfo', () => {
 
   it('returns the explicit unknown and warns for valid JSON that is not an object', () => {
     // `JSON.parse` accepts all three. Without the shape check two of them would read as
-    // an all-null stamp *silently* — indistinguishable from a dev run, which is exactly
+    // an all-null stamp *silently*: indistinguishable from a dev run, which is exactly
     // the confusion the stamp exists to remove. The warning is the load-bearing part
     // here, not the return value.
     for (const [name, contents] of [

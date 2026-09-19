@@ -1,5 +1,5 @@
 /**
- * The print ledger — one row per finished print, kept by the service.
+ * The print ledger: one row per finished print, kept by the service.
  *
  * Statistics, costs, maintenance hours and filament deductions all need the same thing:
  * a record of each print with how long it ran and how much filament it used. The
@@ -9,7 +9,7 @@
  * The weight lives on the *file* (`total_filament_used` in `1044`), and files do not
  * outlive their prints for long: of 49 history entries on the machine this was written
  * against, 2 still had their file on the printer. So a weight has to be captured while
- * the file is still there — at the moment a print starts or ends — or it is gone.
+ * the file is still there (at the moment a print starts or ends) or it is gone.
  *
  * Hence a ledger rather than a view over history:
  *
@@ -43,7 +43,7 @@ export interface LedgerEntry {
   /** Epoch milliseconds. */
   startedAt: number;
   endedAt: number;
-  /** How long it actually ran — machine time, whatever the outcome. */
+  /** How long it actually ran, machine time, whatever the outcome. */
   seconds: number;
   outcome: LedgerOutcome;
   /** Filament used, in grams. `null` when the file had gone before it could be read. */
@@ -118,7 +118,7 @@ export function factsFromFile(file: FileEntry | undefined): FileFacts | null {
 /**
  * How much filament a print used.
  *
- * A completed print used what the file says — even one that ran long. Running 35% past
+ * A completed print used what the file says, even one that ran long. Running 35% past
  * the estimate is slow travel, not extra plastic. A stopped print used the fraction of
  * it that it got through, estimated from time. An unknown outcome claims nothing.
  */
@@ -139,7 +139,7 @@ export function gramsFor(
 /**
  * Fold printer history into the ledger.
  *
- * Returns the whole ledger and, separately, only the rows this call added — those are
+ * Returns the whole ledger and, separately, only the rows this call added: those are
  * what a caller acts on (a new print to deduct from a spool), whereas the rest were
  * already accounted for.
  */

@@ -3,11 +3,11 @@
  *
  * This is the only control on the dashboard that destroys something the printer cannot
  * give back, and the method it sends is one digit away from `1049 UpdateToken`, which
- * writes the printer's auth token — a mistake this repo has already nearly made once
+ * writes the printer's auth token: a mistake this repo has already nearly made once
  * (see the note on 1049 in `ui/log-methods.ts`). So the payload is asserted here rather
  * than confirmed by trying it: nothing in this file talks to a printer.
  *
- * `confirm` is stubbed in both directions. The cancel case is the one worth having —
+ * `confirm` is stubbed in both directions. The cancel case is the one worth having:
  * a confirmation that fires the command anyway is worse than no confirmation, because
  * it teaches the user the dialog is load-bearing when it is not.
  */

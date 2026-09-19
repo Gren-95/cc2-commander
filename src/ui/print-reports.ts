@@ -1,5 +1,5 @@
 /**
- * Print Reports UI — lists saved print reports with download buttons.
+ * Print Reports UI: lists saved print reports with download buttons.
  */
 
 import { icon, iconSolo } from './icons';
@@ -20,12 +20,12 @@ interface ReportSummary {
 let reportsLoaded = false;
 /**
  * The last fetched payload, kept so that changing the sort or the filter re-renders from
- * memory instead of re-fetching `/api/reports` — the controls change what you see, not
+ * memory instead of re-fetching `/api/reports`: the controls change what you see, not
  * what the server has.
  */
 let reportData: { reports: ReportSummary[]; active: boolean } | null = null;
 
-/** Kept outside the render function — see `list-controls.ts` on why that matters. */
+/** Kept outside the render function: see `list-controls.ts` on why that matters. */
 let reportControls: ListControls<ReportSummary> | null = null;
 
 function ensureReportControls(): ListControls<ReportSummary> {
@@ -41,7 +41,7 @@ function ensureReportControls(): ListControls<ReportSummary> {
     columns: [
       { key: 'name', label: 'Name', value: (r) => r.filename },
       // startedAt/endedAt are epoch *milliseconds* here (Date.now()), unlike print
-      // history's seconds — it only matters if you compare the two, which nothing does.
+      // history's seconds, it only matters if you compare the two, which nothing does.
       {
         key: 'started',
         label: 'Started',

@@ -24,8 +24,8 @@ const SLOT_ACTION = [
 /**
  * One spool slot.
  *
- * A tile, not a bare ring. The ring carried the whole slot — colour, number and the
- * click target — so an empty Canvas rendered as four anonymous circles with nothing
+ * A tile, not a bare ring. The ring carried the whole slot (colour, number and the
+ * click target) so an empty Canvas rendered as four anonymous circles with nothing
  * saying they could be clicked, and a full one said nothing about what it held without
  * hovering for the `title`.
  *
@@ -99,7 +99,7 @@ export function renderCanvas(state: PrinterState): void {
     html += `<div class="flex flex-col gap-2.5 ${connected ? '' : 'opacity-50'}">`;
 
     // The state was a dot plus a word, and the dot carried `canvas-state-ok` /
-    // `canvas-state-off` — classes that appear at that one call site and in no
+    // `canvas-state-off`: classes that appear at that one call site and in no
     // stylesheet, so both rendered in the same grey and connected differed from
     // disconnected by the word alone. A coloured chip carries it now.
     html += `<div class="flex items-center justify-between gap-2">
@@ -110,14 +110,14 @@ export function renderCanvas(state: PrinterState): void {
     </div>`;
 
     // Physical layout is counter-clockwise from top-left: 0=TL, 1=BL, 2=BR, 3=TR, while
-    // a CSS grid fills row-major — hence the reorder rather than a plain map.
+    // a CSS grid fills row-major, hence the reorder rather than a plain map.
     const gridOrder = [0, 3, 1, 2];
     const orderedTrays = gridOrder
       .filter((i) => i < unit.tray_list.length)
       .map((i) => unit.tray_list[i]);
 
     // Keyed on the CARD. This card can be narrowed to a third of the dashboard in edit
-    // mode, where two tiles do not fit whatever the window is doing — which is what the
+    // mode, where two tiles do not fit whatever the window is doing, which is what the
     // `max-[800px]:` gap it replaces could not express.
     html += '<div class="grid grid-cols-1 gap-2 @min-[340px]:grid-cols-2">';
     for (const tray of orderedTrays) {
@@ -133,7 +133,7 @@ export function renderCanvas(state: PrinterState): void {
 
   // One switch for the machine, not one per unit. `auto_refill` is a single field on the
   // canvas payload, so rendering it inside the loop gave a second Canvas a second switch
-  // writing the same setting — and the row nested a <label> inside a <label>, which is
+  // writing the same setting, and the row nested a <label> inside a <label>, which is
   // invalid and makes a click on the text toggle twice or not at all.
   // Directly under the slots, not pinned to the card bottom with `mt-auto`: the grid
   // stretches this card to its row, and pinning left a hole between the slots and it.

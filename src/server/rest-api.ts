@@ -2,15 +2,15 @@
  * REST API and camera proxy.
  *
  * Endpoints:
- *   GET /api/status    — Current printer state as JSON
- *   GET /api/metrics   — Structured metrics as JSON
- *   GET /api/metrics/prometheus — Metrics in Prometheus text exposition format
- *   GET /api/snapshot  — Camera JPEG snapshot (proxied + cached)
- *   GET /api/stream    — MJPEG stream proxy (single upstream, fan-out to all clients)
- *   GET /api/stream/overlay — MJPEG stream with status text overlay
- *   GET /api/health    — Service health check (incl. the deployed build stamp)
- *   GET /api/files/download — Proxy file download from printer
- *   POST /api/files/upload  — Proxy file upload to printer (chunked PUT)
+ *   GET /api/status    (Current printer state as JSON
+ *   GET /api/metrics) Structured metrics as JSON
+ *   GET /api/metrics/prometheus (Metrics in Prometheus text exposition format
+ *   GET /api/snapshot) Camera JPEG snapshot (proxied + cached)
+ *   GET /api/stream    (MJPEG stream proxy (single upstream, fan-out to all clients)
+ *   GET /api/stream/overlay) MJPEG stream with status text overlay
+ *   GET /api/health: Service health check (incl. the deployed build stamp)
+ *   GET /api/files/download (Proxy file download from printer
+ *   POST /api/files/upload) Proxy file upload to printer (chunked PUT)
  */
 
 import type { IncomingMessage, ServerResponse } from 'http';
@@ -57,7 +57,7 @@ let fetchInFlight: Promise<Buffer | null> | null = null;
 let activeCapture: { file: string } | null = null;
 
 // ── Gcode file cache ────────────────────────────────────────────
-// Path helpers live in data-paths.ts so DATA_DIR is honoured — this used to be
+// Path helpers live in data-paths.ts so DATA_DIR is honoured: this used to be
 // join(process.cwd(), 'data', 'gcode-cache'), which ignored it (ELEG-70).
 const GCODE_CACHE_MAX = 10; // keep at most N cached files
 
@@ -115,7 +115,7 @@ async function evictOldCache(): Promise<void> {
 // ── Timelapse cache ─────────────────────────────────────────────
 // Unlike the gcode cache above, this one is deliberately not evicted. A gcode is a
 // working cache for a print that is happening now; a timelapse is the whole reason this
-// exists — the printer's own storage is small and timelapses are exactly the kind of
+// exists: the printer's own storage is small and timelapses are exactly the kind of
 // file someone wants to keep after the print, and after the printer, are gone.
 
 function timelapseCacheKey(fileName: string): string {
@@ -140,7 +140,7 @@ async function getCachedTimelapse(fileName: string): Promise<string | null> {
 /**
  * Download a transcoded timelapse to server storage, fire-and-forget.
  *
- * Called from `index.ts` once `StateStore` sees a transcode finish — method 1051 (or
+ * Called from `index.ts` once `StateStore` sees a transcode finish: method 1051 (or
  * 1050) answering with `error_code: 0` and a `url`. Mirrors `precacheGcode` below, but
  * with no eviction and its own cache directory: see the comment above this section for
  * why the two caches behave differently.
@@ -181,7 +181,7 @@ function downloadToFile(fileName: string, config: ServiceConfig, destPath: strin
         path: `/download?X-Token=${encodeURIComponent(config.printerPassword)}&file_name=${encodeURIComponent(fileName)}`,
         method: 'GET',
         timeout: 120_000,
-        // See handleFileDownload below — the printer's libhv sends both Content-Length
+        // See handleFileDownload below, the printer's libhv sends both Content-Length
         // and Transfer-Encoding: chunked, which Node's strict parser rejects.
         insecureHTTPParser: true,
       },
@@ -285,8 +285,8 @@ function serveTimelapseLive(
  * How a proxied file should be presented to the browser.
  *
  * A timelapse needs `video/mp4` and `inline` or a `<video>` element will not play it;
- * everything else is a download. **The printer sends no `Content-Type` at all** — the
- * header comes back `null` — so whatever this proxy does not set, nothing does, and the
+ * everything else is a download. **The printer sends no `Content-Type` at all** (the
+ * header comes back `null`) so whatever this proxy does not set, nothing does, and the
  * browser is left guessing. That is the whole reason a timelapse failed with
  * `MEDIA_ERR_SRC_NOT_SUPPORTED` and the word "Format" in it.
  */
@@ -358,7 +358,7 @@ async function handleFileDownload(
         'Content-Disposition': presentation.inline
           ? `inline; filename="${baseName}"`
           : `attachment; filename="${baseName}"`,
-        // Forwarded, and it arrives — but it does NOT reach the browser, which sees
+        // Forwarded, and it arrives, but it does NOT reach the browser, which sees
         // `transfer-encoding: chunked` and no length. Established while chasing it:
         // the printer does send `content-length: 7924491` (alongside a contradictory
         // `transfer-encoding: chunked`, which is why this proxy needs
@@ -419,7 +419,7 @@ async function handleFileDownload(
  * instead of hitting the printer while it's busy printing.
  */
 export function precacheGcode(fileName: string, config: ServiceConfig, source = 'local'): void {
-  // Fire and forget — errors are logged but don't affect the caller
+  // Fire and forget, errors are logged but don't affect the caller
   void precacheGcodeAsync(fileName, config, source);
 }
 
@@ -537,7 +537,7 @@ async function doFetch(cameraUrl: string): Promise<Buffer | null> {
       return Buffer.from(await res.arrayBuffer());
     }
 
-    // MJPEG stream — extract first frame
+    // MJPEG stream: extract first frame
     if (!res.body) return null;
     const reader = res.body.getReader();
     const chunks: Buffer[] = [];
@@ -571,7 +571,7 @@ async function doFetch(cameraUrl: string): Promise<Buffer | null> {
   }
 }
 
-/** Shared snapshot fetcher — used by both REST API, Telegram, and AI monitor.
+/** Shared snapshot fetcher: used by both REST API, Telegram, and AI monitor.
  *  Prefers the cached frame from the active MJPEG fan-out stream (zero-cost).
  *  Only falls back to a dedicated HTTP fetch if no recent frame is available. */
 /** Check actual camera stream health (fresh cached frame or active upstream). */
@@ -871,7 +871,7 @@ export function createRestRouter(
   homeAssistant?: HomeAssistantService | null,
   /**
    * Whether this caller is known. Only `/api/health` asks, because it is the one route
-   * that answers without credentials — a predicate rather than the gate itself so this
+   * that answers without credentials: a predicate rather than the gate itself so this
    * file keeps knowing nothing about sessions or keys.
    */
   isAuthenticated: (req: IncomingMessage) => boolean = () => true,
@@ -881,7 +881,7 @@ export function createRestRouter(
   return (req: IncomingMessage, res: ServerResponse) => {
     const url = req.url || '';
 
-    // CORS headers for API routes — same-origin unless CORS_ALLOWED_ORIGINS says
+    // CORS headers for API routes: same-origin unless CORS_ALLOWED_ORIGINS says
     // otherwise (ELEG-24). This is the surface that serves /api/snapshot, /api/stream
     // and the control routes, so the wildcard mattered most here.
     if (url.startsWith('/api/')) {
@@ -916,7 +916,7 @@ export function createRestRouter(
           mqttRegisterAttempts: _bridge?.registerAttempts ?? 0,
           mqttMessage: mqttPhaseMessage(_bridge?.phase ?? 'disconnected'),
           // Liveness is public; identity is not. The serial names one specific machine
-          // and the build names the commit running — neither is needed to answer "is it
+          // and the build names the commit running: neither is needed to answer "is it
           // up?", which is all an unauthenticated caller is asking.
           printerSn: known ? _bridge?.serialNumber || null : null,
           clients: 0, // filled in by ws-transport if needed
@@ -1019,7 +1019,7 @@ export function createRestRouter(
       return;
     }
 
-    // Telegram config — GET (read) and POST (update progress interval)
+    // Telegram config: GET (read) and POST (update progress interval)
     if (url === '/api/config/telegram') {
       if (req.method === 'GET') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -1062,14 +1062,14 @@ export function createRestRouter(
     }
 
     /*
-     * Filament drying. The session lives in the service, not in a tab — see
+     * Filament drying. The session lives in the service, not in a tab: see
      * `server/dryer.ts` for why something that heats a bed cannot be owned by a page
      * that a phone can put to sleep.
      */
     /**
      * Ambient temperature and humidity from Home Assistant.
      *
-     * Read once on page load, then kept current by `home_assistant` WebSocket frames —
+     * Read once on page load, then kept current by `home_assistant` WebSocket frames:
      * the same shape as `/api/dryer`, and for the same reason: a client that connects
      * between two polls would otherwise show nothing until the next one, which is up to
      * a minute of a blank row.
@@ -1258,7 +1258,7 @@ export function createRestRouter(
       return;
     }
 
-    // Enable video stream via SDCP WebSocket (port 3030) — what the official app does
+    // Enable video stream via SDCP WebSocket (port 3030): what the official app does
     if (url === '/api/debug/videostream/sdcp' && req.method === 'POST') {
       if (!bridge) {
         res.writeHead(503, { 'Content-Type': 'application/json' });
@@ -1326,18 +1326,18 @@ export function createRestRouter(
     }
 
     /**
-     * Stream a timelapse video — from server storage if it has already been archived
+     * Stream a timelapse video: from server storage if it has already been archived
      * there, otherwise live from the printer.
      *
-     * The play button used to point a `<video>` at the bare path the printer reports —
-     * `video/<name>.mp4` — which has no host, so the browser resolved it against the
+     * The play button used to point a `<video>` at the bare path the printer reports
+     * (`video/<name>.mp4`) which has no host, so the browser resolved it against the
      * dashboard, got this service's 404, and reported
      * `MEDIA_ERR_SRC_NOT_SUPPORTED: Format error`: a 404 body is not a video, and the
      * element blames the format rather than the address.
      *
      * The file is real and reachable; it comes down the same `/download` endpoint as a
      * gcode, with the same token. What it does NOT come with is a content type, so this
-     * supplies one — without it the proxy would fail exactly as the 404 did.
+     * supplies one, without it the proxy would fail exactly as the 404 did.
      */
     if (url.startsWith('/api/timelapse/video') && req.method === 'GET') {
       const fileName = new URL(url, 'http://localhost').searchParams.get('file');
@@ -1361,7 +1361,7 @@ export function createRestRouter(
           createReadStream(cached).pipe(res);
           return;
         }
-        // Not archived yet — proxy live, and tee the response into the cache so this
+        // Not archived yet, proxy live, and tee the response into the cache so this
         // play also becomes the download `precacheTimelapse` failed to make (an export
         // from before this cache existed, or a precache that errored).
         serveTimelapseLive(res, fileName, baseName, config);
@@ -1370,7 +1370,7 @@ export function createRestRouter(
     }
 
     // ── List cached gcode files ─────────────────────────────────────
-    // GET /api/files/cached — returns array of filenames that have cached gcode
+    // GET /api/files/cached: returns array of filenames that have cached gcode
     if (url.startsWith('/api/files/cached') && req.method === 'GET') {
       void (async () => {
         try {
@@ -1604,7 +1604,7 @@ export function createRestRouter(
         return;
       }
 
-      // GET /api/reports/:id/pdf — Download PDF
+      // GET /api/reports/:id/pdf: Download PDF
       if (action === 'pdf') {
         Promise.all([reportCollector.getReport(reportId), reportCollector.getChartData(reportId)])
           .then(async ([report, chartData]) => {
@@ -1636,7 +1636,7 @@ export function createRestRouter(
         return;
       }
 
-      // GET /api/reports/:id/snapshot/:filename — Download snapshot JPEG
+      // GET /api/reports/:id/snapshot/:filename: Download snapshot JPEG
       if (action === 'snapshot' && parts[2]) {
         const snapName = decodeURIComponent(parts[2]);
         if (snapName.includes('..') || !snapName.endsWith('.jpg')) {
@@ -1662,7 +1662,7 @@ export function createRestRouter(
         return;
       }
 
-      // GET /api/reports/:id — Report JSON
+      // GET /api/reports/:id: Report JSON
       reportCollector
         .getReport(reportId)
         .then((report) => {
@@ -1712,7 +1712,7 @@ export function createRestRouter(
       return;
     }
 
-    // Not an API route — hand the browser the SPA entry document, unless it asked for a
+    // Not an API route: hand the browser the SPA entry document, unless it asked for a
     // file, in which case a missing file must read as missing.
     writeSpaFallback(res, url, req.method);
 

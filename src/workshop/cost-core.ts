@@ -5,7 +5,7 @@
  *
  * Every price starts empty. Electricity and filament prices vary several-fold between
  * one household and the next, and a made-up default would put a confident, wrong figure
- * into every total — which is worse than a blank that says "set your prices".
+ * into every total, which is worse than a blank that says "set your prices".
  *
  * ## Two figures, not one
  *
@@ -40,7 +40,7 @@ export const DEFAULT_COST_SETTINGS: CostSettings = {
   materialPerKg: {},
 };
 
-/** Ceilings that reject a typo — a misplaced digit — rather than any real price. */
+/** Ceilings that reject a typo (a misplaced digit) rather than any real price. */
 const MAX_PRICE = 10_000;
 const MAX_WATTS = 5_000;
 
@@ -133,7 +133,7 @@ export function costOf(
  * What one file on the printer would cost to print, before anyone prints it.
  *
  * Shared between `server/workshop.ts`, which computes it, and the Cost panel, which
- * draws it — a plain data shape belongs beside the maths that produces it, not inside
+ * draws it: a plain data shape belongs beside the maths that produces it, not inside
  * the server-only file that happens to call that maths first.
  */
 export interface FileCost {
@@ -148,7 +148,7 @@ export interface FileCost {
 /**
  * What one finished print actually cost.
  *
- * The ledger entry's own fields, plus the breakdown — same reasoning as `FileCost`
+ * The ledger entry's own fields, plus the breakdown: same reasoning as `FileCost`
  * above: a plain data shape beside the maths, shared between `server/workshop.ts`
  * (`costedHistory`, which combines a `LedgerEntry` with `costOfEntry`'s result) and the
  * Cost panel's history table.
@@ -165,7 +165,7 @@ export interface CostedPrint {
   electricity: number | null;
 }
 
-/** Whether anything is priced yet — the cost panel prompts until it is. */
+/** Whether anything is priced yet: the cost panel prompts until it is. */
 export function hasAnyPrice(s: CostSettings): boolean {
   return (
     s.filamentPerKg !== null ||

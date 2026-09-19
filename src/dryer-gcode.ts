@@ -1,10 +1,10 @@
 /**
- * Filament dryer — the printer-owned half.
+ * Filament dryer: the printer-owned half.
  *
  * `dryer-core.ts` and `server/dryer.ts` between them run a drying session from *here*:
  * the service sets a bed target with `1028` and re-asserts it every 30 s, because
  * anything that clears the target reads exactly like a session running normally. That
- * keepalive is the whole safety argument, and it has one hole it cannot close — it only
+ * keepalive is the whole safety argument, and it has one hole it cannot close: it only
  * works while the service is alive. Kill the container, lose the network, reboot the
  * host mid-session, and the bed is left at temperature with nothing re-asserting it and
  * nothing to turn it off.
@@ -18,7 +18,7 @@
  * ## Why there is no motion in here
  *
  * No `G28`, and therefore no `G1`. Klipper refuses to move an unhomed axis, so removing
- * the homing removes the plate move with it — and that trade is worth taking, because
+ * the homing removes the plate move with it, and that trade is worth taking, because
  * `G28` probes the plate. A spool already sitting there is something for the nozzle to
  * be driven into. With nothing homing and nothing moving there is no such window, so a
  * spool can be loaded *before* the cycle starts rather than during a timed gap.

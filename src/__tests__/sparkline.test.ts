@@ -1,7 +1,7 @@
 /**
  * The humidity trace's geometry.
  *
- * Every failure here is silent — SVG renders a path containing `NaN` as nothing at all,
+ * Every failure here is silent: SVG renders a path containing `NaN` as nothing at all,
  * so the chart simply disappears and looks like missing data rather than a bug.
  */
 

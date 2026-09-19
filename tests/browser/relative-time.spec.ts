@@ -1,9 +1,9 @@
 /**
- * ELEG-45 — relative timestamps in the log, in a real browser.
+ * ELEG-45: relative timestamps in the log, in a real browser.
  *
  * The claim under test is the one the issue warns about: a relative timestamp written
  * once and never updated is worse than a clock. These assert the *refresh* path, and
- * that it works **without a re-render** — which is what keeps the log's auto-scroll,
+ * that it works **without a re-render**, which is what keeps the log's auto-scroll,
  * pause button and expanded rows intact. `renderLog` short-circuits when nothing
  * changed, so a re-render-based approach would silently do nothing at all.
  *
@@ -62,7 +62,7 @@ test.describe('refreshTimestamps', () => {
     expect(await spanText(page)).toBe('2m ago');
   });
 
-  test('advances the age on a later refresh — the whole point of the ticker', async ({ page }) => {
+  test('advances the age on a later refresh: the whole point of the ticker', async ({ page }) => {
     await enableRelative(page, true);
     await mountSpan(page, NOW, 'irrelevant');
 
@@ -82,7 +82,7 @@ test.describe('refreshTimestamps', () => {
     await enableRelative(page, true);
     await refresh(page, NOW);
     expect(await spanText(page)).toBe('2m ago');
-    // Hovering must still give the precise value — this is a toggle, not a replacement.
+    // Hovering must still give the precise value: this is a toggle, not a replacement.
     expect(await spanTitle(page)).toBe('12:34:56.000');
   });
 

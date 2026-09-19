@@ -1,5 +1,5 @@
 /**
- * State persistence — periodically saves chart/layer data to disk
+ * State persistence: periodically saves chart/layer data to disk
  * so the service survives restarts without losing time-series data.
  *
  * Only persists data that cannot be recovered from the printer:

@@ -1,7 +1,7 @@
 /**
  * Single-user authentication.
  *
- * This service had none — see `docs/security.md`, which is blunt about what that
+ * This service had none: see `docs/security.md`, which is blunt about what that
  * meant: every REST route, the WebSocket and both compat layers answered any
  * request that reached the port, and the reachable surface includes `set_temperature`,
  * `move`, `start_print` and `emergency_stop`. The consequences are physical.
@@ -84,7 +84,7 @@ interface AttemptRecord {
  * Password-guess throttling, per client address.
  *
  * In memory, which is the right scope: this is one process serving one user, and a
- * restart clearing the counters is not a meaningful bypass — an attacker cannot restart
+ * restart clearing the counters is not a meaningful bypass, an attacker cannot restart
  * the service. Keyed by address so one blocked client cannot lock the real user out from
  * somewhere else, which a single global counter would do.
  */
@@ -115,7 +115,7 @@ export class LoginThrottle {
     record.count += 1;
   }
 
-  /** A correct password clears the record — the window is for guessing, not for use. */
+  /** A correct password clears the record: the window is for guessing, not for use. */
   recordSuccess(address: string): void {
     this.attempts.delete(address);
   }
@@ -148,13 +148,13 @@ function sign(payload: string, secret: string): string {
 function verifySignature(payload: string, signature: string, secret: string): boolean {
   const expected = Buffer.from(sign(payload, secret), 'base64url');
   const actual = Buffer.from(signature, 'base64url');
-  // `timingSafeEqual` throws on a length mismatch, which is itself an answer — check
+  // `timingSafeEqual` throws on a length mismatch, which is itself an answer: check
   // first rather than letting the throw do it.
   return expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 
 /**
- * Live sessions, in memory — plus, when `AUTH_SECRET` is set, tokens that can be
+ * Live sessions, in memory, plus, when `AUTH_SECRET` is set, tokens that can be
  * believed again after a restart.
  *
  * Sessions were memory-only and nothing was persisted, on the reasoning that a session
@@ -164,7 +164,7 @@ function verifySignature(payload: string, signature: string, secret: string): bo
  * What changed is that a token can *carry* its own claim. With a secret configured,
  * `create` mints `<payload>.<hmac>`; `validate` falls back to checking that signature
  * when the token is not in memory, and rehydrates the session. A restart therefore no
- * longer signs everyone out — which for a service that restarts on every deploy was a
+ * longer signs everyone out, which for a service that restarts on every deploy was a
  * daily annoyance rather than a security property.
  *
  * **The trade, stated plainly.** `revoke` and `revokeAll` clear memory, so within a
@@ -179,7 +179,7 @@ export class SessionStore {
   /**
    * Signed tokens that have been logged out.
    *
-   * Needed because a signed token proves only that we issued it — deleting it from
+   * Needed because a signed token proves only that we issued it: deleting it from
    * `sessions` does nothing, since `rehydrate` would verify the signature and hand it
    * straight back. Without this, pressing "sign out" left the token working, which is
    * the one thing a logout button must not do.
@@ -226,7 +226,7 @@ export class SessionStore {
    * Rebuild a session from a signed token this process has never seen.
    *
    * Only the ABSOLUTE cap is enforced here. The idle clock restarts, because the token
-   * carries the time it was issued and not the last time it was used — tracking that
+   * carries the time it was issued and not the last time it was used: tracking that
    * statelessly would mean re-issuing the cookie on every request. An idle timeout
    * exists to close an abandoned browser, and restarting its clock at a service restart
    * is the smaller compromise; the absolute cap, which is the one that bounds how long a
@@ -251,7 +251,7 @@ export class SessionStore {
       return session;
     } catch {
       // A signature that verifies over a payload that will not parse means the secret is
-      // right and the format is not — a token from an older build. Treat it as invalid.
+      // right and the format is not: a token from an older build. Treat it as invalid.
       return null;
     }
   }
@@ -284,7 +284,7 @@ export class SessionStore {
   revoke(token: string | undefined): void {
     if (!token) return;
     this.sessions.delete(token);
-    // Forgetting a signed token is not enough — `rehydrate` would accept it again.
+    // Forgetting a signed token is not enough, `rehydrate` would accept it again.
     if (this.secret) this.revoked.add(token);
   }
 
@@ -330,7 +330,7 @@ export function secretsMatch(provided: string, expected: string): boolean {
 
 /**
  * scrypt parameters. `N` dominates both cost and memory: 2^16 with r=8 needs ~64 MiB per
- * hash, which is the point — it is what makes a stolen hash expensive to attack on a GPU.
+ * hash, which is the point, it is what makes a stolen hash expensive to attack on a GPU.
  *
  * Node's default `maxmem` is 32 MiB and would reject this, so it is raised explicitly.
  * The values are stored in the hash string rather than assumed, so raising them later
@@ -350,10 +350,10 @@ const scryptAsync = promisify(scrypt) as (
  *
  * scrypt from `node:crypto` rather than `Bun.password`'s argon2id, for one reason that
  * turned out to matter: the `Bun` global does not exist under the test runner, so the
- * argon2 version could not be tested at all — and an untested password check is the last
+ * argon2 version could not be tested at all, and an untested password check is the last
  * thing to want. scrypt is on the approved list, needs no dependency, and runs in both.
  *
- * The format is self-describing — `scrypt$N$r$p$salt$key`, all base64url — so the
+ * The format is self-describing (`scrypt$N$r$p$salt$key`, all base64url) so the
  * parameters can be raised later without stranding hashes generated today.
  */
 export async function hashPassword(password: string): Promise<string> {
@@ -379,7 +379,7 @@ export async function hashPassword(password: string): Promise<string> {
  * Turn `AUTH_PASSWORD` into the hash the gate actually checks against.
  *
  * Config cannot do this itself: hashing is async and `loadConfig` is not, which is why
- * `loadAuthConfig` left a comment saying "filled in by initAuth()" — for a function that
+ * `loadAuthConfig` left a comment saying "filled in by initAuth()", for a function that
  * did not exist. The result was the worst shape a security feature can take: setting
  * `AUTH_PASSWORD` switched auth ON with an EMPTY hash, so every login failed and the
  * dashboard locked its owner out with no error explaining it.
@@ -402,7 +402,7 @@ export async function initAuth(
  * Does this look like a hash `verifyPassword` could ever accept?
  *
  * Exists because the failure it catches is silent and total. `scrypt` hashes are
- * `scrypt$N$r$p$salt$key`, and **Bun expands `$VAR` when it loads `.env` — inside single
+ * `scrypt$N$r$p$salt$key`, and **Bun expands `$VAR` when it loads `.env`: inside single
  * quotes and double quotes alike.** An unescaped hash therefore arrives as the literal
  * "scrypt", every login answers 401, and nothing anywhere says why. Verified: `A=scrypt$65536$8$1$x`,
  * the same single-quoted, and the same double-quoted all load as "scrypt"; only `\$`
@@ -412,7 +412,7 @@ export async function initAuth(
  */
 export function isWellFormedHash(hash: string): boolean {
   // A backslash means the escaping survived into the value, which happens when Docker's
-  // `env_file:` reads the same `.env` that Bun needs escaped — Docker does not unescape.
+  // `env_file:` reads the same `.env` that Bun needs escaped, Docker does not unescape.
   // The two parsers cannot both be satisfied by one file; this at least says which way
   // it went wrong.
   if (hash.includes('\\')) return false;
@@ -489,12 +489,12 @@ export function readApiKey(
  * Build the `Set-Cookie` value for a session.
  *
  * `Secure` is conditional because the service is routinely reached over plain HTTP on a
- * LAN, and a `Secure` cookie is silently dropped there — which presents as "login does
+ * LAN, and a `Secure` cookie is silently dropped there, which presents as "login does
  * nothing", the least debuggable failure available. Behind a TLS-terminating proxy the
  * request arrives as HTTP with `X-Forwarded-Proto: https`, so that is honoured too.
  *
  * `SameSite=Strict` is the CSRF defence: a cross-site request carries no cookie at all,
- * so the control surface cannot be driven by a page the user happens to visit — the
+ * so the control surface cannot be driven by a page the user happens to visit, the
  * exact attack `docs/security.md` describes as surviving a LAN-only deployment.
  */
 export function sessionCookie(token: string, secure: boolean, maxAgeSeconds: number): string {

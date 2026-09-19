@@ -6,7 +6,7 @@
  * `access.get_api_key` with `'elegoo-compat-api-key'`. Nothing was ever checked against
  * either. A client that asked got an answer and displayed itself as **authenticated**,
  * and anyone auditing the code could find the handling and conclude an auth path
- * existed. ELEG-2's description had to carry a warning not to read these as evidence —
+ * existed. ELEG-2's description had to carry a warning not to read these as evidence:
  * that warning was only necessary because the code lied (ELEG-26).
  *
  * Since `AUTH_API_KEY` exists, that answer is conditional, and every function here takes
@@ -19,7 +19,7 @@
  * needs; the key itself is something its operator already has.
  *
  * Kept in its own module, free of dependencies, so both layers say the same thing and
- * the shapes can be asserted directly — the compat layers are pure state→JSON
+ * the shapes can be asserted directly: the compat layers are pure state→JSON
  * translation, which `docs/testing.md` names as the high-value test target, and a
  * client breaks silently when a field's shape drifts.
  */
@@ -32,7 +32,7 @@ export const NO_API_KEY_MESSAGE =
 /**
  * The same method when a key IS required.
  *
- * It still refuses — `access.get_api_key` means "hand me the key", and a service that
+ * It still refuses: `access.get_api_key` means "hand me the key", and a service that
  * hands out its own credential to an unauthenticated caller has no credential. But it
  * says where to get one instead of claiming there is nothing to get.
  */
@@ -61,7 +61,7 @@ export const MOONRAKER_NO_API_KEY_CODE = -32601;
  * no user store.
  *
  * These are safe to withdraw because `access.info` reports `login_required: false`, which
- * is how a well-behaved client learns not to log in — so a client reaching these was
+ * is how a well-behaved client learns not to log in, so a client reaching these was
  * already off the documented path. `oneshot_token` is the exception and is kept; see
  * `ONESHOT_TOKEN` below.
  */
@@ -73,7 +73,7 @@ export const NO_SESSIONS_MESSAGE =
 /**
  * The same surface when a key is required.
  *
- * Still no user store and still no JWTs — single-user auth has one password and one key,
+ * Still no user store and still no JWTs: single-user auth has one password and one key,
  * and inventing a session here would imply a user store that does not exist. What changes
  * is that the client is pointed at the mechanism that does work.
  */
@@ -89,13 +89,13 @@ export function sessionsMessage(apiKeyRequired: boolean): string {
  * The one credential-shaped answer that is deliberately **kept**.
  *
  * In real Moonraker `oneshot_token` exists so a browser can open a WebSocket or a camera
- * stream where an `Authorization` header cannot be set — the token goes in the query
+ * stream where an `Authorization` header cannot be set: the token goes in the query
  * string instead. A client may fetch one **before** it reads `access.info`, so refusing
  * it risks breaking the WebSocket connection outright. That is a regression, not a
  * security improvement, and this service checks nothing either way: withdrawing it would
  * remove no protection whatsoever, because there is none to remove.
  *
- * So it keeps answering — but with a string that tells the truth when it turns up in a
+ * So it keeps answering, but with a string that tells the truth when it turns up in a
  * URL, a proxy log or a browser's network tab, instead of one that reads like a
  * credential. Any value works, since nothing validates it on the way back in.
  *
@@ -109,7 +109,7 @@ export const ONESHOT_TOKEN = 'no-auth-required';
  *
  * With a key configured this has to refuse. The token's whole purpose is to authenticate
  * a URL that cannot carry a header, so returning a fixed string would be a bypass of the
- * gate — any caller could mint it and use it. Refusing costs a browser client its
+ * gate: any caller could mint it and use it. Refusing costs a browser client its
  * query-string path to the camera and socket; the API key still works everywhere a header
  * can be set, and the alternative is auth that can be walked around.
  */
@@ -123,7 +123,7 @@ export function oneshotToken(apiKeyRequired: boolean): string | null {
  * `enabled` reports whether this server does API-key authentication, which is exactly
  * what the field means to an OctoPrint client. The original bug was `enabled: true` plus
  * a fabricated key; the fix was a hardcoded `false`, which became its own lie the moment
- * AUTH_API_KEY existed. It is now neither — it is read from the configuration.
+ * AUTH_API_KEY existed. It is now neither: it is read from the configuration.
  */
 export function octoprintApiSettings(apiKeyRequired: boolean): { enabled: boolean; key: null } {
   // `key` stays null in both states. `enabled` is what the client acts on; the key is
@@ -135,7 +135,7 @@ export function octoprintApiSettings(apiKeyRequired: boolean): { enabled: boolea
  * OctoPrint's `POST /api/login` body.
  *
  * `admin`/`user` stay true in both states, and that is not a lie: this service has one
- * user, and anyone who gets this far — past an open door or past the gate — genuinely has
+ * user, and anyone who gets this far (past an open door or past the gate) genuinely has
  * full control. Understating it would be its own kind of dishonesty. `apikey` is never
  * emitted; only `_login_mechanism` changes, to name how the caller actually got in.
  */
@@ -160,7 +160,7 @@ export function octoprintLoginPayload(apiKeyRequired: boolean): Record<string, u
  * Whether this service actually checks an API key right now.
  *
  * Both halves matter: auth switched off, or switched on with no key configured, means a
- * machine client has nothing to present — and telling it otherwise sends its operator
+ * machine client has nothing to present, and telling it otherwise sends its operator
  * looking for a key that does not exist. Takes the two fields rather than the whole
  * config, so this module keeps its "no dependencies" property.
  */

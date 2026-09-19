@@ -2,7 +2,7 @@
  * Remember the printer's serial number across restarts (ELEG-60).
  *
  * `MqttBridge` can only learn the SN by overhearing an inbound `elegoo/<sn>/...`
- * message — but the printer only publishes while a client is registered. So after a
+ * message, but the printer only publishes while a client is registered. So after a
  * clean shutdown the printer goes quiet, a freshly started service has nothing to
  * overhear, and registration is never even attempted. The service sits in
  * `broker_only` until something else provokes the printer into talking.
@@ -17,7 +17,7 @@
  * synchronously before the first broker connect, and losing it must never cost more
  * than one discovery cycle.
  *
- * Every failure — missing, unreadable, malformed, empty — degrades to "unknown", which
+ * Every failure (missing, unreadable, malformed, empty) degrades to "unknown", which
  * is exactly the pre-ELEG-60 behaviour. It can slow a start down; it cannot break one.
  */
 
@@ -31,7 +31,7 @@ const FILE = 'printer-sn.json';
 
 /**
  * A CC2 serial looks like `F01U3UD3798YT8K`. Validated rather than trusted because it
- * is interpolated straight into MQTT topic filters — a stray `#` or `/` from a corrupt
+ * is interpolated straight into MQTT topic filters: a stray `#` or `/` from a corrupt
  * file would silently subscribe to the wrong thing.
  */
 const SN_RE = /^[A-Za-z0-9_-]{4,64}$/;
@@ -56,7 +56,7 @@ export function readCachedSn(dataDir: string): string {
   }
 }
 
-/** Remember an SN. Never throws — a read-only data dir must not break registration. */
+/** Remember an SN. Never throws: a read-only data dir must not break registration. */
 export function writeCachedSn(dataDir: string, sn: string): void {
   if (!isValidSn(sn)) return;
   try {

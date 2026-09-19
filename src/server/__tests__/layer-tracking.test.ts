@@ -2,12 +2,12 @@
  * Layer-report classification (ELEG-16).
  *
  * The repro these are built from is real. The running service returned 64 layer entries
- * whose **first** element was `{layer: 29, duration: 155.259}` — the previous job's last
+ * whose **first** element was `{layer: 29, duration: 155.259}`, the previous job's last
  * layer, timed across the gap before the new job reached layer 1. The printer keeps
  * reporting the finished job's `current_layer` for a moment after a print ends, so the
  * new job's first report arrives as a *drop*, and timing that drop invents an entry that
  * belongs to neither print. It sits in front of the new series, leaving `layerTimes`
- * non-monotonic — which is what made the layer chart paint outside its own axes.
+ * non-monotonic, which is what made the layer chart paint outside its own axes.
  *
  * This file lives under `src/server/` for the same reason as the other server tests:
  * `tsconfig.json` excludes that directory, so importing server code from
@@ -81,7 +81,7 @@ describe('trailingLayerRun', () => {
     expect(trailingLayerRun(restored).map((x) => x.layer)).toEqual([1, 2, 3]);
   });
 
-  it('never drops from the tail — the newest entry always survives', () => {
+  it('never drops from the tail: the newest entry always survives', () => {
     const restored = [e(29), e(1), e(2), e(3)];
     const run = trailingLayerRun(restored);
     expect(run[run.length - 1]).toEqual(restored[restored.length - 1]);

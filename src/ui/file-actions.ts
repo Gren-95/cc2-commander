@@ -47,7 +47,7 @@ export function confirmDeleteFile(
     return false;
   }
   client?.sendCommand(1047, { storage_media: source, file_path: [fullPath] });
-  // 1047 answers, but pushes no new listing — so ask for one, and for the disk figures
+  // 1047 answers, but pushes no new listing, so ask for one, and for the disk figures
   // the capacity bar reads, or the row stays on screen and the bar stays wrong.
   setTimeout(() => {
     client?.sendCommand(1044, { storage_media: source, dir, offset: 0, limit: 200 });
@@ -120,7 +120,7 @@ export function ensureFileActions(container: HTMLElement): void {
       return;
     }
 
-    // Delete button. The popover had the only delete, and the popover opens on hover —
+    // Delete button. The popover had the only delete, and the popover opens on hover,
     // so on a touchscreen there was no way to reach it at all.
     const deleteBtn = target.closest('.file-delete-btn') as HTMLElement | null;
     if (deleteBtn) {

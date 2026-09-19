@@ -2,7 +2,7 @@
  * Uploading a gcode to the printer.
  *
  * Split out of `files.ts`, which had grown to 781 lines carrying four unrelated jobs.
- * This one talks to `POST /api/files/upload` over XHR — not `fetch` — for the single
+ * This one talks to `POST /api/files/upload` over XHR (not `fetch`) for the single
  * reason that XHR reports upload progress and `fetch` still cannot, and a 500MB file
  * over a printer's wifi needs a progress bar.
  *

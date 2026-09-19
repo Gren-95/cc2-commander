@@ -1,4 +1,4 @@
-/** Gcode preview — 3D toolpath visualization using gcode-preview library */
+/** Gcode preview: 3D toolpath visualization using gcode-preview library */
 
 import { toggleState } from './state-classes';
 import { WebGLPreview } from 'gcode-preview';
@@ -35,7 +35,7 @@ let followMode = localStorage.getItem('gcode-follow') !== 'false';
 /*
  * Stacked unless explicitly asked otherwise.
  *
- * This read `!== 'false'`, so an absent key meant single-layer ON — the opposite of what
+ * This read `!== 'false'`, so an absent key meant single-layer ON: the opposite of what
  * the card actually rendered, and the opposite of what anyone wants on first open: a
  * preview exists to show the model, and one slice of a benchy is not a benchy. Anyone
  * who turned it on has `'true'` stored and keeps it.
@@ -61,13 +61,13 @@ let releaseGcodeFullscreenTrap: (() => void) | null = null;
  *
  *     finalColor = min(uColor * (diff + ambient) * brightness, 1.0)
  *
- * with `diff` the Lambert term scaled by `directional`. Its defaults — ambient 0.4,
- * directional 1.3, brightness 1.3 — put the lit side of a saturated blue at
+ * with `diff` the Lambert term scaled by `directional`. Its defaults (ambient 0.4,
+ * directional 1.3, brightness 1.3) put the lit side of a saturated blue at
  * 0.95 * 1.7 * 1.3 ≈ 2.1, which **clamps**. So does most of the mid-tone. Everything
  * above the clamp renders as the same pixel, which is precisely why a benchy came out as
  * a flat silhouette: the shading existed and was then thrown away by `min`.
  *
- * The instinct — turn the lights up — makes it worse, and measurably so: at ambient 0
+ * The instinct (turn the lights up) makes it worse, and measurably so: at ambient 0
  * with directional 4.0 the render is pixel-identical, because even more of the surface
  * clamps.
  *
@@ -77,7 +77,7 @@ let releaseGcodeFullscreenTrap: (() => void) | null = null;
  *     0.95 * (0.8 + 0.25) * 1.0 ≈ 1.0   lit side, just short of clamping
  *     0.95 * (0.0 + 0.25) * 1.0 ≈ 0.24  fully shaded side
  *
- * — a 4:1 range across the model instead of one flat value.
+ * a 4:1 range across the model instead of one flat value.
  */
 const AMBIENT = 0.35;
 const DIRECTIONAL = 1.0;
@@ -85,8 +85,8 @@ const DIRECTIONAL = 1.0;
  * A post-multiplier, so it trades highlight headroom for overall level.
  *
  * 1.1 puts the lit side of this blue near the top of the range while leaving the shaded
- * side around a quarter of it. The brightest facets clamp on the BLUE channel only —
- * red and green still vary there — so those read as a highlight rather than as the flat
+ * side around a quarter of it. The brightest facets clamp on the BLUE channel only
+ * (red and green still vary there) so those read as a highlight rather than as the flat
  * plateau the library's 1.3 produced across the whole model.
  */
 const BRIGHTNESS = 1.1;
@@ -137,7 +137,7 @@ function updateNozzle(state: PrinterState): void {
   nozzleMesh.position.set(gm.x, gm.z + 4, -gm.y);
 }
 
-/** Build extrusionColor from colorMap — array for multi-color */
+/** Build extrusionColor from colorMap: array for multi-color */
 function buildExtrusionColors(colorMap: Array<{ t: number; color: string }>): string | string[] {
   if (colorMap.length === 0) return chartPalette().gcodeExtrusion;
   if (colorMap.length === 1) return ensureShadable(colorMap[0].color.replace(/^#/, ''));
@@ -172,7 +172,7 @@ function throttledRender(): void {
   preview?.render();
 }
 
-/** Lightweight WebGL-only redraw (no geometry rebuild) — for nozzle moves */
+/** Lightweight WebGL-only redraw (no geometry rebuild), for nozzle moves */
 function lightRender(): void {
   const now = Date.now();
   if (now - lastRenderTime < RENDER_INTERVAL) return;
@@ -191,7 +191,7 @@ function stopAnimateLoop(p: WebGLPreview): void {
   internals.animate = () => {};
 }
 
-/** Render on orbit control changes (user dragging the 3D view) — throttled */
+/** Render on orbit control changes (user dragging the 3D view): throttled */
 function onOrbitChange(): void {
   if (!preview) return;
   preview.renderer.render(preview.scene, preview.camera);
@@ -202,12 +202,12 @@ function onOrbitChange(): void {
  * Show or hide the "No G-code loaded" overlay.
  *
  * Called wherever `preview` is assigned, because that is the only thing that decides
- * whether the canvas has anything on it — a canvas with nothing drawn looks identical
+ * whether the canvas has anything on it: a canvas with nothing drawn looks identical
  * to one that failed to load.
  */
 function setPreviewEmpty(empty: boolean): void {
   $('gcode-preview-empty')?.classList.toggle('hidden', !empty);
-  // The canvas reserves 350px — the tallest single element on the dashboard — and with
+  // The canvas reserves 350px (the tallest single element on the dashboard) and with
   // nothing loaded that is 350px of nothing behind a one-line message. Collapsing it
   // rather than overlaying the message is most of the difference between the card
   // looking "empty" and looking "broken".
@@ -293,7 +293,7 @@ function initPreview(colorMap?: Array<{ t: number; color: string }>): WebGLPrevi
     buildVolume: BUILD_VOLUME,
     /*
      * Tubes, not lines. `renderTubes: false` drew every extrusion as a flat 2px line in
-     * one colour, so a model came out as a silhouette — a benchy was a blue blob you
+     * one colour, so a model came out as a silhouette, a benchy was a blue blob you
      * could not read as a boat, because nothing in the image varied with the surface
      * angle. Tubes are real geometry, and the library lights them, so the shape reads.
      */
@@ -318,7 +318,7 @@ function initPreview(colorMap?: Array<{ t: number; color: string }>): WebGLPrevi
    * directional up is what makes a curve read as a curve: the lit side separates from
    * the shaded side instead of both landing on the same blue.
    */
-  // Deliberately NOT set here — see `applyShading`.
+  // Deliberately NOT set here, see `applyShading`.
 
   lastEndLayer = -1;
   return p;
@@ -342,7 +342,7 @@ function initPreview(colorMap?: Array<{ t: number; color: string }>): WebGLPrevi
  * 0.4.
  *
  * The instance setters, however, write straight into `materials[].uniforms`. So the
- * values have to be applied *after* the geometry is built rather than before — which is
+ * values have to be applied *after* the geometry is built rather than before, which is
  * this function, called at every point that finishes rendering.
  */
 function applyShading(p: WebGLPreview): void {
@@ -397,7 +397,7 @@ export async function loadGcode(filename: string, source = 'local'): Promise<voi
     await preview.processGCode(gcode);
     applyShading(preview);
 
-    // Stop the library's built-in 60fps animate loop — it calls WebGL render()
+    // Stop the library's built-in 60fps animate loop: it calls WebGL render()
     // every frame, leaking ~23 MB/s. We render on-demand instead.
     stopAnimateLoop(preview);
     // Re-render once after stopping the loop (processGCode's last frame may be lost)
@@ -430,8 +430,8 @@ export async function loadGcode(filename: string, source = 'local'): Promise<voi
 /**
  * Write the layer readout from the slider.
  *
- * `updateInfo` only runs when a printer status frame arrives, so with no printer — a
- * file opened by hand, or the service offline — the Layer row sat blank however far you
+ * `updateInfo` only runs when a printer status frame arrives, so with no printer (a
+ * file opened by hand, or the service offline) the Layer row sat blank however far you
  * scrubbed. The slider knows both numbers on its own; nothing about them needs the
  * machine.
  */
@@ -481,7 +481,7 @@ function updateInfo(state: PrinterState): void {
 
   /*
    * The numbers only. The row is labelled "Layer" now, so repeating the word here both
-   * duplicated it and overflowed a 64px cell — the text rendered underneath the slider
+   * duplicated it and overflowed a 64px cell: the text rendered underneath the slider
    * and read as missing. Z and progress moved to the status line below, which has the
    * width for them and is where the file name already lives.
    */
@@ -510,7 +510,7 @@ function shortName(path: string): string {
  * everywhere the card already runs, including the mobile single-card layout.
  *
  * The canvas's own ResizeObserver (bound below) picks up the resulting size change and
- * calls `preview.resize()` — nothing here has to.
+ * calls `preview.resize()`: nothing here has to.
  */
 function setGcodeFullscreen(on: boolean): void {
   const card = $('gcode-preview-card');
@@ -540,7 +540,7 @@ function setGcodeFullscreen(on: boolean): void {
   }
 }
 
-/** Bind control event handlers — call once at startup */
+/** Bind control event handlers: call once at startup */
 export function bindGcodePreviewControls(): void {
   onThemeChange(refreshGcodePreviewTheme);
 
@@ -550,11 +550,11 @@ export function bindGcodePreviewControls(): void {
 
   // `preview` starts null without ever being ASSIGNED null, so none of the call sites
   // below fire on a fresh load and the card opened showing an empty 350px canvas with
-  // the placeholder stacked under it — taller than before the placeholder existed.
+  // the placeholder stacked under it: taller than before the placeholder existed.
   setPreviewEmpty(true);
 
   // The controls start from the stored modes rather than from whatever the markup
-  // happens to mark active — they disagreed before, and nothing reconciled them.
+  // happens to mark active: they disagreed before, and nothing reconciled them.
   syncViewButtons();
   setFollowChecked(followMode);
 
@@ -562,11 +562,11 @@ export function bindGcodePreviewControls(): void {
   const slider = $('gcode-layer-slider') as HTMLInputElement | null;
   if (slider) {
     /*
-     * `preview.render()` is not a draw call — it is `renderPathIndex = 0` followed by
+     * `preview.render()` is not a draw call: it is `renderPathIndex = 0` followed by
      * walking every tool path from scratch and rebuilding all tube geometry
      * (node_modules/gcode-preview's `render()`), the same expensive operation
      * `throttledRender()` above exists to cap during live printing. Dragging used to
-     * call it directly on every `input` event — easily 100+/sec for a pointer drag —
+     * call it directly on every `input` event (easily 100+/sec for a pointer drag)
      * and then, redundantly, a second time right after. Measured against a 120-layer
      * synthetic model: 60 raw input events previously meant up to 120 full rebuilds;
      * coalescing into one rAF callback collapses an entire fast drag into ONE, applied
@@ -600,7 +600,7 @@ export function bindGcodePreviewControls(): void {
    *
    * It was one button that flipped a boolean and called `toggleState(btn, 'active', …)`.
    * That adds a bare `.active` class, and with the stylesheet gone nothing maps it to a
-   * utility — measured, the computed style was identical on and off, so the control gave
+   * utility: measured, the computed style was identical on and off, so the control gave
    * no clue which mode you were in. Two named positions say it without needing a state
    * to be styled at all.
    */
@@ -680,7 +680,7 @@ export function bindGcodePreviewControls(): void {
  * Re-colour a live preview after a theme change.
  *
  * The four colours are read from the chart palette once, at construction, and baked into
- * WebGL state — so flipping the theme used to leave the model sitting on the old
+ * WebGL state, so flipping the theme used to leave the model sitting on the old
  * background until the page reloaded. `ui/theme.ts` calls this for the same reason it
  * calls `invalidateChartPalette`: a canvas cannot re-read a stylesheet by itself.
  *

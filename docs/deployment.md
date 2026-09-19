@@ -1,4 +1,4 @@
-# Deployment — and why `MERGED` is not `IN_PRODUCTION`
+# Deployment, and why `MERGED` is not `IN_PRODUCTION`
 
 **This fork deploys as a container.** A merged commit changes nothing that is running
 until an image is built, pushed and pulled. That gap is the whole reason this page
@@ -10,7 +10,7 @@ exists.
 | --- | --- |
 | image | `ghcr.io/gren-95/cc2-commander:latest` (or a pinned `x.y.z`) |
 | built by | `.github/workflows/publish.yml`, on a push to `main` or a `v*` tag |
-| exec | `bun src/server/index.ts` — the **TypeScript is run directly**, so there is no compiled backend artefact to go stale |
+| exec | `bun src/server/index.ts`: the **TypeScript is run directly**, so there is no compiled backend artefact to go stale |
 | config | the compose file's `environment:` block, not a `.env` in your checkout |
 | state | whatever is mounted at `/app/data` (`DATA_DIR`) |
 | ports | `SERVICE_PORT` 8088 (web + API + `/ws`), `MOONRAKER_PORT` 7125 |
@@ -22,7 +22,7 @@ file back and `/api/health` serves it, so "is my change live?" is one HTTP reque
 rather than a guess.
 
 An unstamped image reports `unknown` rather than lying. That is what a local
-`docker build` produces — the `BUILD_*` args come from the publish workflow — and it is
+`docker build` produces (the `BUILD_*` args come from the publish workflow) and it is
 honest, but it means a locally built image cannot answer the version question.
 
 ## What used to be here
@@ -50,26 +50,26 @@ public repository.
 `BIND_ADDRESS` makes the interface both `SERVICE_PORT` and `MOONRAKER_PORT` listen on
 configurable, but the default is still `0.0.0.0`, so **setting nothing changes nothing**.
 It is the knob, not the decision. In the container, narrow the published port in
-`docker-compose.yml` rather than setting it — see [configuration.md](configuration.md).
+`docker-compose.yml` rather than setting it: see [configuration.md](configuration.md).
 
 Two consequences for anyone testing this:
 
 - **A request from the host itself proves nothing about reachability.** `curl` and any
   local fetch tool resolve and route from inside the network, so a `200` says only that
-  the service is up — not that anyone else can get to it. Answering "is this exposed?"
-  needs a resolver check (what does public DNS return — a routable address or an RFC1918
+  the service is up, not that anyone else can get to it. Answering "is this exposed?"
+  needs a resolver check (what does public DNS return: a routable address or an RFC1918
   one?) and, for reachability, a client genuinely off the network.
 - **The proxy is not the only door.** Because the bind defaults to `0.0.0.0`, ports 8088
   and 7125 are directly reachable from anything routed to the host, bypassing whatever
-  vhost or auth the proxy might add — unless the published ports have been narrowed.
+  vhost or auth the proxy might add, unless the published ports have been narrowed.
 
 Read [security.md](security.md) before adding an endpoint: what protects this service is
 network position, not code.
 
 ## Operator commands
 
-An agent may read (`ps`, `logs`, `curl`), and — by a standing instruction recorded in
-[`CLAUDE.md`](../CLAUDE.md) — rebuilds and recreates the one production container after
+An agent may read (`ps`, `logs`, `curl`), and (by a standing instruction recorded in
+[`CLAUDE.md`](../CLAUDE.md)) rebuilds and recreates the one production container after
 each committed change (`docker compose up -d --build cc2-commander`, then verifies). It
 does not pull images, run `down` or `restart`, or touch any other service. The commands
 below are the ones worth pasting into an `OPERATOR:` issue.
@@ -82,11 +82,11 @@ docker compose logs -n 100                 # startup banner: build, printer, por
 # deploy: pull the new image and recreate
 docker compose pull && docker compose up -d
 
-# roll back to a known-good tag — edit `image:` to a pinned x.y.z, then
+# roll back to a known-good tag: edit `image:` to a pinned x.y.z, then
 docker compose up -d
 ```
 
-**Verify at the receiver, not at the exit code** — a successful `pull` proves nothing:
+**Verify at the receiver, not at the exit code**: a successful `pull` proves nothing:
 
 ```bash
 curl -s localhost:8088/api/health | jq .   # {"ok":true,"mqtt":"connected","mqttPhase":…,"build":{…}}
@@ -105,14 +105,14 @@ Two fields carry the whole check:
 
   **If it is not `connected`, read `mqttPhase` before blaming the deploy** (ELEG-59). The
   coarse field collapses two unrelated failures into `broker_only`, and the instinct
-  after a deploy is to roll back — which on 2026-08-08 was the wrong move, because the
+  after a deploy is to roll back, which on 2026-08-08 was the wrong move, because the
   service was fine and the printer's firmware had hung:
 
   | `mqttPhase` | What it means | Who fixes it |
   | --- | --- | --- |
   | `awaiting_sn` | The broker answered but the printer has never published. Registration was **never attempted**, so `mqttRegisterAttempts` is 0. The machine's Linux side is up; its control application is not. | Power-cycle the **printer**. Not a deploy problem. |
   | `registering` | An SN is known and registration is in flight. Watch `mqttRegisterAttempts` climb. | Wait; if it keeps climbing, the printer is not answering. |
-  | `rejected` | The printer already has its maximum of two clients. | Close another client — the vendor app, or a second copy of this service. |
+  | `rejected` | The printer already has its maximum of two clients. | Close another client: the vendor app, or a second copy of this service. |
 
   `mqttMessage` carries the same thing as one sentence, which is usually all you need:
 
@@ -126,10 +126,10 @@ ELEG has `tracksProduction` **on**, so `IN_PRODUCTION` exists and is meaningful:
 
 - A merged PR moves the issue to `MERGED` and changes **nothing that is running**.
 - `IN_PRODUCTION` means the image was published, pulled, and `/api/health` answered from
-  the new code. That is operator work — file it as its own `OPERATOR:` issue rather than
+  the new code. That is operator work: file it as its own `OPERATOR:` issue rather than
   leaving a code issue open across a manual step, give the exact commands above, and ask
   for the output. **The evidence is `build.commit` from `/api/health` matching the commit
-  the image was built from**, not a successful `docker compose pull` — set the status
+  the image was built from**, not a successful `docker compose pull`: set the status
   from that output rather than from the pull having exited 0.
 - The status automation never moves an issue backwards out of `MERGED` /
   `IN_PRODUCTION`, so setting `IN_PRODUCTION` optimistically is not correctable later.

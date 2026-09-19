@@ -2,7 +2,7 @@
  * Writing a subtab into the address bar.
  *
  * The URL was written only when a MAIN tab changed, so clicking between subtabs left it
- * showing whichever panel happened to be remembered when the tab opened — you could be
+ * showing whichever panel happened to be remembered when the tab opened: you could be
  * looking at the Spool Calculator while the address bar said `subtab=dryer`, and copying
  * that link sent someone to the wrong panel.
  *
@@ -52,7 +52,7 @@ test.describe('updateDeepLinkSubtab', () => {
 
   test('ignores a group whose tab is not on screen', async ({ page }) => {
     // `switchSubtab` runs for a group whenever its parent tab is opened, including to
-    // restore a remembered panel — so the About page must not rewrite the URL while
+    // restore a remembered panel, so the About page must not rewrite the URL while
     // Tools is what you are looking at.
     await mount(page, 'tools');
     await page.evaluate(`${deepLink}.updateDeepLinkSubtab('help', 'debug')`);

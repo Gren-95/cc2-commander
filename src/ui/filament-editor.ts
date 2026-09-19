@@ -6,7 +6,7 @@ import { escapeHtml, escapeAttr } from './helpers';
 import { toast } from './toast';
 
 /**
- * Predefined filament database — matches the official Elegoo web UI exactly.
+ * Predefined filament database: matches the official Elegoo web UI exactly.
  * Each entry has a type (material family), name (specific variant), hex code,
  * temperature range, and availability flags for ELEGOO / Generic brands.
  */

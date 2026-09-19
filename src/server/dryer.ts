@@ -3,7 +3,7 @@
  *
  * The timer used to live in `ui/dryer-panel.ts`: a `setInterval` in whichever tab had
  * the Tools page open. That tab owned a heater. Close it, navigate away, let a phone
- * sleep, and the bed stayed at temperature with nothing left running to turn it off —
+ * sleep, and the bed stayed at temperature with nothing left running to turn it off:
  * the panel said so in small print, which is not a safety mechanism.
  *
  * Here the session is a file under `DATA_DIR` and the loop is the service's. A browser
@@ -14,15 +14,15 @@
  * 1. **`startedAt` is absolute.** Expiry is answered by arithmetic against the clock, so
  *    a service restarted mid-session resumes it correctly and a service restarted *after*
  *    one should have ended turns the bed off at boot instead of resuming a finished job.
- *    Storing "minutes remaining" would make downtime pause the clock — and a bed that is
+ *    Storing "minutes remaining" would make downtime pause the clock, and a bed that is
  *    still hot does not pause.
- * 2. **The target is re-asserted every 30s.** Anything that clears it — the dashboard's
- *    own Off button, the printer's screen, a Moonraker client, a firmware idle timeout —
+ * 2. **The target is re-asserted every 30s.** Anything that clears it (the dashboard's
+ *    own Off button, the printer's screen, a Moonraker client, a firmware idle timeout)
  *    is undone, because a silent stop reads exactly like a session running normally.
  *    Observed before this existed: target 45 °C at 11:50, target 0 at 12:05, timer still
  *    counting down and eventually announcing dry filament.
  * 3. **Every exit turns the bed off.** Finished, stopped, refused, or resolved-expired
- *    all go through `finish`, which sends `heater_bed: 0` before clearing the session —
+ *    all go through `finish`, which sends `heater_bed: 0` before clearing the session,
  *    and clears the session first so a keepalive cannot race in behind the off command.
  * 4. **Never during a print.** A drying session sets the bed to a fixed temperature for
  *    hours; doing that under a print ruins it. `start` refuses, and an active session

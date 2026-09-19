@@ -3,7 +3,7 @@
  *
  * The project was `elegoo-web` and is now `cc2-commander`, and three keys carried the
  * old name: the UI settings, the dashboard card layout and the spool calculator. Those
- * keys are the only handle on state a person arranged by hand — theme, which cards are
+ * keys are the only handle on state a person arranged by hand: theme, which cards are
  * visible and how wide, list sorts, alert volume, spool figures.
  *
  * **Renaming a key is not a rename, it is a delete.** `localStorage` has no concept of
@@ -12,7 +12,7 @@
  * layout went. That is why this exists rather than a find-and-replace.
  *
  * The migration runs on read, not at startup, so a module that is never loaded never
- * pays for it — and it is idempotent: once the value is under the new key the old one is
+ * pays for it, and it is idempotent: once the value is under the new key the old one is
  * gone and the check costs one miss.
  */
 

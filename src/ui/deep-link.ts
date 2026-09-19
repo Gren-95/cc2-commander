@@ -2,13 +2,13 @@
  * Addressable tabs: `?tab=tools&subtab=spool`.
  *
  * Every view in this app was previously reachable only by clicking, which means none of
- * them could be linked, bookmarked, or opened directly — including by a screenshot
+ * them could be linked, bookmarked, or opened directly, including by a screenshot
  * script, which had to click its way to each one and guess when it had arrived.
  *
  * ## Query string rather than a hash or a path
  *
  * A path (`/tools/spool`) would need the SPA fallback to answer it, and that fallback is
- * already the subject of one bug this session — `/api/canvas` was being served the
+ * already the subject of one bug this session: `/api/canvas` was being served the
  * dashboard's HTML. A hash is not sent to the server at all, which is tidy, but it
  * collides with in-page anchors. A query string is unambiguous, survives a reload, and
  * the server never has to know about it.
@@ -25,7 +25,7 @@
  * Nothing is imported from `settings.ts` on purpose.
  *
  * `settings.ts` writes the URL through `updateDeepLink`, so importing `switchToTab`
- * back out of it would close a cycle — the same one `file-browsing.ts` was created to
+ * back out of it would close a cycle: the same one `file-browsing.ts` was created to
  * break. Parsing is a pure function of the query string and the panels that exist;
  * `main.ts` owns both and does the switching.
  */
@@ -63,7 +63,7 @@ export interface DeepLink {
  * What the query string asks for, if anything.
  *
  * Pure: `available` is the list of panel names that exist in this build, which the
- * caller reads from the DOM. Silent about nonsense — `?tab=banana` yields nothing
+ * caller reads from the DOM. Silent about nonsense: `?tab=banana` yields nothing
  * rather than an error, because a bad link is not worth a dialog and the fallback (stay
  * where you are) is obvious.
  */
@@ -76,7 +76,7 @@ export function parseDeepLink(search: string, available: (group: string) => stri
 
   const subtab = params.get('subtab');
   // A subtab only means something inside a tab that has them, and only if that panel
-  // exists here — `?subtab=spool` on the dashboard is a typo, not an instruction.
+  // exists here: `?subtab=spool` on the dashboard is a typo, not an instruction.
   const group = SUBTAB_GROUP[link.tab ?? 'dashboard'];
   if (subtab && group && available(group).includes(subtab)) {
     link.group = group;
@@ -89,8 +89,8 @@ export function parseDeepLink(search: string, available: (group: string) => stri
 /**
  * Put a subtab in the address bar, if it is the one on screen.
  *
- * `switchSubtab` runs for a group whenever its parent tab is opened — including to
- * restore a remembered panel — so writing unconditionally would let the About page's
+ * `switchSubtab` runs for a group whenever its parent tab is opened (including to
+ * restore a remembered panel) so writing unconditionally would let the About page's
  * group rewrite the URL while you are looking at Tools. The active tab is read from the
  * DOM rather than imported from `settings.ts`, which keeps this module importing nothing
  * and therefore incapable of closing a cycle.

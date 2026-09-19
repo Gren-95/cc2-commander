@@ -1,26 +1,26 @@
-# Testing — what is covered, and what nothing covers
+# Testing: what is covered, and what nothing covers
 
 Be honest about the starting point: **the suite is small and almost entirely pure
 functions.** `bunx vitest list` prints the current set; the list below describes what
-each file is *for*, and quotes no totals on purpose (ELEG-15 — a count in prose only ever
+each file is *for*, and quotes no totals on purpose (ELEG-15, a count in prose only ever
 drifts).
 
-- `src/__tests__/types.test.ts` — `detectZone`, `isFilamentChangeSubStatus`.
-- `src/__tests__/layer-chart.test.ts` — the layer chart's window selection and domain
+- `src/__tests__/types.test.ts`: `detectZone`, `isFilamentChangeSubStatus`.
+- `src/__tests__/layer-chart.test.ts`: the layer chart's window selection and domain
   arithmetic (ELEG-16/18).
-- `src/__tests__/layer-chart-render.test.ts` — the only tests that run drawing code, via
+- `src/__tests__/layer-chart-render.test.ts`: the only tests that run drawing code, via
   a recording 2D-context stub (ELEG-16). See below.
-- `src/server/__tests__/layer-tracking.test.ts` — the print-boundary rule for the
+- `src/server/__tests__/layer-tracking.test.ts`: the print-boundary rule for the
   layer-time series (ELEG-16/18).
-- `src/server/__tests__/state-store-restore.test.ts` — the only test that stands up a real
+- `src/server/__tests__/state-store-restore.test.ts`: the only test that stands up a real
   `StateStore` (ELEG-18). See below.
-- `src/server/__tests__/telegram-allowlist.test.ts` — who may issue bot commands (ELEG-3).
+- `src/server/__tests__/telegram-allowlist.test.ts`: who may issue bot commands (ELEG-3).
   and resources (ELEG-7). A *documentation* check.
-- `src/server/__tests__/build-info.test.ts` — the deployed-commit stamp (ELEG-6).
+- `src/server/__tests__/build-info.test.ts`: the deployed-commit stamp (ELEG-6).
 
-Everything else in this repo — the MQTT bridge, the state store's *event* handling, every
+Everything else in this repo (the MQTT bridge, the state store's *event* handling, every
 REST route, both compatibility layers and the Telegram middleware
-wiring — has **no test at all**.
+wiring) has **no test at all**.
 
 So `bun run gates` green means: it compiles, it is formatted, some pure functions still
 work, and one chart still puts its ink inside its own axes. Read that sentence again
@@ -31,13 +31,13 @@ before quoting a green run as evidence in a closing comment.
 `docs/testing.md` long said the store was the most bug-prone untested code here, with
 the MQTT bridge as the obstacle. It is not one:
 `src/server/__tests__/state-store-restore.test.ts` constructs a real `StateStore` with an
-`EventEmitter` stub in place of the bridge — the constructor only registers listeners, and
+`EventEmitter` stub in place of the bridge, the constructor only registers listeners, and
 nothing on the restore path calls it. No printer, no network, no MQTT.
 
 One trap: the constructor starts a chart-sampling `setInterval`, so a test must call
 `store.destroy()` (an `afterEach` is the obvious home) or vitest will never exit.
 
-That opens the delta-merge tests this page has been asking for — a field absent from a
+That opens the delta-merge tests this page has been asking for: a field absent from a
 printer delta means *unchanged*, not *cleared*, and nothing enforces it.
 
 ## Testing canvas code without a browser
@@ -46,16 +46,16 @@ printer delta means *unchanged*, not *cleared*, and nothing enforces it.
 dependency: hand the render function a stub `getContext('2d')` that pushes every call
 into an array, stub `document.getElementById` and `window.devicePixelRatio`, then assert
 on the *operations*. It catches the things that are cheap to get wrong and invisible in a
-diff — a missing `ctx.clip()`, a coordinate outside the plot rect, a label drawn past the
+diff: a missing `ctx.clip()`, a coordinate outside the plot rect, a label drawn past the
 canvas edge (ELEG-16 had all three).
 
 What it cannot tell you is whether the result **looks** right: colour, font, overlap and
 layout need eyes on `bun run dev:web`. This stub approach is still the right one for canvas
-work — jsdom gives you a DOM, not a renderer, and `getContext('2d')` under it does
+work: jsdom gives you a DOM, not a renderer, and `getContext('2d')` under it does
 nothing useful.
 
 **Where a new test file goes is decided by the typechecks, not by taste.** A test that
-imports `src/server/**` belongs under `src/server/__tests__/` — `tsconfig.json` excludes
+imports `src/server/**` belongs under `src/server/__tests__/`: `tsconfig.json` excludes
 that directory, so importing server code from `src/__tests__/` drags Node-only modules
 into the browser typecheck. Frontend tests go in `src/__tests__/`. `vitest.config.ts`
 picks up both.
@@ -64,13 +64,13 @@ picks up both.
 bun run test              # vitest run
 bun run test:watch
 bun run test:coverage
-bun run gates             # the whole set — see docs/gates.md
+bun run gates             # the whole set: see docs/gates.md
 ```
 
 `vitest.config.ts` runs in the **node** environment by default and picks up
 `src/**/*.test.ts` **and `test/**/*.test.ts`**, so a new suite can live in either place.
 
-## There IS a DOM environment now — opt in per file (ELEG-61)
+## There IS a DOM environment now: opt in per file (ELEG-61)
 
 `jsdom` is a devDependency, and a test that needs `document` opts in with a **docblock on
 its first line**:
@@ -79,8 +79,8 @@ its first line**:
 // @vitest-environment jsdom
 ```
 
-That is the whole mechanism. **There is no config change** — no `environment` key, no
-glob, no setup file — which is deliberate: the pure tests keep running in the faster
+That is the whole mechanism. **There is no config change** (no `environment` key, no
+glob, no setup file) which is deliberate: the pure tests keep running in the faster
 `node` env, and there is nothing for the next person to find and misread. Copy the
 docblock, not a config entry.
 
@@ -97,7 +97,7 @@ another; the two things it establishes:
   asserts real round-trips across a simulated reload.
 
   The cause was **not** the obvious one. jsdom does refuse `localStorage` on an opaque
-  origin — `new JSDOM('')` throws `SecurityError`, reproducibly — but inside vitest the
+  origin (`new JSDOM('')` throws `SecurityError`, reproducibly) but inside vitest the
   origin is already `http://localhost:3000`, so `environmentOptions.jsdom.url` fixes
   nothing. The real cause is **Node 26's own experimental `localStorage`**, installed on
   `globalThis` as an accessor whose getter returns `undefined` without
@@ -109,7 +109,7 @@ another; the two things it establishes:
   try/catch and still degrades silently to defaults, so a persistence test whose expected
   value equals the default still passes for the wrong reason. Never assert a default:
   use `'dark'` (not `'auto'`) for theme, a populated object for `listSort`. And re-import
-  the module rather than calling `loadUISettings()` twice — it memoises in a module-level
+  the module rather than calling `loadUISettings()` twice: it memoises in a module-level
   `cached`, so a second call returns the cache without touching storage, testing the
   variable rather than the persistence.
 
@@ -120,12 +120,12 @@ another; the two things it establishes:
 - **Keyboard focus *is* testable here** (ELEG-41). jsdom implements `focus()`,
   `document.activeElement` and event dispatch, so a focus trap can be asserted properly:
   `src/__tests__/focus-trap.test.ts` dispatches Tab and Shift+Tab and checks where focus
-  lands, including the case that matters — focus that has reached the page behind being
+  lands, including the case that matters, focus that has reached the page behind being
   pulled back. Several older issues assume focus needs a real browser; it does not, and
   that assumption is worth checking before deferring one.
 
   **Where it stops:** jsdom does not implement the *native behaviour* of `inert`. A test
-  can assert the attribute is applied and removed — and should — but that a browser
+  can assert the attribute is applied and removed (and should) but that a browser
   actually honours it is not verifiable here. Say which of the two you checked; they are
   not the same claim.
 
@@ -136,13 +136,13 @@ browser or screenshot in any gate.
 One consequence worth knowing before writing a focus or visibility test: **do not filter
 focusable elements on geometry.** `offsetParent` and `getClientRects()` are the usual
 visibility check in a browser, but jsdom has no layout engine and reports every element
-as having none — so a geometry filter matches nothing under test and the code looks
+as having none, so a geometry filter matches nothing under test and the code looks
 broken exactly where it is being verified. Filter on explicit hiding (`inert`,
 `aria-hidden`, `hidden`, this repo's `.hidden` class) instead.
 
 ## The typechecks are the real safety net, and one of them is easy to miss
 
-With almost no tests, `tsc` is doing most of the work — which is exactly why
+With almost no tests, `tsc` is doing most of the work, which is exactly why
 `tsconfig.json` **excluding `src/server`** matters so much. `bun run build` and CI both run
 only that one, so **the whole backend can be type-broken while everything looks green.**
 Run `bun run service:check` (or just `bun run gates`) after touching `src/server/**`. See
@@ -153,29 +153,29 @@ Run `bun run service:check` (or just `bun run gates`) after touching `src/server
 The high-value, low-friction targets are the pure and near-pure functions that already
 carry the protocol's hard-won knowledge:
 
-- **`src/types.ts`** — zone detection, status/sub-status classification, unit
+- **`src/types.ts`**: zone detection, status/sub-status classification, unit
   conversions. Cheap to test, and `types.test.ts` is the pattern to copy.
-- **`src/server/state-store.ts` / `src/printer-state.ts`** — the delta **merge**. Feed
+- **`src/server/state-store.ts` / `src/printer-state.ts`**: the delta **merge**. Feed
   it a sequence of captured status payloads and assert the merged result. This is the
   most bug-prone code in the repo (a field missing from a delta means *unchanged*, not
   *cleared*) and it is entirely untested.
-- **`src/server/config.ts`** — `loadConfig()` already throws on a bad `PRINTER_IP` or
+- **`src/server/config.ts`**: `loadConfig()` already throws on a bad `PRINTER_IP` or
   port. Those refusals are worth pinning; they are the only validation in the service.
-- **The compat layers** — `moonraker-compat.ts` / `octoprint-compat.ts` translate a
+- **The compat layers**: `moonraker-compat.ts` / `octoprint-compat.ts` translate a
   state object into a fixed third-party JSON shape. Pure input → output, and a client
   like Mainsail breaks silently when a field's shape drifts.
 
-**The pure-half / DOM-half split stays, even though jsdom now exists** —
+**The pure-half / DOM-half split stays, even though jsdom now exists**:
 `card-layout.ts` + `settings.ts`, `list-sort.ts` + `list-controls.ts`. **Put the
 decisions in the pure half**: those tests are faster, they read better, and they do not
 depend on an environment. What ELEG-61 changed is that the DOM half is no longer
-*unreachable* — wiring, focus behaviour and event handling can now be asserted, and the
+*unreachable*: wiring, focus behaviour and event handling can now be asserted, and the
 one invariant that had been held up by code review alone now has a test. Everything else
 that renders is still asserted by nothing.
 
 Build fixtures from **captured real payloads** (the debug panel exports the state tree,
 and `${DATA_DIR}/state.json` is a real snapshot) rather than hand-writing an idealised
-message — the CC2's actual payloads are the thing worth encoding. Strip anything
+message: the CC2's actual payloads are the thing worth encoding. Strip anything
 identifying before committing a fixture.
 
 ## Settling a protocol claim, read-only
@@ -185,7 +185,7 @@ exist, so it is worth writing down how to check one **without touching the machi
 
 **`METHOD_NAMES` in `src/ui/log-methods.ts` is a display label, not a citation.** It is
 the most readable list of methods in the repo, which is exactly why wrong numbers got
-copied out of it into issues — ELEG-38 asked for a history delete on 1049 (really
+copied out of it into issues: ELEG-38 asked for a history delete on 1049 (really
 `UpdateToken`, an auth-token write), ELEG-30 for AI detection on 2010/2011 (neither
 exists), ELEG-32 for OTA on 1064 (really 1039). It also contradicted itself, listing
 both 1038 and 1049 as history delete. ELEG-57 audits it.
@@ -193,13 +193,13 @@ both 1038 and 1049 as history delete. ELEG-57 audits it.
 The citable sources are `data/CC2_PROTOCOL_REFERENCE.md` (transcribed from the official
 app, with the full method table, the `hh` error-code enum and per-method payloads) and
 `data/CC2-OFFICIAL-APP-PATTERNS.md`. When those two agree, that is usually enough. When
-they disagree with the running code — and they do, for 1062 and the 2006/2007 pair —
+they disagree with the running code (and they do, for 1062 and the 2006/2007 pair)
 neither wins on authority, because the reference may describe a different firmware.
 
 **Both are local-only. Neither is in a clone (ELEG-66).** `.gitignore` line 7 is a bare
 `data/`, and `git log --all --diff-filter=A -- 'data/*'` returns nothing: no file under
-`data/` has ever been committed. That directory is also the runtime `DATA_DIR` — state
-snapshots, `data/logs/` captures, timelapses — and ignoring *that* content is right,
+`data/` has ever been committed. That directory is also the runtime `DATA_DIR` (state
+snapshots, `data/logs/` captures, timelapses) and ignoring *that* content is right,
 since it carries serial numbers, local addresses and operational captures that have no
 place in a public repo. The protocol documents simply live in the same directory and got
 swept up with it.
@@ -211,7 +211,7 @@ ls data/CC2_PROTOCOL_REFERENCE.md data/CC2-OFFICIAL-APP-PATTERNS.md
 ```
 
 **If they are absent, say so and use the `Get…` probe below instead.** Do not cite a
-file you cannot open — that is indistinguishable from inventing one, and inventing
+file you cannot open: that is indistinguishable from inventing one, and inventing
 method numbers is the thing this whole section exists to prevent. Do not reconstruct
 them from `METHOD_NAMES` either, for the reason above.
 
@@ -221,14 +221,14 @@ machine, because that file never commits. ELEG-55 put `error_code 1100` in a com
 `src/ui/log-methods.ts` precisely for this reason. Follow it: the comment commits, the
 `data/` edit does not.
 
-Whether these two documents could be committed at all — they are transcribed from the
-vendor's own application and firmware headers, into a **public** repo — is an open
+Whether these two documents could be committed at all (they are transcribed from the
+vendor's own application and firmware headers, into a **public** repo) is an open
 question tracked separately, and is a call for a human rather than an agent.
 
 Then a **`Get…` method can simply be asked**, which is a read and therefore allowed:
 
 ```bash
-# Bun has a WebSocket client built in — the `ws` package went with the move to
+# Bun has a WebSocket client built in: the `ws` package went with the move to
 # Bun.serve. Sends one Get and prints the reply. No node_modules needed.
 bun -e "
 const ws = new WebSocket('ws://localhost:8088/ws');
@@ -245,24 +245,24 @@ setTimeout(() => process.exit(1), 5000);
 "
 ```
 
-That is how 1062 was shown to return `{"error_code": 1100}` on this firmware — an
+That is how 1062 was shown to return `{"error_code": 1100}` on this firmware, an
 undocumented code, and the reason `systemInfo` has always been `null` (ELEG-55).
 
 **Only `Get…` methods.** A `Set…` is a write to a physical machine and must never be
 fired to find out what it does; resolve those from a vendor-app capture instead
-(`POST /api/debug/capture` records passively — see ELEG-56 for the shape).
+(`POST /api/debug/capture` records passively: see ELEG-56 for the shape).
 
 ## Do not test against the printer
 
 This is the repo's hard boundary and it is restated here because "just try it" is the
 instinct a test failure produces: the printer is a physical machine. Reads are fine.
 `set_temperature`, `fan`, `move`, `home`, `start_print`, `pause_print`, `stop_print`
-and `emergency_stop` are **not test tools** — they heat a real nozzle, drive real
+and `emergency_stop` are **not test tools**: they heat a real nozzle, drive real
 motors into whatever is on the bed, or abort a job that has been running for hours.
 Verifying one of those is operator work: give the exact command, ask for the output,
 interpret it. See [`CLAUDE.md`](../CLAUDE.md).
 
-## `bun run dev` on this host collides with production — three ways
+## `bun run dev` on this host collides with production: three ways
 
 Production runs on this same machine (see [deployment.md](deployment.md)), and it holds
 **both** service ports:
@@ -275,7 +275,7 @@ LISTEN 0.0.0.0:7125      cc2-commander   (MOONRAKER_PORT)
 So `bun run dev` / `bun run dev:service` with default config **fails to bind**, and if you
 free the ports you hit the worse problem: a second process connecting to the printer's
 MQTT broker means **two registrations for one printer**. The broker is small and the
-two clients fight — which looks like flapping state or dropped updates in *production*,
+two clients fight, which looks like flapping state or dropped updates in *production*,
 not in your dev window.
 
 **The third collision is the Telegram bot, and it bites even on free ports.** Your
@@ -287,7 +287,7 @@ GrammyError: Call to 'getUpdates' failed! (409: Conflict: terminated by other ge
 request; make sure that only one bot instance is running)
 ```
 
-— but not before *your* poller has kicked the production one off the token. The live
+but not before *your* poller has kicked the production one off the token. The live
 service recovers (`Restart=always`, and grammy retries), so the damage is a gap in
 notifications rather than anything lasting. It also takes your dev process down, which is
 how you find out. Measured while verifying ELEG-24.
@@ -327,13 +327,13 @@ safest way to work here.
 
 **When you do probe a local server, prove the request landed.** `curl … | grep -i
 '^access-control-allow-origin'` printing nothing means "header absent" *or* "server never
-came up", and those look identical. Print the status line too — a check that passes
+came up", and those look identical. Print the status line too: a check that passes
 because nothing answered is worse than no check.
 
-## What nothing checks — say so instead of implying otherwise
+## What nothing checks: say so instead of implying otherwise
 
 - **Layout and appearance.** No browser test, no screenshot, no playwright. jsdom (above)
-  can now assert *wiring* — that an element exists, keeps focus, responds to a click —
+  can now assert *wiring* (that an element exists, keeps focus, responds to a click)
   but it does no layout and no paint, so a card that renders empty, overlaps, or throws
   in the console is still invisible to every gate. Look at the page.
 - **The WebSocket contract.** `ws-transport.ts` broadcasts and `ws-client.ts` consumes;

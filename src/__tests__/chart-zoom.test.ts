@@ -62,7 +62,7 @@ describe('zoomIndicator', () => {
     expect(zoomIndicator(1, -30_000)).toBe('1.0x · 30s back · double-click to reset');
   });
 
-  it('is plain text — it is drawn on a canvas, which paints markup literally', () => {
+  it('is plain text: it is drawn on a canvas, which paints markup literally', () => {
     for (const [zoom, pan] of [
       [10, 0],
       [0.1, 0],

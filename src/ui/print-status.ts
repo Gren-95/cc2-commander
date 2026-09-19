@@ -95,7 +95,7 @@ function updateFan(prefix: string, speed: number, rpm?: number): void {
   const pct = fanPct(speed);
   const range = document.getElementById(`${prefix}-range`) as HTMLInputElement | null;
   // Never while it has focus. A status frame lands every second, and writing the
-  // reported speed back mid-drag snaps the thumb out from under the pointer — the fan
+  // reported speed back mid-drag snaps the thumb out from under the pointer: the fan
   // has not spun up yet, so the value being written is the OLD one.
   if (range && document.activeElement !== range) range.value = String(pct);
   $(`${prefix}-value`).textContent = `${pct}%`;
@@ -115,7 +115,7 @@ function getCameraStreamUrl(): string {
  * Point the feed at the plain or the annotated stream.
  *
  * The control is a switch now rather than a button, so this reads the checkbox instead
- * of flipping a boolean of its own — two sources of truth for one setting is how the
+ * of flipping a boolean of its own: two sources of truth for one setting is how the
  * label and the stream came to disagree after a reload.
  */
 export function setCameraOverlay(on: boolean): void {
@@ -164,7 +164,7 @@ function updateCamera(hasCamera: boolean, _printerIp: string): void {
     // Drops the aspect ratio so the card is the size of its message, not of the video
     // it is not showing.
     $('camera-wrap')?.classList.add('camera-off');
-    // Only the text node — `overlay.textContent = …` would take the icon with it.
+    // Only the text node: `overlay.textContent = …` would take the icon with it.
     $('camera-overlay-text').textContent = 'Camera not connected';
   }
 }
@@ -201,7 +201,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   // A half-finished print is waiting on a human, and this is the thing they have open.
   maybeShowPowerLossDialog(powerLoss, ps?.filename, client);
 
-  // Thumbnail — request once per file, don't retry on failure
+  // Thumbnail: request once per file, don't retry on failure
   if (ps?.filename && ps.filename !== lastThumbnailFile) {
     lastThumbnailFile = ps.filename;
     state.thumbnail = null;
@@ -239,7 +239,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     $('print-filename').removeAttribute('title');
   }
 
-  // Status badge — always show both status and sub-status
+  // Status badge: always show both status and sub-status
   const badge = $('print-status-badge');
   const subLabel = subStatusName ? ` · ${subStatusName}` : '';
   if (isPrinting && !isPaused) {
@@ -274,7 +274,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     iconText(badge, 'estop', statusName);
     badge.className = 'print-status-badge badge-error';
   } else if (powerLoss !== 'none') {
-    // Status 15 used to fall through to the `else` below and render as `badge-idle` —
+    // Status 15 used to fall through to the `else` below and render as `badge-idle`:
     // the printer sitting on a half-finished job awaiting a decision, styled as though
     // it had nothing to do (ELEG-29).
     iconText(
@@ -294,7 +294,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
       'print-status-badge badge-idle inline-block [padding:3px_12px] rounded-[10px] text-[13px] font-semibold [margin:4px_0] tracking-[0.02em] bg-[rgba(160,_160,_184,_0.15)] text-fg-soft';
   }
 
-  // Progress — compute from durations in delta updates (available every second)
+  // Progress: compute from durations in delta updates (available every second)
   // machine_status.progress only arrives from full 1002 responses (every ~5s)
   let progress = machineStatus?.progress ?? 0;
   if ((isPrinting || isPaused) && ps?.print_duration != null && ps?.remaining_time_sec != null) {
@@ -319,7 +319,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     toggleState(progressText, 'pulse', false);
   }
 
-  // Window title — show status and progress
+  // Window title: show status and progress
   if (isPrinting || isPaused) {
     const pctStr = `${progress}%`;
     const stateStr = isPaused ? 'Paused' : 'Printing';
@@ -332,7 +332,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     document.title = `${statusName}${sub} · CC2 Commander`;
   }
 
-  // Layer info — use fileTotalLayers from method 1046 or fallback to print_status
+  // Layer info: use fileTotalLayers from method 1046 or fallback to print_status
   const totalLayer = ps?.total_layer ?? state.fileTotalLayers ?? '??';
   const currentLayer = ps?.current_layer ?? '--';
   // The label lives in the markup now, so this writes the value alone.
@@ -401,7 +401,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   }
 
   // The print-only blocks. Everything in them reads "--" without a print, and there are
-  // nine such fields — so an idle printer's most prominent card was a grid of dashes
+  // nine such fields, so an idle printer's most prominent card was a grid of dashes
   // with `0 of ??` set in the largest type on it. Idle, the card is the name line and its
   // "Idle" badge: a separate "Nothing printing" note and an empty thumbnail box both said
   // the same thing again.
@@ -467,7 +467,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     const maxT = chamber.measured_max_temperature;
     const rangeEl = $('temp-chamber-range');
     if (minT != null && maxT != null && (minT > 0 || maxT > 0)) {
-      // Literal numbers only, so innerHTML is safe — and two arrows in one string
+      // Literal numbers only, so innerHTML is safe, and two arrows in one string
       // is past what iconText() can express.
       rangeEl.innerHTML = `(${icon('down')}${minT.toFixed(0)} ${icon('up')}${maxT.toFixed(0)})`;
     } else {
@@ -492,7 +492,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     dot.title = isHomed ? `${a.toUpperCase()} homed` : `${a.toUpperCase()} not homed`;
   }
 
-  // Live speed & flow. The unit is markup beside the value, not part of it —
+  // Live speed & flow. The unit is markup beside the value, not part of it:
   // see the readout/unit split in `ui/design.ts`.
   // The printer reports toolhead speed in mm/min (it is a G-code feedrate); shown in mm/s
   // so it reads in the same unit as Extrusion beside it.
@@ -512,7 +512,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     _prevE = currentE;
     _prevETime = now;
   } else if (_prevETime === 0 && currentE > 0) {
-    // First sample — just record baseline
+    // First sample: just record baseline
     _prevE = currentE;
     _prevETime = now;
   }
@@ -523,7 +523,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   // Per-spool filament usage
   renderFilamentUsage(state);
 
-  // Fans — use Elegoo naming (Model/Assistance/Case)
+  // Fans: use Elegoo naming (Model/Assistance/Case)
   const fans = s.fans;
   if (fans) {
     updateFan('fan-model', fans.fan?.speed ?? 0, fans.fan?.rpm);
@@ -531,7 +531,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     updateFan('fan-case', fans.box_fan?.speed ?? 0, fans.box_fan?.rpm);
   }
 
-  // Speed mode buttons — status reports 0/1/2/3, buttons use command values 50/100/130/160
+  // Speed mode buttons: status reports 0/1/2/3, buttons use command values 50/100/130/160
   const speedModeMap: Record<number, number> = { 0: 50, 1: 100, 2: 130, 3: 160 };
   const speedMode = speedModeMap[pos?.speed_mode ?? 1] ?? 100;
   document.querySelectorAll('.speed-btn').forEach((btn) => {
@@ -539,11 +539,11 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     toggleState(btn, 'active', mode === speedMode);
   });
   // The selection here comes from the printer, not from a click, so the fill has to be
-  // told to follow it — the speed picker moves on its own when the machine changes mode.
+  // told to follow it: the speed picker moves on its own when the machine changes mode.
   const speedTrack = document.querySelector('.speed-btn')?.closest<HTMLElement>('.segmented');
   if (speedTrack) positionSegmented(speedTrack);
 
-  // Light — every switch for it, not just one
+  // Light: every switch for it, not just one
   showLight(s.led?.status === 1);
 
   // Camera

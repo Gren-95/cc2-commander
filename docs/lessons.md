@@ -4,23 +4,23 @@ Findings from fixing real bugs, kept because each one cost a debugging session a
 of them is derivable from the code that resulted. Dated, because firmware behaviour and
 library behaviour both move.
 
-Lived in `.github/lessons-learned.md` until 2026-09-13, where **nothing referenced it** —
+Lived in `.github/lessons-learned.md` until 2026-09-13, where **nothing referenced it**,
 not CLAUDE.md, not CLAUDE.md, not a single source comment. `.github/` is for files GitHub
 itself reads (`workflows/`, `dependabot.yml`, `copilot-instructions.md`); a deep-dive
 filed there is a deep-dive nobody opens, which is the exact failure the "capture durable
 learnings" rule in CLAUDE.md exists to prevent.
 
 **Prefer putting a fact where someone will trip over it.** A comment next to the code
-beats an entry here — `types.ts` carries the registration-code-3 message for precisely
+beats an entry here: `types.ts` carries the registration-code-3 message for precisely
 that reason. This file is for what has no single home, or what spans several.
 
 ## MQTT Bridge Reconnection (Fixed 2026-04-12)
 
-- `mqtt.js client.end(true)` permanently destroys the client — no auto-reconnect possible
+- `mqtt.js client.end(true)` permanently destroys the client: no auto-reconnect possible
 - For forced reconnects: removeAllListeners(), end(true), null the ref, setTimeout, then connect() fresh
 - Registration code 3 = too many clients (max 2 MQTT slots on CC2 broker)
 - Need slow retry (30s) for code-3 rejection, not just give up
-- Never use `store.attributes` truthiness as proxy for MQTT connected state — persisted data survives disconnects
+- Never use `store.attributes` truthiness as proxy for MQTT connected state: persisted data survives disconnects
 - Use `bridge.isConnected` / `bridge.brokerConnected` for real connection state
 
 ## Canvas/AMS Filament Swap Behavior (Fixed 2026-04-12)
@@ -36,8 +36,8 @@ extruder.filament_detected flips 1→0→1 during swap
 
 ### Key Insights
 
-- Sub-status 1066 is UNDOCUMENTED — not in official app source, only seen on fw 01.03.01.89
-- machine_status does NOT change during swap — only sub_status transitions
+- Sub-status 1066 is UNDOCUMENTED (not in official app source, only seen on fw 01.03.01.89
+- machine_status does NOT change during swap) only sub_status transitions
 - Filament sensor physically reads "empty" during swaps (expected behavior)
 - Exception 1211 fires during NORMAL swaps (not just real runouts)
 - Use `isFilamentChangeSubStatus()` from types.ts to identify swap sub-statuses
@@ -63,7 +63,7 @@ extruder.filament_detected flips 1→0→1 during swap
 
 ### Root Cause
 
-The `gcode-preview` library's `WebGLPreview.animate()` runs a continuous 60fps `requestAnimationFrame` loop calling `renderer.render(scene, camera)` every frame. With a ~15MB gcode model loaded, each WebGL render allocates GPU-backed objects that leak ~23 MB/s of JS heap — GC cannot reclaim them fast enough, causing OOM crashes within minutes.
+The `gcode-preview` library's `WebGLPreview.animate()` runs a continuous 60fps `requestAnimationFrame` loop calling `renderer.render(scene, camera)` every frame. With a ~15MB gcode model loaded, each WebGL render allocates GPU-backed objects that leak ~23 MB/s of JS heap: GC cannot reclaim them fast enough, causing OOM crashes within minutes.
 
 ### Profiling Method
 
@@ -76,13 +76,13 @@ Used a headless browser to measure `performance.memory.usedJSHeapSize` over time
 ### Fix Applied (src/ui/gcode-preview.ts)
 
 1. After `processGCode()`, cancel library's `animationFrameId` and override `animate()` to no-op
-2. Render on orbit control `change` events (user dragging) — direct `renderer.render(scene, camera)`
+2. Render on orbit control `change` events (user dragging): direct `renderer.render(scene, camera)`
 3. Throttle layer/nozzle renders to 2 FPS (500ms interval) via `throttledRender()` / `lightRender()`
 4. `preview.render()` (geometry rebuild) only for layer changes; `renderer.render()` for nozzle moves
 
 ### Key Insight
 
-Total WebSocket JSON input was ~50KB — the leak was NOT from data accumulation. It was purely from the rendering pipeline: Three.js WebGL `render()` calls at 60fps with a complex scene.
+Total WebSocket JSON input was ~50KB: the leak was NOT from data accumulation. It was purely from the rendering pipeline: Three.js WebGL `render()` calls at 60fps with a complex scene.
 
 ## Client Memory Leak: Event Listener Accumulation (Fixed 2026-04-12)
 

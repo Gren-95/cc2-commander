@@ -1,10 +1,10 @@
 /**
- * The About panel — which build is running, and what it is talking to.
+ * The About panel, which build is running, and what it is talking to.
  *
  * Worth testing rather than eyeballing because the interesting case is the one that is
  * invisible in development: an UNSTAMPED deploy. Production runs as a container,
  * which is not a git checkout, so this panel is the only answer to "which commit is
- * this?" — and the failure mode to avoid is it confidently showing something wrong.
+ * this?", and the failure mode to avoid is it confidently showing something wrong.
  * ELEG-48: a version you cannot trust is worse than none.
  *
  * `diagnosticsText` gets the same attention: it is what a bug report will be pasted
@@ -88,7 +88,7 @@ test.describe('the running build', () => {
   test('says so plainly when the deploy is unstamped, rather than inventing a version', async ({ page }) => {
     const facts = await renderFacts(page, { build: { describe: null, version: null } });
     expect(facts.Version).toBe('unstamped');
-    // No commit row at all — an empty one would imply the field exists and is blank.
+    // No commit row at all, an empty one would imply the field exists and is blank.
     expect(facts.Commit).toBeUndefined();
   });
 
@@ -137,7 +137,7 @@ test.describe('printer and service facts', () => {
   });
 
   test('says "not registered" rather than blank when the printer has not spoken', async ({ page }) => {
-    // `printerSn` is null until the printer identifies itself — a real state, and a
+    // `printerSn` is null until the printer identifies itself: a real state, and a
     // blank value would read as a bug in the panel rather than a fact about the setup.
     const facts = await renderFacts(page, { printerSn: null, printerIp: '192.0.2.10' });
     expect(facts.Serial).toBe('not registered');
@@ -160,7 +160,7 @@ test.describe('diagnosticsText', () => {
     camera: 'available',
   };
 
-  test('carries the full commit, not the short one — it is going into an issue', async ({ page }) => {
+  test('carries the full commit, not the short one: it is going into an issue', async ({ page }) => {
     const text = await diagnostics(page, status, 'TestBrowser/1.0');
     expect(text).toContain('d867b1bc');
     expect(text).toContain('0.2.1+97');

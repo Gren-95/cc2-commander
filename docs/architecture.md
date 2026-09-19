@@ -41,7 +41,7 @@ So the Moonraker compatibility layer exists **twice**, deliberately: path-prefix
 
 A request to 8088 is answered by exactly one of these, checked in this order:
 
-1. **Bun's static route table** — `src/server/spa.ts` walks `dist/` once at startup and
+1. **Bun's static route table**: `src/server/spa.ts` walks `dist/` once at startup and
    hands every file to `Bun.serve({ routes })`. These are answered **without entering
    JavaScript**: no handler runs, no object is allocated, and Bun adds `ETag` and
    `Last-Modified` itself. This is the browser's entire asset burst when someone opens
@@ -50,14 +50,14 @@ A request to 8088 is answered by exactly one of these, checked in this order:
    `rest-api.ts`.
 
    The table is built **once**. A rebuild while the service is running is not picked
-   up until it restarts — which is already how production works, since a deploy there
+   up until it restarts, which is already how production works, since a deploy there
    replaces the container rather than editing files under a running process.
 
-2. **`/ws`** — upgraded in `fetch()` to Bun's native WebSocket server, handled by
+2. **`/ws`**: upgraded in `fetch()` to Bun's native WebSocket server, handled by
    `ws-transport.ts`. Note it does *not* use `server.publish()` for broadcast; see the
    comment on `broadcast()` for why the per-client backpressure check is load-bearing.
 
-3. **Everything else** — the Node-style routers, through `runNodeHandler()` in
+3. **Everything else**: the Node-style routers, through `runNodeHandler()` in
    `src/server/node-compat.ts`.
 
 ### Why node-compat.ts exists
@@ -66,8 +66,8 @@ A request to 8088 is answered by exactly one of these, checked in this order:
 the compat layers are written against `IncomingMessage` /
 `ServerResponse`. Rewriting them to the fetch types would be an 11k-line change to
 routes that **no test exercises** (see [gates.md](gates.md)), so instead they keep their
-signature and one adapter object is allocated per request. The static path — the hot one
-— skips it entirely.
+signature and one adapter object is allocated per request. The static path (the hot one
+) skips it entirely.
 
 `node-compat.ts` is the only piece of the Bun migration with no upstream to trust, so it
 is also the only part with real test coverage: `src/server/__tests__/node-compat.test.ts`.
@@ -101,7 +101,7 @@ order matters: the first match wins, and the SPA fallback is last.
 ## State flow, and the two things that surprise people
 
 1. **The printer sends deltas, and the store merges them.** A field absent from a
-   status message means *unchanged*, not *cleared* — `printer-state.ts` merges rather
+   status message means *unchanged*, not *cleared*: `printer-state.ts` merges rather
    than replaces. Code that treats a snapshot as complete will read stale-looking
    nulls right after a reconnect.
 2. **State outlives the process.** `state-persistence.ts` writes to
@@ -112,7 +112,7 @@ order matters: the first match wins, and the SPA fallback is last.
 
 ## Frontend
 
-`index.html` + `src/main.ts` compose hand-written DOM modules from `src/ui/*.ts` — no
+`index.html` + `src/main.ts` compose hand-written DOM modules from `src/ui/*.ts`: no
 framework, no JSX, no component library. Each card is a module that owns its own DOM
 subtree and subscribes to `ws-client.ts` updates. Layout state (which cards are
 collapsed / reordered) is persisted client-side by `ui-settings.ts`.
@@ -120,13 +120,13 @@ collapsed / reordered) is persisted client-side by `ui-settings.ts`.
 There used to be a `persistence.ts` here too, saving chart and layer data to
 localStorage. It was superseded when chart history moved server-side and then sat
 unreachable for the life of the repo; knip found it and ELEG-65 deleted it, along with
-`mqtt-client.ts` — a browser-side MQTT client from before the service existed, replaced
+`mqtt-client.ts`: a browser-side MQTT client from before the service existed, replaced
 by `ws-client.ts`. Both are worth knowing about only because their names still read as
 plausible in older notes.
 
 `gcode-preview.ts` and `canvas.ts` are the heavy ones (Three.js). Gcode is fetched
 through the service, which pre-caches a file when a print starts
-(`precacheGcode`) — the printer's own HTTP server is slow while printing, and that
+(`precacheGcode`): the printer's own HTTP server is slow while printing, and that
 cache is why the preview loads at all mid-print.
 
 ## Optional subsystems
@@ -137,7 +137,7 @@ above must tolerate them being `null`:
 - **Telegram** (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`)
   (OpenAI-compatible or Ollama). Emits `analysis`, `alert` and `ai_chart_data`, which
   `index.ts` forwards to the WebSocket, the store and Telegram.
-- **Camera** (`CAMERA_ENABLED`) — a single upstream MJPEG connection fanned out to all
+- **Camera** (`CAMERA_ENABLED`): a single upstream MJPEG connection fanned out to all
   viewers by `rest-api.ts`. Same principle as the MQTT bridge: one connection to the
   device, N consumers. Don't add a second reader.
 

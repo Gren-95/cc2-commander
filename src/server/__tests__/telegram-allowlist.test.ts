@@ -3,13 +3,13 @@
  *
  * The bot registered `/start`, `/help`, `/status` and `/photo` with no check on who sent
  * the message. `TELEGRAM_CHAT_ID` was only ever used for *outbound* notifications, so
- * inbound was open to anyone who found the bot — printer status, and via `/photo` a live
+ * inbound was open to anyone who found the bot: printer status, and via `/photo` a live
  * camera image of the room.
  *
  * This is a security boundary, so it is asserted in **both** directions: that an allowed
  * id passes, and that everything else is refused. The middleware wiring in
- * `src/server/telegram.ts` is not covered — nothing in this repo can stand up a grammy
- * bot — so the `next()`-only-when-allowed shape is verified by reading. What is covered
+ * `src/server/telegram.ts` is not covered (nothing in this repo can stand up a grammy
+ * bot) so the `next()`-only-when-allowed shape is verified by reading. What is covered
  * is every way the decision itself can go wrong.
  */
 
@@ -27,7 +27,7 @@ describe('parseAllowedChatIds', () => {
     expect(parseAllowedChatIds(' 111 , 222,333 ', '999')).toEqual(['111', '222', '333']);
   });
 
-  it('keeps negative ids — a Telegram channel id is negative', () => {
+  it('keeps negative ids: a Telegram channel id is negative', () => {
     expect(parseAllowedChatIds('-1001234567890', '')).toEqual(['-1001234567890']);
   });
 
@@ -66,7 +66,7 @@ describe('isAllowedSender', () => {
   });
 
   it('refuses an update with no sender', () => {
-    // ctx.from is optional in grammy — channel posts have none.
+    // ctx.from is optional in grammy: channel posts have none.
     expect(isAllowedSender(allowed, undefined)).toBe(false);
   });
 

@@ -1,5 +1,5 @@
 /**
- * The drying service — the one thing in this repo that holds a heater on by itself.
+ * The drying service: the one thing in this repo that holds a heater on by itself.
  *
  * The timer used to live in a browser tab, which meant closing the tab left the bed at
  * temperature with nothing running to turn it off. Moving it into the service fixes
@@ -154,7 +154,7 @@ describe('adopting what was left on disk', () => {
 
   it('turns the bed off for a session that ran out while the service was down', async () => {
     // The branch nobody sees, and the reason `startedAt` is absolute. Storing minutes
-    // remaining would make downtime pause the clock — and a hot bed does not pause.
+    // remaining would make downtime pause the clock, and a hot bed does not pause.
     writeFileSync(
       sessionFile(),
       JSON.stringify({

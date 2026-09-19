@@ -1,5 +1,5 @@
 /**
- * List control bar — the DOM half of the shared sort/filter helper (ELEG-49).
+ * List control bar: the DOM half of the shared sort/filter helper (ELEG-49).
  *
  * The pure decisions live in `list-sort.ts`; this owns the markup, the events and the
  * persistence. Adopted by Files, Print History, Print Reports and Timelapse.
@@ -11,7 +11,7 @@
  * bar therefore lives in a *static* container that is a sibling of the list, sort/filter
  * state lives in this closure rather than in the render function, and the only thing a
  * re-render touches is the list itself. Clicking a sort button repaints the buttons
- * alone — never the input.
+ * alone: never the input.
  */
 
 import { CHIP, EMPTY } from './design';
@@ -30,7 +30,7 @@ import { getListSelect, getListSort, saveListSelect, saveListSort } from './ui-s
 
 /** A dropdown filter, e.g. Print History's completed / failed / stopped. */
 export interface SelectFilter<T> {
-  /** Stable id — persisted under the view's key. */
+  /** Stable id: persisted under the view's key. */
   id: string;
   label: string;
   /** `all` is supplied automatically as the first option and means "no filtering". */
@@ -40,7 +40,7 @@ export interface SelectFilter<T> {
 }
 
 export interface ListControlsOptions<T> {
-  /** Stable id for this view — the persistence key and the DOM id prefix. */
+  /** Stable id for this view: the persistence key and the DOM id prefix. */
   id: string;
   /** A **static** element that the render pass never overwrites. */
   container: HTMLElement;
@@ -123,7 +123,7 @@ export function createListControls<T>(options: ListControlsOptions<T>): ListCont
   const sortWrap = container.querySelector('.list-sort') as HTMLElement;
   const countEl = container.querySelector('.list-count') as HTMLElement;
 
-  /** Repaints the sort buttons only — deliberately not the input above them. */
+  /** Repaints the sort buttons only: deliberately not the input above them. */
   function renderSortButtons(): void {
     sortWrap.innerHTML = columns
       .map((column) => {

@@ -14,13 +14,13 @@ export function setHistoryClient(client: CommandSender): void {
 
 export function requestHistory(): void {
   if (!historyClient) return;
-  // Method 1036 takes NO params per CC2 protocol — page/page_size not supported
+  // Method 1036 takes NO params per CC2 protocol, page/page_size not supported
   historyClient.sendCommand(1036, {});
 }
 
 type HistoryItem = PrinterState['printHistory'][number];
 
-/** Kept outside the render function — see `list-controls.ts` on why that matters. */
+/** Kept outside the render function: see `list-controls.ts` on why that matters. */
 let historyControls: ListControls<HistoryItem> | null = null;
 let lastHistoryState: PrinterState | null = null;
 
@@ -35,7 +35,7 @@ function ensureHistoryControls(): ListControls<HistoryItem> {
     columns: [
       { key: 'name', label: 'Name', value: (i) => i.filename },
       // nonZero/spanSeconds, not the raw fields: the printer sends 0 for a time it did
-      // not record, and 0 sorts as 1970 — top of "newest first" — rather than as absent.
+      // not record, and 0 sorts as 1970 (top of "newest first") rather than as absent.
       {
         key: 'started',
         label: 'Started',
@@ -156,7 +156,7 @@ export function bindHistoryControls(): void {
     if (!taskId || !historyClient) return;
 
     const name = btn.dataset.filename || 'this entry';
-    // The record is destroyed on the printer, not hidden here — same shape as the file
+    // The record is destroyed on the printer, not hidden here: same shape as the file
     // delete in files.ts, and equally irreversible.
     if (
       !confirm(
@@ -166,7 +166,7 @@ export function bindHistoryControls(): void {
       return;
     }
 
-    // Method 1038 (HistoryDelete) takes a list of task ids. NOT 1049 — that is
+    // Method 1038 (HistoryDelete) takes a list of task ids. NOT 1049: that is
     // UpdateToken, and sending it here would have written the printer's auth token
     // (ELEG-38).
     historyClient.sendCommand(1038, { list: [taskId] });

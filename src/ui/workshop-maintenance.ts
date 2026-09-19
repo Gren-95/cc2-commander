@@ -8,7 +8,7 @@
  *
  * ## Two static siblings, not one re-rendered panel
  *
- * The status list refetches on every `workshop_changed` frame — a finished print adds
+ * The status list refetches on every `workshop_changed` frame: a finished print adds
  * hours to every task. If the editor were rebuilt along with it, a label half-typed
  * into a field would vanish out from under whoever was typing it, the same hazard
  * `workshop-cost.ts` avoids the same way. So the editor and the status list are two
@@ -204,7 +204,7 @@ function renderEditor(): void {
   if (!data) return;
   const host = document.getElementById('maintenance-editor');
   if (!host) return;
-  // Never redraw under someone's fingers — see the module comment.
+  // Never redraw under someone's fingers, see the module comment.
   if (host.contains(document.activeElement) && document.activeElement !== document.body) return;
   host.innerHTML = editorHtml(data.tasks);
   bindEditor();

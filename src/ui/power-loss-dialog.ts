@@ -3,19 +3,19 @@
  *
  * The CC2 reports machine status 15 after power is restored with a print in progress.
  * It then sits there waiting to be told whether to carry on or give up, and the web app
- * is the thing people have open — so this is the one place where *not* having UI has a
+ * is the thing people have open, so this is the one place where *not* having UI has a
  * real cost.
  *
  * ## The methods, and how far they are verified
  *
- * Resume is **1023 (ResumePrint)** and cancel is **1022 (CancelPrint)** — the same
+ * Resume is **1023 (ResumePrint)** and cancel is **1022 (CancelPrint)**: the same
  * methods as a normal resume and stop, both taking no parameters. The issue asked for
  * that assumption to be checked rather than believed. It was, against both protocol
  * sources in `data/`:
  *
- * - `CC2_PROTOCOL_REFERENCE.md` — the full method table has no power-loss-specific
+ * - `CC2_PROTOCOL_REFERENCE.md`, the full method table has no power-loss-specific
  *   method; state 15 is `PowerOffResume` and 2405/2406 are its sub-statuses.
- * - `CC2-OFFICIAL-APP-PATTERNS.md` — same, independently transcribed from the app.
+ * - `CC2-OFFICIAL-APP-PATTERNS.md`: same, independently transcribed from the app.
  *
  * So the assumption is *supported* by everything available. It is **not confirmed
  * against a live recovery**, because triggering one means cutting power mid-print,
@@ -33,7 +33,7 @@ import { escapeHtml } from './helpers';
 
 /**
  * Only prompt once per recovery. Without this, the dialog would be rebuilt on every
- * status frame — roughly once a second — and a click could never land.
+ * status frame (roughly once a second) and a click could never land.
  */
 let promptedForRecovery = false;
 

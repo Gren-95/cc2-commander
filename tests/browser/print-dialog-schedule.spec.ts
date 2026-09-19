@@ -239,7 +239,7 @@ test.describe('the USB drive', () => {
 });
 
 test.describe('confirming Later', () => {
-  test('asks the scheduler for the file, its folder and the time — and sends no 1020', async ({
+  test('asks the scheduler for the file, its folder and the time, and sends no 1020', async ({
     page,
   }) => {
     const calls = await stubScheduler(page);
