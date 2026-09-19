@@ -457,8 +457,14 @@ async function start(): Promise<void> {
   homeAssistant.start();
 }
 
+/** Longest a shutdown waits for its final saves; well inside Docker's 10 s grace period. */
+const SHUTDOWN_SAVE_MS = 5_000;
+
 // Graceful shutdown
-function shutdown(): void {
+let shuttingDown = false;
+async function shutdown(): Promise<void> {
+  if (shuttingDown) return;
+  shuttingDown = true;
   log.info('Shutting down...');
   // Only the interval. The session stays on disk and the bed stays at temperature:
   // deliberately: a restart resumes it, and turning a heater off because a process is
@@ -466,8 +472,14 @@ function shutdown(): void {
   dryer.stop();
   scheduler.stop();
   homeAssistant.stop();
-  persistence.stop();
-  moonrakerServer.stop();
+  // The final saves are awaited. They used to be started and then cut off by
+  // `process.exit` a moment later, so every restart and every deploy lost whatever had
+  // changed since the last periodic save, leaving a truncated `state.json.tmp` behind.
+  const saved = Promise.all([persistence.stop(), moonrakerServer.stop()]);
+  const cap = new Promise<'timeout'>((r) => setTimeout(() => r('timeout'), SHUTDOWN_SAVE_MS));
+  if ((await Promise.race([saved, cap])) === 'timeout') {
+    log.warn(`Final save did not finish within ${SHUTDOWN_SAVE_MS / 1000}s; exiting anyway`);
+  }
   wsTransport.close();
   telegram?.stop();
   bridge.disconnect();
@@ -475,8 +487,8 @@ function shutdown(): void {
   process.exit(0);
 }
 
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
+process.on('SIGINT', () => void shutdown());
+process.on('SIGTERM', () => void shutdown());
 
 start().catch((err) => {
   log.error('Fatal:', err);

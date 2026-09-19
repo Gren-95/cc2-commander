@@ -96,13 +96,13 @@ export class StatePersistence {
   }
 
   /** Stop periodic saving */
-  stop(): void {
+  /** Stop saving on a timer, and make the final save. Resolves once it is on disk. */
+  stop(): Promise<void> {
     if (this.timer) {
       clearInterval(this.timer);
       this.timer = null;
     }
-    // Final save
-    this.save().catch(() => {});
+    return this.save().catch(() => {});
   }
 
   private async save(): Promise<void> {

@@ -79,4 +79,15 @@ describe('the Moonraker settings store', () => {
     const back = JSON.parse(readFileSync(join(dir, 'moonraker-db.json'), 'utf8'));
     expect(back.mainsail.theme).toBe('dark');
   });
+
+  it('stop() resolves only once outstanding settings are on disk', async () => {
+    // Shutdown awaits this before the process exits. It used to start the save and return,
+    // and the exit a moment later cut it off: every restart lost the last changes.
+    const db = new MoonrakerDatabase(dir);
+    await db.load();
+    db.postItem('fluidd', 'layout', 'compact');
+    await db.stop();
+    const back = JSON.parse(readFileSync(join(dir, 'moonraker-db.json'), 'utf8'));
+    expect(back.fluidd.layout).toBe('compact');
+  });
 });

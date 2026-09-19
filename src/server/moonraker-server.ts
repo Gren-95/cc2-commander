@@ -221,8 +221,9 @@ export class MoonrakerServer {
     log.info(`Moonraker compat server on :${this.server.port}`);
   }
 
-  stop(): void {
-    this.db.stop();
+  /** Close the server, and save the key/value store. Resolves once that is on disk. */
+  stop(): Promise<void> {
+    const saved = this.db.stop();
     if (this.statusInterval) clearInterval(this.statusInterval);
     if (this.procStatInterval) clearInterval(this.procStatInterval);
     if (this.statusListener) {
@@ -235,6 +236,7 @@ export class MoonrakerServer {
     this.clients.clear();
     this.server?.stop(true);
     this.server = null;
+    return saved;
   }
 
   /** Seed a default webcam entry if the webcams namespace is empty. */

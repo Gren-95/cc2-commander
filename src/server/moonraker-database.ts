@@ -56,9 +56,10 @@ export class MoonrakerDatabase {
     }
   }
 
-  stop(): void {
+  /** Stop the periodic save, and save anything outstanding. Resolves once it is written. */
+  stop(): Promise<void> {
     if (this.saveTimer) clearInterval(this.saveTimer);
-    if (this.dirty) void this.save();
+    return this.dirty ? this.save() : Promise.resolve();
   }
 
   listNamespaces(): string[] {
