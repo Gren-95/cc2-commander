@@ -468,7 +468,7 @@ export function mqttPhaseMessage(phase: MqttPhase): string {
     case 'disconnected':
       return 'No MQTT connection to the printer.';
     case 'awaiting_sn':
-      return 'The broker is reachable but the printer is not responding. Its control application may have stopped — it may need a power cycle.';
+      return 'The broker is reachable but the printer is not responding. Its control application may have stopped and need a power cycle.';
     case 'rejected':
       return 'The printer refused registration: it already has the maximum of two clients. Close another client (the vendor app, or a second copy of this service) and it will retry.';
     case 'registering':
@@ -536,7 +536,7 @@ export const ERROR_CODE_NAMES: Record<number, string> = {
   1019: 'Timelapse generation failed',
   1020: 'Timelapse video does not exist',
   1021: 'File not found',
-  1026: 'No bed mesh data — run auto-levelling first',
+  1026: 'No bed mesh data. Run auto-levelling first.',
   9999: 'Unknown error',
 };
 

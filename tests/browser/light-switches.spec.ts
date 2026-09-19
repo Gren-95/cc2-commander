@@ -1,7 +1,7 @@
 /**
- * The overhead light's three switches.
+ * The overhead light's two switches.
  *
- * They are three views of one light, so what matters is that they never disagree: using
+ * They are two views of one light, so what matters is that they never disagree: using
  * any one mirrors onto the others at once, the printer's own report redraws all of them,
  * and the command sender is handed every switch so all can be held while it is in flight
  * (otherwise a second could be flipped against the first before the printer answers).
@@ -17,7 +17,7 @@ type Harness = {
   };
 };
 
-const IDS = ['led-toggle', 'led-toggle-camera', 'led-toggle-fans'] as const;
+const IDS = ['led-toggle-fans', 'led-toggle-camera'] as const;
 
 /** The three switches, as index.html has them (minus the styling), bound to a recorder. */
 async function mount(page: Page): Promise<void> {
@@ -45,22 +45,22 @@ test.beforeEach(async ({ page }) => {
 
 test('the printer reporting the light redraws every switch', async ({ page }) => {
   await show(page, true);
-  expect(await state(page)).toEqual([true, true, true]);
+  expect(await state(page)).toEqual([true, true]);
   await show(page, false);
-  expect(await state(page)).toEqual([false, false, false]);
+  expect(await state(page)).toEqual([false, false]);
 });
 
 for (const id of IDS) {
   test.describe(`using ${id}`, () => {
     test('turns the others on with it, at once', async ({ page }) => {
       await page.locator(`label:has(#${id})`).click();
-      expect(await state(page)).toEqual([true, true, true]);
+      expect(await state(page)).toEqual([true, true]);
     });
 
     test('and off again', async ({ page }) => {
       await show(page, true);
       await page.locator(`label:has(#${id})`).click();
-      expect(await state(page)).toEqual([false, false, false]);
+      expect(await state(page)).toEqual([false, false]);
     });
 
     test('sends the choice once, handing over every switch to be held', async ({ page }) => {
@@ -79,8 +79,8 @@ test('sends nothing when nothing was used', async ({ page }) => {
 
 test('the printer’s report wins over a click that has not been confirmed', async ({ page }) => {
   await page.locator('label:has(#led-toggle-fans)').click();
-  expect(await state(page)).toEqual([true, true, true]);
+  expect(await state(page)).toEqual([true, true]);
   // The printer says the light is off — say it was refused, or was already changed.
   await show(page, false);
-  expect(await state(page)).toEqual([false, false, false]);
+  expect(await state(page)).toEqual([false, false]);
 });

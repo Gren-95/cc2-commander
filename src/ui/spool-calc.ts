@@ -307,7 +307,7 @@ export function renderSpoolCalc(): void {
               <input type="number" id="sc-outer-dia" value="${p.currentOuterDiameter || ''}" min="0" max="400" step="1" placeholder="e.g. 180">
               <span class="text-[12px] text-fg-muted min-w-7">mm</span>
             </div>
-            <span class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Measure the filament wound on the spool with a ruler — updates weight automatically</span>
+            <span class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Measure the filament wound on the spool with a ruler: updates weight automatically</span>
           </div>
 
           <h4>Filament</h4>

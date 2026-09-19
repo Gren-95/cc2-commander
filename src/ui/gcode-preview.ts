@@ -372,7 +372,7 @@ export async function loadGcode(filename: string, source = 'local'): Promise<voi
         resp = null;
       } catch (e) {
         if (attempt < 3) {
-          if (statusEl) statusEl.textContent = `Retry ${attempt}/2 — download failed`;
+          if (statusEl) statusEl.textContent = `Retry ${attempt}/2: download failed`;
           await new Promise((r) => setTimeout(r, 2000));
         } else {
           throw e;

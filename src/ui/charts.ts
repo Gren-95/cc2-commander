@@ -178,6 +178,48 @@ function bindChartInteractions(): void {
   }
 }
 
+const END_LABEL_HEIGHT = 14;
+
+/**
+ * Right-aligned inside the plot, each on a backing so it stays legible over the lines,
+ * and pushed apart vertically so no two overlap. Kept within the plot's top and bottom.
+ */
+function drawEndLabels(
+  ctx: CanvasRenderingContext2D,
+  labels: { text: string; color: string; y: number }[],
+  right: number,
+  top: number,
+  bottom: number,
+  backing: string,
+): void {
+  if (!labels.length) return;
+  const half = END_LABEL_HEIGHT / 2;
+  const placed = [...labels].sort((a, b) => a.y - b.y).map((l) => ({ ...l }));
+  // Down from the top, then back up from the bottom: a simple two-pass spread.
+  for (let i = 0; i < placed.length; i++) {
+    const min = i === 0 ? top + half : placed[i - 1].y + END_LABEL_HEIGHT;
+    placed[i].y = Math.max(placed[i].y, min);
+  }
+  for (let i = placed.length - 1; i >= 0; i--) {
+    const max = i === placed.length - 1 ? bottom - half : placed[i + 1].y - END_LABEL_HEIGHT;
+    placed[i].y = Math.min(placed[i].y, max);
+  }
+  ctx.save();
+  ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (const l of placed) {
+    const width = ctx.measureText(l.text).width;
+    ctx.fillStyle = backing;
+    ctx.globalAlpha = 0.8;
+    ctx.fillRect(right - width - 4, l.y - half, width + 6, END_LABEL_HEIGHT);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = l.color;
+    ctx.fillText(l.text, right, l.y);
+  }
+  ctx.restore();
+}
+
 /** Start chart draw timer — 10 FPS is plenty for 1 Hz data */
 function startDrawTimer(): void {
   if (drawTimer) clearInterval(drawTimer);
@@ -320,7 +362,9 @@ function drawChart(config: ChartConfig): void {
   // Grid lines (X) — time labels
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  const xGridCount = Math.min(6, Math.floor(plotW / 60));
+  // At least ~95px per tick: a time label is ~46px wide, and with the end labels aligned
+  // inward (below) a 60px spacing ran them into their neighbours.
+  const xGridCount = Math.max(1, Math.min(6, Math.floor(plotW / 95)));
   for (let i = 0; i <= xGridCount; i++) {
     const t = tMin + (i / xGridCount) * (tMax - tMin);
     const x = xMap(t);
@@ -329,12 +373,20 @@ function drawChart(config: ChartConfig): void {
     ctx.lineTo(x, PADDING.top + plotH);
     ctx.stroke();
     const d = new Date(t);
+    // The end ticks sit on the plot's edges; centred, half of each label hung off the
+    // canvas and the last one read "19:39:0".
+    ctx.textAlign = i === 0 ? 'left' : i === xGridCount ? 'right' : 'center';
     ctx.fillText(
       `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`,
       x,
       PADDING.top + plotH + 4,
     );
   }
+
+  // Current-value labels, collected while drawing and placed after, so they can be kept
+  // apart. They used to be drawn right of each line's last point, into 12px of padding:
+  // cut to "No"/"Be"/"Ch", and a target line sitting on its reading overlapped it.
+  const endLabels: { text: string; color: string; y: number }[] = [];
 
   // Draw each series
   for (const s of allSeries) {
@@ -359,14 +411,17 @@ function drawChart(config: ChartConfig): void {
 
     // Current value label at the right end
     const last = visible[visible.length - 1];
-    if (last) {
-      ctx.fillStyle = s.color;
-      ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(`${s.label}: ${last.v.toFixed(1)}`, xMap(last.t) + 4, yMap(last.v));
-    }
+    if (last)
+      endLabels.push({ text: `${s.label} ${last.v.toFixed(1)}`, color: s.color, y: yMap(last.v) });
   }
+  drawEndLabels(
+    ctx,
+    endLabels,
+    w - PADDING.right - 4,
+    PADDING.top,
+    PADDING.top + plotH,
+    pal.tooltipBg,
+  );
 
   // Draw average lines (dashed) for configured series
   if (config.averageKeys?.length) {

@@ -342,10 +342,19 @@ function showDashboard(): void {
   }
 }
 
+/**
+ * Set when a "Connection lost" was shown, so the reconnect can say it recovered. On a
+ * plain page load there is nothing to recover from, and a success toast every load, naming
+ * the printer's serial, only sat over the header.
+ */
+let lostConnection = false;
+
 /** Called when printer MQTT is confirmed connected */
-function onPrinterConnected(sn: string): void {
-  console.log(`Connected to printer SN: ${sn}`);
-  toast(`Connected to printer ${sn}`, 'success');
+function onPrinterConnected(_sn: string): void {
+  if (lostConnection) {
+    lostConnection = false;
+    toast('Reconnected to the printer', 'success');
+  }
   showDashboard();
 
   // Request data that the service may not have cached yet
@@ -376,7 +385,7 @@ function reportCommandOutcome(method: number, data: unknown): CommandOutcome {
   const label = COMMAND_METHOD_NAMES[method] ?? `Command ${method}`;
 
   if (outcome === 'busy') {
-    toast(`${label}: printer is busy — try again in a moment`, 'warning');
+    toast(`${label}: printer is busy. Try again in a moment`, 'warning');
   } else if (outcome === 'rejected') {
     toast(`${label} refused: ${describeCommandError(code)}`, 'warning');
   } else if (outcome === 'error') {
@@ -400,7 +409,8 @@ function connectToService(): void {
       updateConnectionBadge(connState);
 
       if (connState === 'disconnected' && dashboardShown) {
-        toast('Connection lost — reconnecting...', 'warning');
+        lostConnection = true;
+        toast('Connection lost. Reconnecting...', 'warning');
       }
 
       if (connState === 'error' && !dashboardShown) {
@@ -502,7 +512,7 @@ function connectToService(): void {
         if (errorCode === 0) {
           toast('File deleted', 'success');
         } else if (classifyCommandOutcome(errorCode) === 'busy') {
-          toast('Cannot delete — printer is busy. Try again in a moment.', 'warning');
+          toast('Cannot delete: printer is busy. Try again in a moment.', 'warning');
         } else {
           toast(`Delete failed: ${describeCommandError(errorCode)}`, 'error');
         }
@@ -557,10 +567,10 @@ function connectToService(): void {
           if (state.videoUrl) {
             showTimelapsePlayer(state.videoUrl);
           } else {
-            toast('Timelapse export started — video will be generated', 'info');
+            toast('Timelapse export started. The video is being generated.', 'info');
           }
         } else if (classifyCommandOutcome(err1051) === 'busy') {
-          toast('Cannot export timelapse — printer is busy. Try when idle.', 'warning');
+          toast('Cannot export timelapse: printer is busy. Try when idle.', 'warning');
           requestAnimationFrame(() => renderTimelapse(state));
         } else {
           toast(`Timelapse export failed: ${describeCommandError(err1051)}`, 'error');
@@ -595,7 +605,7 @@ function connectToService(): void {
         if (classifyCommandOutcome(code) === 'ok') {
           toast('History entry deleted', 'success');
         } else if (classifyCommandOutcome(code) === 'busy') {
-          toast('Cannot delete — printer is busy. Try again in a moment.', 'warning');
+          toast('Cannot delete: printer is busy. Try again in a moment.', 'warning');
         } else {
           toast(`Delete failed: ${describeCommandError(code)}`, 'error');
         }
@@ -614,7 +624,7 @@ function connectToService(): void {
           toast('Filament saved', 'success');
           if (client) client.sendCommand(2005, {});
         } else if (classifyCommandOutcome(errorCode) === 'busy') {
-          toast('Cannot edit filament while printing — printer is busy', 'warning');
+          toast('Cannot edit filament while printing: printer is busy', 'warning');
         } else {
           toast(`Filament save failed: ${describeCommandError(errorCode)}`, 'error');
         }
@@ -878,7 +888,7 @@ if ('serviceWorker' in navigator) {
           // `controller` is null on the very first install; that is a fresh visit, not
           // an update, and saying "updated" there would be nonsense.
           if (installing.state === 'installed' && navigator.serviceWorker.controller) {
-            toast('A new version is ready — reload to use it', 'info');
+            toast('A new version is ready. Reload to use it.', 'info');
           }
         });
       });

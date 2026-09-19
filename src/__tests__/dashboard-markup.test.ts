@@ -65,9 +65,9 @@ describe('the camera, inside the print card', () => {
   });
 });
 
-describe('the three switches for the one light', () => {
-  // Same light, three places: the Control card where it always was, the camera, and the
-  // fans card. Each must be in its own card, once, or a switch is missing or doubled.
+describe('the two switches for the one light', () => {
+  // Same light, two places: the fans card and the camera. Each must be in its own card,
+  // once, or a switch is missing or doubled — and the Control card's is gone for good.
   const within = (card: string, id: string) => {
     const start = idAt(card);
     const nextCard = html.indexOf('class="card @container', html.indexOf('>', start));
@@ -75,11 +75,14 @@ describe('the three switches for the one light', () => {
   };
 
   it.each([
-    ['toolhead-card', 'led-toggle'],
     ['print-status-bar', 'led-toggle-camera'],
     ['fans-card', 'led-toggle-fans'],
   ])('%s holds %s, once', (card, id) => {
     expect(count(id), `${id} should appear exactly once`).toBe(1);
     expect(within(card, id), `${id} should be inside ${card}`).toBe(true);
+  });
+
+  it('no longer has one in the Control card', () => {
+    expect(count('led-toggle')).toBe(0);
   });
 });

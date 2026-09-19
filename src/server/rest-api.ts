@@ -1290,7 +1290,7 @@ export function createRestRouter(
       res.end(
         JSON.stringify({
           success: true,
-          note: 'Sent method 1054 Enable=1 — check MQTT log for response',
+          note: 'Sent method 1054 Enable=1. Check the MQTT log for the response.',
         }),
       );
       return;

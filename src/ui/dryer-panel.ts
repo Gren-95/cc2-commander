@@ -206,12 +206,12 @@ function humidityTone(value: number): string {
  */
 function humidityAdvice(value: number): string {
   if (value >= 60) {
-    return 'Damp air — filament left in it takes moisture back on within a day.';
+    return 'Damp air. Filament left in it takes moisture back on within a day.';
   }
   if (value >= 40) {
-    return 'Middling — dried filament wants a sealed box, not open air.';
+    return 'Middling. Dried filament wants a sealed box, not open air.';
   }
-  return 'Dry — filament keeps in this without a box.';
+  return 'Dry. Filament keeps in this without a box.';
 }
 
 /**
@@ -235,7 +235,7 @@ function presetOptions(selected: string): string {
   return DRYING_PRESETS.map(
     (p) =>
       `<option value="${p.id}" ${p.id === selected ? 'selected' : ''}>${escapeHtml(
-        `${p.label} — ${p.tempC}°C for ${formatDuration(p.minutes)}`,
+        `${p.label}: ${p.tempC}°C for ${formatDuration(p.minutes)}`,
       )}</option>`,
   ).join('');
 }
@@ -296,7 +296,7 @@ function idleView(): string {
           : `<div class="flex flex-wrap items-baseline gap-x-2 gap-y-1 [padding:8px_10px] rounded-chip bg-input">
                <span class="text-[11px] text-fg-muted" title="${escapeAttr(humidityName)}">Humidity</span>
                <span class="dryer-humidity-value font-mono text-[15px] ${humidityTone(roomHumidity)}">${roomHumidity.toFixed(1)} %</span>
-               <span class="dryer-humidity-age text-[11px] text-warn ${readingAge(humidityChangedAt) ? '' : 'hidden'}">${readingAge(humidityChangedAt)}</span>
+               <span class="dryer-humidity-age text-[11px] text-fg-muted ${readingAge(humidityChangedAt) ? '' : 'hidden'}">${readingAge(humidityChangedAt)}</span>
                <span class="dryer-humidity-advice text-[12px] text-fg-muted">${humidityAdvice(roomHumidity)}</span>
              </div>`
       }
@@ -305,7 +305,7 @@ function idleView(): string {
         <button id="dryer-start" class="[padding:8px_16px] rounded-chip bg-accent text-white font-semibold cursor-pointer border border-accent">
           ${icon('heat')} Start drying
         </button>
-        <span class="text-[12px] text-fg-muted">Heats the printer's bed — the lid should be closed.</span>
+        <span class="text-[12px] text-fg-muted">Heats the printer's bed. The lid should be closed.</span>
       </div>
     </div>`;
 }
@@ -374,7 +374,7 @@ function tempsView(session: DryerSession): string {
   let plateState = '';
   if (temps.bed !== null && temps.bedTarget !== null) {
     if (Math.round(temps.bedTarget) === 0) {
-      plateState = `<span class="text-[11px] font-semibold text-bad">heater off — restoring</span>`;
+      plateState = `<span class="text-[11px] font-semibold text-bad">heater off, restoring</span>`;
     } else if (Math.abs(temps.bed - temps.bedTarget) <= 2) {
       plateState = `<span class="text-[11px] font-semibold text-ok">at temperature</span>`;
     } else if (temps.bed < temps.bedTarget) {
@@ -399,13 +399,13 @@ function tempsView(session: DryerSession): string {
       : cell(
           'Humidity',
           `<span class="dryer-humidity-value ${humidityTone(roomHumidity)}">${roomHumidity.toFixed(1)} %</span>`,
-          `<span class="dryer-humidity-age text-[11px] text-warn ${readingAge(humidityChangedAt) ? '' : 'hidden'}">${readingAge(humidityChangedAt)}</span>`,
+          `<span class="dryer-humidity-age text-[11px] text-fg-muted ${readingAge(humidityChangedAt) ? '' : 'hidden'}">${readingAge(humidityChangedAt)}</span>`,
           humidityName,
         );
 
   return `
       <div class="flex flex-wrap gap-6 [padding:10px_12px] rounded-chip bg-input">
-        ${cell(`Plate — drying at ${session.tempC} °C`, plateValue, plateState)}
+        ${cell(`Plate: drying at ${session.tempC} °C`, plateValue, plateState)}
         ${cell('Chamber', deg(temps.chamber))}
         ${cell('Nozzle', deg(temps.nozzle))}
         ${humidityCell}
@@ -464,7 +464,7 @@ function runningView(session: DryerSession, now: number): string {
         <span class="font-semibold">${icon('warning')} The service re-sends the bed target every 30 seconds</span>
         <span class="text-fg-soft">
           Turning the bed off from the dashboard, the printer screen or another app will
-          not stop drying — it comes back on within 30 seconds. Use
+          not stop drying: it comes back on within 30 seconds. Use
           <strong>Stop and cool down</strong> above.
         </span>
         <span class="text-fg-soft">
@@ -473,7 +473,7 @@ function runningView(session: DryerSession, now: number): string {
         </span>
         ${
           client === null
-            ? '<span class="text-bad font-semibold">This page is not connected to the service — the countdown above may be stale. The session itself is unaffected.</span>'
+            ? '<span class="text-bad font-semibold">This page is not connected to the service: the countdown above may be stale. The session itself is unaffected.</span>'
             : ''
         }
         ${
@@ -483,7 +483,7 @@ function runningView(session: DryerSession, now: number): string {
                   hour: '2-digit',
                   minute: '2-digit',
                 }),
-              )} — something had cleared the target and it was put back.</span>`
+              )}: something had cleared the target and it was put back.</span>`
             : ''
         }
       </div>
@@ -545,7 +545,7 @@ function bindIdle(): void {
     if (
       !confirm(
         `Heat the bed to ${session.tempC} °C for ${formatDuration(session.totalMinutes)}?\n\n` +
-          'The SERVICE runs this, not this page — it keeps going with the browser closed ' +
+          'The SERVICE runs this, not this page, so it keeps going with the browser closed ' +
           'and resumes after a restart, and it turns the bed off when the timer ends.\n\n' +
           'It re-sends the target every 30 seconds, so turning the bed off from the ' +
           'dashboard, the printer screen or another app will NOT stop drying. Use ' +
@@ -590,7 +590,7 @@ async function stopOnService(): Promise<void> {
     const res = await fetchTimeout('/api/dryer', { method: 'DELETE' });
     const body = (await res.json()) as { data?: unknown };
     applyDryerState((body.data ?? {}) as Record<string, unknown>);
-    toast('Drying stopped — bed turned off', 'info');
+    toast('Drying stopped. Bed turned off.', 'info');
   } catch {
     toast('Not connected to the service', 'error');
   }
@@ -622,12 +622,12 @@ export function handleDryerFinished(reason: string, label: string): void {
   session = null;
   lastCorrectionAt = null;
   if (reason === 'done') {
-    toast(`${label} is dry — bed turned off`, 'success');
+    toast(`${label} is dry. Bed turned off.`, 'success');
     void playAlert('success');
   } else if (reason === 'expired-while-down') {
-    toast('Drying finished while the service was down — bed turned off', 'info');
+    toast('Drying finished while the service was down. Bed turned off.', 'info');
   } else if (reason === 'print-started') {
-    toast('A print started — drying stopped and the bed is cooling', 'warning');
+    toast('A print started, so drying stopped and the bed is cooling', 'warning');
   }
   renderDryer();
 }

@@ -83,9 +83,13 @@ function button(
   active: boolean,
   accent: string,
 ): string {
+  // Idle buttons carry their hue on the icon only, on the same neutral button as the rest
+  // of the app. Each used to get a tinted fill and a tinted border as well, and fourteen of
+  // those stacked down the edge of a phone read as a wall of colour rather than as a rail.
+  // The focused one is still filled, so the choice stands out.
   const style = active
     ? `background:${accent};border-color:${accent};color:#fff`
-    : `background:color-mix(in srgb, ${accent} 18%, var(--bg-card));border-color:color-mix(in srgb, ${accent} 35%, var(--border));color:${accent}`;
+    : `background:var(--bg-card);border-color:var(--border);color:${accent}`;
   return `
     <button
       type="button"

@@ -123,7 +123,7 @@ test.describe('spoolTile', () => {
     );
     // The whole name must survive INSIDE the attribute — if the quote escaped, the
     // parser would end `title` early and `onmouseover` would become a real handler.
-    expect(r.title).toBe('" onmouseover="alert(1) — click to edit');
+    expect(r.title).toBe('" onmouseover="alert(1): click to edit');
     expect(r.html).not.toContain('onmouseover="alert');
   });
 

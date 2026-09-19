@@ -285,7 +285,7 @@ export class HomeAssistantService extends EventEmitter {
       // not fix itself on the next poll.
       throw new Error(
         res.status === 401
-          ? 'Home Assistant rejected the token (401) — is HOMEASSISTANT_TOKEN still valid?'
+          ? 'Home Assistant rejected the token (401). Is HOMEASSISTANT_TOKEN still valid?'
           : `Home Assistant returned ${res.status} for ${entityId}`,
       );
     }
@@ -332,7 +332,7 @@ export class HomeAssistantService extends EventEmitter {
         humidityHistory: this.humidityHistory,
       };
       if (!wasReachable && this.state.reachable) {
-        log.info(`Connected — ${readings.map((r) => `${r.name} ${r.value}${r.unit}`).join(', ')}`);
+        log.info(`Connected: ${readings.map((r) => `${r.name} ${r.value}${r.unit}`).join(', ')}`);
       }
       this.emit('readings', this.state);
     } catch (err) {

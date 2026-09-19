@@ -81,7 +81,7 @@ function editorHtml(tasks: readonly MaintenanceTask[]): string {
 function statusRowHtml(t: TaskStatus): string {
   const lastDone =
     t.lastDoneAt === null
-      ? 'Never done — counting from the first recorded print'
+      ? 'Never done: counting from the first recorded print'
       : `Last done ${new Date(t.lastDoneAt).toLocaleString()}`;
   return `<tr class="border-t border-line-soft" data-task-status-id="${escapeAttr(t.id)}">
       <td class="py-1.5 pr-4">

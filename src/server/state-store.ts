@@ -161,9 +161,9 @@ function summarizeEvent(e: PrintEvent): string {
     case 'print_completed':
       return `[PRINT COMPLETED] ${e.filename} (${e.duration}s)`;
     case 'print_failed':
-      return `[PRINT FAILED] ${e.filename} — ${e.reason}`;
+      return `[PRINT FAILED] ${e.filename}: ${e.reason}`;
     case 'print_progress':
-      return `[PROGRESS] ${e.progress}% — Layer ${e.layer}/${e.totalLayers} — ${e.filename}`;
+      return `[PROGRESS] ${e.progress}% · Layer ${e.layer}/${e.totalLayers}: ${e.filename}`;
     case 'error':
       return `[ERROR] ${e.names.join(', ')} (codes: ${e.codes.join(', ')})`;
     case 'filament_runout':
@@ -171,7 +171,7 @@ function summarizeEvent(e: PrintEvent): string {
     case 'layer_change':
       return `[LAYER] ${e.layer}/${e.totalLayers} (${e.durationSec.toFixed(1)}s)`;
     case 'first_layer_complete':
-      return `[FIRST LAYER] ${e.filename} — ${e.totalLayers} total (${e.durationSec.toFixed(1)}s)`;
+      return `[FIRST LAYER] ${e.filename}: ${e.totalLayers} total (${e.durationSec.toFixed(1)}s)`;
     case 'status_change':
       return `[STATUS] ${e.from} → ${e.to}`;
     case 'sub_status_change':
@@ -484,7 +484,7 @@ export class StateStore extends EventEmitter {
     const dropped = layerTimes.length - clean.length;
     if (dropped > 0) {
       log.warn(
-        `Restored layer data was not monotonic — dropped ${dropped} entr${dropped === 1 ? 'y' : 'ies'} from a previous print, kept ${clean.length} from L${clean[0].layer}`,
+        `Restored layer data was not monotonic: dropped ${dropped} entr${dropped === 1 ? 'y' : 'ies'} from a previous print, kept ${clean.length} from L${clean[0].layer}`,
       );
     }
 
@@ -723,16 +723,16 @@ export class StateStore extends EventEmitter {
         this._lastLayer = currentLayer;
         this._lastLayerTime = Date.now();
         log.info(
-          `Baseline from full status — printing at ${progress}%, kept ${this.layerTimes.length} layer entries, rebased timing at L${currentLayer}`,
+          `Baseline from full status: printing at ${progress}%, kept ${this.layerTimes.length} layer entries, rebased timing at L${currentLayer}`,
         );
       } else {
         this.clearLayerData();
         log.info(
-          `Baseline from full status — printing at ${progress}%, layer data reset (stale or empty)`,
+          `Baseline from full status: printing at ${progress}%, layer data reset (stale or empty)`,
         );
       }
     } else {
-      log.info(`Baseline from full status — idle (status ${this.lastMachineStatus})`);
+      log.info(`Baseline from full status: idle (status ${this.lastMachineStatus})`);
     }
 
     this.trackLayerChange(ps?.current_layer);
@@ -995,7 +995,7 @@ export class StateStore extends EventEmitter {
       // Recording it would append a cross-print entry (ELEG-16) and leave the series
       // non-monotonic, which is what painted the layer chart outside its plot area.
       log.info(
-        `Layer went backwards (L${this._lastLayer} → L${layer}) — treating as a print boundary, resetting layer data`,
+        `Layer went backwards (L${this._lastLayer} → L${layer}): treating as a print boundary, resetting layer data`,
       );
       this.clearLayerData();
     } else if (report.action === 'discard') {

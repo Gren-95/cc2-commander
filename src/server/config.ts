@@ -197,7 +197,7 @@ export function loadConfig(): ServiceConfig {
   );
   if (env('TELEGRAM_ALLOWED_CHAT_IDS') && telegramAllowedChatIds.length === 0) {
     throw new Error(
-      'TELEGRAM_ALLOWED_CHAT_IDS is set but contains no valid numeric id — refusing to start ' +
+      'TELEGRAM_ALLOWED_CHAT_IDS is set but contains no valid numeric id. Refusing to start ' +
         'rather than fall back to a bot that answers everyone',
     );
   }

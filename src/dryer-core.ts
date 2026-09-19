@@ -78,7 +78,7 @@ export const DRYING_PRESETS: DryingPreset[] = [
     label: 'TPU',
     tempC: 50,
     minutes: 300,
-    note: 'Absorbs fast — dry it before every long print.',
+    note: 'Absorbs fast. Dry it before every long print.',
   },
   {
     id: 'abs',
@@ -109,7 +109,7 @@ export const DRYING_PRESETS: DryingPreset[] = [
     label: 'PVA / BVOH',
     tempC: 45,
     minutes: 360,
-    note: 'Water-soluble — never leave it out of a dry box.',
+    note: 'Water-soluble. Never leave it out of a dry box.',
   },
 ];
 

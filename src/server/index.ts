@@ -80,14 +80,14 @@ log.info(`Data:    ${config.dataDir}`);
 await initAuth(config.auth, config.auth.plainPassword);
 if (config.auth.enabled && !config.auth.sessionSecret) {
   log.info(
-    'Auth:    sessions are memory-only — a restart signs every browser out. Set ' +
+    'Auth:    sessions are memory-only, so a restart signs every browser out. Set ' +
       'AUTH_SECRET to a long random string to keep them (`bun run auth:secret` prints one).',
   );
 }
 if (config.auth.enabled && config.auth.plainPassword) {
   log.warn(
-    'AUTH_PASSWORD is a plaintext credential in a file. It works — it is hashed at ' +
-      'startup and never stored — but `bun run auth:secret` prints a hash to use instead, ' +
+    'AUTH_PASSWORD is a plaintext credential in a file. It works (it is hashed at ' +
+      'startup and never stored), but `bun run auth:secret` prints a hash to use instead, ' +
       'and then the file holds nothing worth stealing.',
   );
 }
@@ -100,11 +100,11 @@ if (
   !isWellFormedHash(config.auth.passwordHash)
 ) {
   log.error(
-    'AUTH_PASSWORD_HASH is malformed — every login will fail with "Invalid credentials". ' +
+    'AUTH_PASSWORD_HASH is malformed. Every login will fail with "Invalid credentials". ' +
       'Two parsers read that file and they disagree: Bun expands $VAR (so each $ needs a ' +
       "backslash) while Docker's env_file does not unescape (so a backslash arrives " +
       'literally). If the service runs in a container reading .env through env_file, use ' +
-      'AUTH_PASSWORD instead — a password has no $ and survives both. Otherwise each $ in the hash ' +
+      'AUTH_PASSWORD instead, since a password has no $ and survives both. Otherwise each $ in the hash ' +
       'must be backslash-escaped: AUTH_PASSWORD_HASH=scrypt\\$65536\\$8\\$1\\$… ' +
       'Re-run `bun run auth:secret` and paste the line exactly as printed.',
   );
@@ -125,7 +125,7 @@ if (config.auth.enabled) {
   // Loud, and specific about what is reachable. A quiet "auth: off" is how a service
   // ends up on the public internet with `emergency_stop` open to anyone who finds it.
   log.warn(
-    'Auth:    DISABLED — every endpoint answers without credentials, including ' +
+    'Auth:    DISABLED. Every endpoint answers without credentials, including ' +
       'printer control (set_temperature, move, start_print, emergency_stop) and the ' +
       'camera. Set AUTH_PASSWORD or AUTH_PASSWORD_HASH in .env to require a login.',
   );
@@ -374,7 +374,7 @@ dryer.on(
     if (!session) return;
     wsTransport.broadcast({ type: 'dryer_finished', label: session.label, reason });
     if (telegram && reason === 'done') {
-      void telegram.notify(`🌡 ${session.label} is dry — bed turned off`);
+      void telegram.notify(`🌡 ${session.label} is dry. Bed turned off.`);
     }
   },
 );

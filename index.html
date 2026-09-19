@@ -171,7 +171,7 @@
               <!-- Its own container, so the @min-[…] rules below answer to this column and not to the whole card. -->
               <div class="@container flex min-w-0 flex-1 flex-col gap-3">
             <div class="flex items-center gap-3">
-              <div class="h-14 w-14 shrink-0 rounded-lg border border-line bg-card overflow-hidden grid place-items-center" id="print-thumbnail-wrap">
+              <div class="h-14 w-14 shrink-0 rounded-lg border border-line bg-card overflow-hidden not-[.hidden]:grid place-items-center" id="print-thumbnail-wrap">
                 <img class="thumb-img h-full w-full object-cover hidden" id="print-thumbnail" alt="">
                 <div class="text-fg-muted text-xl" id="print-thumbnail-placeholder"><i class="bi bi-printer" aria-hidden="true"></i></div>
               </div>
@@ -236,11 +236,6 @@
                 </div>
             </div>
 
-            <!-- What an idle printer gets instead of nine dashes. -->
-            <div id="print-idle-note" class="hidden not-[.hidden]:flex flex-1 flex-col items-center justify-center gap-2 px-4 py-8 text-center text-xs text-fg-muted">
-              <span>Nothing printing</span>
-            </div>
-
               </div>
             </div>
 
@@ -264,9 +259,12 @@
                   <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 mt-1">
                     <span class="font-mono text-2xl font-semibold tabular-nums leading-none text-fg" id="temp-nozzle">--</span>
                     <span class="text-xs text-fg-muted font-normal">°C</span>
-                    <span class="text-xs text-fg-muted font-normal">of</span>
-                    <span class="font-mono text-base tabular-nums leading-none text-fg-soft" id="temp-nozzle-target">--</span>
-                    <span class="text-xs text-fg-muted font-normal">°C</span>
+                    <span class="inline-flex items-baseline gap-x-1.5" id="temp-nozzle-target-group">
+                      <span class="text-xs text-fg-muted font-normal">of</span>
+                      <span class="font-mono text-base tabular-nums leading-none text-fg-soft" id="temp-nozzle-target">--</span>
+                      <span class="text-xs text-fg-muted font-normal">°C</span>
+                    </span>
+                    <span class="hidden text-xs text-fg-muted font-normal" id="temp-nozzle-off">· heater off</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0 @max-[379px]:w-full">
@@ -287,9 +285,12 @@
                   <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 mt-1">
                     <span class="font-mono text-2xl font-semibold tabular-nums leading-none text-fg" id="temp-bed">--</span>
                     <span class="text-xs text-fg-muted font-normal">°C</span>
-                    <span class="text-xs text-fg-muted font-normal">of</span>
-                    <span class="font-mono text-base tabular-nums leading-none text-fg-soft" id="temp-bed-target">--</span>
-                    <span class="text-xs text-fg-muted font-normal">°C</span>
+                    <span class="inline-flex items-baseline gap-x-1.5" id="temp-bed-target-group">
+                      <span class="text-xs text-fg-muted font-normal">of</span>
+                      <span class="font-mono text-base tabular-nums leading-none text-fg-soft" id="temp-bed-target">--</span>
+                      <span class="text-xs text-fg-muted font-normal">°C</span>
+                    </span>
+                    <span class="hidden text-xs text-fg-muted font-normal" id="temp-bed-off">· heater off</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0 @max-[379px]:w-full">
@@ -465,17 +466,6 @@
 
           <div class="border-t border-line-soft my-3"></div>
 
-          <div class="flex items-center gap-2">
-            <i class="bi bi-lightbulb text-fg-muted" aria-hidden="true"></i>
-            <span class="text-xs text-fg">Overhead light</span>
-            <label class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent ml-auto">
-              <input type="checkbox" id="led-toggle" class="peer sr-only" checked>
-              <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
-            </label>
-          </div>
-
-          <div class="border-t border-line-soft my-3"></div>
-
           <div class="text-xs text-fg-muted mb-2">Maintenance</div>
           <div id="maintenance-status"></div>
           <div class="flex flex-wrap items-center gap-2">
@@ -497,10 +487,6 @@
               <input type="range" min="0" max="100" step="5" value="0" id="fan-model-range" data-fan="fan" class="fan-range flex-1 min-w-0 cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-line [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent" aria-label="Model fan speed">
               <span class="font-mono text-xs tabular-nums leading-none text-fg shrink-0 w-9 text-right" id="fan-model-value">--%</span>
               <span class="text-[10px] text-fg-muted shrink-0 tabular-nums" id="fan-model-rpm"></span>
-              <label class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
-                <input type="checkbox" id="fan-model-toggle" class="peer sr-only">
-                <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
-              </label>
             </div>
             <div class="flex items-center gap-2">
               <i class="bi bi-fan text-fg-muted shrink-0" aria-hidden="true"></i>
@@ -508,10 +494,6 @@
               <input type="range" min="0" max="100" step="5" value="0" id="fan-aux-range" data-fan="aux_fan" class="fan-range flex-1 min-w-0 cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-line [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent" aria-label="Assistance fan speed">
               <span class="font-mono text-xs tabular-nums leading-none text-fg shrink-0 w-9 text-right" id="fan-aux-value">--%</span>
               <span class="text-[10px] text-fg-muted shrink-0 tabular-nums" id="fan-aux-rpm"></span>
-              <label class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
-                <input type="checkbox" id="fan-aux-toggle" class="peer sr-only">
-                <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
-              </label>
             </div>
             <div class="flex items-center gap-2">
               <i class="bi bi-fan text-fg-muted shrink-0" aria-hidden="true"></i>
@@ -519,10 +501,6 @@
               <input type="range" min="0" max="100" step="5" value="0" id="fan-case-range" data-fan="box_fan" class="fan-range flex-1 min-w-0 cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-line [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-line [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent" aria-label="Case fan speed">
               <span class="font-mono text-xs tabular-nums leading-none text-fg shrink-0 w-9 text-right" id="fan-case-value">--%</span>
               <span class="text-[10px] text-fg-muted shrink-0 tabular-nums" id="fan-case-rpm"></span>
-              <label class="toggle relative inline-block h-5 w-9 shrink-0 cursor-pointer rounded-full bg-line transition-colors has-[:checked]:bg-accent">
-                <input type="checkbox" id="fan-case-toggle" class="peer sr-only">
-                <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4"></span>
-              </label>
             </div>
             <div class="flex items-center gap-2">
               <i class="bi bi-lightbulb text-fg-muted shrink-0" aria-hidden="true"></i>
@@ -551,7 +529,7 @@
           <div class="grid grid-cols-2 gap-x-4 gap-y-3 @min-[560px]:grid-cols-4">
             <div class="min-w-0">
               <div class="text-xs text-fg-muted truncate">Speed</div>
-              <div class="font-mono text-base tabular-nums leading-none text-fg-soft mt-1 truncate"><span id="live-speed">--</span> <span class="text-[10px] text-fg-muted">mm/min</span></div>
+              <div class="font-mono text-base tabular-nums leading-none text-fg-soft mt-1 truncate"><span id="live-speed">--</span> <span class="text-[10px] text-fg-muted">mm/s</span></div>
             </div>
             <div class="min-w-0">
               <div class="text-xs text-fg-muted truncate">Extrusion</div>
@@ -692,7 +670,7 @@
               <button class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" id="slog-export" title="Download the filtered log as JSON"><i class="bi bi-download bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Export</button>
               <button class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" id="slog-clear">Clear</button>
             </div>
-            <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Exports the messages currently shown. The payloads include the printer's serial number and local IP — check before posting one publicly.</p>
+            <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Exports the messages currently shown. The payloads include the printer's serial number and local IP. Check before posting one publicly.</p>
             <div id="slog-entries" class="flex-1 min-h-40 max-h-100 overflow-y-auto overflow-x-auto font-mono text-[0.75rem] leading-[1.5] bg-app rounded-card p-1"></div>
             <div class="flex justify-between items-center text-[11px] text-fg-muted [padding:2px_4px]">
               <span id="slog-count">0 messages</span>
@@ -710,7 +688,7 @@
               <button class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" id="log-export" title="Download the filtered log as JSON"><i class="bi bi-download bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> Export</button>
               <button class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" id="log-clear">Clear</button>
             </div>
-            <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Exports the messages currently shown. The payloads include the printer's serial number and local IP — check before posting one publicly.</p>
+            <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Exports the messages currently shown. The payloads include the printer's serial number and local IP. Check before posting one publicly.</p>
             <div id="log-entries" class="h-80 overflow-y-auto font-mono text-[0.75rem] leading-[1.5] bg-app rounded-card p-1"></div>
           </div>
         </div>
@@ -754,7 +732,7 @@
 
         <section id="tools-subtab-cost" class="hidden">
           <p class="text-[13px] text-fg-muted mb-4 max-w-[70ch]">
-            Every price starts empty — electricity and filament prices vary too much
+            Every price starts empty, because electricity and filament prices vary too much
             between households for a guessed default to be worth trusting.
           </p>
           <div id="workshop-cost-content"></div>
@@ -762,7 +740,7 @@
 
         <section id="tools-subtab-maintenance" class="hidden">
           <p class="text-[13px] text-fg-muted mb-4 max-w-[70ch]">
-            Tracked by print hours, not calendar time — a printer idle for a month has
+            Tracked by print hours, not calendar time: a printer idle for a month has
             not worn its rails. These intervals are starting points, not figures from
             Elegoo; edit them to fit your filament and environment.
           </p>
@@ -842,7 +820,7 @@
             </div>
             <div class="" style="display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--border);">
               <span style="font-size: 12px; color: var(--text-muted); align-self: center;">Video Stream:</span>
-              <button class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" id="debug-videostream-sdcp" title="Send CmdVideoStreamControl Enable=1 via SDCP WebSocket (port 3030) — matches official app"><i class="bi bi-arrow-right bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> SDCP Enable</button>
+              <button class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" id="debug-videostream-sdcp" title="Send CmdVideoStreamControl Enable=1 via SDCP WebSocket (port 3030), as the official app does"><i class="bi bi-arrow-right bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> SDCP Enable</button>
               <button class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg cursor-pointer transition-colors hover:bg-hover hover:border-fg-muted disabled:opacity-50 disabled:cursor-not-allowed" id="debug-videostream-mqtt" title="Send method 1054 (CTRL_LIVE_STREAM) Enable=1 via MQTT"><i class="bi bi-arrow-right bi-lead [margin-inline-end:0.4em] max-[700px]:[.main-tab_&]:text-[19px] max-[700px]:[.main-tab_&]:[margin-inline-end:0]" aria-hidden="true"></i> MQTT 1054</button>
               <span id="debug-videostream-result" style="font-size: 12px; color: var(--text-muted); align-self: center;"></span>
             </div>

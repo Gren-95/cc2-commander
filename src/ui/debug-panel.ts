@@ -602,7 +602,7 @@ export function bindDebugPanel(): void {
         const data = await resp.json();
         if (resultSpan)
           data.success
-            ? iconText(resultSpan, 'check', 'MQTT 1054: sent — check log for response')
+            ? iconText(resultSpan, 'check', 'MQTT 1054 sent. Check the log for the response.')
             : iconText(resultSpan, 'cross', `MQTT 1054: ${data.error || 'Failed'}`);
       } catch (err: unknown) {
         if (resultSpan)

@@ -70,7 +70,7 @@ function tile(label: string, value: string, unit: string, sub: string, extra = '
 function costTile(label: string, value: number | null, knownFor: number, total: number): string {
   return tile(
     label,
-    value === null ? '—' : `${escapeHtml(currency)}${value.toFixed(2)}`,
+    value === null ? '--' : `${escapeHtml(currency)}${value.toFixed(2)}`,
     '',
     knownFor > 0 ? `Known for ${knownFor} of ${total} prints` : 'No price set in the Cost tab',
   );
@@ -91,7 +91,7 @@ function tiles(s: Stats): string {
       ${tile('Prints', String(s.prints), '', `${s.completed} finished · ${s.stopped} stopped`)}
       ${tile(
         'Finish rate',
-        rate === null ? '—' : String(rate),
+        rate === null ? '--' : String(rate),
         rate === null ? '' : '%',
         'Stopped includes cancelled first layers',
         meter,
@@ -106,7 +106,7 @@ function tiles(s: Stats): string {
       )}
       ${tile(
         'Filament',
-        s.gramsKnownFor ? g.value : '—',
+        s.gramsKnownFor ? g.value : '--',
         s.gramsKnownFor ? g.unit : '',
         `Known for ${s.gramsKnownFor} of ${s.prints} prints`,
       )}
@@ -167,7 +167,7 @@ function table(s: Stats): string {
         <td class="py-1 pr-4 text-right tabular-nums">${m.prints}</td>
         <td class="py-1 pr-4 text-right tabular-nums">${m.completed}</td>
         <td class="py-1 pr-4 text-right tabular-nums">${fmtHours(m.hours)}</td>
-        <td class="py-1 text-right tabular-nums">${m.grams || '—'}</td>
+        <td class="py-1 text-right tabular-nums">${m.grams || '--'}</td>
       </tr>`,
     )
     .join('');

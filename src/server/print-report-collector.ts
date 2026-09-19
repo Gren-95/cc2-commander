@@ -129,7 +129,7 @@ export class PrintReportCollector extends EventEmitter {
     switch (event.type) {
       case 'print_started':
         if (event.resumed && this.activeReport) {
-          log.info(`Print resumed: ${event.filename} — continuing report`);
+          log.info(`Print resumed: ${event.filename}: continuing report`);
           return;
         }
         this.startReport(event.filename);
@@ -141,7 +141,7 @@ export class PrintReportCollector extends EventEmitter {
         this.finalizeReport('failed', undefined, event.reason);
         break;
       case 'print_progress':
-        this.recordEvent(`Progress ${event.progress}% — Layer ${event.layer}/${event.totalLayers}`);
+        this.recordEvent(`Progress ${event.progress}% · Layer ${event.layer}/${event.totalLayers}`);
         // Capture snapshot at every 10% milestone
         this.captureProgressMilestone(event.progress);
         break;
@@ -339,7 +339,7 @@ export class PrintReportCollector extends EventEmitter {
     const milestone = Math.floor(progress / 10) * 10;
     if (milestone <= this.lastProgressMilestone) return;
     this.lastProgressMilestone = milestone;
-    log.info(`Progress milestone ${milestone}% — capturing snapshot`);
+    log.info(`Progress milestone ${milestone}%: capturing snapshot`);
     void this.captureSnapshot();
   }
 

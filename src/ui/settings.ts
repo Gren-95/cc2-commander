@@ -296,7 +296,7 @@ function buildSettingsHTML(content: HTMLElement): void {
 
     <section class="mb-5 [&_h3]:text-[13px] [&_h3]:font-semibold [&_h3]:text-fg-soft [&_h3]:uppercase [&_h3]:tracking-[0.5px] [&_h3]:mb-2">
       <h3>Alerts</h3>
-      <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Play a sound when a print finishes, fails, or hits a critical error. Off by default. Only events arriving live make a sound — reconnecting never replays old ones.</p>
+      <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">Play a sound when a print finishes, fails, or hits a critical error. Off by default. Only events arriving live make a sound: reconnecting never replays old ones.</p>
       <div class="flex items-center gap-3 [padding:6px_0] [&_label]:text-fg-soft [&_label]:text-[13px] [&_label]:min-w-30">
         <label for="settings-alert-sound">Audible alerts</label>
         <input type="checkbox" id="settings-alert-sound">
@@ -315,7 +315,7 @@ function buildSettingsHTML(content: HTMLElement): void {
       <h3>Dashboard layout</h3>
       <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">
         The dashboard is one grid, in this order. Untick a card to hide it, and set how
-        much of a row each one takes — <strong>Compact</strong> is a quarter of a wide
+        much of a row each one takes: <strong>Compact</strong> is a quarter of a wide
         screen, <strong>Wide</strong> a half, <strong>Full</strong> the whole row. Narrow
         screens collapse everything to one column regardless.
       </p>
@@ -409,7 +409,7 @@ function buildSettingsHTML(content: HTMLElement): void {
       !confirm(
         'Reset the dashboard layout to its default?\n\n' +
           'Card order, widths, and hidden and collapsed cards are all restored. ' +
-          'Other settings — chart resolution, log filters, camera selection — are kept.',
+          'Other settings (chart resolution, log filters, camera selection) are kept.',
       )
     ) {
       return;

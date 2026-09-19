@@ -54,7 +54,7 @@ test.describe('applyBusyGuard', () => {
     await page.evaluate(() => window.T.busyGuard.applyBusyGuard(2));
     const jog = await state(page, 'jog');
     expect(jog.disabled).toBe(true);
-    expect(jog.title).toBe('Printing — wait until the printer is idle');
+    expect(jog.title).toBe('Printing: wait until the printer is idle');
   });
 
   test('treats every non-idle state as busy, not only printing', async ({ page }) => {
@@ -70,7 +70,7 @@ test.describe('applyBusyGuard', () => {
       await page.evaluate((s) => window.T.busyGuard.applyBusyGuard(s), status);
       const s = await state(page, 'level');
       expect(s.disabled, `status ${status}`).toBe(true);
-      expect(s.title).toBe(`${name} — wait until the printer is idle`);
+      expect(s.title).toBe(`${name}: wait until the printer is idle`);
     }
   });
 
@@ -99,7 +99,7 @@ test.describe('applyBusyGuard', () => {
     });
     const fresh = await state(page, 'fresh');
     expect(fresh.disabled).toBe(true);
-    expect(fresh.title).toBe('Printing — wait until the printer is idle');
+    expect(fresh.title).toBe('Printing: wait until the printer is idle');
   });
 
   test('an unknown status is treated as busy rather than idle', async ({ page }) => {

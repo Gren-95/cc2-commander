@@ -126,7 +126,7 @@ export function bindLogControls(store: LogStore): void {
     // interesting thing, and an unfiltered dump is what people already cannot read.
     const entries = store.getEntries().filter(matchesFilter);
     if (!entries.length) {
-      toast('Nothing to export — no messages match the filter', 'warning');
+      toast('Nothing to export: no messages match the filter', 'warning');
       return;
     }
     const count = exportLogEntries(entries, 'raw');

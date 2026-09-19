@@ -65,7 +65,7 @@ export function spoolTile(unitId: number, tray: CanvasTray, isActive: boolean): 
       data-type="${escapeAttr(tray.filament_type || '')}" data-color="${escapeAttr(tray.filament_color || '')}"
       data-brand="${escapeAttr(tray.brand || 'ELEGOO')}" data-name="${escapeAttr(tray.filament_name || '')}"
       data-min-temp="${tray.min_nozzle_temp || ''}" data-max-temp="${tray.max_nozzle_temp || ''}"
-      title="${escapeAttr(tray.filament_name || typeLabel)} — click to edit">
+      title="${escapeAttr(tray.filament_name || typeLabel)}: click to edit">
       <span class="relative shrink-0">
         ${ring}
         <span class="absolute -top-1 -left-1 grid h-4 w-4 place-items-center rounded-full bg-fg-muted text-[10px] font-bold text-app [.spool-active_&]:bg-accent">${tray.tray_id + 1}</span>
@@ -135,7 +135,9 @@ export function renderCanvas(state: PrinterState): void {
   // canvas payload, so rendering it inside the loop gave a second Canvas a second switch
   // writing the same setting — and the row nested a <label> inside a <label>, which is
   // invalid and makes a click on the text toggle twice or not at all.
-  html += `<label class="mt-auto flex cursor-pointer items-center gap-3 border-t border-line-soft pt-3">
+  // Directly under the slots, not pinned to the card bottom with `mt-auto`: the grid
+  // stretches this card to its row, and pinning left a hole between the slots and it.
+  html += `<label class="mt-3 flex cursor-pointer items-center gap-3 border-t border-line-soft pt-3">
     <span class="min-w-0 flex-1">
       <span class="block text-xs text-fg">Auto-refill</span>
       <span class="block text-[11px] text-fg-muted">Switch to another spool of the same colour when one runs out</span>

@@ -191,7 +191,7 @@ export function renderAbout(): void {
           { label: 'Uptime', value: uptime ?? 'unknown', muted: !uptime },
           {
             label: 'Browsers',
-            value: String(status?.wsClients ?? '—'),
+            value: String(status?.wsClients ?? '--'),
             muted: status?.wsClients == null,
           },
           {

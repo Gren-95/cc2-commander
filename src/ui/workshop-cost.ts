@@ -45,7 +45,7 @@ let mounted = false;
 let data: CostData | null = null;
 
 function money(v: number | null, currency: string): string {
-  return v === null ? '—' : `${escapeHtml(currency)}${v.toFixed(2)}`;
+  return v === null ? '--' : `${escapeHtml(currency)}${v.toFixed(2)}`;
 }
 
 function materialRowHtml(name: string, price: number | ''): string {
@@ -119,8 +119,8 @@ function filesListHtml(d: CostData): string {
     .map(
       (f) => `<tr class="border-t border-line-soft">
         <td class="py-1.5 pr-4 max-w-60 truncate" title="${escapeAttr(f.filename)}">${escapeHtml(f.filename)}</td>
-        <td class="py-1.5 pr-4 text-right tabular-nums">${f.grams !== null ? `${Math.round(f.grams)} g` : '—'}</td>
-        <td class="py-1.5 pr-4 text-right tabular-nums">${f.seconds !== null ? formatTime(f.seconds) : '—'}</td>
+        <td class="py-1.5 pr-4 text-right tabular-nums">${f.grams !== null ? `${Math.round(f.grams)} g` : '--'}</td>
+        <td class="py-1.5 pr-4 text-right tabular-nums">${f.seconds !== null ? formatTime(f.seconds) : '--'}</td>
         <td class="py-1.5 pr-4 text-right tabular-nums">${money(f.filament, d.settings.currency)}</td>
         <td class="py-1.5 text-right tabular-nums">${money(f.electricity, d.settings.currency)}</td>
       </tr>`,
@@ -223,7 +223,7 @@ function historyListHtml(d: CostData, controls: ListControls<CostedPrint>): stri
     .map((p) => {
       const when = new Date(p.endedAt).toLocaleString();
       const grams =
-        p.grams !== null ? `${Math.round(p.grams)} g${p.gramsEstimated ? ' (est.)' : ''}` : '—';
+        p.grams !== null ? `${Math.round(p.grams)} g${p.gramsEstimated ? ' (est.)' : ''}` : '--';
       return `<tr class="border-t border-line-soft">
         <td class="py-1.5 pr-4 max-w-60 truncate" title="${escapeAttr(p.filename)}">${escapeHtml(p.filename)}</td>
         <td class="py-1.5 pr-4 whitespace-nowrap">${escapeHtml(when)}</td>

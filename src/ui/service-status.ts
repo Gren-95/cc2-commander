@@ -48,7 +48,7 @@ const PHASE_LABELS: Record<MqttPhase, string> = {
   disconnected: 'disconnected',
   awaiting_sn: 'waiting for printer',
   registering: 'registering...',
-  rejected: 'refused — too many clients',
+  rejected: 'refused: too many clients',
 };
 
 /**
@@ -195,13 +195,22 @@ export function renderServiceStatus(): void {
     { label: 'Printer', state: s.printerSn ? 'ok' : 'err', okValues: ['ok'] },
   ];
 
-  const healthy = checks.filter((c) => isOk(c.state, c.okValues)).length;
-  const total = checks.length;
+  // Only what is switched on is counted. An integration nobody configured is not a fault:
+  // counting Telegram-not-set-up as one left the badge on a permanent red "3/4" that
+  // looked like something was broken. The dropdown below still lists every service.
+  const counted = checks.filter((c) => c.state !== 'disabled');
+  const healthy = counted.filter((c) => isOk(c.state, c.okValues)).length;
+  const total = counted.length;
 
   // Header badge: colored dots + count
   const allOk = healthy === total;
-  dotsEl.innerHTML = checks.map((c) => dotHtml(isOk(c.state, c.okValues))).join('');
+  dotsEl.innerHTML = counted.map((c) => dotHtml(isOk(c.state, c.okValues))).join('');
   countEl.textContent = `${healthy}/${total}`;
+  // A bare "3/4" says nothing on its own; the tooltip says what it counts and what is wrong.
+  const failing = counted.filter((c) => !isOk(c.state, c.okValues)).map((c) => c.label);
+  badge.title = allOk
+    ? `All ${total} services OK. Click for details`
+    : `${healthy} of ${total} services OK. Not OK: ${failing.join(', ')}`;
   toggleState(badge, 'svc-all-ok', allOk);
   toggleState(badge, 'svc-has-err', !allOk);
 
@@ -229,7 +238,7 @@ export function renderServiceStatus(): void {
   const headline = mqttBannerHeadline(phase, s.mqttRegisterAttempts);
   const firmwareBanner = headline
     ? `<div class="svc-firmware-warning [padding:8px_10px] [margin-bottom:6px] rounded-chip bg-[rgba(255,_152,_0,_0.12)] border border-[rgba(255,_152,_0,_0.4)] text-[#ffb74d] text-[0.8rem] leading-[1.4] [&_strong]:text-[#ff9800]">
-        ${icon('warning')} <strong>${escapeHtml(headline)}</strong> — ${escapeHtml(mqttPhaseMessage(phase))}
+        ${icon('warning')} <strong>${escapeHtml(headline)}</strong>: ${escapeHtml(mqttPhaseMessage(phase))}
         ${phase === 'registering' ? `(${s.mqttRegisterAttempts} registration attempts)` : ''}
       </div>`
     : '';

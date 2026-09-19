@@ -65,7 +65,7 @@ export function applyBusyGuard(status: number | undefined): void {
       control.dataset.idleTitle = control.title ?? '';
     }
     control.disabled = !idle;
-    control.title = idle ? control.dataset.idleTitle : `${label} — wait until the printer is idle`;
+    control.title = idle ? control.dataset.idleTitle : `${label}: wait until the printer is idle`;
     // A disabled button is not focusable and announces itself, so `aria-disabled` would
     // be redundant. What is not automatic is the reason, which the title carries.
   }

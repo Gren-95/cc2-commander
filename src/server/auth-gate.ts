@@ -174,7 +174,7 @@ export class AuthGate {
     const address = this.addressOf(req);
     if (!this.throttle.allows(address)) {
       const retryAfter = this.throttle.retryAfterSeconds(address);
-      log.warn(`Login throttled for ${address} — ${retryAfter}s remaining`);
+      log.warn(`Login throttled for ${address}: ${retryAfter}s remaining`);
       res.writeHead(429, {
         'Content-Type': 'application/json',
         'Retry-After': String(retryAfter),

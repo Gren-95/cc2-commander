@@ -79,7 +79,7 @@ function eventDescription(e: Record<string, unknown>): string {
     case 'print_failed': {
       const fn = escapeHtml(String(e.filename || 'unknown'));
       const reason = escapeHtml(String(e.reason || 'unknown'));
-      return `Print failed: ${fn} — ${reason}`;
+      return `Print failed: ${fn} (${reason})`;
     }
     case 'print_progress': {
       const pct = e.progress as number;
@@ -87,7 +87,7 @@ function eventDescription(e: Record<string, unknown>): string {
       const total = e.totalLayers as number;
       const rem =
         typeof e.remaining === 'number' ? ` (${fmtDuration(e.remaining as number)} remaining)` : '';
-      return `Progress: ${pct}% — Layer ${layer}/${total}${rem}`;
+      return `Progress: ${pct}% · Layer ${layer}/${total}${rem}`;
     }
     case 'error': {
       const names = (e.names as string[]) || [];

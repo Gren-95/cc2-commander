@@ -143,7 +143,7 @@ export function bindControls(client: CommandSender): void {
       if (axis) {
         const homeDot = document.getElementById(`home-${axis}`);
         if (homeDot && !homeDot.classList.contains('homed')) {
-          toast(`${axis.toUpperCase()} axis is not homed — movement may be ignored`, 'warning');
+          toast(`${axis.toUpperCase()} axis is not homed: movement may be ignored`, 'warning');
         }
         guardedSend(client, 1027, { axes: axis, distance: currentMoveDistance * dir }, el);
       }
@@ -173,20 +173,6 @@ export function bindControls(client: CommandSender): void {
       const mode = parseInt((btn as HTMLElement).dataset.mode ?? '100');
       guardedSend(client, 1031, { mode }, btn as HTMLElement);
     });
-  });
-
-  // Fan toggle controls
-  $('fan-model-toggle').addEventListener('change', (e) => {
-    const on = (e.target as HTMLInputElement).checked;
-    guardedSend(client, 1030, { fan: on ? 255 : 0 }, e.target as HTMLElement);
-  });
-  $('fan-aux-toggle').addEventListener('change', (e) => {
-    const on = (e.target as HTMLInputElement).checked;
-    guardedSend(client, 1030, { aux_fan: on ? 255 : 0 }, e.target as HTMLElement);
-  });
-  $('fan-case-toggle').addEventListener('change', (e) => {
-    const on = (e.target as HTMLInputElement).checked;
-    guardedSend(client, 1030, { box_fan: on ? 255 : 0 }, e.target as HTMLElement);
   });
 
   // Fan sliders.

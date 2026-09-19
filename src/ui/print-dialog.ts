@@ -479,14 +479,14 @@ function showDialog(
             : `Cached (${formatSize(result.size)})`;
         } else {
           // Precache failed — warn but still allow printing
-          textEl.textContent = `Cache failed: ${result.error ?? 'unknown'} — printing anyway`;
+          textEl.textContent = `Cache failed: ${result.error ?? 'unknown'}, printing anyway`;
           textEl.style.color = 'var(--warning)';
         }
       } catch {
         // Network error — warn but still allow printing
         fillEl.style.width = '100%';
         fillEl.style.background = 'var(--warning)';
-        textEl.textContent = 'Cache unavailable — printing anyway';
+        textEl.textContent = 'Cache unavailable, printing anyway';
         textEl.style.color = 'var(--warning)';
       }
 

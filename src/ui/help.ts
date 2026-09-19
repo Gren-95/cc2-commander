@@ -249,7 +249,7 @@ scrape_configs:
     metrics_path: '/api/metrics/prometheus'</code></pre>
 
   <h4>Fluidd / Mainsail</h4>
-  <p>Point Fluidd or Mainsail at <code>http://&lt;host&gt;:7125</code> — the standalone Moonraker server provides full compatibility.</p>
+  <p>Point Fluidd or Mainsail at <code>http://&lt;host&gt;:7125</code>: the standalone Moonraker server provides full compatibility.</p>
 
   <h4>Home Assistant (OctoPrint integration)</h4>
   <p>Add an OctoPrint integration pointing to <code>http://&lt;host&gt;:8088/octoprint/</code> with any API key.</p>

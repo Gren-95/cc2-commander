@@ -424,7 +424,7 @@ export function bindStructuredLogControls(store: LogStore): void {
     // the same set on screen, so the file matches what the user was looking at.
     const entries = store.getEntries().filter(matchesFilters);
     if (!entries.length) {
-      toast('Nothing to export — no messages match the filters', 'warning');
+      toast('Nothing to export: no messages match the filters', 'warning');
       return;
     }
     const count = exportLogEntries(entries, 'structured');

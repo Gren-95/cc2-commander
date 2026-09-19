@@ -153,9 +153,9 @@ export class TelegramIntegration {
       await ctx.reply(
         '🖨 *Elegoo CC2 Telegram Bot*\n\n' +
           'Commands:\n' +
-          '/status — Current printer status\n' +
-          '/photo — Camera snapshot\n' +
-          '/help — Show this message',
+          '/status: Current printer status\n' +
+          '/photo: Camera snapshot\n' +
+          '/help: Show this message',
         { parse_mode: 'MarkdownV2' },
       );
     });
@@ -163,8 +163,8 @@ export class TelegramIntegration {
     this.bot.command('help', async (ctx) => {
       await ctx.reply(
         '🖨 *Elegoo CC2 Telegram Bot*\n\n' +
-          '/status — Current printer status\n' +
-          '/photo — Camera snapshot',
+          '/status: Current printer status\n' +
+          '/photo: Camera snapshot',
         { parse_mode: 'MarkdownV2' },
       );
     });
@@ -226,7 +226,7 @@ export class TelegramIntegration {
       // Print started: send new live message (skip reconnection-based events)
       if (event.type === 'print_started') {
         if (event.resumed) {
-          log.info('Skipping print_started — reconnected to active print');
+          log.info('Skipping print_started: reconnected to active print');
           return;
         }
         this.liveMessageId = await this.sendNew(text, photo, urgent);

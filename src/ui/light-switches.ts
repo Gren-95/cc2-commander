@@ -1,8 +1,9 @@
 /**
- * The overhead light has three switches — in the Control card where it always was, on the
- * camera (you want the light on when you are looking at the print), and on the fans card.
+ * The overhead light has two switches — on the Fans & light card, and on the camera (you
+ * want the light on when you are looking at the print). There used to be a third in the
+ * Control card; one light in three places was one too many.
  *
- * They are three views of one light, so they must never disagree. That is why this lives
+ * They are two views of one light, so they must never disagree. That is why this lives
  * in one place: whichever is used mirrors its choice onto the others at once, and the
  * printer's own report of the light redraws all three (`showLight`). Nothing else keeps
  * a copy of the state.
@@ -10,7 +11,7 @@
 
 import { $ } from './helpers';
 
-export const LIGHT_SWITCH_IDS = ['led-toggle', 'led-toggle-camera', 'led-toggle-fans'] as const;
+export const LIGHT_SWITCH_IDS = ['led-toggle-fans', 'led-toggle-camera'] as const;
 
 const switches = (): HTMLInputElement[] => LIGHT_SWITCH_IDS.map((id) => $(id) as HTMLInputElement);
 

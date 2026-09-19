@@ -91,7 +91,7 @@ function getActiveFilamentInfo(state: PrinterState): { type: string; color: stri
   return null;
 }
 
-function updateFan(prefix: string, speed: number, toggleId: string, rpm?: number): void {
+function updateFan(prefix: string, speed: number, rpm?: number): void {
   const pct = fanPct(speed);
   const range = document.getElementById(`${prefix}-range`) as HTMLInputElement | null;
   // Never while it has focus. A status frame lands every second, and writing the
@@ -99,7 +99,6 @@ function updateFan(prefix: string, speed: number, toggleId: string, rpm?: number
   // has not spun up yet, so the value being written is the OLD one.
   if (range && document.activeElement !== range) range.value = String(pct);
   $(`${prefix}-value`).textContent = `${pct}%`;
-  ($(toggleId) as HTMLInputElement).checked = speed > 0;
   const rpmEl = $(`${prefix}-rpm`);
   if (rpmEl) {
     rpmEl.textContent = rpm != null && rpm > 0 ? `${rpm} RPM` : '';
@@ -168,6 +167,17 @@ function updateCamera(hasCamera: boolean, _printerIp: string): void {
     // Only the text node — `overlay.textContent = …` would take the icon with it.
     $('camera-overlay-text').textContent = 'Camera not connected';
   }
+}
+
+/**
+ * "of 210 °C" while a heater has a target, "· heater off" when it has none. "of 0 °C" read
+ * as a target of zero degrees rather than a heater that is off.
+ */
+function showTarget(heater: 'nozzle' | 'bed', target: number): void {
+  const off = !(target > 0);
+  $(`temp-${heater}-target`).textContent = Math.round(target).toString();
+  $(`temp-${heater}-target-group`).classList.toggle('hidden', off);
+  $(`temp-${heater}-off`).classList.toggle('hidden', !off);
 }
 
 export function renderDashboard(state: PrinterState, client: CommandSender): void {
@@ -271,7 +281,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
       badge,
       'powerLoss',
       powerLoss === 'awaiting_decision'
-        ? 'Power loss — resume or cancel'
+        ? 'Power loss: resume or cancel'
         : `${statusName}${subLabel}`,
     );
     badge.className =
@@ -314,12 +324,12 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
     const pctStr = `${progress}%`;
     const stateStr = isPaused ? 'Paused' : 'Printing';
     const sub = subStatusName ? ` · ${subStatusName}` : '';
-    document.title = `${pctStr} ${stateStr}${sub} — CC2 Commander`;
+    document.title = `${pctStr} ${stateStr}${sub} · CC2 Commander`;
   } else if (machineStatus?.status === 1) {
-    document.title = 'Idle — CC2 Commander';
+    document.title = 'Idle · CC2 Commander';
   } else {
     const sub = subStatusName ? ` · ${subStatusName}` : '';
-    document.title = `${statusName}${sub} — CC2 Commander`;
+    document.title = `${statusName}${sub} · CC2 Commander`;
   }
 
   // Layer info — use fileTotalLayers from method 1046 or fallback to print_status
@@ -392,22 +402,32 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
 
   // The print-only blocks. Everything in them reads "--" without a print, and there are
   // nine such fields — so an idle printer's most prominent card was a grid of dashes
-  // with `0 of ??` set in the largest type on it. It gets one honest line instead.
+  // with `0 of ??` set in the largest type on it. Idle, the card is the name line and its
+  // "Idle" badge: a separate "Nothing printing" note and an empty thumbnail box both said
+  // the same thing again.
   const running = isPrinting || isPaused;
   $('print-progress-block').classList.toggle('hidden', !running);
   $('print-detail-grid').classList.toggle('hidden', !running);
-  $('print-idle-note').classList.toggle('hidden', running);
+  $('print-thumbnail-wrap').classList.toggle('hidden', !running);
 
   // Print action buttons
   $('btn-pause').classList.toggle('hidden', !isPrinting || isPaused);
   $('btn-resume').classList.toggle('hidden', !isPaused);
   $('btn-stop').classList.toggle('hidden', !isPrinting && !isPaused);
 
-  // Temperatures (show 2 decimal places like Elegoo app)
+  // A field with nothing to say is left out, label and all, rather than showing "Colours"
+  // over a blank or "Filament" over "--". Checked after every field above is written.
+  for (const field of $('print-detail-grid').children) {
+    const value = field.lastElementChild?.textContent?.trim() ?? '';
+    field.classList.toggle('hidden', value === '' || value === '--');
+  }
+
+  // Temperatures, to one decimal. It was two, to match the Elegoo app, but the second
+  // decimal is noise that flickers every frame; nobody reads a nozzle to 0.01 °C.
   const ext = s.extruder;
   if (ext) {
-    $('temp-nozzle').textContent = ext.temperature.toFixed(2);
-    $('temp-nozzle-target').textContent = Math.round(ext.target).toString();
+    $('temp-nozzle').textContent = ext.temperature.toFixed(1);
+    showTarget('nozzle', ext.target);
     const nozzlePct = ext.target > 0 ? Math.min(100, (ext.temperature / ext.target) * 100) : 0;
     ($('temp-nozzle-bar') as HTMLElement).style.width = `${nozzlePct}%`;
     const nozzleBar = $('temp-nozzle-bar') as HTMLElement;
@@ -421,8 +441,8 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
 
   const bed = s.heater_bed;
   if (bed) {
-    $('temp-bed').textContent = bed.temperature.toFixed(2);
-    $('temp-bed-target').textContent = Math.round(bed.target).toString();
+    $('temp-bed').textContent = bed.temperature.toFixed(1);
+    showTarget('bed', bed.target);
     const bedPct = bed.target > 0 ? Math.min(100, (bed.temperature / bed.target) * 100) : 0;
     ($('temp-bed-bar') as HTMLElement).style.width = `${bedPct}%`;
     const bedBar = $('temp-bed-bar') as HTMLElement;
@@ -442,7 +462,7 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
 
   const chamber = s.ztemperature_sensor;
   if (chamber) {
-    $('temp-chamber').textContent = chamber.temperature.toFixed(2);
+    $('temp-chamber').textContent = chamber.temperature.toFixed(1);
     const minT = chamber.measured_min_temperature;
     const maxT = chamber.measured_max_temperature;
     const rangeEl = $('temp-chamber-range');
@@ -474,7 +494,9 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
 
   // Live speed & flow. The unit is markup beside the value, not part of it —
   // see the readout/unit split in `ui/design.ts`.
-  $('live-speed').textContent = pos?.speed ? String(Math.round(pos.speed)) : '--';
+  // The printer reports toolhead speed in mm/min (it is a G-code feedrate); shown in mm/s
+  // so it reads in the same unit as Extrusion beside it.
+  $('live-speed').textContent = pos?.speed ? String(Math.round(pos.speed / 60)) : '--';
   const currentE = pos?.extruder ?? pos?.e ?? 0;
   const now = Date.now();
   // Only recompute rates when we get a NEW extruder position (not every render)
@@ -504,9 +526,9 @@ export function renderDashboard(state: PrinterState, client: CommandSender): voi
   // Fans — use Elegoo naming (Model/Assistance/Case)
   const fans = s.fans;
   if (fans) {
-    updateFan('fan-model', fans.fan?.speed ?? 0, 'fan-model-toggle', fans.fan?.rpm);
-    updateFan('fan-aux', fans.aux_fan?.speed ?? 0, 'fan-aux-toggle', fans.aux_fan?.rpm);
-    updateFan('fan-case', fans.box_fan?.speed ?? 0, 'fan-case-toggle', fans.box_fan?.rpm);
+    updateFan('fan-model', fans.fan?.speed ?? 0, fans.fan?.rpm);
+    updateFan('fan-aux', fans.aux_fan?.speed ?? 0, fans.aux_fan?.rpm);
+    updateFan('fan-case', fans.box_fan?.speed ?? 0, fans.box_fan?.rpm);
   }
 
   // Speed mode buttons — status reports 0/1/2/3, buttons use command values 50/100/130/160
@@ -551,7 +573,7 @@ function renderExceptions(codes: number[]): void {
     const isCritical = CRITICAL_EXCEPTIONS.has(code);
     const cls = isCritical ? 'exception-item critical' : 'exception-item warning';
     const severityIcon = isCritical ? icon('critical') : icon('warning');
-    return `<div class="${cls}">${severityIcon} <strong>${escapeHtml(String(code))}</strong> — ${escapeHtml(name)}</div>`;
+    return `<div class="${cls}">${severityIcon} <strong>${escapeHtml(String(code))}</strong>: ${escapeHtml(name)}</div>`;
   });
 
   banner.innerHTML = items.join('');

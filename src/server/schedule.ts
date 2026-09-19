@@ -155,7 +155,7 @@ export class ScheduleService extends EventEmitter {
   private async skip(entry: ScheduledPrint, reason: string): Promise<void> {
     entry.status = 'skipped';
     entry.skipReason = reason;
-    log.warn(`Scheduled print skipped — ${entry.filename}: ${reason}`);
+    log.warn(`Scheduled print skipped (${entry.filename}): ${reason}`);
     await this.save();
     this.emit('skipped', entry);
   }

@@ -307,3 +307,40 @@ test.describe('printer link on the collapsed badge', () => {
     expect(state.caption).toBe('Disconnected');
   });
 });
+
+test.describe('the header count', () => {
+  /** Mount, render one status, and read back the badge. */
+  const badgeAfter = (page: Page, over: Record<string, unknown>) =>
+    page.evaluate((o) => {
+      const w = window as never as any;
+      w.mount();
+      w.render(o);
+      const badge = document.getElementById('svc-header-badge') as HTMLElement;
+      return {
+        count: document.getElementById('svc-header-count')?.textContent ?? '',
+        dots: document.getElementById('svc-header-dots')?.children.length ?? 0,
+        title: badge.title,
+      };
+    }, over);
+
+  const healthy = { mqtt: 'connected', printerSn: 'TESTSN000000001', camera: 'available' };
+
+  test('does not count an integration nobody switched on as a fault', async ({ page }) => {
+    // Telegram not configured is how every install without a bot looks. It used to read
+    // as a permanent red "3/4".
+    const b = await badgeAfter(page, { ...healthy, telegram: 'disabled' });
+    expect(b.count).toBe('3/3');
+    expect(b.dots).toBe(3);
+    expect(b.title).toBe('All 3 services OK. Click for details');
+  });
+
+  test('counts it once it is switched on', async ({ page }) => {
+    expect((await badgeAfter(page, { ...healthy, telegram: 'running' })).count).toBe('4/4');
+  });
+
+  test('names what is wrong, when something is', async ({ page }) => {
+    const b = await badgeAfter(page, { ...healthy, telegram: 'stopped', camera: 'unavailable' });
+    expect(b.count).toBe('2/4');
+    expect(b.title).toBe('2 of 4 services OK. Not OK: Telegram, Camera');
+  });
+});

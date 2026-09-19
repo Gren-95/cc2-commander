@@ -34,7 +34,7 @@ export async function uploadFile(file: File, client: CommandSender): Promise<voi
     progressEl.classList.remove('hidden');
     progressEl.classList.add('upload-error');
     fillEl.style.width = '0%';
-    iconText(textEl, 'cross', `Invalid file type "${ext}" — only .gcode and .3mf allowed`);
+    iconText(textEl, 'cross', `Invalid file type "${ext}": only .gcode and .3mf allowed`);
     return;
   }
   if (file.size > MAX_UPLOAD_SIZE) {
@@ -44,7 +44,7 @@ export async function uploadFile(file: File, client: CommandSender): Promise<voi
     iconText(
       textEl,
       'cross',
-      `File too large (${(file.size / 1024 / 1024).toFixed(0)} MB) — max 500 MB`,
+      `File too large (${(file.size / 1024 / 1024).toFixed(0)} MB): max 500 MB`,
     );
     return;
   }

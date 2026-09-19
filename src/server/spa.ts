@@ -75,7 +75,7 @@ const INDEX_HEADERS = {
 export function buildStaticRoutes(): Record<string, Response> {
   const routes: Record<string, Response> = {};
   if (!existsSync(DIST_DIR)) {
-    log.warn(`No dist/ at ${DIST_DIR} — frontend not served (run \`bun run build\`)`);
+    log.warn(`No dist/ at ${DIST_DIR}: frontend not served (run \`bun run build\`)`);
     return routes;
   }
 
@@ -114,7 +114,7 @@ function warnStaleAsset(urlPath: string): void {
   if (now - staleAssetWarnedAt < 60_000) return;
   staleAssetWarnedAt = now;
   log.warn(
-    `404 for ${urlPath} — the route table was built at startup and dist/ has changed since. ` +
+    `404 for ${urlPath}: the route table was built at startup and dist/ has changed since. ` +
       'Restart the service to pick up the new build.',
   );
 }

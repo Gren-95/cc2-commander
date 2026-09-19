@@ -84,9 +84,11 @@ function addFormHtml(): string {
         <button type="button" id="schedule-add" class="${BTN_PRIMARY}">${icon('add')}Schedule</button>
       </div>
       <p class="${LABEL}">
-        The exact path Files shows for it — check there if you are not sure. The
-        printer is re-checked for the file right before it fires; it is skipped, not
-        guessed, if the file, or the printer, is not there.
+        Easier: find the file in the Files card, press Print, and choose Later. That
+        keeps your plate, spools and other settings; a schedule typed here uses the
+        printer's defaults. Type the path exactly as Files shows it. The printer is
+        re-checked for the file right before it fires; it is skipped, not guessed, if
+        the file, or the printer, is not there.
       </p>
     </div>`;
 }

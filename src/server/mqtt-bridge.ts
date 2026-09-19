@@ -128,7 +128,7 @@ export class MqttBridge extends EventEmitter {
         log.info(`Registering with known SN ${this.sn}...`);
         this.register();
       } else {
-        log.info('No known SN — waiting for the printer to publish. This can hang if the');
+        log.info('No known SN: waiting for the printer to publish. This can hang if the');
         log.info('printer is idle and nothing is registered; set PRINTER_SN to skip it.');
       }
       this.startSilenceWatch();
@@ -296,7 +296,7 @@ export class MqttBridge extends EventEmitter {
       if (this._connected || this.sawPrinterMessage) return;
       const secs = Math.round(MqttBridge.SILENCE_WARN_MS / 1000);
       log.warn(
-        `Broker connected but the printer has been silent for ${secs}s — no message on ` +
+        `Broker connected but the printer has been silent for ${secs}s: no message on ` +
           'elegoo/# has arrived.',
       );
       if (!this.sn) {
@@ -357,7 +357,7 @@ export class MqttBridge extends EventEmitter {
       if (this.client && this.sn) {
         this.heartbeatMissed++;
         if (this.heartbeatMissed >= 2) {
-          log.warn('Heartbeat timeout (2 missed) — forcing reconnect...');
+          log.warn('Heartbeat timeout (2 missed): forcing reconnect...');
           this.stopHeartbeat();
           this._connected = false;
           // Reconnect: destroy the dead client and create a fresh one
@@ -459,7 +459,7 @@ export class MqttBridge extends EventEmitter {
           const ack = resp?.Data?.Data?.Ack ?? resp?.Data?.Ack ?? resp?.Ack;
           const videoUrl = resp?.Data?.Data?.VideoUrl ?? resp?.Data?.VideoUrl ?? resp?.VideoUrl;
           if (ack === 0) {
-            log.info(`[VideoStream] SDCP: success — VideoUrl: ${videoUrl || '(not returned)'}`);
+            log.info(`[VideoStream] SDCP success, VideoUrl: ${videoUrl || '(not returned)'}`);
             resolve({ success: true, videoUrl: videoUrl || undefined });
           } else {
             log.warn(`[VideoStream] SDCP: response Ack=${ack}`);

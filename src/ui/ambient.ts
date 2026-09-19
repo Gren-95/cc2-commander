@@ -52,6 +52,19 @@ function readingAge(changedAt: string): string {
   return mins < 90 ? `${mins} min ago` : `${Math.round(mins / 60)} h ago`;
 }
 
+/**
+ * The sensor's name without its kind when the icon beside it already says so: Home
+ * Assistant names entities "<device> <kind>", which read here as "Efe Temp Temperature".
+ * Only a trailing word matching the device class is dropped, and never the whole name.
+ */
+export function shortSensorName(name: string, deviceClass: string): string {
+  const trimmed = name.trim();
+  if (!deviceClass) return trimmed;
+  const kind = new RegExp(`\\s+${deviceClass.replace(/_/g, ' ')}$`, 'i');
+  const short = trimmed.replace(kind, '').trim();
+  return short || trimmed;
+}
+
 function humidityTone(value: number): string {
   if (value >= 60) return 'text-bad';
   if (value >= 40) return 'text-warn';
@@ -108,8 +121,8 @@ export function renderAmbient(state: Record<string, unknown>): void {
         <span class="text-fg-muted">${glyphFor(r.deviceClass)}</span>
         <span class="font-mono text-sm tabular-nums ${tone}">${r.value}</span>
         <span class="text-[11px] text-fg-muted">${escapeHtml(r.unit)}</span>
-        <span class="min-w-0 truncate text-[11px] text-fg-muted">${escapeHtml(r.name)}</span>
-        ${stale ? `<span class="shrink-0 text-[11px] text-warn">${stale}</span>` : ''}
+        <span class="min-w-0 truncate text-[11px] text-fg-muted">${escapeHtml(shortSensorName(r.name, r.deviceClass))}</span>
+        ${stale ? `<span class="shrink-0 text-[11px] text-fg-muted">· ${stale}</span>` : ''}
       </div>`;
     })
     .join('');

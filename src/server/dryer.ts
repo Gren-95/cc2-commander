@@ -90,7 +90,7 @@ export class DryerService extends EventEmitter {
     // A print starting is the one event that ends a session without anyone asking.
     store.on('print_event', (event: { type: string }) => {
       if (event.type === 'print_started' && this.session) {
-        log.warn('Print started during a drying session — stopping it and cooling down');
+        log.warn('Print started during a drying session: stopping it and cooling down');
         void this.finish('print-started');
       }
     });
@@ -195,7 +195,7 @@ export class DryerService extends EventEmitter {
     await this.persist();
     this.setBed(0);
 
-    if (ending) log.info(`Drying ended (${reason}) — bed off`);
+    if (ending) log.info(`Drying ended (${reason}): bed off`);
     this.emit('finished', { session: ending, reason });
     this.emitState();
   }
@@ -230,7 +230,7 @@ export class DryerService extends EventEmitter {
     }
 
     if (this.printing) {
-      log.warn('A print is running — stopping the drying session');
+      log.warn('A print is running: stopping the drying session');
       await this.finish('print-started');
       return;
     }
@@ -240,7 +240,7 @@ export class DryerService extends EventEmitter {
     const reported = this.store.status?.heater_bed?.target;
     if (reported !== undefined && Math.round(reported) !== session.tempC) {
       this.lastCorrectionAt = Date.now();
-      log.warn(`Bed target had dropped to ${Math.round(reported)} °C — restoring ${session.tempC}`);
+      log.warn(`Bed target had dropped to ${Math.round(reported)} °C: restoring ${session.tempC}`);
     }
     this.setBed(session.tempC);
     this.emitState();

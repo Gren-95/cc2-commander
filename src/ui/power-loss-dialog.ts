@@ -81,7 +81,7 @@ function showPowerLossDialog(filename: string | undefined, client: CommandSender
         <p>The printer lost power during a print and is waiting for a decision.</p>
         ${fileLine}
         <p class="text-[0.8rem] text-fg-muted [margin:0_0_8px] [&_code]:bg-input [&_code]:[padding:1px_4px] [&_code]:rounded-[3px] [&_code]:text-[0.75rem]">
-          Check the model and the bed before resuming — a print that shifted or came
+          Check the model and the bed before resuming: a print that shifted or came
           loose while the power was off will not recover, and resuming will print into
           the air. Cancelling cannot be undone.
         </p>

@@ -47,7 +47,7 @@ export async function generateReportPDF(
       size: 'A4',
       margins: { top: 40, bottom: 40, left: 50, right: 50 },
       info: {
-        Title: `Print Report — ${report.filename}`,
+        Title: `Print Report · ${report.filename}`,
         Author: 'Elegoo CC2 Web Frontend',
         Subject: `Print report for ${report.filename}`,
         CreationDate: new Date(),
@@ -134,7 +134,7 @@ function drawReport(
     .fontSize(8)
     .fillColor(COLORS.muted)
     .text(
-      `Generated ${new Date().toISOString()} — Elegoo CC2 Web Frontend`,
+      `Generated ${new Date().toISOString()} · Elegoo CC2 Web Frontend`,
       doc.page.margins.left,
       footerY,
       { align: 'center', width: pageW },
@@ -569,7 +569,7 @@ function drawSnapshots(
     doc
       .fontSize(7)
       .fillColor(COLORS.muted)
-      .text(`${time} — ${snap.progress}% — Layer ${snap.layer}`, imgX, captionY, { width: imgW });
+      .text(`${time} · ${snap.progress}% · Layer ${snap.layer}`, imgX, captionY, { width: imgW });
 
     // After second column (or last image), advance Y past the row
     if (col === 1 || i === snaps.length - 1) {
@@ -724,7 +724,7 @@ function formatDuration(seconds: number): string {
 }
 
 function formatTempStats(s: { min: number; max: number; avg: number }): string {
-  if (s.max === 0) return '—';
+  if (s.max === 0) return '--';
   return `${s.avg.toFixed(0)}°C (${s.min.toFixed(0)}–${s.max.toFixed(0)})`;
 }
 
